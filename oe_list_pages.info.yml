@@ -1,0 +1,10 @@
+name: OpenEuropa List Pages
+description: OpenEuropa Link Pages handles collecting of all items of a given type (eg. Event, News, Publications) matching a set of configured filters.
+package: OpenEuropa
+
+type: module
+core: 8.x
+
+dependencies:
+  - emr_node:emr_node
+  - search_api:search_api
