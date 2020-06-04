@@ -1,5 +1,5 @@
 name: OpenEuropa List Pages
-description: OpenEuropa Link Pages handles collecting of all items of a given type (eg. Event, News, Publications) matching a set of configured filters.
+description: The OpenEuropa List Pages provides List pages associated with the new list meta bundle.
 package: OpenEuropa
 
 type: module
