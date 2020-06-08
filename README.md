@@ -1,6 +1,7 @@
 # OpenEuropa List Pages
 
-The OpenEuropa List Pages provides List pages associated with the new list meta bundle. The list of exposed filters can be individually defined per list page from the list of all facets available for the content type defined in the list page source.
+The OpenEuropa List Pages component allows creation and management of list pages with configurable options. 
+List pages use Search api queries allowing to configure different query options like facet filtering for all the indexed content bundles.
 
 ## Development setup
 

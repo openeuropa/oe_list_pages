@@ -1,5 +1,5 @@
 name: OpenEuropa List Pages
-description: The OpenEuropa List Pages provides List pages associated with the new list meta bundle.
+description: The OpenEuropa List Pages allows creation and management of list pages with configurable options.
 package: OpenEuropa
 
 type: module
