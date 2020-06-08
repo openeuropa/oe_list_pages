@@ -1,0 +1,5 @@
+langcode: en
+status: true
+dependencies: {  }
+id: oe_list_page
+label: 'List Page'

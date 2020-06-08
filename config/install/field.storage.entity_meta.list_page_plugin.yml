@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - emr
+id: entity_meta.list_page_plugin
+field_name: list_page_plugin
+entity_type: entity_meta
+type: string
+settings:
+  max_length: 255
+  is_ascii: false
+  case_sensitive: false
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

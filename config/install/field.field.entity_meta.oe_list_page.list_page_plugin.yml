@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - emr.entity_meta_type.oe_list_page
+    - field.storage.entity_meta.list_page_plugin
+id: entity_meta.oe_list_page.list_page_plugin
+field_name: list_page_plugin
+entity_type: entity_meta
+bundle: oe_list_page
+label: 'Source plugin'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string
