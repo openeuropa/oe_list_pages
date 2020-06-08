@@ -3,13 +3,11 @@ status: true
 dependencies:
   module:
     - emr
-id: entity_meta.list_page_plugin
-field_name: list_page_plugin
+id: entity_meta.oe_list_pages_config
+field_name: oe_list_pages_config
 entity_type: entity_meta
-type: string
+type: string_long
 settings:
-  max_length: 255
-  is_ascii: false
   case_sensitive: false
 module: core
 locked: false

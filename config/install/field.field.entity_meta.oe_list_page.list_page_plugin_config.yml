@@ -3,12 +3,12 @@ status: true
 dependencies:
   config:
     - emr.entity_meta_type.oe_list_page
-    - field.storage.entity_meta.list_page_plugin_config
-id: entity_meta.oe_list_page.list_page_plugin_config
-field_name: list_page_plugin_config
+    - field.storage.entity_meta.oe_list_pages_config
+id: entity_meta.oe_list_page.oe_list_pages_config
+field_name: oe_list_pages_config
 entity_type: entity_meta
 bundle: oe_list_page
-label: 'Source plugin configuration'
+label: 'List Pages configuration'
 description: ''
 required: false
 translatable: false
