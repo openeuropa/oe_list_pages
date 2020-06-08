@@ -7,7 +7,7 @@ namespace Drupal\oe_list_pages;
 use Drupal\emr\EntityMetaWrapper;
 
 /**
- * Wrapper for the list page plugins.
+ * Wrapper for the list page.
  */
 class ListPageWrapper extends EntityMetaWrapper {
 
@@ -20,8 +20,8 @@ class ListPageWrapper extends EntityMetaWrapper {
    *   Bundle of entity type.
    */
   public function setListPageSource(string $entity_type, string $bundle): void {
-    $this->entityMeta->set('list_page_plugin', $entity_type . ':' . $bundle);
-    $this->entityMeta->set('list_page_plugin_config', serialize([
+    $this->entityMeta->set('oe_list_pages_source', $entity_type . ':' . $bundle);
+    $this->entityMeta->set('oe_list_pages_config', serialize([
       'entity_type' => $entity_type,
       'bundle' => $bundle,
     ]));
@@ -29,23 +29,23 @@ class ListPageWrapper extends EntityMetaWrapper {
   }
 
   /**
-   * Returns the plugin configuration.
+   * Returns the entity meta configuration.
    *
    * @return array
-   *   The plugin configuration.
+   *   The configuration.
    */
   public function getListPageConfiguration(): array {
-    return $this->entityMeta->get('list_page_plugin_config')->isEmpty() ? [] : unserialize($this->entityMeta->get('list_page_plugin_config')->value);
+    return $this->entityMeta->get('oe_list_pages_config')->isEmpty() ? [] : unserialize($this->entityMeta->get('oe_list_pages_config')->value);
   }
 
   /**
-   * Sets the plugin configuration.
+   * Sets the entity meta configuration.
    *
    * @param array $configuration
    *   The plugin configuration.
    */
   public function setPluginConfiguration(array $configuration): void {
-    $this->entityMeta->set('list_page_plugin_config', serialize($configuration));
+    $this->entityMeta->set('oe_list_pages_config', serialize($configuration));
   }
 
 }
