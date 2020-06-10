@@ -51,6 +51,7 @@ class ListPagesTest extends EntityKernelTestBaseTest {
     parent::setUp();
 
     $this->installConfig(['oe_list_pages', 'emr', 'emr_node']);
+    $this->installSchema('node', ['node_access']);
     $this->installEntitySchema('node');
     $this->installEntitySchema('entity_meta');
     $this->installEntitySchema('entity_meta_relation');
@@ -81,14 +82,16 @@ class ListPagesTest extends EntityKernelTestBaseTest {
     $node->save();
 
     /** @var \Drupal\emr\Entity\EntityMetaInterface $entity_meta */
-    $entity_meta = $node->get('emr_entity_metas')
-      ->getEntityMeta('oe_list_page');
+    $entity_meta = $node->get('emr_entity_metas')->getEntityMeta('oe_list_page');
     $this->assertFalse($entity_meta->isNew());
     /** @var \Drupal\oe_list_pages\ListPageWrapper $wrapper */
     $wrapper = $entity_meta->getWrapper();
     $this->assertEquals('node:list_page', $wrapper->getListPageSource());
+    $this->assertEquals([], $wrapper->getListPageConfiguration());
     $wrapper->setListPageSource('node', 'list_page');
-    $wrapper->getEntityMeta()->save();
+    $wrapper->setListPageConfiguration(['exposed' => ['list']]);
+    $node->get('emr_entity_metas')->attach($entity_meta);
+    $node->save();
 
     $updated_node = $node_storage->load($node->id());
     /** @var \Drupal\emr\Entity\EntityMetaInterface $entity_meta */
@@ -97,7 +100,7 @@ class ListPagesTest extends EntityKernelTestBaseTest {
 
     /** @var \Drupal\oe_list_pages\ListPageWrapper $wrapper */
     $wrapper = $entity_meta->getWrapper();
-    $this->assertEquals($wrapper->getListPageConfiguration(), []);
+    $this->assertEquals($wrapper->getListPageConfiguration(), ['exposed' => ['list']]);
   }
 
 }

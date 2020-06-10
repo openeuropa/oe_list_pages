@@ -49,7 +49,7 @@ class ListPageWrapper extends EntityMetaWrapper {
    * @param array $configuration
    *   The plugin configuration.
    */
-  public function setPluginConfiguration(array $configuration): void {
+  public function setListPageConfiguration(array $configuration): void {
     $this->entityMeta->set('oe_list_page_config', serialize($configuration));
   }
 
