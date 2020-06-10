@@ -75,7 +75,7 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
    */
   public function updateEntityBundles(array &$form, FormStateInterface $form_state): array {
     $key = $this->getFormKey();
-    return $form[$key]['bundle'];
+    return $form[$key]['bundle_wrapper'];
   }
 
   /**
@@ -108,15 +108,16 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
 
     $form[$key]['entity_type'] = [
       '#type' => 'select',
-      '#title' => $this->t('Entity types'),
+      '#title' => $this->t('Source entity type'),
       '#options' => $entity_type_options,
       '#default_value' => $form_state->getValue('entity_type') ?? $entity_type_id,
       '#empty_option' => $this->t('- Select -'),
+      '#required' => TRUE,
       '#ajax' => [
         'callback' => [$this, 'updateEntityBundles'],
         'disable-refocus' => FALSE,
         'event' => 'change',
-        'wrapper' => 'entity-bundles',
+        'wrapper' => 'list-page-entity-bundles',
       ],
     ];
 
@@ -130,19 +131,22 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
 
     $entity_bundle_id = $configuration['bundle'] ?? NULL;
 
-    $form[$key]['bundle'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Bundles'),
-      '#prefix' => '<div id="entity-bundles">',
-      '#suffix' => '</div>',
-      '#default_value' => $form_state->getValue('entity_type') ?? $entity_bundle_id,
-      '#options' => $bundle_options,
-      '#states' => [
-        'visible' => [
-          ':input[name="entity_type"]' => ['empty' => FALSE],
-        ],
+    $form[$key]['bundle_wrapper'] = [
+      '#type' => 'container',
+      '#attributes' => [
+        'id' => 'list-page-entity-bundles',
       ],
     ];
+
+    if (!empty($form_state->getValue('entity_type')) || !empty($configuration['bundle'])) {
+      $form[$key]['bundle_wrapper']['bundle'] = [
+        '#type' => 'select',
+        '#title' => $this->t('Source bundle'),
+        '#default_value' => $form_state->getValue('bundle') ?? $entity_bundle_id,
+        '#options' => $bundle_options,
+        '#required' => TRUE,
+      ];
+    }
 
     // Set the entity meta so we use it in the submit handler.
     $form_state->set($entity_meta_bundle . '_entity_meta', $entity_meta);
