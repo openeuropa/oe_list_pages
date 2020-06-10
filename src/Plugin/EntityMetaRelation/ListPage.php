@@ -12,6 +12,7 @@ use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\emr\Entity\EntityMetaInterface;
 use Drupal\emr\Plugin\EntityMetaRelationContentFormPluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -174,6 +175,18 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
 
     $entity_meta_wrapper->setListPageSource($form_state->getValue('entity_type'), $form_state->getValue('bundle'));
     $host_entity->get('emr_entity_metas')->attach($entity_meta);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function fillDefaultEntityMetaValues(EntityMetaInterface $entity_meta): void {
+    // Set the default value to be the first node bundle.
+    // This avoid any meta of this type is created without value.
+    $bundles = $this->entityTypeBundleInfo->getBundleInfo('node');
+    /** @var \Drupal\oe_list_pages\ListPageWrapper $wrapper */
+    $wrapper = $entity_meta->getWrapper();
+    $wrapper->setListPageSource('node', key($bundles));
   }
 
 }

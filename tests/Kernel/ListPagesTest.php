@@ -86,7 +86,7 @@ class ListPagesTest extends EntityKernelTestBaseTest {
     $this->assertFalse($entity_meta->isNew());
     /** @var \Drupal\oe_list_pages\ListPageWrapper $wrapper */
     $wrapper = $entity_meta->getWrapper();
-    $this->assertFalse($wrapper->getListPageConfiguration());
+    $this->assertEquals('node:list_page', $wrapper->getListPageSource());
     $wrapper->setListPageSource('node', 'list_page');
     $wrapper->getEntityMeta()->save();
 
@@ -97,10 +97,7 @@ class ListPagesTest extends EntityKernelTestBaseTest {
 
     /** @var \Drupal\oe_list_pages\ListPageWrapper $wrapper */
     $wrapper = $entity_meta->getWrapper();
-    $this->assertEqual($wrapper->getListPageConfiguration(), [
-      'entity_type' => 'node',
-      'bundle' => 'list_page',
-    ]);
+    $this->assertEquals($wrapper->getListPageConfiguration(), []);
   }
 
 }

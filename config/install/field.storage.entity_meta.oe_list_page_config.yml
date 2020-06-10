@@ -3,8 +3,8 @@ status: true
 dependencies:
   module:
     - emr
-id: entity_meta.oe_list_pages_config
-field_name: oe_list_pages_config
+id: entity_meta.oe_list_page_config
+field_name: oe_list_page_config
 entity_type: entity_meta
 type: string_long
 settings:

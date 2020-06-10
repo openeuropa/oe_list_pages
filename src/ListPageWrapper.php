@@ -12,7 +12,7 @@ use Drupal\emr\EntityMetaWrapper;
 class ListPageWrapper extends EntityMetaWrapper {
 
   /**
-   * Set the entity/bundle pair.
+   * Set the entity/bundle pair for source.
    *
    * @param string $entity_type
    *   Entity type name.
@@ -20,12 +20,17 @@ class ListPageWrapper extends EntityMetaWrapper {
    *   Bundle of entity type.
    */
   public function setListPageSource(string $entity_type, string $bundle): void {
-    $this->entityMeta->set('oe_list_pages_source', $entity_type . ':' . $bundle);
-    $this->entityMeta->set('oe_list_pages_config', serialize([
-      'entity_type' => $entity_type,
-      'bundle' => $bundle,
-    ]));
+    $this->entityMeta->set('oe_list_page_source', $entity_type . ':' . $bundle);
+  }
 
+  /**
+   * Returns the entity meta source.
+   *
+   * @return string
+   *   The configuration.
+   */
+  public function getListPageSource(): ?string {
+    return $this->entityMeta->get('oe_list_page_source')->value;
   }
 
   /**
@@ -35,7 +40,7 @@ class ListPageWrapper extends EntityMetaWrapper {
    *   The configuration.
    */
   public function getListPageConfiguration(): array {
-    return $this->entityMeta->get('oe_list_pages_config')->isEmpty() ? [] : unserialize($this->entityMeta->get('oe_list_pages_config')->value);
+    return $this->entityMeta->get('oe_list_page_config')->isEmpty() ? [] : unserialize($this->entityMeta->get('oe_list_page_config')->value);
   }
 
   /**
@@ -45,7 +50,7 @@ class ListPageWrapper extends EntityMetaWrapper {
    *   The plugin configuration.
    */
   public function setPluginConfiguration(array $configuration): void {
-    $this->entityMeta->set('oe_list_pages_config', serialize($configuration));
+    $this->entityMeta->set('oe_list_page_config', serialize($configuration));
   }
 
 }
