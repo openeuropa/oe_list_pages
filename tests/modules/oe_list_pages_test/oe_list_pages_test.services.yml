@@ -1,0 +1,6 @@
+services:
+  oe_list_pages_test.event_subscriber:
+    class: Drupal\oe_list_pages_test\EventSubscriber\ListPagesTestSubscriber
+    arguments: ['@config.factory']
+    tags:
+      - { name: event_subscriber }
