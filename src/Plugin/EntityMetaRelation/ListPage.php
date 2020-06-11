@@ -104,12 +104,14 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
       $entity_type_options[$entity_key] = $entity_type->getLabel();
     }
 
-    $configuration = $entity_meta_wrapper->getListPageConfiguration();
-    $entity_type_id = $configuration['entity_type'] ?? NULL;
+    // @todo throw event to limit the allowed entity types.
+
+    $entity_type_id = $entity_meta_wrapper->getSourceEntityType();
 
     $form[$key]['entity_type'] = [
       '#type' => 'select',
       '#title' => $this->t('Source entity type'),
+      '#description' => $this->t('Select the entity type that will be used as the source for this list page.'),
       '#options' => $entity_type_options,
       '#default_value' => $form_state->getValue('entity_type') ?? $entity_type_id,
       '#empty_option' => $this->t('- Select -'),
@@ -128,9 +130,11 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
       foreach ($bundles as $bundle_key => $bundle) {
         $bundle_options[$bundle_key] = $bundle['label'];
       }
+
+      // @todo throw event to limit the allowed bundles.
     }
 
-    $entity_bundle_id = $configuration['bundle'] ?? NULL;
+    $entity_bundle_id = $entity_meta_wrapper->getSourceEntityBundle();
 
     $form[$key]['bundle_wrapper'] = [
       '#type' => 'container',
@@ -139,7 +143,7 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
       ],
     ];
 
-    if (!empty($form_state->getValue('entity_type')) || !empty($configuration['bundle'])) {
+    if (!empty($form_state->getValue('entity_type')) || $entity_bundle_id) {
       $form[$key]['bundle_wrapper']['bundle'] = [
         '#type' => 'select',
         '#title' => $this->t('Source bundle'),
@@ -173,7 +177,7 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
     /** @var \Drupal\oe_list_pages\ListPageWrapper $entity_meta_wrapper */
     $entity_meta_wrapper = $entity_meta->getWrapper();
 
-    $entity_meta_wrapper->setListPageSource($form_state->getValue('entity_type'), $form_state->getValue('bundle'));
+    $entity_meta_wrapper->setSource($form_state->getValue('entity_type'), $form_state->getValue('bundle'));
     $host_entity->get('emr_entity_metas')->attach($entity_meta);
   }
 
@@ -182,11 +186,12 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
    */
   public function fillDefaultEntityMetaValues(EntityMetaInterface $entity_meta): void {
     // Set the default value to be the first node bundle.
-    // This avoid any meta of this type is created without value.
+    // We want to do this because we don't want any entity meta being created
+    // without a value (via the API).
     $bundles = $this->entityTypeBundleInfo->getBundleInfo('node');
     /** @var \Drupal\oe_list_pages\ListPageWrapper $wrapper */
     $wrapper = $entity_meta->getWrapper();
-    $wrapper->setListPageSource('node', key($bundles));
+    $wrapper->setSource('node', key($bundles));
   }
 
 }
