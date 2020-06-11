@@ -14,7 +14,10 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\emr\Entity\EntityMetaInterface;
 use Drupal\emr\Plugin\EntityMetaRelationContentFormPluginBase;
+use Drupal\oe_list_pages\ListPageEvents;
+use Drupal\oe_list_pages\ListPageSourceRetrieveEvent;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Plugin implementation of the entity_meta_relation.
@@ -42,11 +45,19 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
   private $entityTypeBundleInfo;
 
   /**
+   * The event dispatcher.
+   *
+   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   */
+  private $eventDispatcher;
+
+  /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityFieldManagerInterface $entity_field_manager, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityFieldManagerInterface $entity_field_manager, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $dispatcher) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_field_manager, $entity_type_manager);
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
+    $this->eventDispatcher = $dispatcher;
   }
 
   /**
@@ -59,7 +70,8 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
       $plugin_definition,
       $container->get('entity_field.manager'),
       $container->get('entity_type.manager'),
-      $container->get('entity_type.bundle.info')
+      $container->get('entity_type.bundle.info'),
+      $container->get('event_dispatcher')
     );
   }
 
@@ -104,7 +116,9 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
       $entity_type_options[$entity_key] = $entity_type->getLabel();
     }
 
-    // @todo throw event to limit the allowed entity types.
+    $event = new ListPageSourceRetrieveEvent($entity_type_options);
+    $this->eventDispatcher->dispatch(ListPageEvents::ALTER_ALLOWED_ENTITY_TYPES, $event);
+    $entity_type_options = $event->getEntityTypes();
 
     $entity_type_id = $entity_meta_wrapper->getSourceEntityType();
 
@@ -125,13 +139,15 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
     ];
 
     $bundle_options = [];
-    if ($form[$key]['entity_type']['#default_value']) {
-      $bundles = $this->entityTypeBundleInfo->getBundleInfo($form[$key]['entity_type']['#default_value']);
+    if ($selected_entity_type = $form[$key]['entity_type']['#default_value']) {
+      $bundles = $this->entityTypeBundleInfo->getBundleInfo($selected_entity_type);
       foreach ($bundles as $bundle_key => $bundle) {
         $bundle_options[$bundle_key] = $bundle['label'];
       }
 
-      // @todo throw event to limit the allowed bundles.
+      $event->setBundles($selected_entity_type, $bundle_options);
+      $this->eventDispatcher->dispatch(ListPageEvents::ALTER_ALLOWED_BUNDLES, $event);
+      $bundle_options = $event->getBundles();
     }
 
     $entity_bundle_id = $entity_meta_wrapper->getSourceEntityBundle();
