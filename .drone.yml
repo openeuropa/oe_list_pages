@@ -11,6 +11,15 @@ services:
     image: percona/percona-server:5.6
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+  selenium:
+    image: selenium/standalone-chrome:3.141.5
+    shm_size: 2g
+    environment:
+      - DISPLAY=:99
+      - SCREEN_WIDTH=1280
+      - SCREEN_HEIGHT=800
+      - NODE_MAX_INSTANCES=5
+      - NODE_MAX_SESSION=5
 
 pipeline:
   composer-install:
