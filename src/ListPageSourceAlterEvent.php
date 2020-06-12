@@ -4,23 +4,22 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages;
 
-use Drupal\Core\Cache\RefinableCacheableDependencyInterface;
-use Drupal\Core\Cache\RefinableCacheableDependencyTrait;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
- * Defines a ListPageSourceRetrieveEvent event.
+ * Event thrown in order to alter the list source.
+ *
+ * The entity types and bundles that can be selected for a list source can
+ * be altered by subscribing to this event.
  */
-class ListPageSourceRetrieveEvent extends Event implements RefinableCacheableDependencyInterface {
-
-  use RefinableCacheableDependencyTrait;
+class ListPageSourceAlterEvent extends Event {
 
   /**
    * The list of entity types.
    *
    * @var array
    */
-  protected $entityTypeIds;
+  protected $entityTypes;
 
   /**
    * The list of bundles.
@@ -30,15 +29,15 @@ class ListPageSourceRetrieveEvent extends Event implements RefinableCacheableDep
   protected $bundles;
 
   /**
-   * Constructs a new ListPageSourceRetrieveEvent.
+   * Constructs a new ListPageSourceAlterEvent.
    *
-   * @param array $entity_type_ids
+   * @param array $entity_types
    *   The list of entity type ids.
    * @param array $bundles
    *   The list of entity bundles.
    */
-  public function __construct(array $entity_type_ids, array $bundles = []) {
-    $this->entityTypeIds = $entity_type_ids;
+  public function __construct(array $entity_types, array $bundles = []) {
+    $this->entityTypes = $entity_types;
     $this->bundles = $bundles;
   }
 
@@ -49,17 +48,17 @@ class ListPageSourceRetrieveEvent extends Event implements RefinableCacheableDep
    *   The list of entity types.
    */
   public function getEntityTypes(): array {
-    return $this->entityTypeIds;
+    return $this->entityTypes;
   }
 
   /**
    * Set the allowed entity types.
    *
-   * @param array $entity_type_ids
+   * @param array $entity_types
    *   The list of entity types.
    */
-  public function setEntityTypes(array $entity_type_ids): void {
-    $this->entityTypeIds = $entity_type_ids;
+  public function setEntityTypes(array $entity_types): void {
+    $this->entityTypes = $entity_types;
   }
 
   /**
@@ -81,7 +80,7 @@ class ListPageSourceRetrieveEvent extends Event implements RefinableCacheableDep
    *   The bundles.
    */
   public function setBundles(string $entity_type, array $bundles): void {
-    $this->entityTypeIds = [$entity_type => $entity_type];
+    $this->entityTypes = [$entity_type];
     $this->bundles = $bundles;
   }
 

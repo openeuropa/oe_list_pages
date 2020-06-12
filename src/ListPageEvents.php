@@ -10,17 +10,17 @@ namespace Drupal\oe_list_pages;
 final class ListPageEvents {
 
   /**
-   * Name of the event fired on retrieving allowed entity types.
+   * Event fired when altering the entity types.
    *
    * @var string
    */
-  const ALTER_ALLOWED_ENTITY_TYPES = 'oe_list_pages.allowed_entity_types_alter';
+  const ALTER_ENTITY_TYPES = 'oe_list_pages.entity_types_alter';
 
   /**
-   * Name of the event fired on retrieving allowed bundles.
+   * Event fired when altering the bundles.
    *
    * @var string
    */
-  const ALTER_ALLOWED_BUNDLES = 'oe_list_pages.allowed_bundles_alter';
+  const ALTER_BUNDLES = 'oe_list_pages.bundles_alter';
 
 }

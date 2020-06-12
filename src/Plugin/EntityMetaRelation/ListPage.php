@@ -15,7 +15,7 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\emr\Entity\EntityMetaInterface;
 use Drupal\emr\Plugin\EntityMetaRelationContentFormPluginBase;
 use Drupal\oe_list_pages\ListPageEvents;
-use Drupal\oe_list_pages\ListPageSourceRetrieveEvent;
+use Drupal\oe_list_pages\ListPageSourceAlterEvent;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -109,16 +109,16 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
 
     $entity_type_options = [];
     $entity_types = $this->entityTypeManager->getDefinitions();
-    foreach ($entity_types as $entity_key => $entity_type) {
+    foreach ($entity_types as $entity_type_key => $entity_type) {
       if (!$entity_type instanceof ContentEntityTypeInterface) {
         continue;
       }
-      $entity_type_options[$entity_key] = $entity_type->getLabel();
+      $entity_type_options[$entity_type_key] = $entity_type->getLabel();
     }
 
-    $event = new ListPageSourceRetrieveEvent($entity_type_options);
-    $this->eventDispatcher->dispatch(ListPageEvents::ALTER_ALLOWED_ENTITY_TYPES, $event);
-    $entity_type_options = $event->getEntityTypes();
+    $event = new ListPageSourceAlterEvent(array_keys($entity_type_options));
+    $this->eventDispatcher->dispatch(ListPageEvents::ALTER_ENTITY_TYPES, $event);
+    $entity_type_options = array_intersect_key($entity_type_options, array_combine($event->getEntityTypes(), $event->getEntityTypes()));
 
     $entity_type_id = $entity_meta_wrapper->getSourceEntityType();
 
@@ -127,8 +127,9 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
       '#title' => $this->t('Source entity type'),
       '#description' => $this->t('Select the entity type that will be used as the source for this list page.'),
       '#options' => $entity_type_options,
+      // If there is no selection, the default entity type will be Node, due to
+      // self::fillDefaultEntityMetaValues().
       '#default_value' => $form_state->getValue('entity_type') ?? $entity_type_id,
-      '#empty_option' => $this->t('- Select -'),
       '#required' => TRUE,
       '#ajax' => [
         'callback' => [$this, 'updateEntityBundles'],
@@ -145,9 +146,9 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
         $bundle_options[$bundle_key] = $bundle['label'];
       }
 
-      $event->setBundles($selected_entity_type, $bundle_options);
-      $this->eventDispatcher->dispatch(ListPageEvents::ALTER_ALLOWED_BUNDLES, $event);
-      $bundle_options = $event->getBundles();
+      $event->setBundles($selected_entity_type, array_keys($bundle_options));
+      $this->eventDispatcher->dispatch(ListPageEvents::ALTER_BUNDLES, $event);
+      $bundle_options = array_intersect_key($bundle_options, array_combine($event->getBundles(), $event->getBundles()));
     }
 
     $entity_bundle_id = $entity_meta_wrapper->getSourceEntityBundle();

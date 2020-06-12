@@ -4,9 +4,9 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages_test\EventSubscriber;
 
-use Drupal\Core\Config\ConfigFactory;
+use Drupal\Core\State\StateInterface;
 use Drupal\oe_list_pages\ListPageEvents;
-use Drupal\oe_list_pages\ListPageSourceRetrieveEvent;
+use Drupal\oe_list_pages\ListPageSourceAlterEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -15,20 +15,20 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class ListPagesTestSubscriber implements EventSubscriberInterface {
 
   /**
-   * The config.
+   * The state.
    *
-   * @var \Drupal\Core\Config\Config
+   * @var \Drupal\Core\State\StateInterface
    */
-  private $config;
+  protected $state;
 
   /**
    * Constructs event subscriber.
    *
-   * @param \Drupal\Core\Config\ConfigFactory $config_factory
-   *   The Config Factory.
+   * @param \Drupal\Core\State\StateInterface $state
+   *   The state.
    */
-  public function __construct(ConfigFactory $config_factory) {
-    $this->config = $config_factory->get('oe_list_pages_test.settings');
+  public function __construct(StateInterface $state) {
+    $this->state = $state;
   }
 
   /**
@@ -36,60 +36,47 @@ class ListPagesTestSubscriber implements EventSubscriberInterface {
    */
   public static function getSubscribedEvents() {
     return [
-      ListPageEvents::ALTER_ALLOWED_ENTITY_TYPES => ['onEntityTypesRetrieving'],
-      ListPageEvents::ALTER_ALLOWED_BUNDLES => ['onBundlesRetrieving'],
+      ListPageEvents::ALTER_ENTITY_TYPES => ['onEntityTypesAlter'],
+      ListPageEvents::ALTER_BUNDLES => ['onBundlesAlter'],
     ];
   }
 
   /**
-   * Event handler for limiting allowed entity types.
+   * Event handler for limiting the allowed entity types.
    *
-   * @param \Drupal\oe_list_pages\ListPageSourceRetrieveEvent $event
+   * @param \Drupal\oe_list_pages\ListPageSourceAlterEvent $event
    *   The event object.
    */
-  public function onEntityTypesRetrieving(ListPageSourceRetrieveEvent $event): void {
-    $event->addCacheableDependency($this->config);
+  public function onEntityTypesAlter(ListPageSourceAlterEvent $event): void {
     $entity_types = $event->getEntityTypes();
-    $allowed_entity_bundles = $this->config->get('allowed_entity_types_bundles');
-    if ($allowed_entity_bundles === NULL) {
+    $allowed = $this->state->get('oe_list_pages_test.allowed_entity_types_bundles');
+    if ($allowed === NULL) {
       return;
     }
-    $allowed_entity_bundles = array_keys($allowed_entity_bundles);
 
-    foreach (array_keys($entity_types) as $entity_type) {
-      if (!in_array($entity_type, $allowed_entity_bundles)) {
-        unset($entity_types[$entity_type]);
-      }
-    }
-    $event->setEntityTypes($entity_types);
+    $allowed_entity_types = array_keys($allowed);
+    $event->setEntityTypes(array_intersect($entity_types, $allowed_entity_types));
   }
 
   /**
-   * Event handler for limiting allowed bundles.
+   * Event handler for limiting the allowed bundles.
    *
-   * @param \Drupal\oe_list_pages\ListPageSourceRetrieveEvent $event
+   * @param \Drupal\oe_list_pages\ListPageSourceAlterEvent $event
    *   The event object.
    */
-  public function onBundlesRetrieving(ListPageSourceRetrieveEvent $event): void {
-    $event->addCacheableDependency($this->config);
+  public function onBundlesAlter(ListPageSourceAlterEvent $event): void {
     $entity_types = $event->getEntityTypes();
     $entity_type = reset($entity_types);
     $bundles = $event->getBundles();
 
-    $allowed_entity_bundles = $this->config->get('allowed_entity_types_bundles');
-    if ($allowed_entity_bundles === NULL) {
+    $allowed = $this->state->get('oe_list_pages_test.allowed_entity_types_bundles');
+    if ($allowed === NULL) {
       return;
     }
 
-    $allowed_bundles = $allowed_entity_bundles[$entity_type] ? array_keys($allowed_entity_bundles[$entity_type]) : NULL;
+    $allowed_bundles = $allowed[$entity_type] ?? [];
 
-    foreach (array_keys($bundles) as $bundle) {
-      if (!in_array($bundle, $allowed_bundles)) {
-        unset($bundles[$bundle]);
-      }
-    }
-
-    $event->setBundles($entity_type, $bundles);
+    $event->setBundles($entity_type, array_intersect($bundles, $allowed_bundles));
   }
 
 }
