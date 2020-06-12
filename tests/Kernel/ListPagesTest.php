@@ -86,10 +86,10 @@ class ListPagesTest extends EntityKernelTestBaseTest {
     $this->assertFalse($entity_meta->isNew());
     /** @var \Drupal\oe_list_pages\ListPageWrapper $wrapper */
     $wrapper = $entity_meta->getWrapper();
-    $this->assertEquals('node:list_page', $wrapper->getListPageSource());
-    $this->assertEquals([], $wrapper->getListPageConfiguration());
-    $wrapper->setListPageSource('node', 'list_page');
-    $wrapper->setListPageConfiguration(['exposed' => ['list']]);
+    $this->assertEquals('node:list_page', $wrapper->getSource());
+    $this->assertEquals([], $wrapper->getConfiguration());
+    $wrapper->setSource('node', 'list_page');
+    $wrapper->setConfiguration(['exposed' => ['list']]);
     $node->get('emr_entity_metas')->attach($entity_meta);
     $node->save();
 
@@ -100,7 +100,7 @@ class ListPagesTest extends EntityKernelTestBaseTest {
 
     /** @var \Drupal\oe_list_pages\ListPageWrapper $wrapper */
     $wrapper = $entity_meta->getWrapper();
-    $this->assertEquals($wrapper->getListPageConfiguration(), ['exposed' => ['list']]);
+    $this->assertEquals($wrapper->getConfiguration(), ['exposed' => ['list']]);
   }
 
 }
