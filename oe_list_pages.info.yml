@@ -6,5 +6,13 @@ type: module
 core: 8.x
 
 dependencies:
-  - emr_node:emr_node
+  - emr:emr_node
   - search_api:search_api
+
+config_devel:
+  install:
+    - emr.entity_meta_type.oe_list_page
+    - field.field.entity_meta.oe_list_page.list_page_plugin
+    - field.field.entity_meta.oe_list_page.list_page_plugin_config
+    - field.storage.entity_meta.list_page_plugin
+    - field.storage.entity_meta.list_page_plugin_config
