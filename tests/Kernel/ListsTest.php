@@ -4,8 +4,12 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\oe_list_pages\Kernel;
 
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Plugin\PluginBase;
+use Drupal\facets\Entity\Facet;
+use Drupal\facets\FacetInterface;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBaseTest;
+use Drupal\search_api\Entity\Index;
 
 /**
  * Tests the List internal functionality..
@@ -16,6 +20,7 @@ class ListsTest extends EntityKernelTestBaseTest {
    * {@inheritdoc}
    */
   public static $modules = [
+    'entity_test',
     'facets',
     'entity_reference_revisions',
     'oe_list_pages',
@@ -74,6 +79,21 @@ class ListsTest extends EntityKernelTestBaseTest {
       'system',
     ]);
 
+    entity_test_create_bundle('article', '', 'entity_test_mulrev_changed');
+    entity_test_create_bundle('item', '', 'entity_test_mulrev_changed');
+
+    // Index new bundles.
+    $this->index = Index::load('database_search_index');
+    $this->datasource = $this->index->getDatasource('entity:entity_test_mulrev_changed');
+    $this->datasource->setConfiguration([
+      'bundles' => [
+        'default' => FALSE,
+        'selected' => ['item', 'entity_test_mulrev_changed'],
+      ]
+    ]);
+
+    $this->index->save();
+
     /** @var \Drupal\oe_list_pages\ListManager $listManager */
     $this->listManager = \Drupal::service('oe_list_pages.list_manager');
 
@@ -92,9 +112,20 @@ class ListsTest extends EntityKernelTestBaseTest {
 
     $available_facet_sources = [];
     foreach ($facet_sources as $facet_source_id => $facet_source) {
-      $available_facet_sources[] = $facet_source_id;
+      $available_facet_sources[] = $facet_source['display_id'];
     }
 
+    // Item bundle is indexed.
+    $article_plugin_id =  'entity_test_mulrev_changed' . PluginBase::DERIVATIVE_SEPARATOR . 'item';
+    $this->assertContains($article_plugin_id, $available_facet_sources);
+    // entity_test_mulrev_changed bundle is  indexed.
+    $article_plugin_id =  'entity_test_mulrev_changed' . PluginBase::DERIVATIVE_SEPARATOR . 'entity_test_mulrev_changed';
+    $this->assertContains($article_plugin_id, $available_facet_sources);
+    // Article bundle is not indexed.
+    $article_plugin_id =  'entity_test_mulrev_changed' . PluginBase::DERIVATIVE_SEPARATOR . 'article';
+    $this->assertNotContains($article_plugin_id, $available_facet_sources);
+
+    // All indexed bundles have facet sources available.
     foreach ($indexed_bundles as $entity_type => $bundles) {
       foreach ($bundles as $bundle) {
         $id = $entity_type . PluginBase::DERIVATIVE_SEPARATOR . $bundle['id'];
@@ -106,6 +137,58 @@ class ListsTest extends EntityKernelTestBaseTest {
 
     // Only indexed bundles have an associate facet source.
     $this->assertEmpty($available_facet_sources);
+  }
+
+  /**
+   * Tests that all available filters within a list.
+   */
+  public function testAvailableFilters(): void {
+    // Create facets for default bundle.
+    $search_id = $this->listManager->getSearchId('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
+    $this->createFacet('category', $search_id);
+    $this->createFacet('keywords', $search_id);
+    $this->createFacet('width', $search_id);
+
+    // Create facets for item bundle.
+    $search_id_item = $this->listManager->getSearchId('entity_test_mulrev_changed', 'item');
+    $this->createFacet('category', $search_id_item);
+    $this->createFacet('width', $search_id_item);
+
+    // Filters for default bundle.
+    $filters = $this->listManager->getAvailableFiltersForList($search_id);
+    $this->assertCount(3, $filters);
+    $this->assertArrayHasKey('category', $filters);
+    $this->assertArrayHasKey('keywords', $filters);
+    $this->assertArrayHasKey('width', $filters);
+
+    // Filters for item bundle.
+    $filters_item = $this->listManager->getAvailableFiltersForList($search_id_item);
+    $this->assertCount(2, $filters_item);
+    $this->assertArrayHasKey('category', $filters_item);
+    $this->assertArrayNotHasKey('keywords', $filters_item);
+    $this->assertArrayHasKey('width', $filters_item);
+  }
+
+  /**
+   * Creates a facet for the specified field.
+   *
+   * @param string $field
+   *   The field.
+   * @param string $search_id
+   *   The search id.
+   */
+  private function createFacet(string $field, string $search_id): FacetInterface {
+    $entity = Facet::create([
+      'id' => md5($search_id) . '_' . $field,
+      'name' => 'Facet for ' . $field,
+    ]);
+    $entity->setWidget('links');
+    $entity->setFieldIdentifier($field);
+    $entity->setEmptyBehavior(['behavior' => 'none']);
+    $entity->setFacetSourceId($search_id);
+    $entity->save();
+
+    return $entity;
   }
 
 }

@@ -76,24 +76,26 @@ class ListManager {
    *   The id.
    */
   public function getSearchId(string $entity_type, string $bundle) {
-    return $entity_type . PluginBase::DERIVATIVE_SEPARATOR . $bundle;
+    return 'list_facet_source' . PluginBase::DERIVATIVE_SEPARATOR . $entity_type . PluginBase::DERIVATIVE_SEPARATOR . $bundle;
   }
 
   /**
    * Get available filters for the entity type / bundle.
    *
-   * @param string $entity_type
-   *   The entity type.
-   * @param string $bundle
-   *   The bundle.
+   * @param string $search_id
+   *   The search id.
    *
    * @return array
-   *   The available filters.
+   *   The filters.
    */
-  public function getAvailableFilters(string $entity_type, string $bundle): array {
+  public function getAvailableFiltersForList(string $search_id): array {
     $filters = [];
-    $search_id = $this->getSearchId();
-    // $facets = $this->facetManager->getFacetsByFacetSourceId($search_id);
+    $facets = $this->facetManager->getFacetsByFacetSourceId($search_id);
+    foreach ($facets as $facet) {
+      $field_id = $facet->getFieldIdentifier();
+      $filters[$field_id] = $facet->getFacetSource()->getIndex()->getField($field_id)->getLabel();
+    }
+
     return $filters;
   }
 

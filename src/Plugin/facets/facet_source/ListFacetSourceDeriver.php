@@ -50,6 +50,8 @@ class ListFacetSourceDeriver extends FacetSourceDeriverBase {
       return $this->derivatives[$base_plugin_id];
     }
 
+    $this->derivatives[$base_plugin_id] = [];
+
     // Loop through all available data sources from enabled indexes.
     $indexed_bundles = $this->listManager->getAvailableLists();
     foreach ($indexed_bundles as $entity_type => $bundles) {
@@ -57,7 +59,7 @@ class ListFacetSourceDeriver extends FacetSourceDeriverBase {
         $id = $entity_type . PluginBase::DERIVATIVE_SEPARATOR . $bundle['id'];
         $plugin_derivatives[$id] = [
           'id' => $base_plugin_id . PluginBase::DERIVATIVE_SEPARATOR . $id,
-          'index' => $bundle['index'],
+          'index' => $bundle['index']->id(),
           'label' => $this->t('List %content_type', ['%content_type' => $bundle['label']]),
           'display_id' => $id,
         ] + $base_plugin_definition;;
