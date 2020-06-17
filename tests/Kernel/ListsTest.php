@@ -4,11 +4,11 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\oe_list_pages\Kernel;
 
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\facets\Entity\Facet;
 use Drupal\facets\FacetInterface;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBaseTest;
+use Drupal\oe_list_pages\ListSource;
 use Drupal\search_api\Entity\Index;
 
 /**
@@ -89,7 +89,7 @@ class ListsTest extends EntityKernelTestBaseTest {
       'bundles' => [
         'default' => FALSE,
         'selected' => ['item', 'entity_test_mulrev_changed'],
-      ]
+      ],
     ]);
 
     $this->index->save();
@@ -116,27 +116,14 @@ class ListsTest extends EntityKernelTestBaseTest {
     }
 
     // Item bundle is indexed.
-    $article_plugin_id =  'entity_test_mulrev_changed' . PluginBase::DERIVATIVE_SEPARATOR . 'item';
+    $article_plugin_id = 'entity_test_mulrev_changed' . PluginBase::DERIVATIVE_SEPARATOR . 'item';
     $this->assertContains($article_plugin_id, $available_facet_sources);
     // entity_test_mulrev_changed bundle is  indexed.
-    $article_plugin_id =  'entity_test_mulrev_changed' . PluginBase::DERIVATIVE_SEPARATOR . 'entity_test_mulrev_changed';
+    $article_plugin_id = 'entity_test_mulrev_changed' . PluginBase::DERIVATIVE_SEPARATOR . 'entity_test_mulrev_changed';
     $this->assertContains($article_plugin_id, $available_facet_sources);
     // Article bundle is not indexed.
-    $article_plugin_id =  'entity_test_mulrev_changed' . PluginBase::DERIVATIVE_SEPARATOR . 'article';
+    $article_plugin_id = 'entity_test_mulrev_changed' . PluginBase::DERIVATIVE_SEPARATOR . 'article';
     $this->assertNotContains($article_plugin_id, $available_facet_sources);
-
-    // All indexed bundles have facet sources available.
-    foreach ($indexed_bundles as $entity_type => $bundles) {
-      foreach ($bundles as $bundle) {
-        $id = $entity_type . PluginBase::DERIVATIVE_SEPARATOR . $bundle['id'];
-        $position = array_search($id, $available_facet_sources);
-        $this->assertNotEqual($position, '-1');
-        unset($available_facet_sources[$position]);
-      }
-    }
-
-    // Only indexed bundles have an associate facet source.
-    $this->assertEmpty($available_facet_sources);
   }
 
   /**
@@ -144,25 +131,25 @@ class ListsTest extends EntityKernelTestBaseTest {
    */
   public function testAvailableFilters(): void {
     // Create facets for default bundle.
-    $search_id = $this->listManager->getSearchId('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
-    $this->createFacet('category', $search_id);
-    $this->createFacet('keywords', $search_id);
-    $this->createFacet('width', $search_id);
+    $default_list = new ListSource('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
+    $this->createFacet('category', $default_list->id());
+    $this->createFacet('keywords', $default_list->id());
+    $this->createFacet('width', $default_list->id());
 
     // Create facets for item bundle.
-    $search_id_item = $this->listManager->getSearchId('entity_test_mulrev_changed', 'item');
-    $this->createFacet('category', $search_id_item);
-    $this->createFacet('width', $search_id_item);
+    $item_list = new ListSource('entity_test_mulrev_changed', 'item');
+    $this->createFacet('category', $item_list->id());
+    $this->createFacet('width', $item_list->id());
 
     // Filters for default bundle.
-    $filters = $this->listManager->getAvailableFiltersForList($search_id);
+    $filters = $default_list->getAvailableFilters();
     $this->assertCount(3, $filters);
     $this->assertArrayHasKey('category', $filters);
     $this->assertArrayHasKey('keywords', $filters);
     $this->assertArrayHasKey('width', $filters);
 
     // Filters for item bundle.
-    $filters_item = $this->listManager->getAvailableFiltersForList($search_id_item);
+    $filters_item = $item_list->getAvailableFilters();
     $this->assertCount(2, $filters_item);
     $this->assertArrayHasKey('category', $filters_item);
     $this->assertArrayNotHasKey('keywords', $filters_item);

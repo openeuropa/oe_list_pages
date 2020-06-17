@@ -53,19 +53,18 @@ class ListFacetSourceDeriver extends FacetSourceDeriverBase {
     $this->derivatives[$base_plugin_id] = [];
 
     // Loop through all available data sources from enabled indexes.
-    $indexed_bundles = $this->listManager->getAvailableLists();
-    foreach ($indexed_bundles as $entity_type => $bundles) {
-      foreach ($bundles as $bundle) {
-        $id = $entity_type . PluginBase::DERIVATIVE_SEPARATOR . $bundle['id'];
-        $plugin_derivatives[$id] = [
-          'id' => $base_plugin_id . PluginBase::DERIVATIVE_SEPARATOR . $id,
-          'index' => $bundle['index']->id(),
-          'label' => $this->t('List %content_type', ['%content_type' => $bundle['label']]),
-          'display_id' => $id,
-        ] + $base_plugin_definition;;
+    $lists = $this->listManager->getAvailableLists();
+    /** @var \Drupal\oe_list_pages\ListSource $list */
+    foreach ($lists as $list) {
+      $id = $list->getEntityType() . PluginBase::DERIVATIVE_SEPARATOR . $list->getBundle();
+      $plugin_derivatives[$id] = [
+        'id' => $base_plugin_id . PluginBase::DERIVATIVE_SEPARATOR . $id,
+        'index' => $list->getDataSource()->getIndex()->id(),
+        'label' => $this->t('List %content_type', ['%content_type' => $list->getBundle()]),
+        'display_id' => $id,
+      ] + $base_plugin_definition;;
 
-        $this->derivatives[$base_plugin_id] = $plugin_derivatives;
-      }
+      $this->derivatives[$base_plugin_id] = $plugin_derivatives;
     }
 
     return $this->derivatives[$base_plugin_id];

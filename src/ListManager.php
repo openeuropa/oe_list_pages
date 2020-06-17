@@ -5,7 +5,6 @@ declare(strict_types = 1);
 namespace Drupal\oe_list_pages;
 
 use Drupal\Core\Entity\EntityTypeManager;
-use Drupal\Core\Plugin\PluginBase;
 use Drupal\facets\FacetManager\DefaultFacetManager;
 
 /**
@@ -42,6 +41,7 @@ class ListManager {
     $indexes = $index_storage->loadByProperties(['status' => 1]);
     foreach ($indexes as $index) {
       $datasources = $index->getDatasources();
+      /** @var \Drupal\search_api\Datasource\DatasourceInterface $datasource */
       foreach ($datasources as $datasource) {
         $entity_type = $datasource->getEntityTypeId();
         $bundles = $datasource->getBundles();
@@ -52,51 +52,14 @@ class ListManager {
             continue;
           }
 
-          $lists[$entity_type][] = [
-            'label' => $label,
-            'index' => $index,
-            'id' => $id,
-          ];
+          $list = new ListSource($entity_type, $id);
+          $list->setDataSource($datasource);
+          $lists[$list->id()] = $list;
         }
       }
     }
 
     return $lists;
-  }
-
-  /**
-   * Get the search id for the list used for entity type / bundle.
-   *
-   * @param string $entity_type
-   *   The entity type.
-   * @param string $bundle
-   *   The bundle.
-   *
-   * @return string
-   *   The id.
-   */
-  public function getSearchId(string $entity_type, string $bundle) {
-    return 'list_facet_source' . PluginBase::DERIVATIVE_SEPARATOR . $entity_type . PluginBase::DERIVATIVE_SEPARATOR . $bundle;
-  }
-
-  /**
-   * Get available filters for the entity type / bundle.
-   *
-   * @param string $search_id
-   *   The search id.
-   *
-   * @return array
-   *   The filters.
-   */
-  public function getAvailableFiltersForList(string $search_id): array {
-    $filters = [];
-    $facets = $this->facetManager->getFacetsByFacetSourceId($search_id);
-    foreach ($facets as $facet) {
-      $field_id = $facet->getFieldIdentifier();
-      $filters[$field_id] = $facet->getFacetSource()->getIndex()->getField($field_id)->getLabel();
-    }
-
-    return $filters;
   }
 
 }
