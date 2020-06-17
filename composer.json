@@ -9,6 +9,7 @@
         "drupal/core": "^8.8",
         "openeuropa/entity_meta_relation": "dev-8.x-1.x",
         "drupal/search_api": "~1.17",
+        "drupal/facets": "~1.4",
         "php": ">=7.2"
     },
     "require-dev": {

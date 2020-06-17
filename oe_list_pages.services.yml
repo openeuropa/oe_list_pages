@@ -1,0 +1,4 @@
+services:
+  filter_manager:
+    class: Drupal\oe_list_pages\FilterManager
+    arguments: ['@language.default']
