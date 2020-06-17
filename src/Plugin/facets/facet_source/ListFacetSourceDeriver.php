@@ -4,9 +4,9 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages\Plugin\facets\facet_source;
 
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\facets\FacetSource\FacetSourceDeriverBase;
+use Drupal\oe_list_pages\ListManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -15,20 +15,20 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class ListFacetSourceDeriver extends FacetSourceDeriverBase {
 
   /**
-   * The entity type manager.
+   * The list manager.
    *
-   * @var \Drupal\Core\Entity\EntityTypeManager
+   * @var \Drupal\oe_list_pages\ListManager
    */
-  protected $entityTypeManager;
+  private $listManager;
 
   /**
    * Constructs a new ListFacetDeriver.
    *
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   The entity type manager.
+   * @param \Drupal\oe_list_pages\ListManager $listManager
+   *   The list manager.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
-    $this->entityTypeManager = $entity_type_manager;
+  public function __construct(ListManager $listManager) {
+    $this->listManager = $listManager;
   }
 
   /**
@@ -36,7 +36,7 @@ class ListFacetSourceDeriver extends FacetSourceDeriverBase {
    */
   public static function create(ContainerInterface $container, $base_plugin_id) {
     return new static(
-      $container->get('entity_type.manager')
+      $container->get('oe_list_pages.list_manager')
     );
   }
 
@@ -49,33 +49,20 @@ class ListFacetSourceDeriver extends FacetSourceDeriverBase {
     if (isset($this->derivatives[$base_plugin_id])) {
       return $this->derivatives[$base_plugin_id];
     }
-    /** @var \Drupal\search_api\Entity\SearchApiConfigEntityStorage $storage_index */
-    $storage_index = $this->entityTypeManager->getStorage('search_api_index');
 
     // Loop through all available data sources from enabled indexes.
-    $indexes = $storage_index->loadByProperties(['status' => 1]);
-    foreach ($indexes as $index) {
-      $datasources = $index->getDatasources();
-      foreach ($datasources as $datasource) {
-        $entity_type = $datasource->getEntityTypeId();
-        $bundles = $datasource->getBundles();
-        foreach ($bundles as $id => $label) {
+    $indexed_bundles = $this->listManager->getAvailableLists();
+    foreach ($indexed_bundles as $entity_type => $bundles) {
+      foreach ($bundles as $bundle) {
+        $id = $entity_type . PluginBase::DERIVATIVE_SEPARATOR . $bundle['id'];
+        $plugin_derivatives[$id] = [
+          'id' => $base_plugin_id . PluginBase::DERIVATIVE_SEPARATOR . $id,
+          'index' => $bundle['index'],
+          'label' => $this->t('List %content_type', ['%content_type' => $bundle['label']]),
+          'display_id' => $id,
+        ] + $base_plugin_definition;;
 
-          // In case not all bundles are indexed:
-          if (!empty($datasource->getConfiguration()['bundles']['selected']) && !in_array($id, $datasource->getConfiguration()['bundles']['selected'])) {
-            continue;
-          }
-
-          $id = $entity_type . PluginBase::DERIVATIVE_SEPARATOR . $id;
-          $plugin_derivatives[$id] = [
-            'id' => $base_plugin_id . PluginBase::DERIVATIVE_SEPARATOR . $id,
-            'index' => $index->id(),
-            'label' => $this->t('List %content_type', ['%content_type' => $label]),
-            'display_id' => $id,
-          ] + $base_plugin_definition;;
-
-          $this->derivatives[$base_plugin_id] = $plugin_derivatives;
-        }
+        $this->derivatives[$base_plugin_id] = $plugin_derivatives;
       }
     }
 
