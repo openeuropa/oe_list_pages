@@ -38,6 +38,7 @@ class ListPagesTest extends EntityKernelTestBaseTest {
    */
   public static $modules = [
     'entity_reference_revisions',
+    'facets',
     'oe_list_pages',
     'node',
     'emr',

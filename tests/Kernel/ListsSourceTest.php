@@ -95,10 +95,7 @@ class ListsSourceTest extends EntityKernelTestBaseTest {
 
     $this->index->save();
 
-    /** @var \Drupal\oe_list_pages\ListManager $listManager */
     $this->listManager = \Drupal::service('oe_list_pages.list_manager');
-
-    /** @var \Drupal\facets\FacetManager\DefaultFacetManager facetManager */
     $this->facetManager = \Drupal::service('facets.manager');
   }
 
