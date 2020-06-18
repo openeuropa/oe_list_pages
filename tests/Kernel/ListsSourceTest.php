@@ -14,7 +14,7 @@ use Drupal\search_api\Entity\Index;
 /**
  * Tests the List internal functionality..
  */
-class ListsTest extends EntityKernelTestBaseTest {
+class ListsSourceTest extends EntityKernelTestBaseTest {
 
   /**
    * {@inheritdoc}
@@ -79,6 +79,7 @@ class ListsTest extends EntityKernelTestBaseTest {
       'system',
     ]);
 
+    // Create extra bundles for the test entity.
     entity_test_create_bundle('article', '', 'entity_test_mulrev_changed');
     entity_test_create_bundle('item', '', 'entity_test_mulrev_changed');
 
