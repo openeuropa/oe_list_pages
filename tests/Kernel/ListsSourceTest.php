@@ -8,11 +8,10 @@ use Drupal\Core\Plugin\PluginBase;
 use Drupal\facets\Entity\Facet;
 use Drupal\facets\FacetInterface;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBaseTest;
-use Drupal\oe_list_pages\ListSource;
 use Drupal\search_api\Entity\Index;
 
 /**
- * Tests the List internal functionality..
+ * Tests the List sources and their properties.
  */
 class ListsSourceTest extends EntityKernelTestBaseTest {
 
@@ -35,18 +34,18 @@ class ListsSourceTest extends EntityKernelTestBaseTest {
   ];
 
   /**
-   * The list manager.
-   *
-   * @var \Drupal\oe_list_pages\ListManager
-   */
-  protected $listManager;
-
-  /**
    * The facet manager.
    *
    * @var \Drupal\facets\FacetManager\DefaultFacetManager
    */
   protected $facetManager;
+
+  /**
+   * The list factory service.
+   *
+   * @var \Drupal\oe_list_pages\ListSourceFactory
+   */
+  protected $listFactory;
 
   /**
    * {@inheritdoc}
@@ -95,7 +94,7 @@ class ListsSourceTest extends EntityKernelTestBaseTest {
 
     $this->index->save();
 
-    $this->listManager = \Drupal::service('oe_list_pages.list_manager');
+    $this->listFactory = \Drupal::service('oe_list_pages.list_source.factory');
     $this->facetManager = \Drupal::service('facets.manager');
   }
 
@@ -103,7 +102,6 @@ class ListsSourceTest extends EntityKernelTestBaseTest {
    * Tests that all indexed bundles have a list.
    */
   public function testListForEachBundle(): void {
-    $indexed_bundles = $this->listManager->getAvailableLists();
     $facet_sources = $this->container
       ->get('plugin.manager.facets.facet_source')
       ->getDefinitions();
@@ -129,15 +127,19 @@ class ListsSourceTest extends EntityKernelTestBaseTest {
    */
   public function testAvailableFilters(): void {
     // Create facets for default bundle.
-    $default_list = new ListSource('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
-    $this->createFacet('category', $default_list->id());
-    $this->createFacet('keywords', $default_list->id());
-    $this->createFacet('width', $default_list->id());
+    $default_list_id = $this->listFactory->generateSearchId('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
+    $this->createFacet('category', $default_list_id);
+    $this->createFacet('keywords', $default_list_id);
+    $this->createFacet('width', $default_list_id);
 
     // Create facets for item bundle.
-    $item_list = new ListSource('entity_test_mulrev_changed', 'item');
-    $this->createFacet('category', $item_list->id());
-    $this->createFacet('width', $item_list->id());
+    $item_list_id = $this->listFactory->generateSearchId('entity_test_mulrev_changed', 'item');
+    $this->createFacet('category', $item_list_id);
+    $this->createFacet('width', $item_list_id);
+
+    // Get the lists.
+    $default_list = $this->listFactory->get('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
+    $item_list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
 
     // Filters for default bundle.
     $filters = $default_list->getAvailableFilters();
@@ -164,6 +166,7 @@ class ListsSourceTest extends EntityKernelTestBaseTest {
    */
   private function createFacet(string $field, string $search_id): FacetInterface {
     $entity = Facet::create([
+      // Id just needs to be unique when generated.
       'id' => md5($search_id) . '_' . $field,
       'name' => 'Facet for ' . $field,
     ]);

@@ -4,10 +4,10 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages\Plugin\facets\facet_source;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Path\CurrentPathStack;
 use Drupal\facets\FacetSource\SearchApiFacetSourceInterface;
 use Drupal\facets\Plugin\facets\facet_source\SearchApiBaseFacetSource;
-use Drupal\search_api\Entity\Index;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -38,15 +38,29 @@ class ListFacetSource extends SearchApiBaseFacetSource implements SearchApiFacet
   protected $requestStack;
 
   /**
+   * The search api index to use.
+   *
+   * @var string
+   */
+  protected $index;
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, $query_type_plugin_manager, $search_results_cache, RequestStack $request_stack, CurrentPathStack $current_path_stack) {
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, $query_type_plugin_manager, $search_results_cache, RequestStack $request_stack, CurrentPathStack $current_path_stack, EntityTypeManagerInterface $entity_type_manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $query_type_plugin_manager, $search_results_cache);
 
     $this->currentPathStack = $current_path_stack;
     $this->requestStack = $request_stack;
-    $index = $plugin_definition['index'];
-    $this->index = Index::load($index);
+    $this->entityTypeManager = $entity_type_manager;
+    $this->index = $plugin_definition['index'];
   }
 
   /**
@@ -60,7 +74,8 @@ class ListFacetSource extends SearchApiBaseFacetSource implements SearchApiFacet
       $container->get('plugin.manager.facets.query_type'),
       $container->get('search_api.query_helper'),
       $container->get('request_stack'),
-      $container->get('path.current')
+      $container->get('path.current'),
+      $container->get('entity_type.manager')
     );
   }
 
@@ -68,7 +83,7 @@ class ListFacetSource extends SearchApiBaseFacetSource implements SearchApiFacet
    * {@inheritdoc}
    */
   public function getIndex() {
-    return $this->index;
+    return $this->entityTypeManager->getStorage('search_api_index')->load($this->index);
   }
 
   /**
@@ -114,7 +129,7 @@ class ListFacetSource extends SearchApiBaseFacetSource implements SearchApiFacet
     if ($field) {
       return $field->getDataDefinition();
     }
-    throw new \Exception("Field with name {$field_name} does not have a definition");
+    throw new \Exception(sprintf("Field with name %s does not have a definition", $field_name));
   }
 
   /**

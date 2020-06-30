@@ -4,20 +4,19 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages;
 
-use Drupal\Core\Plugin\PluginBase;
-use Drupal\search_api\Datasource\DatasourceInterface;
+use Drupal\search_api\IndexInterface;
 
 /**
  * List source object.
  */
-class ListSource {
+class ListSource implements ListSourceInterface {
 
   /**
-   * The id for the list source.
+   * The search id for the list source.
    *
    * @var string
    */
-  protected $id;
+  protected $searchId;
 
   /**
    * The entity type.
@@ -41,87 +40,74 @@ class ListSource {
   protected $dataSource;
 
   /**
+   * The associated search api index.
+   *
+   * @var \Drupal\search_api\IndexInterface
+   */
+  protected $index;
+
+  /**
+   * The list of available filters.
+   *
+   * @var array
+   */
+  protected $filters;
+
+  /**
    * ListSource constructor.
    *
+   * @param string $search_id
+   *   The id.
    * @param string $entity_type
    *   The entity type.
    * @param string $bundle
    *   The bundle.
-   */
-  public function __construct(string $entity_type, string $bundle) {
-    $this->entityType = $entity_type;
-    $this->bundle = $bundle;
-    $this->id = 'list_facet_source' . PluginBase::DERIVATIVE_SEPARATOR . $entity_type . PluginBase::DERIVATIVE_SEPARATOR . $bundle;
-
-  }
-
-  /**
-   * Get available filters for the list source.
-   *
-   * @return array
+   * @param \Drupal\search_api\IndexInterface $index
+   *   The search api index.
+   * @param array $filters
    *   The filters.
    */
-  public function getAvailableFilters(): array {
-    $filters = [];
-    $facets = \Drupal::service('facets.manager')->getFacetsByFacetSourceId($this->id());
-    foreach ($facets as $facet) {
-      $field_id = $facet->getFieldIdentifier();
-      $filters[$field_id] = $facet->getFacetSource()->getIndex()->getField($field_id)->getLabel();
-    }
-
-    return $filters;
+  public function __construct(string $search_id, string $entity_type, string $bundle, IndexInterface $index, array $filters) {
+    $this->searchId = $search_id;
+    $this->entityType = $entity_type;
+    $this->bundle = $bundle;
+    $this->index = $index;
+    $this->filters = $filters;
   }
 
   /**
-   * Gets the bundle.
-   *
-   * @return string
-   *   The bundle
+   * {@inheritdoc}
+   */
+  public function getAvailableFilters(): array {
+    return $this->filters;
+  }
+
+  /**
+   * {@inheritdoc}
    */
   public function getBundle(): string {
     return $this->bundle;
   }
 
   /**
-   * Gets the entity type.
-   *
-   * @return string
-   *   The entity type.
+   * {@inheritdoc}
    */
   public function getEntityType(): string {
     return $this->entityType;
   }
 
   /**
-   * Gets associated search api data source.
-   *
-   * @return \Drupal\search_api\Datasource\DatasourceInterface
-   *   The data source.
+   * {@inheritdoc}
    */
-  public function getDataSource(): DatasourceInterface {
-    return $this->dataSource;
+  public function getSearchId(): string {
+    return $this->searchId;
   }
 
   /**
-   * Sets search api data source.
-   *
-   * @param \Drupal\search_api\Datasource\DatasourceInterface $dataSource
-   *   The search api data source.
+   * {@inheritdoc}
    */
-  public function setDataSource(DatasourceInterface $dataSource): void {
-    $this->dataSource = $dataSource;
-  }
-
-  /**
-   * Get search id.
-   *
-   * @return string
-   *   The search id.
-   *
-   * @SuppressWarnings(PHPMD.ShortMethodName)
-   */
-  public function id(): string {
-    return $this->id;
+  public function getIndex(): IndexInterface {
+    return $this->index;
   }
 
 }
