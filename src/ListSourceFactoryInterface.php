@@ -20,7 +20,7 @@ interface ListSourceFactoryInterface {
    * @return string
    *   The generated id.
    */
-  public function generateFacetSourcePluginId(string $entity_type, string $bundle): string;
+  public static function generateFacetSourcePluginId(string $entity_type, string $bundle): string;
 
   /**
    * Gets the associated list source with the entity type/bundle.
