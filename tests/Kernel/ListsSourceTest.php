@@ -8,6 +8,7 @@ use Drupal\Core\Plugin\PluginBase;
 use Drupal\facets\Entity\Facet;
 use Drupal\facets\FacetInterface;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBaseTest;
+use Drupal\oe_list_pages\ListSourceFactory;
 use Drupal\search_api\Entity\Index;
 
 /**
@@ -127,13 +128,13 @@ class ListsSourceTest extends EntityKernelTestBaseTest {
    */
   public function testAvailableFilters(): void {
     // Create facets for default bundle.
-    $default_list_id = $this->listFactory->generateSearchId('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
+    $default_list_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
     $this->createFacet('category', $default_list_id);
     $this->createFacet('keywords', $default_list_id);
     $this->createFacet('width', $default_list_id);
 
     // Create facets for item bundle.
-    $item_list_id = $this->listFactory->generateSearchId('entity_test_mulrev_changed', 'item');
+    $item_list_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'item');
     $this->createFacet('category', $item_list_id);
     $this->createFacet('width', $item_list_id);
 
@@ -163,6 +164,9 @@ class ListsSourceTest extends EntityKernelTestBaseTest {
    *   The field.
    * @param string $search_id
    *   The search id.
+   *
+   * @return \Drupal\facets\FacetInterface
+   *   The created facet.
    */
   private function createFacet(string $field, string $search_id): FacetInterface {
     $entity = Facet::create([

@@ -7,7 +7,7 @@ namespace Drupal\oe_list_pages;
 use Drupal\search_api\IndexInterface;
 
 /**
- * Interface for List source class.
+ * Defines the interface for list source implementations.
  */
 interface ListSourceInterface {
 
@@ -36,7 +36,7 @@ interface ListSourceInterface {
   public function getEntityType(): string;
 
   /**
-   * Get search id.
+   * Gets the search id.
    *
    * @return string
    *   The search id.
@@ -44,7 +44,7 @@ interface ListSourceInterface {
   public function getSearchId();
 
   /**
-   * Get the associated index.
+   * Gets the associated index.
    *
    * @return \Drupal\search_api\IndexInterface
    *   The search api index.

@@ -7,7 +7,10 @@ namespace Drupal\oe_list_pages;
 use Drupal\search_api\IndexInterface;
 
 /**
- * List source object.
+ * List sources are associated with a facet source.
+ *
+ * They contain all required fields to allow to execute searches on bundles
+ * that have associated filterable lists.
  */
 class ListSource implements ListSourceInterface {
 

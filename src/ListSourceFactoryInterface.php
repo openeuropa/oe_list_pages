@@ -4,15 +4,13 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages;
 
-use Drupal\search_api\Entity\Index;
-
 /**
- * Interface class for ListSourceFactory class.
+ * Defines the interface for ListSourceInterface factories.
  */
 interface ListSourceFactoryInterface {
 
   /**
-   * Generates search id.
+   * Generates facet source plugin id.
    *
    * @param string $entity_type
    *   The entity type.
@@ -22,22 +20,7 @@ interface ListSourceFactoryInterface {
    * @return string
    *   The generated id.
    */
-  public function generateSearchId(string $entity_type, string $bundle): string;
-
-  /**
-   * Creates a new list source.
-   *
-   * @param string $entity_type
-   *   The entity type.
-   * @param string $bundle
-   *   The bundle.
-   * @param \Drupal\search_api\Entity\Index $index
-   *   The Search API Index.
-   *
-   * @return \Drupal\oe_list_pages\ListSource
-   *   The created list source
-   */
-  public function create(string $entity_type, string $bundle, Index $index): ListSource;
+  public function generateFacetSourcePluginId(string $entity_type, string $bundle): string;
 
   /**
    * Gets the associated list source with the entity type/bundle.

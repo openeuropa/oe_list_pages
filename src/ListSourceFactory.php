@@ -10,7 +10,7 @@ use Drupal\facets\FacetManager\DefaultFacetManager;
 use Drupal\search_api\Entity\Index;
 
 /**
- * Factory class for ListSource entities.
+ * Factory class for ListSource objects.
  */
 class ListSourceFactory implements ListSourceFactoryInterface {
 
@@ -37,7 +37,7 @@ class ListSourceFactory implements ListSourceFactoryInterface {
   protected $listsSources;
 
   /**
-   * EntityMetaWrapperFactory constructor.
+   * ListSourceFactory constructor.
    *
    * @param \Drupal\facets\FacetManager\DefaultFacetManager $facetsManager
    *   The facets manager.
@@ -90,17 +90,27 @@ class ListSourceFactory implements ListSourceFactoryInterface {
   /**
    * {@inheritdoc}
    */
-  public function generateSearchId(string $entity_type, string $bundle): string {
+  public static function generateFacetSourcePluginId(string $entity_type, string $bundle): string {
     return 'list_facet_source' . PluginBase::DERIVATIVE_SEPARATOR . $entity_type . PluginBase::DERIVATIVE_SEPARATOR . $bundle;
   }
 
   /**
-   * {@inheritdoc}
+   * Creates a new list source.
+   *
+   * @param string $entity_type
+   *   The entity type.
+   * @param string $bundle
+   *   The bundle.
+   * @param \Drupal\search_api\Entity\Index $index
+   *   The Search API Index.
+   *
+   * @return \Drupal\oe_list_pages\ListSource
+   *   The created list source
    */
-  public function create(string $entity_type, string $bundle, Index $index): ListSource {
+  protected function create(string $entity_type, string $bundle, Index $index): ListSource {
 
     $filters = [];
-    $id = $this->generateSearchId($entity_type, $bundle);
+    $id = self::generateFacetSourcePluginId($entity_type, $bundle);
     $facets = $this->facetsManager->getFacetsByFacetSourceId($id);
     foreach ($facets as $facet) {
       $field_id = $facet->getFieldIdentifier();
@@ -120,7 +130,7 @@ class ListSourceFactory implements ListSourceFactoryInterface {
       $this->instantiateLists();
     }
 
-    $id = $this->generateSearchId($entity_type, $bundle);
+    $id = self::generateFacetSourcePluginId($entity_type, $bundle);
     return !empty($this->listsSources[$id]) ? $this->listsSources[$id] : NULL;
   }
 

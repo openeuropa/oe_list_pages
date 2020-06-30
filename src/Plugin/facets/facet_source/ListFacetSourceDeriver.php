@@ -23,6 +23,9 @@ class ListFacetSourceDeriver extends FacetSourceDeriverBase {
 
   /**
    * Constructs a new ListFacetSourceDeriver.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   The entity type manager.
    */
   public function __construct(EntityTypeManagerInterface $entityTypeManager) {
     $this->entityTypeManager = $entityTypeManager;
