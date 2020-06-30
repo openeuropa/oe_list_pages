@@ -16,8 +16,6 @@ use Symfony\Component\HttpFoundation\RequestStack;
  *
  * @FacetsFacetSource(
  *   id = "list_facet_source",
- *   display_id = "oe_list_pages",
- *   label = "OE List Pages",
  *   deriver = "Drupal\oe_list_pages\Plugin\facets\facet_source\ListFacetSourceDeriver"
  * )
  */
