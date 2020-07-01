@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\oe_list_pages;
 
 use Drupal\search_api\IndexInterface;
+use Drupal\search_api\Query\QueryInterface;
 
 /**
  * Defines the interface for list source implementations.
@@ -50,5 +51,13 @@ interface ListSourceInterface {
    *   The search api index.
    */
   public function getIndex(): IndexInterface;
+
+  /**
+   * Gets the query.
+   *
+   * @return \Drupal\search_api\Query\QueryInterface
+   *   The search api query.
+   */
+  public function getQuery(): QueryInterface;
 
 }
