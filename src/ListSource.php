@@ -117,6 +117,8 @@ class ListSource implements ListSourceInterface {
       'offset' => ($limit * $page),
     ]);
 
+    $query->setOption('hernani', 'dois');
+
     $query->setSearchId($this->getSearchId());
     return $query;
   }
