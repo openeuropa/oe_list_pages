@@ -12,4 +12,13 @@ use Drupal\search_api\Display\DisplayPluginBase;
  *   deriver = "Drupal\oe_list_pages\Plugin\search_api\display\ViewsDisplayDeriver"
  * )
  */
-class ListDisplay extends DisplayPluginBase {}
+class ListDisplay extends DisplayPluginBase {
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isRenderedInCurrentRequest() {
+    return TRUE;
+  }
+
+}

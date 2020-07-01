@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\oe_list_pages;
 
 use Drupal\search_api\IndexInterface;
+use Drupal\search_api\Query\QueryInterface;
 
 /**
  * List sources are associated with a facet source.
@@ -111,6 +112,20 @@ class ListSource implements ListSourceInterface {
    */
   public function getIndex(): IndexInterface {
     return $this->index;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getQuery($limit = 10, $page = 0): QueryInterface {
+
+    $query = $this->index->query([
+      'limit' => $limit,
+      'offset' => ($limit * $page),
+    ]);
+
+    $query->setSearchId($this->getSearchId());
+    return $query;
   }
 
 }

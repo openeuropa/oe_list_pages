@@ -30,7 +30,7 @@ class ListDisplayDeriver extends DisplayDeriverBase {
         $entity_type = $datasource->getEntityTypeId();
         $bundles = $datasource->getBundles();
         foreach ($bundles as $id => $label) {
-          $id = $entity_type . PluginBase::DERIVATIVE_SEPARATOR . $id;
+          $id = 'list_display' . PluginBase::DERIVATIVE_SEPARATOR . $entity_type . PluginBase::DERIVATIVE_SEPARATOR . $id;
           $definition = $base_plugin_definition;
           $definitions[$id] = [
             'label' => $this->t('List display %id', ['%id' => $id]),

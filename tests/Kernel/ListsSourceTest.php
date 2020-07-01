@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\oe_list_pages\Kernel;
 
-use Drupal\Core\Plugin\PluginBase;
 use Drupal\facets\Entity\Facet;
 use Drupal\facets\FacetInterface;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBaseTest;
@@ -109,17 +108,17 @@ class ListsSourceTest extends EntityKernelTestBaseTest {
 
     $available_facet_sources = [];
     foreach ($facet_sources as $facet_source_id => $facet_source) {
-      $available_facet_sources[] = $facet_source['display_id'];
+      $available_facet_sources[] = $facet_source['id'];
     }
 
     // Item bundle is indexed.
-    $article_plugin_id = 'entity_test_mulrev_changed' . PluginBase::DERIVATIVE_SEPARATOR . 'item';
+    $article_plugin_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'item');
     $this->assertContains($article_plugin_id, $available_facet_sources);
     // entity_test_mulrev_changed bundle is  indexed.
-    $article_plugin_id = 'entity_test_mulrev_changed' . PluginBase::DERIVATIVE_SEPARATOR . 'entity_test_mulrev_changed';
+    $article_plugin_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
     $this->assertContains($article_plugin_id, $available_facet_sources);
     // Article bundle is not indexed.
-    $article_plugin_id = 'entity_test_mulrev_changed' . PluginBase::DERIVATIVE_SEPARATOR . 'article';
+    $article_plugin_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'article');
     $this->assertNotContains($article_plugin_id, $available_facet_sources);
   }
 
