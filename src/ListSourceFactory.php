@@ -49,6 +49,26 @@ class ListSourceFactory implements ListSourceFactoryInterface {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function get(string $entity_type, string $bundle): ?ListSourceInterface {
+
+    if (empty($this->listsSources)) {
+      $this->instantiateLists();
+    }
+
+    $id = self::generateFacetSourcePluginId($entity_type, $bundle);
+    return !empty($this->listsSources[$id]) ? $this->listsSources[$id] : NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function generateFacetSourcePluginId(string $entity_type, string $bundle): string {
+    return 'list_facet_source' . PluginBase::DERIVATIVE_SEPARATOR . $entity_type . PluginBase::DERIVATIVE_SEPARATOR . $bundle;
+  }
+
+  /**
    * Instantiate the list sources from the indexed content bundles.
    */
   protected function instantiateLists(): void {
@@ -87,13 +107,6 @@ class ListSourceFactory implements ListSourceFactoryInterface {
   }
 
   /**
-   * {@inheritdoc}
-   */
-  public static function generateFacetSourcePluginId(string $entity_type, string $bundle): string {
-    return 'list_facet_source' . PluginBase::DERIVATIVE_SEPARATOR . $entity_type . PluginBase::DERIVATIVE_SEPARATOR . $bundle;
-  }
-
-  /**
    * Creates a new list source.
    *
    * @param string $entity_type
@@ -116,19 +129,6 @@ class ListSourceFactory implements ListSourceFactoryInterface {
     }
 
     return new ListSource($id, $entity_type, $bundle, $index, $filters);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function get(string $entity_type, string $bundle): ?ListSourceInterface {
-
-    if (empty($this->listsSources)) {
-      $this->instantiateLists();
-    }
-
-    $id = self::generateFacetSourcePluginId($entity_type, $bundle);
-    return !empty($this->listsSources[$id]) ? $this->listsSources[$id] : NULL;
   }
 
 }
