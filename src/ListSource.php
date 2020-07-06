@@ -36,13 +36,6 @@ class ListSource implements ListSourceInterface {
   protected $bundle;
 
   /**
-   * The data source.
-   *
-   * @var \Drupal\search_api\Datasource\DatasourceInterface
-   */
-  protected $dataSource;
-
-  /**
    * The associated search api index.
    *
    * @var \Drupal\search_api\IndexInterface
