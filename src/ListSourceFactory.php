@@ -18,7 +18,6 @@ class ListSourceFactory implements ListSourceFactoryInterface {
    * The facets manager.
    *
    * @var \Drupal\facets\FacetManager\DefaultFacetManager
-   *   The facets manager.
    */
   protected $facetsManager;
 
@@ -104,10 +103,10 @@ class ListSourceFactory implements ListSourceFactoryInterface {
    * @param \Drupal\search_api\IndexInterface $index
    *   The Search API Index.
    *
-   * @return \Drupal\oe_list_pages\ListSource
+   * @return \Drupal\oe_list_pages\ListSourceInterface
    *   The created list source
    */
-  protected function create(string $entity_type, string $bundle, IndexInterface $index): ListSource {
+  protected function create(string $entity_type, string $bundle, IndexInterface $index): ListSourceInterface {
     $filters = [];
     $id = self::generateFacetSourcePluginId($entity_type, $bundle);
     $facets = $this->facetsManager->getFacetsByFacetSourceId($id);
@@ -122,7 +121,7 @@ class ListSourceFactory implements ListSourceFactoryInterface {
   /**
    * {@inheritdoc}
    */
-  public function get(string $entity_type, string $bundle): ?ListSource {
+  public function get(string $entity_type, string $bundle): ?ListSourceInterface {
 
     if (empty($this->listsSources)) {
       $this->instantiateLists();

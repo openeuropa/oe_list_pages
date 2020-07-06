@@ -30,9 +30,9 @@ interface ListSourceFactoryInterface {
    * @param string $bundle
    *   The bundle.
    *
-   * @return \Drupal\oe_list_pages\ListSource|null
+   * @return \Drupal\oe_list_pages\ListSourceInterface|null
    *   The list source if exists.
    */
-  public function get(string $entity_type, string $bundle): ?ListSource;
+  public function get(string $entity_type, string $bundle): ?ListSourceInterface;
 
 }
