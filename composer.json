@@ -9,6 +9,7 @@
         "drupal/core": "^8.8",
         "drupal/emr": "~1.0-beta7",
         "drupal/search_api": "~1.17",
+        "drupal/facets": "~1.4",
         "php": ">=7.2"
     },
     "require-dev": {
