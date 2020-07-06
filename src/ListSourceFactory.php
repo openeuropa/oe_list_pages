@@ -7,7 +7,7 @@ namespace Drupal\oe_list_pages;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\facets\FacetManager\DefaultFacetManager;
-use Drupal\search_api\Entity\Index;
+use Drupal\search_api\IndexInterface;
 
 /**
  * Factory class for ListSource objects.
@@ -101,14 +101,13 @@ class ListSourceFactory implements ListSourceFactoryInterface {
    *   The entity type.
    * @param string $bundle
    *   The bundle.
-   * @param \Drupal\search_api\Entity\Index $index
+   * @param \Drupal\search_api\IndexInterface $index
    *   The Search API Index.
    *
    * @return \Drupal\oe_list_pages\ListSource
    *   The created list source
    */
-  protected function create(string $entity_type, string $bundle, Index $index): ListSource {
-
+  protected function create(string $entity_type, string $bundle, IndexInterface $index): ListSource {
     $filters = [];
     $id = self::generateFacetSourcePluginId($entity_type, $bundle);
     $facets = $this->facetsManager->getFacetsByFacetSourceId($id);
@@ -117,8 +116,7 @@ class ListSourceFactory implements ListSourceFactoryInterface {
       $filters[$field_id] = $facet->getFacetSource()->getIndex()->getField($field_id)->getLabel();
     }
 
-    $list = new ListSource($id, $entity_type, $bundle, $index, $filters);
-    return $list;
+    return new ListSource($id, $entity_type, $bundle, $index, $filters);
   }
 
   /**
