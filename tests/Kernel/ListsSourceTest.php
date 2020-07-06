@@ -107,20 +107,24 @@ class ListsSourceTest extends EntityKernelTestBaseTest {
       ->get('plugin.manager.facets.facet_source')
       ->getDefinitions();
 
-    $available_facet_sources = [];
-    foreach ($facet_sources as $facet_source_id => $facet_source) {
-      $available_facet_sources[] = $facet_source['display_id'];
-    }
+    $display_manager = $this->container->get('plugin.manager.search_api.display');
 
-    // Item bundle is indexed.
-    $article_plugin_id = 'entity_test_mulrev_changed' . PluginBase::DERIVATIVE_SEPARATOR . 'item';
-    $this->assertContains($article_plugin_id, $available_facet_sources);
-    // entity_test_mulrev_changed bundle is  indexed.
-    $article_plugin_id = 'entity_test_mulrev_changed' . PluginBase::DERIVATIVE_SEPARATOR . 'entity_test_mulrev_changed';
-    $this->assertContains($article_plugin_id, $available_facet_sources);
-    // Article bundle is not indexed.
-    $article_plugin_id = 'entity_test_mulrev_changed' . PluginBase::DERIVATIVE_SEPARATOR . 'article';
-    $this->assertNotContains($article_plugin_id, $available_facet_sources);
+    $indexed = [
+      'list_facet_source:entity_test_mulrev_changed' . PluginBase::DERIVATIVE_SEPARATOR . 'item',
+      'list_facet_source:entity_test_mulrev_changed' . PluginBase::DERIVATIVE_SEPARATOR . 'entity_test_mulrev_changed',
+    ];
+    $not_indexed = [
+      'list_facet_source:entity_test_mulrev_changed' . PluginBase::DERIVATIVE_SEPARATOR . 'article',
+    ];
+
+    foreach ($indexed as $id) {
+      $this->assertArrayHasKey($id, $facet_sources);
+      $this->assertTrue($display_manager->hasDefinition($facet_sources[$id]['display_id']));
+    }
+    foreach ($not_indexed as $id) {
+      $this->assertArrayNotHasKey($id, $facet_sources);
+      $this->assertFalse($display_manager->hasDefinition('list_facet_source:entity_test_mulrev_changed' . PluginBase::DERIVATIVE_SEPARATOR . 'article'));
+    }
   }
 
   /**

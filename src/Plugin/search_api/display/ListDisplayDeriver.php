@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\oe_list_pages\Plugin\search_api\display;
 
 use Drupal\Core\Plugin\PluginBase;
@@ -14,11 +16,6 @@ class ListDisplayDeriver extends DisplayDeriverBase {
    * {@inheritdoc}
    */
   public function getDerivativeDefinitions($base_plugin_definition) {
-    $base_plugin_id = $base_plugin_definition['id'];
-    if (isset($this->derivatives[$base_plugin_id])) {
-      return $this->derivatives[$base_plugin_id];
-    }
-    $definitions = [];
     $index_storage = $this->entityTypeManager->getStorage('search_api_index');
 
     // Loop through all available data sources from enabled indexes.
@@ -29,17 +26,14 @@ class ListDisplayDeriver extends DisplayDeriverBase {
       foreach ($datasources as $datasource) {
         $entity_type = $datasource->getEntityTypeId();
         $bundles = $datasource->getBundles();
-        foreach ($bundles as $id => $label) {
-          $id = $entity_type . PluginBase::DERIVATIVE_SEPARATOR . $id;
+        foreach ($bundles as $bundle_id => $label) {
+          $id = $entity_type . PluginBase::DERIVATIVE_SEPARATOR . $bundle_id;
           $definition = $base_plugin_definition;
-          $definitions[$id] = [
-            'label' => $this->t('List display %id', ['%id' => $id]),
-            'description' => $this->t('List display %id', ['%id' => $id]),
-            'index' => $datasource->getIndex()->id(),
-          ];
-          $definitions[$id] = $definition;
+          $definition['label'] = $this->t('List display %id', ['%id' => $id]);
+          $definition['description'] = $this->t('List display %id', ['%id' => $id]);
+          $definition['index'] = $datasource->getIndex()->id();
+          $this->derivatives[$id] = $definition;
         }
-        $this->derivatives = $definitions;
       }
     }
 
