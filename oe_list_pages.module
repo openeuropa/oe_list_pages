@@ -1,0 +1,11 @@
+ <?php
+
+/**
+ * Implements hook_facets_search_api_query_type_mapping_alter().
+ */
+function oe_list_pages_facets_search_api_query_type_mapping_alter($backend_plugin_id, array &$query_types) {
+  $query_types['title_comparison'] = 'title_query_type';
+  $query_types['date_comparison'] = 'date_query_type';
+}
+
+
