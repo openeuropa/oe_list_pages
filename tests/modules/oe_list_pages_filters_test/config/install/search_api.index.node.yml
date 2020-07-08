@@ -1,0 +1,67 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - search_api
+  config:
+    - field.storage.node.field_select_one
+    - field.storage.node.field_select_two
+    - search_api.server.database_server
+id: node
+name: Node
+description: ''
+read_only: false
+field_settings:
+  field_select_one:
+    label: 'select one'
+    datasource_id: 'entity:node'
+    property_path: field_select_one
+    type: string
+    dependencies:
+      config:
+        - field.storage.node.field_select_one
+  field_select_two:
+    label: 'select two'
+    datasource_id: 'entity:node'
+    property_path: field_select_two
+    type: string
+    dependencies:
+      config:
+        - field.storage.node.field_select_two
+  status:
+    label: Published
+    datasource_id: 'entity:node'
+    property_path: status
+    type: boolean
+    dependencies:
+      module:
+        - node
+  title:
+    label: Title
+    datasource_id: 'entity:node'
+    property_path: title
+    type: string
+    dependencies:
+      module:
+        - node
+datasource_settings:
+  'entity:node':
+    bundles:
+      default: true
+      selected: {  }
+    languages:
+      default: true
+      selected: {  }
+processor_settings:
+  add_url: {  }
+  aggregated_field: {  }
+  language_with_fallback: {  }
+  rendered_item: {  }
+tracker_settings:
+  default:
+    indexing_order: fifo
+options:
+  index_directly: true
+  cron_limit: 50
+server: database_server
