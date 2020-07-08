@@ -36,7 +36,7 @@ class ListPageSourceAlterEvent extends Event {
    * @param array $bundles
    *   The list of entity bundles.
    */
-  public function __construct(array $entity_types, array $bundles = []) {
+  public function __construct(array $entity_types = [], array $bundles = []) {
     $this->entityTypes = $entity_types;
     $this->bundles = $bundles;
   }
