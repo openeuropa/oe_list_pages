@@ -80,6 +80,28 @@ class ListFacetSource extends SearchApiBaseFacetSource implements SearchApiFacet
   /**
    * {@inheritdoc}
    */
+  public function getFields() {
+    $indexed_fields = [];
+    $index = $this->getIndex();
+
+    $fields = $index->getFields();
+    $server = $index->getServerInstance();
+    $backend = $server->getBackend();
+
+    foreach ($fields as $field) {
+      $data_type_plugin_id = $field->getDataTypePlugin()->getPluginId();
+      $query_types = $this->getQueryTypesForDataType($backend, $data_type_plugin_id);
+      if (!empty($query_types)) {
+        $indexed_fields[$field->getFieldIdentifier()] = $field->getLabel() . ' (' . $field->getPropertyPath() . ')';
+      }
+    }
+
+    return $indexed_fields;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getIndex() {
     return $this->entityTypeManager->getStorage('search_api_index')->load($this->index);
   }
