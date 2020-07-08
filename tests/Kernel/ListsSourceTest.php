@@ -55,6 +55,7 @@ class ListsSourceTest extends EntityKernelTestBaseTest {
 
     $this->installEntitySchema('facets_facet');
     $this->installEntitySchema('search_api_task');
+    $this->installSchema('search_api', ['search_api_item']);
     $this->installEntitySchema('entity_test_mulrev_changed');
     $this->installEntitySchema('user');
     $this->installEntitySchema('node');
@@ -130,16 +131,8 @@ class ListsSourceTest extends EntityKernelTestBaseTest {
    * Tests that all available filters within a list.
    */
   public function testAvailableFilters(): void {
-    // Create facets for default bundle.
-    $default_list_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
-    $this->createFacet('category', $default_list_id);
-    $this->createFacet('keywords', $default_list_id);
-    $this->createFacet('width', $default_list_id);
 
-    // Create facets for item bundle.
-    $item_list_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'item');
-    $this->createFacet('category', $item_list_id);
-    $this->createFacet('width', $item_list_id);
+    $this->createTestFacets();
 
     // Get the lists.
     $default_list = $this->listFactory->get('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
@@ -161,6 +154,130 @@ class ListsSourceTest extends EntityKernelTestBaseTest {
   }
 
   /**
+   * Tests the query functionality.
+   */
+  public function testQuery(): void {
+    $this->createTestFacets();
+    $this->createTestContent('entity_test_mulrev_changed', 5);
+    $this->createTestContent('item', 6);
+
+    // Get the lists.
+    $default_list = $this->listFactory->get('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
+    $item_list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
+
+    // Index items.
+    $default_list->getIndex()->indexItems();
+    $item_list->getIndex()->indexItems();
+
+    /** @var \Drupal\search_api\Query\QueryInterface $default_query */
+    $default_query = $default_list->getQuery();
+    $default_query->execute();
+    /** @var \Drupal\search_api\Query\ResultSetInterface $results */
+    $default_results = $default_query->getResults();
+
+    /** @var \Drupal\search_api\Query\QueryInterface $default_query */
+    $item_query = $item_list->getQuery(2);
+    $item_query->execute();
+    /** @var \Drupal\search_api\Query\ResultSetInterface $results */
+    $item_results = $item_query->getResults();
+
+    // Asserts results.
+    $this->assertEquals(5, $default_results->getResultCount());
+    $this->assertEquals(6, $item_results->getResultCount());
+
+    $this->assertCount(5, $default_results->getResultItems());
+    $this->assertCount(2, $item_results->getResultItems());
+
+    $default_facets = $default_results->getExtraData('search_api_facets');
+    $item_facets = $default_results->getExtraData('search_api_facets');
+    $expected_facets_category = [
+      [
+        'count' => 2,
+        'filter' => '"second class"',
+      ],
+      [
+        'count' => 2,
+        'filter' => '"third class"',
+      ],
+      [
+        'count' => 1,
+        'filter' => '"first class"',
+      ],
+    ];
+
+    $this->assertEquals($expected_facets_category, $default_facets['category']);
+  }
+
+  /**
+   * Tests ignored filters.
+   */
+  public function testIgnoredFilters(): void {
+
+  }
+
+  /**
+   * Tests preset filters.
+   */
+  public function testPresetFilters(): void {
+    $this->createTestFacets();
+    $this->createTestContent('entity_test_mulrev_changed', 5);
+    $this->createTestContent('item', 6);
+
+    // Get the lists.
+    $default_list = $this->listFactory->get('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
+
+    // Index items.
+    $default_list->getIndex()->indexItems();
+
+    $facet_id = md5($default_list->getSearchId()) . 'category';
+    /** @var \Drupal\search_api\Query\QueryInterface $default_query */
+    $query = $default_list->getQuery(2, 0, [], [$facet_id => ['third class']]);
+    $query->execute();
+    /** @var \Drupal\search_api\Query\ResultSetInterface $results */
+    $results = $query->getResults();
+
+    // Asserts results.
+    $this->assertEquals(2, $results->getResultCount());
+    $this->assertCount(2, $results->getResultItems());
+  }
+
+  /**
+   * Create test content.
+   */
+  private function createTestContent($bundle, $count): void {
+
+    $categories = ['first class', 'second class', 'third class'];
+
+    // Add new entities.
+    $entity_test_storage = \Drupal::entityTypeManager()->getStorage('entity_test_mulrev_changed');
+    for ($i = 1; $i <= $count; $i++) {
+      $entity_test_storage->create([
+        'name' => 'foo bar baz ' . $i,
+        'body' => 'test ' . $i . ' test',
+        'type' => $bundle,
+        'keywords' => ['orange'],
+        'category' => $categories[$i % 3],
+      ])->save();
+    }
+  }
+
+  /**
+   * Create test facets.
+   */
+  private function createTestFacets(): void {
+    // Create facets for default bundle.
+    $default_list_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
+    $this->createFacet('category', $default_list_id);
+    $this->createFacet('keywords', $default_list_id);
+    $this->createFacet('width', $default_list_id);
+
+    // Create facets for item bundle.
+    $item_list_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'item');
+    $this->createFacet('category', $item_list_id);
+    $this->createFacet('width', $item_list_id);
+  }
+
+  /**
    * Creates a facet for the specified field.
    *
    * @param string $field
@@ -174,7 +291,7 @@ class ListsSourceTest extends EntityKernelTestBaseTest {
   private function createFacet(string $field, string $search_id): FacetInterface {
     $entity = Facet::create([
       // Id just needs to be unique when generated.
-      'id' => md5($search_id) . '_' . $field,
+      'id' => md5($search_id) . $field,
       'name' => 'Facet for ' . $field,
     ]);
     $entity->setWidget('links');

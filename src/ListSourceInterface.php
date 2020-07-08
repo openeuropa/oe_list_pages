@@ -55,9 +55,18 @@ interface ListSourceInterface {
   /**
    * Gets the query.
    *
+   * @param int $limit
+   *   The query limit.
+   * @param int $page
+   *   The query offset.
+   * @param array $ignored_filters
+   *   Ignored filter keys.
+   * @param array $preset_filters_values
+   *   Preset filter values.
+   *
    * @return \Drupal\search_api\Query\QueryInterface
    *   The search api query.
    */
-  public function getQuery(): QueryInterface;
+  public function getQuery(int $limit = 10, int $page = 0, array $ignored_filters = [], array $preset_filters_values = []): QueryInterface;
 
 }

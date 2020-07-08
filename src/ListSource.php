@@ -110,16 +110,19 @@ class ListSource implements ListSourceInterface {
   /**
    * {@inheritdoc}
    */
-  public function getQuery($limit = 10, $page = 0): QueryInterface {
+  public function getQuery(int $limit = 10, int $page = 0, array $ignored_filters = [], array $preset_filters_values = []): QueryInterface {
 
     $query = $this->index->query([
       'limit' => $limit,
       'offset' => ($limit * $page),
     ]);
 
-    $query->setOption('hernani', 'dois');
-
+    $query_options = new ListQueryOptions($ignored_filters, $preset_filters_values);
+    $query->setOption('oe_list_page_query_options', $query_options);
     $query->setSearchId($this->getSearchId());
+    $query->addCondition('type', $this->getBundle());
+    $query->addCondition('search_api_datasource', 'entity:' . $this->getEntityType());
+
     return $query;
   }
 

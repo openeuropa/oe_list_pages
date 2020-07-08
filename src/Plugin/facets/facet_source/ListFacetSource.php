@@ -164,9 +164,6 @@ class ListFacetSource extends SearchApiBaseFacetSource implements SearchApiFacet
         $query->keys($keys);
       }
 
-      // Index fields.
-      $query->setFulltextFields();
-
       // Execute the query.
       $results = $query->execute();
     }
