@@ -9,6 +9,7 @@ use Drupal\facets\FacetInterface;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBaseTest;
 use Drupal\oe_list_pages\ListSourceFactory;
 use Drupal\search_api\Entity\Index;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Tests the List sources and their properties.
@@ -131,7 +132,6 @@ class ListsSourceTest extends EntityKernelTestBaseTest {
    * Tests that all available filters within a list.
    */
   public function testAvailableFilters(): void {
-
     $this->createTestFacets();
 
     // Get the lists.
@@ -212,7 +212,29 @@ class ListsSourceTest extends EntityKernelTestBaseTest {
    * Tests ignored filters.
    */
   public function testIgnoredFilters(): void {
+    $this->createTestFacets();
+    $this->createTestContent('entity_test_mulrev_changed', 5);
+    $this->createTestContent('item', 6);
 
+    // Change current request and set category to third class.
+    $search_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
+    $facet_id = $this->generateFacetId('category', $search_id);
+    $request = new Request();
+    $request->query->set('f', [$facet_id . ':third class']);
+    \Drupal::requestStack()->push($request);
+
+    // Get the lists.
+    $default_list = $this->listFactory->get('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
+    // Index items.
+    $default_list->getIndex()->indexItems();
+
+    /** @var \Drupal\search_api\Query\QueryInterface $default_query */
+    $query = $default_list->getQuery(2, 0, [$facet_id], []);
+    $query->execute();
+    /** @var \Drupal\search_api\Query\ResultSetInterface $results */
+    $results = $query->getResults();
+    // Asserts results.
+    $this->assertEquals(5, $results->getResultCount());
   }
 
   /**
@@ -225,11 +247,11 @@ class ListsSourceTest extends EntityKernelTestBaseTest {
 
     // Get the lists.
     $default_list = $this->listFactory->get('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
-
     // Index items.
     $default_list->getIndex()->indexItems();
 
-    $facet_id = md5($default_list->getSearchId()) . 'category';
+    $search_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
+    $facet_id = $this->generateFacetId('category', $search_id);
     /** @var \Drupal\search_api\Query\QueryInterface $default_query */
     $query = $default_list->getQuery(2, 0, [], [$facet_id => ['third class']]);
     $query->execute();
@@ -278,6 +300,21 @@ class ListsSourceTest extends EntityKernelTestBaseTest {
   }
 
   /**
+   * Generate a valid facet it.
+   *
+   * @param string $field
+   *   The field.
+   * @param string $search_id
+   *   The search id.
+   *
+   * @return string
+   *   The facet id.
+   */
+  private function generateFacetId($field, $search_id): string {
+    return str_replace(':', '_', $search_id . $field);
+  }
+
+  /**
    * Creates a facet for the specified field.
    *
    * @param string $field
@@ -289,15 +326,21 @@ class ListsSourceTest extends EntityKernelTestBaseTest {
    *   The created facet.
    */
   private function createFacet(string $field, string $search_id): FacetInterface {
+    $facet_id = $this->generateFacetId($field, $search_id);
     $entity = Facet::create([
-      // Id just needs to be unique when generated.
-      'id' => md5($search_id) . $field,
+      'id' => $facet_id,
       'name' => 'Facet for ' . $field,
     ]);
-    $entity->setWidget('links');
+    $entity->setUrlAlias($facet_id);
     $entity->setFieldIdentifier($field);
     $entity->setEmptyBehavior(['behavior' => 'none']);
     $entity->setFacetSourceId($search_id);
+    $entity->setWidget('links', ['show_numbers' => TRUE]);
+    $entity->addProcessor([
+      'processor_id' => 'url_processor_handler',
+      'weights' => ['pre_query' => -10, 'build' => -10],
+      'settings' => [],
+    ]);
     $entity->save();
 
     return $entity;

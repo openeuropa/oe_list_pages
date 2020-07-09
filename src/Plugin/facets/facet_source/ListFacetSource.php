@@ -137,44 +137,9 @@ class ListFacetSource extends SearchApiBaseFacetSource implements SearchApiFacet
    */
   public function fillFacetsWithResults(array $facets) {
     $plugin_definition_id = $this->getPluginDefinition()['display_id'];
-    // Check if there are results in the static cache.
     $results = $this->searchApiQueryHelper->getResults($plugin_definition_id);
-
-    // If there are no results, execute the search page and check for results
-    // again. This happens when a page or block is cached, so Search API has
-    // not fired an actual search.
-    if (!$results) {
-      /* @var $search_api_index \Drupal\search_api\IndexInterface */
-      $search_api_index = $this->getIndex();
-      $current_request = $this->requestStack->getCurrentRequest();
-
-      // Create the query.
-      $options = [
-        'parse_mode' => 'direct',
-        'limit' => 10,
-        'offset' => $current_request->get('page', 0),
-      ];
-      $query = $search_api_index->query($options);
-      // $query->addCondition('type', 'oe_event');
-      $query->setSearchId('list_facet_source:' . $plugin_definition_id);
-
-      // Keys.
-      $keys = $this->requestStack->getCurrentRequest()->get('keys');
-      if (!empty($keys)) {
-        $query->keys($keys);
-      }
-
-      // Execute the query.
-      $results = $query->execute();
-    }
-
-    // If we got results from the cache, this is the first code executed in this
-    // method, so it's good to double check that we can actually work with
-    // $results.
     if ($results instanceof ResultSetInterface) {
-      // Get our facet data from the results.
       $facet_results = $results->getExtraData('search_api_facets');
-
       // Loop over each facet and execute the build method from the given query
       // type.
       foreach ($facets as $facet) {
@@ -184,15 +149,11 @@ class ListFacetSource extends SearchApiBaseFacetSource implements SearchApiFacet
             'facet' => $facet,
             'results' => $facet_results[$facet->getFieldIdentifier()],
           ];
-
-          // Get the Facet Specific Query Type so we can process the results
-          // using the build() function of the query type.
           $query_type = $this->queryTypePluginManager->createInstance($facet->getQueryType(), $configuration);
           $query_type->build();
         }
       }
     }
-
   }
 
 }
