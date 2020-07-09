@@ -26,13 +26,8 @@ class ListDisplayDeriver extends DisplayDeriverBase {
       foreach ($datasources as $datasource) {
         $entity_type = $datasource->getEntityTypeId();
         $bundles = $datasource->getBundles();
-<<<<<<< HEAD:src/Plugin/search_api/display/ListDisplayDeriver.php
-        foreach ($bundles as $bundle_id => $label) {
-          $id = $entity_type . PluginBase::DERIVATIVE_SEPARATOR . $bundle_id;
-=======
         foreach ($bundles as $id => $label) {
           $id = 'list_display' . PluginBase::DERIVATIVE_SEPARATOR . $entity_type . PluginBase::DERIVATIVE_SEPARATOR . $id;
->>>>>>> OPENEUROPA-3373: Query service returning from list source.:src/Plugin/facets/display/ListDisplayDeriver.php
           $definition = $base_plugin_definition;
           $definition['label'] = $this->t('List display %id', ['%id' => $id]);
           $definition['description'] = $this->t('List display %id', ['%id' => $id]);

@@ -36,7 +36,7 @@ class QuerySubscriber implements EventSubscriberInterface {
       $facet_manager = \Drupal::service('facets.manager');
       $queryTypePluginManager = \Drupal::service('plugin.manager.facets.query_type');
       $facetsource_id = $query->getSearchId();
-      /** @var \Drupal\oe_list_pages\ListQueryOptionsInterface  $query_options */
+      /** @var \Drupal\oe_list_pages\ListQueryOptionsInterface $query_options */
       $query_options = $query->getOption('oe_list_page_query_options');
 
       if (!empty($query_options)) {
