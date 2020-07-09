@@ -20,7 +20,6 @@ class ListsSourceTest extends ListsSourceBaseTest {
       ->getDefinitions();
 
     $display_manager = $this->container->get('plugin.manager.search_api.display');
-
     $indexed = [
       'list_facet_source:entity_test_mulrev_changed' . PluginBase::DERIVATIVE_SEPARATOR . 'item',
       'list_facet_source:entity_test_mulrev_changed' . PluginBase::DERIVATIVE_SEPARATOR . 'entity_test_mulrev_changed',
@@ -44,18 +43,15 @@ class ListsSourceTest extends ListsSourceBaseTest {
    */
   public function testAvailableFilters(): void {
     $this->createTestFacets();
-
     // Get the lists.
     $default_list = $this->listFactory->get('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
     $item_list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
-
     // Filters for default bundle.
     $filters = $default_list->getAvailableFilters();
     $this->assertCount(3, $filters);
     $this->assertArrayHasKey('category', $filters);
     $this->assertArrayHasKey('keywords', $filters);
     $this->assertArrayHasKey('width', $filters);
-
     // Filters for item bundle.
     $filters_item = $item_list->getAvailableFilters();
     $this->assertCount(2, $filters_item);
