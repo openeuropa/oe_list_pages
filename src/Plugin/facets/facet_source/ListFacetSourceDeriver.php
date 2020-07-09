@@ -34,8 +34,8 @@ class ListFacetSourceDeriver extends FacetSourceDeriverBase {
           $definition['label'] = $this->t('List %bundle', ['%bundle' => $id]);
           // We use as the display ID the same ID as this derivative.
           // @see \Drupal\oe_list_pages\Plugin\search_api\display\ListDisplayDeriver
-          $definition['display_id'] = 'list_facet_source' . PluginBase::DERIVATIVE_SEPARATOR . $id;
-          $definitions[$id] = $definition;
+          $definition['display_id'] = 'oe_list_pages' . PluginBase::DERIVATIVE_SEPARATOR . $id;
+          $this->derivatives[$id] = $definition;
         }
 
       }
