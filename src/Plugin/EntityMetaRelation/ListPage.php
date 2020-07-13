@@ -167,7 +167,6 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
     ];
 
     $selected_entity_type = $form[$key]['entity_type']['#default_value'] ?? NULL;
-    $bundle_options = $this->getBundleOptions($selected_entity_type);
 
     $form[$key]['bundle_wrapper'] = [
       '#type' => 'container',
@@ -179,6 +178,7 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
     $entity_bundle_id = $entity_meta_wrapper->getSourceEntityBundle();
 
     if (!empty($selected_entity_type) || $entity_bundle_id) {
+      $bundle_options = $this->getBundleOptions($selected_entity_type);
       $form[$key]['bundle_wrapper']['bundle'] = [
         '#type' => 'select',
         '#title' => $this->t('Source bundle'),
@@ -202,7 +202,6 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
       ],
     ];
 
-    $selected_entity_type = $form[$key]['entity_type']['#default_value'] ?? NULL;
     $selected_bundle = $form[$key]['bundle_wrapper']['bundle']['#default_value'] ?? NULL;
 
     // Try to get the list source for a selected entity type and bundle.
