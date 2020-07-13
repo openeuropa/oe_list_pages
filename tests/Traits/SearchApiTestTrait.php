@@ -8,7 +8,7 @@ use Drupal\facets\Entity\Facet;
 use Drupal\facets\FacetInterface;
 
 /**
- * Trait SearchApiTestTrait for usage in Kernel and Functional tests.
+ * Trait SearchApiTestTrait contains methods for search api capabilities.
  *
  * @package Drupal\Tests\oe_list_pages\Traits
  */
@@ -38,25 +38,6 @@ trait SearchApiTestTrait {
     $entity->save();
 
     return $entity;
-  }
-
-  /**
-   * Get available options of select box.
-   *
-   * @param string $field
-   *   The label, id or name of select box.
-   *
-   * @return array
-   *   Select box options.
-   */
-  protected function getSelectOptions(string $field): array {
-    $page = $this->getSession()->getPage();
-    $options = $page->findField($field)->findAll('css', 'option');
-    $actual_options = [];
-    foreach ($options as $option) {
-      $actual_options[$option->getValue()] = $option->getText();
-    }
-    return $actual_options;
   }
 
 }

@@ -142,4 +142,23 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
     $this->assertNoFieldChecked('Published');
   }
 
+  /**
+   * Get available options of select box.
+   *
+   * @param string $field
+   *   The label, id or name of select box.
+   *
+   * @return array
+   *   Select box options.
+   */
+  protected function getSelectOptions(string $field): array {
+    $page = $this->getSession()->getPage();
+    $options = $page->findField($field)->findAll('css', 'option');
+    $actual_options = [];
+    foreach ($options as $option) {
+      $actual_options[$option->getValue()] = $option->getText();
+    }
+    return $actual_options;
+  }
+
 }
