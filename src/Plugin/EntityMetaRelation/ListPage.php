@@ -14,10 +14,12 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\emr\Entity\EntityMetaInterface;
+use Drupal\emr\EntityMetaWrapper;
 use Drupal\emr\Plugin\EntityMetaRelationContentFormPluginBase;
 use Drupal\oe_list_pages\ListPageEvents;
 use Drupal\oe_list_pages\ListPageSourceAlterEvent;
 use Drupal\oe_list_pages\ListSourceFactory;
+use Drupal\oe_list_pages\ListSourceInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -179,10 +181,17 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
 
     if (!empty($selected_entity_type) || $entity_bundle_id) {
       $bundle_options = $this->getBundleOptions($selected_entity_type);
+      $default_bundle = $form_state->getValue('bundle', $entity_bundle_id);
+      if ($form_state->getTriggeringElement()['#array_parents'] === [$key, 'entity_type']) {
+        // We are using first available option of bundles on changing of
+        // entity type.
+        $default_bundle = key($bundle_options);
+      }
+
       $form[$key]['bundle_wrapper']['bundle'] = [
         '#type' => 'select',
         '#title' => $this->t('Source bundle'),
-        '#default_value' => $form_state->getValue('bundle', $entity_bundle_id),
+        '#default_value' => $default_bundle,
         '#options' => $bundle_options,
         '#required' => TRUE,
         '#ajax' => [
@@ -207,14 +216,9 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
     // Try to get the list source for a selected entity type and bundle.
     $list_source = $this->listSourceFactory->get($selected_entity_type, $selected_bundle);
 
-    // Get currently saved configuration for exposed filters if applicable
-    // (we have selected relevant entity type and bundle).
-    $configuration = [];
-    if ($list_source && $entity_meta_wrapper->getSourceEntityType() === $list_source->getEntityType() && $entity_meta_wrapper->getSourceEntityBundle() === $list_source->getBundle()) {
-      $configuration = $entity_meta_wrapper->getConfiguration()['exposed_filters'] ? array_keys($entity_meta_wrapper->getConfiguration()['exposed_filters']) : NULL;
-    }
     // Get available filters.
     if ($list_source && $available_filters = $list_source->getAvailableFilters()) {
+      $configuration = $this->getDefaultConfiguration($list_source, $entity_meta_wrapper);
       $form[$key]['bundle_wrapper']['exposed_filters_wrapper']['exposed_filters'] = [
         '#type' => 'checkboxes',
         '#title' => $this->t('Exposed filters'),
@@ -330,6 +334,27 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
     $event->setBundles($selected_entity_type, array_keys($bundle_options));
     $this->eventDispatcher->dispatch(ListPageEvents::ALTER_BUNDLES, $event);
     return array_intersect_key($bundle_options, array_combine($event->getBundles(), $event->getBundles()));
+  }
+
+  /**
+   * Get default configuration for form element.
+   *
+   * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
+   *   The list source.
+   * @param \Drupal\emr\EntityMetaWrapper $entity_meta_wrapper
+   *   The entity meta wrapper.
+   *
+   * @return array|null
+   *   The unserialized config.
+   */
+  protected function getDefaultConfiguration(ListSourceInterface $list_source, EntityMetaWrapper $entity_meta_wrapper): ?array {
+    // Get currently saved configuration for exposed filters if applicable
+    // (we have selected relevant entity type and bundle).
+    $configuration = [];
+    if ($list_source && $entity_meta_wrapper->getSourceEntityType() === $list_source->getEntityType() && $entity_meta_wrapper->getSourceEntityBundle() === $list_source->getBundle()) {
+      $configuration = isset($entity_meta_wrapper->getConfiguration()['exposed_filters']) ? array_keys($entity_meta_wrapper->getConfiguration()['exposed_filters']) : NULL;
+    }
+    return $configuration;
   }
 
 }
