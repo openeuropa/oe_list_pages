@@ -141,7 +141,7 @@ class ListsSourceBaseTest extends EntityKernelTestBaseTest {
    * @return \Drupal\facets\FacetInterface
    *   The created facet.
    */
-  private function createFacet(string $field, string $search_id): FacetInterface {
+  protected function createFacet(string $field, string $search_id): FacetInterface {
     $facet_id = $this->generateFacetId($field, $search_id);
     $entity = Facet::create([
       'id' => $facet_id,

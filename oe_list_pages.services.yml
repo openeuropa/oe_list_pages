@@ -4,5 +4,6 @@ services:
     arguments: ['@facets.manager', '@entity_type.manager']
   oe_list_pages.query_event_subscriber:
     class: Drupal\oe_list_pages\EventSubscriber\QuerySubscriber
+    arguments: ['@facets.manager', '@plugin.manager.facets.query_type']
     tags:
       - { name: event_subscriber }

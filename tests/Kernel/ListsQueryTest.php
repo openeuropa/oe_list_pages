@@ -120,7 +120,7 @@ class ListsQueryTest extends ListsSourceBaseTest {
   /**
    * Create test content.
    */
-  private function createTestContent($bundle, $count): void {
+  protected function createTestContent($bundle, $count): void {
     $categories = ['first class', 'second class', 'third class'];
 
     // Add new entities.
