@@ -30,12 +30,12 @@ class ListQueryOptions implements ListQueryOptionsInterface {
    *
    * @param array $ignored_filters
    *   The ignored filters.
-   * @param array $preset_filters_values
+   * @param array $preset_filters
    *   The preset filters.
    */
-  public function __construct(array $ignored_filters, array $preset_filters_values) {
+  public function __construct(array $ignored_filters, array $preset_filters) {
     $this->ignoredFilters = $ignored_filters;
-    $this->presetFiltersValues = $preset_filters_values;
+    $this->presetFiltersValues = $preset_filters;
   }
 
   /**
