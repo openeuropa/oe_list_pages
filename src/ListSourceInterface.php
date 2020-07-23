@@ -29,6 +29,14 @@ interface ListSourceInterface {
   public function getBundle(): string;
 
   /**
+   * Gets the bundle field id.
+   *
+   * @return string
+   *   The bundle
+   */
+  public function getBundleFieldId(): string;
+
+  /**
    * Gets the entity type.
    *
    * @return string

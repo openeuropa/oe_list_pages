@@ -51,6 +51,13 @@ class ListSource implements ListSourceInterface {
   protected $filters;
 
   /**
+   * The bundle field id.
+   *
+   * @var string
+   */
+  protected $bundleFieldId;
+
+  /**
    * ListSource constructor.
    *
    * @param string $search_id
@@ -59,15 +66,18 @@ class ListSource implements ListSourceInterface {
    *   The entity type.
    * @param string $bundle
    *   The bundle.
+   * @param string $bundle_field_id
+   *   The bundle field id.
    * @param \Drupal\search_api\IndexInterface $index
    *   The search api index.
    * @param array $filters
    *   The filters.
    */
-  public function __construct(string $search_id, string $entity_type, string $bundle, IndexInterface $index, array $filters) {
+  public function __construct(string $search_id, string $entity_type, string $bundle, string $bundle_field_id, IndexInterface $index, array $filters) {
     $this->searchId = $search_id;
     $this->entityType = $entity_type;
     $this->bundle = $bundle;
+    $this->bundleFieldId = $bundle_field_id;
     $this->index = $index;
     $this->filters = $filters;
   }
@@ -103,6 +113,13 @@ class ListSource implements ListSourceInterface {
   /**
    * {@inheritdoc}
    */
+  public function getBundleFieldId(): string {
+    return $this->bundleFieldId;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getIndex(): IndexInterface {
     return $this->index;
   }
@@ -116,13 +133,11 @@ class ListSource implements ListSourceInterface {
       'limit' => $limit,
       'offset' => ($limit * $page),
     ]);
-
     $query_options = new ListQueryOptions($ignored_filters, $preset_filters_values);
     $query->setOption('oe_list_page_query_options', $query_options);
     $query->setSearchId($this->getSearchId());
-    $query->addCondition('type', $this->getBundle());
+    $query->addCondition($this->getBundleFieldId(), $this->getBundle());
     $query->addCondition('search_api_datasource', 'entity:' . $this->getEntityType());
-
     return $query;
   }
 
