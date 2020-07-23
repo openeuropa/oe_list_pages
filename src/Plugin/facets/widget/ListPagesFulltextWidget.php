@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages\Plugin\facets\widget;
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\facets\FacetInterface;
 
 /**
@@ -40,6 +41,20 @@ class ListPagesFulltextWidget extends ListPagesBaseWidget {
    */
   public function getQueryType() {
     return 'title_comparison';
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state, FacetInterface $facet) {
+
+    $form['fulltext_all_fields'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Fulltext search on all fields'),
+      '#default_value' => $this->getConfiguration()['fulltext_all_fields'],
+    ];
+
+    return $form;
   }
 
 }
