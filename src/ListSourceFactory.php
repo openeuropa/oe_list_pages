@@ -128,7 +128,8 @@ class ListSourceFactory implements ListSourceFactoryInterface {
       $filters[$field_id] = $facet->getFacetSource()->getIndex()->getField($field_id)->getLabel();
     }
 
-    return new ListSource($id, $entity_type, $bundle, $index, $filters);
+    $bundle_field_id = $this->entityTypeManager->getDefinition($entity_type)->getKey('bundle');
+    return new ListSource($id, $entity_type, $bundle, $bundle_field_id, $index, $filters);
   }
 
 }

@@ -8,6 +8,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Path\CurrentPathStack;
 use Drupal\facets\FacetSource\SearchApiFacetSourceInterface;
 use Drupal\facets\Plugin\facets\facet_source\SearchApiBaseFacetSource;
+use Drupal\search_api\Query\ResultSetInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -38,7 +39,7 @@ class ListFacetSource extends SearchApiBaseFacetSource implements SearchApiFacet
   /**
    * The search api index to use.
    *
-   * @var string
+   * @var \Drupal\search_api\IndexInterface
    */
   protected $index;
 
@@ -58,7 +59,8 @@ class ListFacetSource extends SearchApiBaseFacetSource implements SearchApiFacet
     $this->currentPathStack = $current_path_stack;
     $this->requestStack = $request_stack;
     $this->entityTypeManager = $entity_type_manager;
-    $this->index = $plugin_definition['index'];
+    // This needs to be loaded as search api doesn't rely on getIndex().
+    $this->index = $this->entityTypeManager->getStorage('search_api_index')->load($plugin_definition['index']);
   }
 
   /**
@@ -81,7 +83,7 @@ class ListFacetSource extends SearchApiBaseFacetSource implements SearchApiFacet
    * {@inheritdoc}
    */
   public function getIndex() {
-    return $this->entityTypeManager->getStorage('search_api_index')->load($this->index);
+    return $this->index;
   }
 
   /**
@@ -134,7 +136,24 @@ class ListFacetSource extends SearchApiBaseFacetSource implements SearchApiFacet
    * {@inheritdoc}
    */
   public function fillFacetsWithResults(array $facets) {
-
+    $plugin_definition_id = $this->getPluginDefinition()['display_id'];
+    $results = $this->searchApiQueryHelper->getResults($plugin_definition_id);
+    if ($results instanceof ResultSetInterface) {
+      $facet_results = $results->getExtraData('search_api_facets');
+      // Loop over each facet and execute the build method from the given query
+      // type.
+      foreach ($facets as $facet) {
+        if (isset($facet_results[$facet->getFieldIdentifier()])) {
+          $configuration = [
+            'query' => NULL,
+            'facet' => $facet,
+            'results' => $facet_results[$facet->getFieldIdentifier()],
+          ];
+          $query_type = $this->queryTypePluginManager->createInstance($facet->getQueryType(), $configuration);
+          $query_type->build();
+        }
+      }
+    }
   }
 
 }

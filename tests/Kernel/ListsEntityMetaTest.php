@@ -10,7 +10,7 @@ use Drupal\node\Entity\NodeType;
 /**
  * Tests the List Pages.
  */
-class ListPagesTest extends EntityKernelTestBaseTest {
+class ListsEntityMetaTest extends EntityKernelTestBaseTest {
 
   /**
    * The node storage.

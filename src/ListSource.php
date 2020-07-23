@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\oe_list_pages;
 
 use Drupal\search_api\IndexInterface;
+use Drupal\search_api\Query\QueryInterface;
 
 /**
  * List sources are associated with a facet source.
@@ -50,6 +51,13 @@ class ListSource implements ListSourceInterface {
   protected $filters;
 
   /**
+   * The bundle entity key used to reference the entity bundle.
+   *
+   * @var string
+   */
+  protected $bundleKey;
+
+  /**
    * ListSource constructor.
    *
    * @param string $search_id
@@ -58,15 +66,18 @@ class ListSource implements ListSourceInterface {
    *   The entity type.
    * @param string $bundle
    *   The bundle.
+   * @param string $bundle_key
+   *   The bundle key.
    * @param \Drupal\search_api\IndexInterface $index
    *   The search api index.
    * @param array $filters
    *   The filters.
    */
-  public function __construct(string $search_id, string $entity_type, string $bundle, IndexInterface $index, array $filters) {
+  public function __construct(string $search_id, string $entity_type, string $bundle, string $bundle_key, IndexInterface $index, array $filters) {
     $this->searchId = $search_id;
     $this->entityType = $entity_type;
     $this->bundle = $bundle;
+    $this->bundleKey = $bundle_key;
     $this->index = $index;
     $this->filters = $filters;
   }
@@ -102,8 +113,32 @@ class ListSource implements ListSourceInterface {
   /**
    * {@inheritdoc}
    */
+  public function getBundleKey(): string {
+    return $this->bundleKey;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getIndex(): IndexInterface {
     return $this->index;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getQuery(int $limit = 10, int $page = 0, array $ignored_filters = [], array $preset_filters = []): QueryInterface {
+
+    $query = $this->index->query([
+      'limit' => $limit,
+      'offset' => ($limit * $page),
+    ]);
+    $query_options = new ListQueryOptions($ignored_filters, $preset_filters);
+    $query->setOption('oe_list_page_query_options', $query_options);
+    $query->setSearchId($this->getSearchId());
+    $query->addCondition($this->getBundleKey(), $this->getBundle());
+    $query->addCondition('search_api_datasource', 'entity:' . $this->getEntityType());
+    return $query;
   }
 
 }
