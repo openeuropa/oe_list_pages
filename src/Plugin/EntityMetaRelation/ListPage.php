@@ -213,12 +213,12 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
 
     $selected_bundle = $form[$key]['bundle_wrapper']['bundle']['#default_value'] ?? NULL;
 
-    // Try to get the list source for a selected entity type and bundle.
+    // Try to get the list source for the selected entity type and bundle.
     $list_source = $this->listSourceFactory->get($selected_entity_type, $selected_bundle);
 
     // Get available filters.
     if ($list_source && $available_filters = $list_source->getAvailableFilters()) {
-      $configuration = $this->getDefaultConfiguration($list_source, $entity_meta_wrapper);
+      $configuration = $this->getExposedFiltersConfiguration($list_source, $entity_meta_wrapper);
       $form[$key]['bundle_wrapper']['exposed_filters_wrapper']['exposed_filters'] = [
         '#type' => 'checkboxes',
         '#title' => $this->t('Exposed filters'),
@@ -286,7 +286,6 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
    *   The entity meta.
    */
   protected function getListPageEntityMeta(ContentEntityInterface $entity, string $entity_meta_bundle): EntityMetaInterface {
-    // Get the related List Page entity meta.
     /** @var \Drupal\emr\Field\EntityMetaItemListInterface $entity_meta_list */
     $entity_meta_list = $entity->get('emr_entity_metas');
     /** @var \Drupal\emr\Entity\EntityMetaInterface $navigation_block_entity_meta */
@@ -294,10 +293,10 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
   }
 
   /**
-   * Get available/allowed entity types.
+   * Get available entity types.
    *
    * @return array
-   *   The array of entity type labels which keyed by machine name.
+   *   The array of entity type labels keyed by machine name.
    */
   protected function getEntityTypeOptions(): array {
     $entity_type_options = [];
@@ -315,13 +314,13 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
   }
 
   /**
-   * Get available bundles of entity type.
+   * Get available bundles for a given entity type.
    *
    * @param string|null $selected_entity_type
    *   The entity type id.
    *
    * @return array
-   *   The array of bundles.
+   *   The array of bundles keyed by machine name.
    */
   protected function getBundleOptions(string $selected_entity_type): array {
     $bundle_options = [];
@@ -337,17 +336,17 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
   }
 
   /**
-   * Get default configuration for form element.
+   * Get the exposed filters configuration.
    *
    * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
-   *   The list source.
+   *   The selected list source.
    * @param \Drupal\emr\EntityMetaWrapper $entity_meta_wrapper
-   *   The entity meta wrapper.
+   *   The current entity meta wrapper.
    *
    * @return array|null
-   *   The unserialized config.
+   *   The current unserialized configuration if available.
    */
-  protected function getDefaultConfiguration(ListSourceInterface $list_source, EntityMetaWrapper $entity_meta_wrapper): ?array {
+  protected function getExposedFiltersConfiguration(ListSourceInterface $list_source, EntityMetaWrapper $entity_meta_wrapper): ?array {
     // Get currently saved configuration for exposed filters if applicable
     // (we have selected relevant entity type and bundle).
     $configuration = [];
