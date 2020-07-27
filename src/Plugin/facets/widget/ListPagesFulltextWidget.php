@@ -45,6 +45,15 @@ class ListPagesFulltextWidget extends ListPagesBaseWidget {
   /**
    * {@inheritdoc}
    */
+  public function defaultConfiguration() {
+    return [
+      'fulltext_all_fields' => TRUE,
+    ] + parent::defaultConfiguration();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state, FacetInterface $facet) {
 
     $form['fulltext_all_fields'] = [

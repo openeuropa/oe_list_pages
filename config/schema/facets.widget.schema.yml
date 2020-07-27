@@ -1,0 +1,7 @@
+facet.widget.config.oe_list_pages_fulltext:
+  type: facet.widget.default_config
+  label: 'Fulltext widget configuration'
+  mapping:
+    fulltext_all_fields:
+      type: boolean
+      label: 'Search on all fulltext fields'

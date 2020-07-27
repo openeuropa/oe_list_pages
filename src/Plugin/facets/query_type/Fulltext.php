@@ -21,7 +21,6 @@ class Fulltext extends QueryTypePluginBase {
    */
   public function execute() {
     $query = $this->query;
-
     // Only alter the query when there's an actual query object to alter.
     if (!empty($query)) {
       $field_identifier = $this->facet->getFieldIdentifier();
@@ -32,7 +31,8 @@ class Fulltext extends QueryTypePluginBase {
         $query->keys($value);
         if (isset($widget_config['fulltext_all_fields']) && !$widget_config['fulltext_all_fields']) {
           // Search on specific field.
-          $query->setFulltextFields([$field_identifier] + $query->getFulltextFields());
+          $fulltext_fields = $query->getFulltextFields() ?? [];
+          $query->setFulltextFields([$field_identifier] + $fulltext_fields);
         }
       }
     }

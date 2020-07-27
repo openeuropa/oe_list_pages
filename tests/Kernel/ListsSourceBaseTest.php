@@ -122,12 +122,14 @@ class ListsSourceBaseTest extends EntityKernelTestBaseTest {
    *   The field.
    * @param string $search_id
    *   The search id.
+   * @param string $suffix
+   *   The suffix.
    *
    * @return string
    *   The facet id.
    */
-  protected function generateFacetId($field, $search_id): string {
-    return str_replace(':', '_', $search_id . $field);
+  protected function generateFacetId($field, $search_id, $suffix = ''): string {
+    return str_replace(':', '_', $search_id . $field . $suffix);
   }
 
   /**
@@ -137,12 +139,18 @@ class ListsSourceBaseTest extends EntityKernelTestBaseTest {
    *   The field.
    * @param string $search_id
    *   The search id.
+   * @param string $suffix
+   *   The suffix.
+   * @param string $widget_id
+   *   The widget id.
+   * @param array $widget_config
+   *   The widget config.
    *
    * @return \Drupal\facets\FacetInterface
    *   The created facet.
    */
-  protected function createFacet(string $field, string $search_id): FacetInterface {
-    $facet_id = $this->generateFacetId($field, $search_id);
+  protected function createFacet(string $field, string $search_id, string $suffix = '', string $widget_id = '', array $widget_config = []): FacetInterface {
+    $facet_id = $this->generateFacetId($field, $search_id, $suffix);
     $entity = Facet::create([
       'id' => $facet_id,
       'name' => 'Facet for ' . $field,
@@ -151,7 +159,13 @@ class ListsSourceBaseTest extends EntityKernelTestBaseTest {
     $entity->setFieldIdentifier($field);
     $entity->setEmptyBehavior(['behavior' => 'none']);
     $entity->setFacetSourceId($search_id);
-    $entity->setWidget('links', ['show_numbers' => TRUE]);
+    if (!empty($widget_id)) {
+      $entity->setWidget($widget_id, $widget_config);
+    }
+    else {
+      $entity->setWidget('links', ['show_numbers' => TRUE]);
+    }
+
     $entity->addProcessor([
       'processor_id' => 'url_processor_handler',
       'weights' => ['pre_query' => -10, 'build' => -10],

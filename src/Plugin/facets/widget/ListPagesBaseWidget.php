@@ -24,10 +24,8 @@ class ListPagesBaseWidget extends WidgetPluginBase implements ListPagesWidgetInt
    * {@inheritdoc}
    */
   public function getValueFromActiveFilters(FacetInterface $facet, string $key): ?string {
-    $urlProcessorManager = \Drupal::service('plugin.manager.facets.url_processor');
-    $url_processor = $urlProcessorManager->createInstance($facet->getFacetSourceConfig()->getUrlProcessorName(), ['facet' => $facet]);
-    $active_filters = $url_processor->getActiveFilters();
-    return $active_filters[$facet->id()][$key] ?? NULL;
+    $active_filters = $facet->getActiveItems();
+    return $active_filters[$key] ?? NULL;
   }
 
 }

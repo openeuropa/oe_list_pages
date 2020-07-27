@@ -130,9 +130,13 @@ class ListSource implements ListSourceInterface {
   public function getQuery(int $limit = 10, int $page = 0, array $ignored_filters = [], array $preset_filters = []): QueryInterface {
 
     $query = $this->index->query([
-      'limit' => $limit,
       'offset' => ($limit * $page),
     ]);
+
+    if ($limit) {
+      $query->setOption('limit', $limit);
+    }
+
     $query_options = new ListQueryOptions($ignored_filters, $preset_filters);
     $query->setOption('oe_list_page_query_options', $query_options);
     $query->setSearchId($this->getSearchId());
