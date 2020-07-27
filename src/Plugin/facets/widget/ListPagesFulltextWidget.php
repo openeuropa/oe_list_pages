@@ -22,17 +22,16 @@ class ListPagesFulltextWidget extends ListPagesBaseWidget {
    * {@inheritdoc}
    */
   public function build(FacetInterface $facet) {
-    $build = parent::build($facet);
-    $build['#items'][] = [
-      'value' => [
-        '#type' => 'textfield',
-        '#title' => $facet->getName(),
-        '#value' => $this->activeFilters($facet),
-      ],
+    $build[$facet->id()] = [
+      '#type' => 'textfield',
+      '#title' => $facet->getName(),
+      '#default_value' => $this->getValueFromActiveFilters($facet, '0'),
     ];
+
     $build['#cache']['contexts'] = [
       'url.query_args',
     ];
+
     return $build;
   }
 
@@ -40,7 +39,7 @@ class ListPagesFulltextWidget extends ListPagesBaseWidget {
    * {@inheritdoc}
    */
   public function getQueryType() {
-    return 'title_comparison';
+    return 'fulltext_comparison';
   }
 
   /**

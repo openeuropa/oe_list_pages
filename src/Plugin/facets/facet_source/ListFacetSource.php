@@ -22,6 +22,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
  */
 class ListFacetSource extends SearchApiBaseFacetSource implements SearchApiFacetSourceInterface {
 
+
   /**
    * The current path stack.
    *

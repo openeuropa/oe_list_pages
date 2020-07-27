@@ -24,16 +24,15 @@ class Fulltext extends QueryTypePluginBase {
 
     // Only alter the query when there's an actual query object to alter.
     if (!empty($query)) {
-      $operator = $this->facet->getQueryOperator();
       $field_identifier = $this->facet->getFieldIdentifier();
-
       // Add the filter to the query if there are active values.
       $active_items = $this->facet->getActiveItems();
-
-      if (count($active_items)) {
-        foreach ($active_items as $value) {
-          $query->keys($value);
-          $query->setFulltextFields([$field_identifier]);
+      $widget_config = $this->facet->getWidgetInstance()->getConfiguration();
+      foreach ($active_items as $value) {
+        $query->keys($value);
+        if (isset($widget_config['fulltext_all_fields']) && !$widget_config['fulltext_all_fields']) {
+          // Search on specific field.
+          $query->setFulltextFields([$field_identifier] + $query->getFulltextFields());
         }
       }
     }
