@@ -1,28 +1,36 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\oe_list_pages\Kernel;
 
 use Drupal\oe_list_pages\ListSourceFactory;
 use Drupal\oe_list_pages\Plugin\facets\widget\ListPagesFulltextWidget;
 
 /**
- * Text for Fulltext widget and query type.
+ * Test for Fulltext widget and query type.
  */
 class FulltextWidgetTest extends ListsSourceBaseTest {
+
+  /**
+   * The widget.
+   *
+   * @var \Drupal\oe_list_pages\Plugin\facets\widget\ListPagesFulltextWidget
+   */
+  protected $widget;
 
   /**
    * Creates a new processor object for use in the tests.
    */
   protected function setUp() {
     parent::setUp();
-
     $this->widget = new ListPagesFulltextWidget(['fulltext_all_fields' => TRUE], 'oe_list_pages_fulltext', []);
   }
 
   /**
    * Tests widget value conversion.
    */
-  public function testWidgetFormValue() {
+  public function testWidgetFormValue(): void {
     $default_list_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
     $facet_active = $this->createFacet('body', $default_list_id);
     $facet_active->setActiveItems(['message']);
@@ -43,7 +51,7 @@ class FulltextWidgetTest extends ListsSourceBaseTest {
   /**
    * Tests query type with and without fulltext in all fields.
    */
-  public function testQueryType() {
+  public function testQueryType(): void {
     $this->createTestContent('item', 4);
     // Another list for another bundle.
     $item_list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
@@ -51,13 +59,13 @@ class FulltextWidgetTest extends ListsSourceBaseTest {
 
     // Create facets for body and name.
     $default_list_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'item');
-    $facet = $this->createFacet('body', $default_list_id, '', 'oe_list_pages_fulltext', ['fulltext_all_fields' => TRUE]);
+    $facet_body = $this->createFacet('body', $default_list_id, '', 'oe_list_pages_fulltext', ['fulltext_all_fields' => TRUE]);
     $facet_name = $this->createFacet('name', $default_list_id, '', 'oe_list_pages_fulltext', ['fulltext_all_fields' => FALSE]);
 
     // Search for body.
     $list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
     /** @var \Drupal\search_api\Query\QueryInterface $default_query */
-    $query = $list->getQuery(0, 0, [], [$facet->id() => 'message']);
+    $query = $list->getQuery(0, 0, [], [$facet_body->id() => 'message']);
     $query->execute();
     $results = $query->getResults();
 
@@ -75,15 +83,15 @@ class FulltextWidgetTest extends ListsSourceBaseTest {
   /**
    * Tests query type.
    */
-  public function testGetQueryType() {
-    $result = $this->widget->getQueryType($this->queryTypes);
+  public function testGetQueryType(): void {
+    $result = $this->widget->getQueryType();
     $this->assertEquals('fulltext_comparison', $result);
   }
 
   /**
-   * {@inheritdoc}
+   * Tests a default configuration.
    */
-  public function testDefaultConfiguration() {
+  public function testDefaultConfiguration(): void {
     $default_config = $this->widget->defaultConfiguration();
     $this->assertArrayHasKey('fulltext_all_fields', $default_config);
     $this->assertTrue($default_config['fulltext_all_fields']);
