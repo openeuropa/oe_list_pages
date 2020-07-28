@@ -55,7 +55,6 @@ class ListPagesFulltextWidget extends ListPagesBaseWidget {
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state, FacetInterface $facet) {
-
     $form['fulltext_all_fields'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Fulltext search on all fields'),
