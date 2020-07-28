@@ -2,7 +2,7 @@
 
 /**
  * @file
- * OE List Pages module.
+ * The OpenEuropa List Pages module.
  */
 
 declare(strict_types = 1);
