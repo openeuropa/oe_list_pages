@@ -6,9 +6,6 @@ namespace Drupal\Tests\oe_list_pages\FunctionalJavascript;
 
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\node\Entity\Node;
-use Drupal\oe_list_pages\ListSourceFactory;
-use Drupal\search_api\Entity\Index;
-use Drupal\Tests\oe_list_pages\Traits\SearchApiTestTrait;
 
 /**
  * Tests the List pages exposed filters.
@@ -16,8 +13,6 @@ use Drupal\Tests\oe_list_pages\Traits\SearchApiTestTrait;
  * @group oe_list_pages
  */
 class ListPagesExposedFiltersTest extends WebDriverTestBase {
-
-  use SearchApiTestTrait;
 
   /**
    * {@inheritdoc}
@@ -45,34 +40,12 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
     $installer->installEntityMetaTypeOnContentEntityType('oe_list_page', 'node', [
       'content_type_one',
     ]);
-
-    // Index new bundles.
-    $this->index = Index::load('node');
-    $this->datasource = $this->index->getDatasource('entity:node');
-    $this->datasource->setConfiguration([
-      'bundles' => [
-        'default' => FALSE,
-        'selected' => ['content_type_one', 'content_type_two'],
-      ],
-    ]);
-
-    $this->index->save();
   }
 
   /**
    * Test configuring of exposed filters.
    */
   public function testListPagePluginFilters(): void {
-    // Create facets for content type one.
-    $ct_one = ListSourceFactory::generateFacetSourcePluginId('node', 'content_type_one');
-    $this->createFacet('field_select_one', $ct_one);
-    $this->createFacet('status', $ct_one);
-
-    // Create facets for content type two.
-    $ct_two = ListSourceFactory::generateFacetSourcePluginId('node', 'content_type_two');
-    $this->createFacet('field_select_two', $ct_two);
-    $this->createFacet('status', $ct_two);
-
     $this->drupalLogin($this->rootUser);
     $this->drupalGet('/node/add/content_type_one');
     $this->clickLink('List Page');
@@ -96,7 +69,7 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
     ];
     $this->assertEquals($expected_bundles, $actual_bundles);
     $page = $this->getSession()->getPage();
-    $page->checkField('select one');
+    $page->checkField('Select one');
     $page->checkField('Published');
     $page->fillField('Title', 'Node title');
 
@@ -120,7 +93,7 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
     $this->clickLink('List Page');
     $page->selectFieldOption('Source bundle', 'Content type two');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $page->checkField('select two');
+    $page->checkField('Select two');
     $page->pressButton('Save');
 
     \Drupal::entityTypeManager()->getStorage('node')->resetCache();
@@ -138,7 +111,7 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
 
     $this->drupalGet('/node/1/edit');
     $this->clickLink('List Page');
-    $this->assertFieldChecked('select two');
+    $this->assertFieldChecked('Select two');
     $this->assertNoFieldChecked('Published');
   }
 

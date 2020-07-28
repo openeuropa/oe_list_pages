@@ -24,7 +24,7 @@ class ListPagesPluginTest extends WebDriverTestBase {
   protected static $modules = [
     'taxonomy',
     'node',
-    'oe_list_pages_test',
+    'oe_list_pages_event_subscriber_test',
   ];
 
   /**

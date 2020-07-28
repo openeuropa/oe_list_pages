@@ -14,7 +14,7 @@ description: ''
 read_only: false
 field_settings:
   field_select_one:
-    label: 'select one'
+    label: 'Select one'
     datasource_id: 'entity:node'
     property_path: field_select_one
     type: string
@@ -22,7 +22,7 @@ field_settings:
       config:
         - field.storage.node.field_select_one
   field_select_two:
-    label: 'select two'
+    label: 'Select two'
     datasource_id: 'entity:node'
     property_path: field_select_two
     type: string

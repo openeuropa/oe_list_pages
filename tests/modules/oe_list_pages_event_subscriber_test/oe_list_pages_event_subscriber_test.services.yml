@@ -1,0 +1,6 @@
+services:
+  oe_list_pages_event_subscriber_test.event_subscriber:
+    class: Drupal\oe_list_pages_event_subscriber_test\EventSubscriber\ListPagesTestSubscriber
+    arguments: ['@state']
+    tags:
+      - { name: event_subscriber }
