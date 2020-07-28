@@ -43,7 +43,7 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
   }
 
   /**
-   * Test configuring of exposed filters.
+   * Test exposed filters configuration.
    */
   public function testListPagePluginFilters(): void {
     $this->drupalLogin($this->rootUser);
@@ -116,7 +116,7 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
   }
 
   /**
-   * Get available options of select box.
+   * Get select box available options.
    *
    * @param string $field
    *   The label, id or name of select box.
