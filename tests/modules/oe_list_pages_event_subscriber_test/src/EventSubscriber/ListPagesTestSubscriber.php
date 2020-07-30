@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Drupal\oe_list_pages_test\EventSubscriber;
+namespace Drupal\oe_list_pages_event_subscriber_test\EventSubscriber;
 
 use Drupal\Core\State\StateInterface;
 use Drupal\oe_list_pages\ListPageEvents;

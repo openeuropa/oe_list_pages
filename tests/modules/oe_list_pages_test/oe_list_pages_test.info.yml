@@ -1,9 +1,0 @@
-name: OpenEuropa List Pages
-type: module
-description: The test module for OE List Pages.
-
-package: Testing
-core: 8.x
-
-dependencies:
-  - oe_list_pages

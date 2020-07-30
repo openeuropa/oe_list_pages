@@ -24,7 +24,7 @@ class ListPagesPluginTest extends WebDriverTestBase {
   protected static $modules = [
     'taxonomy',
     'node',
-    'oe_list_pages_test',
+    'oe_list_pages_event_subscriber_test',
   ];
 
   /**
@@ -160,10 +160,10 @@ class ListPagesPluginTest extends WebDriverTestBase {
       'vocab_three' => 'Vocabulary 3',
     ];
     $this->assertEquals($expected_bundles, $actual_bundles);
+    $this->getSession()->getPage()->selectFieldOption('Source bundle', 'vocab_three');
 
     // Select a bundle and save the node.
     $this->getSession()->getPage()->fillField('Title', 'Node title');
-    $this->getSession()->getPage()->selectFieldOption('Source bundle', 'vocab_three');
     $this->getSession()->getPage()->pressButton('Save');
 
     // Assert the entity meta was correctly saved.
@@ -192,9 +192,11 @@ class ListPagesPluginTest extends WebDriverTestBase {
     $this->getSession()->getPage()->selectFieldOption('Source entity type', 'node');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->selectFieldOption('Source bundle', 'node_type_two');
+    $this->assertSession()->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->pressButton('Save');
 
     \Drupal::entityTypeManager()->getStorage('node')->resetCache();
+    \Drupal::entityTypeManager()->getStorage('entity_meta_relation')->resetCache();
     $node = Node::load(1);
     $this->assertEquals(2, $node->getRevisionId());
     /** @var \Drupal\emr\Field\ComputedEntityMetasItemList $entity_meta_list */

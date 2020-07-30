@@ -30,6 +30,7 @@ class ListFacetSourceDeriver extends FacetSourceDeriverBase {
         foreach ($bundles as $bundle_id => $label) {
           $id = $entity_type . PluginBase::DERIVATIVE_SEPARATOR . $bundle_id;
           $definition = $base_plugin_definition;
+          $definition['id'] .= PluginBase::DERIVATIVE_SEPARATOR . $id;
           $definition['index'] = $datasource->getIndex()->id();
           $definition['label'] = $this->t('List %bundle', ['%bundle' => $id]);
           // We use as the display ID the same ID as this derivative.
