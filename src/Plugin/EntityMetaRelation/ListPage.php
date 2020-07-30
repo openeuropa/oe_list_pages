@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages\Plugin\EntityMetaRelation;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Entity\ContentEntityInterface;
@@ -101,7 +102,7 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
    */
   public function updateEntityBundles(array &$form, FormStateInterface $form_state): array {
     $key = $this->getFormKey();
-    return $form[$key]['bundle_wrapper'];
+    return $form[$key];
   }
 
   /**
@@ -133,7 +134,7 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
         NestedArray::setValue($form, array_merge($parents, [$option, '#checked']), FALSE);
       }
     }
-    return $form[$key]['bundle_wrapper']['exposed_filters_wrapper'];
+    return $form[$key];
   }
 
   /**
@@ -151,6 +152,14 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
     $entity_type_options = $this->getEntityTypeOptions();
     $entity_type_id = $entity_meta_wrapper->getSourceEntityType();
 
+    $form[$key]['#id'] = $form[$key]['#id'] ?? Html::getUniqueId($key);
+
+    $triggering_element = $form_state->getTriggeringElement();
+    if ($triggering_element && $triggering_element['#name'] === 'entity_type') {
+      $form_state->setValue('bundle', NULL);
+      $form_state->setValue(['exposed_filters_wrapper', 'exposed_filters'], []);
+    }
+
     $form[$key]['entity_type'] = [
       '#type' => 'select',
       '#title' => $this->t('Source entity type'),
@@ -162,13 +171,11 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
       '#required' => TRUE,
       '#ajax' => [
         'callback' => [$this, 'updateEntityBundles'],
-        'disable-refocus' => FALSE,
-        'event' => 'change',
-        'wrapper' => 'list-page-entity-bundles',
+        'wrapper' => $form[$key]['#id'],
       ],
     ];
 
-    $selected_entity_type = $form[$key]['entity_type']['#default_value'] ?? NULL;
+    $selected_entity_type = $form[$key]['entity_type']['#default_value'];
 
     $form[$key]['bundle_wrapper'] = [
       '#type' => 'container',
@@ -177,15 +184,12 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
       ],
     ];
 
-    $entity_bundle_id = $entity_meta_wrapper->getSourceEntityBundle();
-
-    if (!empty($selected_entity_type) || $entity_bundle_id) {
+    if (!empty($selected_entity_type)) {
       $bundle_options = $this->getBundleOptions($selected_entity_type);
-      $default_bundle = $form_state->getValue('bundle', $entity_bundle_id);
-      if ($form_state->getTriggeringElement()['#array_parents'] === [$key, 'entity_type']) {
-        // We are using first available option of bundles on changing of
-        // entity type.
-        $default_bundle = key($bundle_options);
+
+      $default_bundle = $form_state->getValue('bundle') ?? $entity_meta_wrapper->getSourceEntityBundle();
+      if (!isset($default_bundle, $bundle_options) && $entity_meta->isNew()) {
+        $default_bundle = NULL;
       }
 
       $form[$key]['bundle_wrapper']['bundle'] = [
@@ -196,9 +200,7 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
         '#required' => TRUE,
         '#ajax' => [
           'callback' => [$this, 'updateExposedFilters'],
-          'disable-refocus' => FALSE,
-          'event' => 'change',
-          'wrapper' => 'list-page-exposed-filters',
+          'wrapper' => $form[$key]['#id'],
         ],
       ];
     }
@@ -211,7 +213,10 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
       ],
     ];
 
-    $selected_bundle = $form[$key]['bundle_wrapper']['bundle']['#default_value'] ?? NULL;
+    $selected_bundle = $form[$key]['bundle_wrapper']['bundle']['#default_value'];
+    if (!$selected_bundle) {
+      return $form;
+    }
 
     // Try to get the list source for the selected entity type and bundle.
     $list_source = $this->listSourceFactory->get($selected_entity_type, $selected_bundle);
@@ -343,15 +348,15 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
    * @param \Drupal\emr\EntityMetaWrapper $entity_meta_wrapper
    *   The current entity meta wrapper.
    *
-   * @return array|null
+   * @return array
    *   The current unserialized configuration if available.
    */
-  protected function getExposedFiltersConfiguration(ListSourceInterface $list_source, EntityMetaWrapper $entity_meta_wrapper): ?array {
+  protected function getExposedFiltersConfiguration(ListSourceInterface $list_source, EntityMetaWrapper $entity_meta_wrapper): array {
     // Get currently saved configuration for exposed filters if applicable
     // (we have selected relevant entity type and bundle).
     $configuration = [];
     if ($list_source && $entity_meta_wrapper->getSourceEntityType() === $list_source->getEntityType() && $entity_meta_wrapper->getSourceEntityBundle() === $list_source->getBundle()) {
-      $configuration = isset($entity_meta_wrapper->getConfiguration()['exposed_filters']) ? array_keys($entity_meta_wrapper->getConfiguration()['exposed_filters']) : NULL;
+      $configuration = isset($entity_meta_wrapper->getConfiguration()['exposed_filters']) ? array_keys($entity_meta_wrapper->getConfiguration()['exposed_filters']) : [];
     }
     return $configuration;
   }
