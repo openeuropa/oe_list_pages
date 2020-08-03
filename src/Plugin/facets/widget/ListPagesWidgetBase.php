@@ -11,7 +11,7 @@ use Drupal\facets\Widget\WidgetPluginBase;
 /**
  * Base class for facet widgets.
  */
-class ListPagesBaseWidget extends WidgetPluginBase implements ListPagesWidgetInterface {
+class ListPagesWidgetBase extends WidgetPluginBase implements ListPagesWidgetInterface {
 
   /**
    * {@inheritdoc}

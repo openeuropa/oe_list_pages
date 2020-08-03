@@ -8,6 +8,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Path\CurrentPathStack;
 use Drupal\facets\FacetSource\SearchApiFacetSourceInterface;
 use Drupal\facets\Plugin\facets\facet_source\SearchApiBaseFacetSource;
+use Drupal\search_api\Display\DisplayPluginManager;
 use Drupal\search_api\Query\ResultSetInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -61,7 +62,7 @@ class ListFacetSource extends SearchApiBaseFacetSource implements SearchApiFacet
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, $query_type_plugin_manager, $search_results_cache, RequestStack $request_stack, CurrentPathStack $current_path_stack, EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, $query_type_plugin_manager, $search_results_cache, RequestStack $request_stack, CurrentPathStack $current_path_stack, EntityTypeManagerInterface $entity_type_manager, DisplayPluginManager $display_plugin_manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $query_type_plugin_manager, $search_results_cache);
 
     $this->currentPathStack = $current_path_stack;
@@ -69,6 +70,7 @@ class ListFacetSource extends SearchApiBaseFacetSource implements SearchApiFacet
     $this->entityTypeManager = $entity_type_manager;
     // This needs to be loaded as search api doesn't rely on getIndex().
     $this->index = $this->entityTypeManager->getStorage('search_api_index')->load($plugin_definition['index']);
+    $this->displayPluginManager = $display_plugin_manager;
   }
 
   /**

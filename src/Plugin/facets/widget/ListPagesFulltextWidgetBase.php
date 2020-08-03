@@ -16,7 +16,7 @@ use Drupal\facets\FacetInterface;
  *   description = @Translation("A fulltext search widget."),
  * )
  */
-class ListPagesFulltextWidget extends ListPagesBaseWidget {
+class ListPagesFulltextWidgetBase extends ListPagesWidgetBase {
 
   /**
    * {@inheritdoc}
@@ -30,6 +30,7 @@ class ListPagesFulltextWidget extends ListPagesBaseWidget {
 
     $build['#cache']['contexts'] = [
       'url.query_args',
+      'url.path',
     ];
 
     return $build;
@@ -58,6 +59,7 @@ class ListPagesFulltextWidget extends ListPagesBaseWidget {
     $form['fulltext_all_fields'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Fulltext search on all fields'),
+      '#description' => $this->t('Perform the search on all available indexed text fields.'),
       '#default_value' => $this->getConfiguration()['fulltext_all_fields'],
     ];
 

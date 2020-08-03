@@ -32,7 +32,7 @@ class Fulltext extends QueryTypePluginBase {
         if (isset($widget_config['fulltext_all_fields']) && !$widget_config['fulltext_all_fields']) {
           // Search on specific field.
           $fulltext_fields = $query->getFulltextFields() ?? [];
-          $query->setFulltextFields([$field_identifier] + $fulltext_fields);
+          $query->setFulltextFields(array_merge([$field_identifier], $fulltext_fields));
         }
       }
     }

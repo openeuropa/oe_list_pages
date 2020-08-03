@@ -13,7 +13,7 @@ use Drupal\facets\FacetInterface;
 interface ListPagesWidgetInterface {
 
   /**
-   * Prepares the values to be passed to url generator using the submitted form.
+   * Prepares the values to be passed to the URL generator from the submission.
    *
    * @param \Drupal\facets\FacetInterface $facet
    *   The facet.
@@ -23,12 +23,12 @@ interface ListPagesWidgetInterface {
    *   The form state.
    *
    * @return array
-   *   The active filters to be handled by url generator.
+   *   The active filters to be handled by the URL generator.
    */
   public function prepareValueForUrl(FacetInterface $facet, array &$form, FormStateInterface $form_state): array;
 
   /**
-   * Get active filters for the facet.
+   * Get the active filters for the facet.
    *
    * @param \Drupal\facets\FacetInterface $facet
    *   The facet.

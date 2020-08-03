@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\Tests\oe_list_pages\Kernel;
 
 use Drupal\oe_list_pages\ListSourceFactory;
-use Drupal\oe_list_pages\Plugin\facets\widget\ListPagesFulltextWidget;
+use Drupal\oe_list_pages\Plugin\facets\widget\ListPagesFulltextWidgetBase;
 
 /**
  * Test for Fulltext widget and query type.
@@ -15,7 +15,7 @@ class FulltextWidgetTest extends ListsSourceBaseTest {
   /**
    * The widget.
    *
-   * @var \Drupal\oe_list_pages\Plugin\facets\widget\ListPagesFulltextWidget
+   * @var \Drupal\oe_list_pages\Plugin\facets\widget\ListPagesFulltextWidgetBase
    */
   protected $widget;
 
@@ -24,7 +24,7 @@ class FulltextWidgetTest extends ListsSourceBaseTest {
    */
   protected function setUp() {
     parent::setUp();
-    $this->widget = new ListPagesFulltextWidget(['fulltext_all_fields' => TRUE], 'oe_list_pages_fulltext', []);
+    $this->widget = new ListPagesFulltextWidgetBase(['fulltext_all_fields' => TRUE], 'oe_list_pages_fulltext', []);
   }
 
   /**
@@ -99,8 +99,13 @@ class FulltextWidgetTest extends ListsSourceBaseTest {
 
   /**
    * Create test content.
+   *
+   * @param string $bundle
+   *   The bundle.
+   * @param int $count
+   *   The number of items to create.
    */
-  protected function createTestContent($bundle, $count): void {
+  protected function createTestContent(string $bundle, int $count): void {
     $titles = ['With nothing', 'With a void', 'With a message', 'None'];
     $bodies = ['Sending message', 'Receiving a message ', 'None', 'Receiving'];
 
