@@ -39,6 +39,7 @@ class ListPagesMultiselectWidget extends ListPagesWidgetBase {
 
     $build['#cache']['contexts'] = [
       'url.query_args',
+      'url.path'
     ];
 
     return $build;

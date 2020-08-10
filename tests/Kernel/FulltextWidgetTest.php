@@ -20,7 +20,7 @@ class FulltextWidgetTest extends ListsSourceBaseTest {
   protected $widget;
 
   /**
-   * Creates a new processor object for use in the tests.
+   * {@inheritdoc}
    */
   protected function setUp() {
     parent::setUp();
@@ -95,29 +95,6 @@ class FulltextWidgetTest extends ListsSourceBaseTest {
     $default_config = $this->widget->defaultConfiguration();
     $this->assertArrayHasKey('fulltext_all_fields', $default_config);
     $this->assertTrue($default_config['fulltext_all_fields']);
-  }
-
-  /**
-   * Create test content.
-   *
-   * @param string $bundle
-   *   The bundle.
-   * @param int $count
-   *   The number of items to create.
-   */
-  protected function createTestContent(string $bundle, int $count): void {
-    $titles = ['With nothing', 'With a void', 'With a message', 'None'];
-    $bodies = ['Sending message', 'Receiving a message ', 'None', 'Receiving'];
-
-    // Add new entities.
-    $entity_test_storage = \Drupal::entityTypeManager()->getStorage('entity_test_mulrev_changed');
-    for ($i = 1; $i <= $count; $i++) {
-      $entity_test_storage->create([
-        'name' => $titles[$i % $count],
-        'body' => $bodies[$i % $count],
-        'type' => $bundle,
-      ])->save();
-    }
   }
 
 }

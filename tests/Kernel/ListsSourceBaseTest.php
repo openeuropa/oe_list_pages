@@ -176,4 +176,29 @@ class ListsSourceBaseTest extends EntityKernelTestBaseTest {
     return $entity;
   }
 
+  /**
+   * Create test content.
+   *
+   * @param string $bundle
+   *   The bundle.
+   * @param int $count
+   *   The number of items to create.
+   */
+  protected function createTestContent(string $bundle, int $count): void {
+    $titles = ['With nothing', 'With a void', 'With a message', 'None'];
+    $categories = ['cat1', 'cat2', 'cat1', 'cat1'];
+    $bodies = ['Sending message', 'Receiving a message ', 'None', 'Receiving'];
+
+    // Add new entities.
+    $entity_test_storage = \Drupal::entityTypeManager()->getStorage('entity_test_mulrev_changed');
+    for ($i = 1; $i <= $count; $i++) {
+      $entity_test_storage->create([
+        'name' => $titles[$i % $count],
+        'body' => $bodies[$i % $count],
+        'category' => $categories[$i % $count],
+        'type' => $bundle,
+      ])->save();
+    }
+  }
+
 }
