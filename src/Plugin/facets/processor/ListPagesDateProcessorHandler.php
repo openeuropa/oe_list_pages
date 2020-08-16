@@ -28,7 +28,7 @@ class ListPagesDateProcessorHandler extends UrlProcessorHandler implements Build
    */
   public function preQuery(FacetInterface $facet) {
     $active_filters = $this->processor->getActiveFilters();
-    if (isset($active_filters[$facet->id()]) && $facet->getWidget()['id'] === 'oe_list_pages_date') {
+    if (isset($active_filters[$facet->id()]) && $facet->getWidget()['type'] === 'oe_list_pages_date') {
       $active_items = [];
       $active_filter_values = explode('|', $active_filters[$facet->id()][0]);
       foreach ($active_filter_values as $value) {
