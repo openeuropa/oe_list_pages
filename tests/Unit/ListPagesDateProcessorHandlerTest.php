@@ -10,17 +10,17 @@ use Drupal\facets\FacetSource\FacetSourcePluginManager;
 use Drupal\facets\UrlProcessor\UrlProcessorInterface;
 use Drupal\facets\Widget\WidgetPluginManager;
 use Drupal\oe_list_pages\Plugin\facets\processor\ListPagesDateProcessorHandler;
-use Drupal\Tests\facets\Unit\Plugin\processor\UrlProcessorHandlerTest;
+use Drupal\Tests\UnitTestCase;
 
 /**
  * Unit test for date processor.
  *
  * @group facets
  */
-class ListPagesDateProcessorHandlerTest extends UrlProcessorHandlerTest {
+class ListPagesDateProcessorHandlerTest extends UnitTestCase {
 
   /**
-   * Tests configuration.
+   * Tests preQuery method.
    */
   public function testPreQuery() {
     $facet = new Facet(['id' => 'facets_facet'], 'facets_facet');
