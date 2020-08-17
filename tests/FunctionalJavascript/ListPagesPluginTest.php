@@ -161,6 +161,7 @@ class ListPagesPluginTest extends WebDriverTestBase {
     ];
     $this->assertEquals($expected_bundles, $actual_bundles);
     $this->getSession()->getPage()->selectFieldOption('Source bundle', 'vocab_three');
+    $this->assertSession()->assertWaitOnAjaxRequest();
 
     // Select a bundle and save the node.
     $this->getSession()->getPage()->fillField('Title', 'Node title');
