@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\Tests\oe_list_pages\Kernel;
 
 use Drupal\oe_list_pages\ListSourceFactory;
-use Drupal\oe_list_pages\Plugin\facets\widget\ListPagesFulltextWidget;
+use Drupal\oe_list_pages\Plugin\facets\widget\FulltextWidget;
 
 /**
  * Test for Fulltext widget and query type.
@@ -15,7 +15,7 @@ class FulltextWidgetTest extends ListsSourceBaseTest {
   /**
    * The widget.
    *
-   * @var \Drupal\oe_list_pages\Plugin\facets\widget\ListPagesFulltextWidget
+   * @var \Drupal\oe_list_pages\Plugin\facets\widget\FulltextWidget
    */
   protected $widget;
 
@@ -24,7 +24,7 @@ class FulltextWidgetTest extends ListsSourceBaseTest {
    */
   protected function setUp() {
     parent::setUp();
-    $this->widget = new ListPagesFulltextWidget(['fulltext_all_fields' => TRUE], 'oe_list_pages_fulltext', []);
+    $this->widget = new FulltextWidget(['fulltext_all_fields' => TRUE], 'oe_list_pages_fulltext', []);
   }
 
   /**

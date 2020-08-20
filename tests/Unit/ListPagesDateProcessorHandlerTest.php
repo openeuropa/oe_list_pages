@@ -9,7 +9,7 @@ use Drupal\facets\Entity\Facet;
 use Drupal\facets\FacetSource\FacetSourcePluginManager;
 use Drupal\facets\UrlProcessor\UrlProcessorInterface;
 use Drupal\facets\Widget\WidgetPluginManager;
-use Drupal\oe_list_pages\Plugin\facets\processor\ListPagesDateProcessorHandler;
+use Drupal\oe_list_pages\Plugin\facets\processor\DateProcessorHandler;
 use Drupal\Tests\UnitTestCase;
 
 /**
@@ -25,15 +25,33 @@ class ListPagesDateProcessorHandlerTest extends UnitTestCase {
   public function testPreQuery() {
     $facet = new Facet(['id' => 'facets_facet'], 'facets_facet');
     $this->createContainer();
-    $processor = new ListPagesDateProcessorHandler(['facet' => $facet], 'date_processor_handler', []);
+    $processor = new DateProcessorHandler(['facet' => $facet], 'date_processor_handler', []);
 
-    $processor->getProcessor()->expects($this->exactly(1))
+    $processor->getProcessor()->expects($this->exactly(2))
       ->method('getActiveFilters')
-      ->willReturn(['facets_facet' => ['gt|2020-08-16']]);
+      ->willReturnOnConsecutiveCalls(['facets_facet' => ['gt|2020-08-16']], ['facets_facet' => ['bt|2020-08-16|2020-08-20']]);
 
     $facet->setWidget('oe_list_pages_date', ['type' => 'oe_list_pages_date']);
     $processor->preQuery($facet);
     $this->assertEquals(['gt', '2020-08-16'], $facet->getActiveItems());
+
+    // Structure the data.
+    $structured = DateProcessorHandler::structureActiveItems($facet);
+    $this->assertEquals([
+      'operator' => 'gt',
+      'first' => '2020-08-16',
+    ], $structured);
+
+    $processor->preQuery($facet);
+    $this->assertEquals(['bt', '2020-08-16', '2020-08-20'], $facet->getActiveItems());
+
+    // Structure the data.
+    $structured = DateProcessorHandler::structureActiveItems($facet);
+    $this->assertEquals([
+      'operator' => 'bt',
+      'first' => '2020-08-16',
+      'second' => '2020-08-20',
+    ], $structured);
   }
 
   /**

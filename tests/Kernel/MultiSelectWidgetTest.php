@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\Tests\oe_list_pages\Kernel;
 
 use Drupal\oe_list_pages\ListSourceFactory;
-use Drupal\oe_list_pages\Plugin\facets\widget\ListPagesMultiselectWidget;
+use Drupal\oe_list_pages\Plugin\facets\widget\MultiselectWidget;
 
 /**
  * Test for Multiselect widget.
@@ -15,7 +15,7 @@ class MultiSelectWidgetTest extends ListsSourceBaseTest {
   /**
    * The widget.
    *
-   * @var \Drupal\oe_list_pages\Plugin\facets\widget\ListPagesMultiselectWidget
+   * @var \Drupal\oe_list_pages\Plugin\facets\widget\MultiselectWidget
    */
   protected $widget;
 
@@ -24,7 +24,7 @@ class MultiSelectWidgetTest extends ListsSourceBaseTest {
    */
   protected function setUp() {
     parent::setUp();
-    $this->widget = new ListPagesMultiselectWidget([], 'oe_list_pages_multiselect', []);
+    $this->widget = new MultiselectWidget([], 'oe_list_pages_multiselect', []);
   }
 
   /**

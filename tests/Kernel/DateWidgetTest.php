@@ -6,7 +6,7 @@ namespace Drupal\Tests\oe_list_pages\Kernel;
 
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItem;
 use Drupal\oe_list_pages\ListSourceFactory;
-use Drupal\oe_list_pages\Plugin\facets\widget\ListPagesDateWidget;
+use Drupal\oe_list_pages\Plugin\facets\widget\DateWidget;
 
 /**
  * Test for Multiselect widget.
@@ -23,7 +23,7 @@ class DateWidgetTest extends ListsSourceBaseTest {
   /**
    * The widget.
    *
-   * @var \Drupal\oe_list_pages\Plugin\facets\widget\ListPagesMultiselectWidget
+   * @var \Drupal\oe_list_pages\Plugin\facets\widget\MultiselectWidget
    */
   protected $widget;
 
@@ -33,7 +33,7 @@ class DateWidgetTest extends ListsSourceBaseTest {
   protected function setUp() {
     parent::setUp();
 
-    $this->widget = new ListPagesDateWidget([], 'oe_list_pages_date', []);
+    $this->widget = new DateWidget([], 'oe_list_pages_date', []);
   }
 
   /**
@@ -43,7 +43,12 @@ class DateWidgetTest extends ListsSourceBaseTest {
     $default_list_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
 
     $facet_active = $this->createFacet('created', $default_list_id, '', 'oe_list_pages_date', ['date_type' => DateTimeItem::DATETIME_TYPE_DATE]);
-    $facet_active->setActiveItems(['bt', '14/08/2020', '21/08/2020']);
+    // Set the date in ATOM format as submitted also by the widget.
+    $facet_active->setActiveItems([
+      'bt',
+      '2020-08-14T15:26:45+02:00',
+      '2020-08-21T15:26:45+02:00',
+    ]);
 
     $build = $this->widget->build($facet_active);
     $actual = $build[$facet_active->id() . '_op'];
@@ -51,39 +56,53 @@ class DateWidgetTest extends ListsSourceBaseTest {
     $this->assertEquals('select', $actual['#type']);
     $this->assertEquals('bt', $actual['#default_value']);
 
-    $actual = $build[$facet_active->id() . '_date'];
+    $actual = $build[$facet_active->id() . '_first_date_wrapper'][$facet_active->id() . '_first_date'];
     $this->assertSame('array', gettype($actual));
-    $this->assertEquals('date', $actual['#type']);
-    $this->assertEquals('14/08/2020', $actual['#default_value']);
+    $this->assertEquals('datetime', $actual['#type']);
+    $this->assertEquals('date', $actual['#date_date_element']);
+    $this->assertEquals('none', $actual['#date_time_element']);
+    $this->assertEquals('14/08/2020', $actual['#default_value']->format('d/m/Y'));
 
-    $actual = $build[$facet_active->id() . '_end_date'];
+    $actual = $build[$facet_active->id() . '_second_date_wrapper'][$facet_active->id() . '_second_date'];
     $this->assertSame('array', gettype($actual));
-    $this->assertEquals('date', $actual['#type']);
-    $this->assertEquals('21/08/2020', $actual['#default_value']);
+    $this->assertEquals('datetime', $actual['#type']);
+    $this->assertEquals('date', $actual['#date_date_element']);
+    $this->assertEquals('none', $actual['#date_time_element']);
+    $this->assertEquals('21/08/2020', $actual['#default_value']->format('d/m/Y'));
 
-    // Test widget if we choose not 'In between' operator.
+    // Test widget if we choose the greater than or less than operator.
     foreach (['gt', 'lt'] as $operator_key) {
-      $facet_active->setActiveItems([$operator_key, '14/08/2020', '21/08/2020']);
+      $facet_active->setActiveItems([$operator_key, '2020-08-14T15:26:45+02:00']);
       $build = $this->widget->build($facet_active);
       $actual = $build[$facet_active->id() . '_op'];
       $this->assertSame('array', gettype($actual));
       $this->assertEquals('select', $actual['#type']);
       $this->assertEquals($operator_key, $actual['#default_value']);
 
-      $actual = $build[$facet_active->id() . '_date'];
+      $actual = $build[$facet_active->id() . '_first_date_wrapper'][$facet_active->id() . '_first_date'];
       $this->assertSame('array', gettype($actual));
-      $this->assertEquals('date', $actual['#type']);
-      $this->assertEquals('14/08/2020', $actual['#default_value']);
+      $this->assertEquals('datetime', $actual['#type']);
+      $this->assertEquals('date', $actual['#date_date_element']);
+      $this->assertEquals('none', $actual['#date_time_element']);
+      $this->assertEquals('14/08/2020', $actual['#default_value']->format('d/m/Y'));
 
-      $actual = $build[$facet_active->id() . '_end_date'];
+      // The second date element should be there in the form but hidden via
+      // #states.
+      $actual = $build[$facet_active->id() . '_second_date_wrapper'][$facet_active->id() . '_second_date'];
       $this->assertSame('array', gettype($actual));
-      $this->assertEquals('date', $actual['#type']);
+      $this->assertEquals('datetime', $actual['#type']);
+      $this->assertEquals('date', $actual['#date_date_element']);
+      $this->assertEquals('none', $actual['#date_time_element']);
       $this->assertEmpty($actual['#default_value']);
     }
 
-    // Widget for with datetime type.
+    // Test the widget form with datetime type.
     $facet_active = $this->createFacet('created', $default_list_id, 'datetime', 'oe_list_pages_date', ['date_type' => DateTimeItem::DATETIME_TYPE_DATETIME]);
-    $facet_active->setActiveItems(['bt', '14/08/2020', '21/08/2020']);
+    $facet_active->setActiveItems([
+      'bt',
+      '2020-08-14T15:26:45+02:00',
+      '2020-08-21T15:26:45+02:00',
+    ]);
 
     $build = $this->widget->build($facet_active);
     $actual = $build[$facet_active->id() . '_op'];
@@ -91,27 +110,30 @@ class DateWidgetTest extends ListsSourceBaseTest {
     $this->assertEquals('select', $actual['#type']);
     $this->assertEquals('bt', $actual['#default_value']);
 
-    $actual = $build[$facet_active->id() . '_date'];
+    $actual = $build[$facet_active->id() . '_first_date_wrapper'][$facet_active->id() . '_first_date'];
     $this->assertSame('array', gettype($actual));
     $this->assertEquals('datetime', $actual['#type']);
-    $this->assertEquals('14/08/2020', $actual['#default_value']);
+    $this->assertEquals('date', $actual['#date_date_element']);
+    $this->assertEquals('time', $actual['#date_time_element']);
+    $this->assertEquals('14/08/2020', $actual['#default_value']->format('d/m/Y'));
 
-    $actual = $build[$facet_active->id() . '_end_date'];
+    $actual = $build[$facet_active->id() . '_second_date_wrapper'][$facet_active->id() . '_second_date'];
     $this->assertSame('array', gettype($actual));
     $this->assertEquals('datetime', $actual['#type']);
-    $this->assertEquals('21/08/2020', $actual['#default_value']);
+    $this->assertEquals('date', $actual['#date_date_element']);
+    $this->assertEquals('time', $actual['#date_time_element']);
+    $this->assertEquals('21/08/2020', $actual['#default_value']->format('d/m/Y'));
 
     // Now without active result.
     $default_list_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
     $facet_inactive = $this->createFacet('created', $default_list_id, 'inactive', 'oe_list_pages_date', ['date_type' => DateTimeItem::DATETIME_TYPE_DATE]);
     $build = $this->widget->build($facet_inactive);
     $form_elements = [
-      $facet_inactive->id() . '_op' => 'select',
-      $facet_inactive->id() . '_date' => 'date',
-      $facet_inactive->id() . '_end_date' => 'date',
+      $facet_inactive->id() . '_first_date' => 'datetime',
+      $facet_inactive->id() . '_second_date' => 'datetime',
     ];
     foreach ($form_elements as $form_key => $field_type) {
-      $actual = $build[$form_key];
+      $actual = $build[$form_key . '_wrapper'][$form_key];
       $this->assertSame('array', gettype($actual));
       $this->assertEquals($field_type, $actual['#type']);
       $this->assertEmpty($actual['#default_value']);
@@ -119,7 +141,7 @@ class DateWidgetTest extends ListsSourceBaseTest {
   }
 
   /**
-   * Tests query type using the active filter.
+   * Tests the date query type using the active filter.
    */
   public function testQueryType(): void {
     $this->createTestContent('item', 4);
@@ -132,7 +154,7 @@ class DateWidgetTest extends ListsSourceBaseTest {
 
     // Search by date.
     $list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
-    foreach ($this->filtersData() as $message => $data) {
+    foreach ($this->getTestFilterDateData() as $message => $data) {
       /** @var \Drupal\search_api\Query\QueryInterface $query */
       $query = $list->getQuery(0, 0, [], [
         $facet_date->id() => array_values($data['filters']),
@@ -153,12 +175,12 @@ class DateWidgetTest extends ListsSourceBaseTest {
   }
 
   /**
-   * Test data for filters.
+   * Returns an array of test data for filters.
    *
    * @return array
    *   The array of test data.
    */
-  protected function filtersData(): array {
+  protected function getTestFilterDateData(): array {
     return [
       'range of dates' => [
         'filters' => [
