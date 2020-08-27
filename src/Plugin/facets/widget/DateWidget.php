@@ -136,11 +136,20 @@ class DateWidget extends ListPagesWidgetBase {
 
     foreach ($value_keys as $key) {
       $value = $form_state->getValue($key);
+      if (!$value) {
+        continue;
+      }
+
       if (!$value instanceof DrupalDateTime) {
         $value = new DrupalDateTime($value);
       }
 
       $values[] = $value->format(\DateTimeInterface::ATOM);
+    }
+
+    if (count($values) === 1) {
+      // If we only have the operator, it means no dates have been specified.
+      return [];
     }
 
     return [implode('|', $values)];
