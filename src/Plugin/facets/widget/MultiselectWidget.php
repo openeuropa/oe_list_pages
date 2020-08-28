@@ -29,13 +29,15 @@ class MultiselectWidget extends ListPagesWidgetBase {
       $options[$result->getRawValue()] = $result->getDisplayValue();
     });
 
-    $build[$facet->id()] = [
-      '#type' => 'select',
-      '#title' => $facet->getName(),
-      '#options' => $options,
-      '#multiple' => TRUE,
-      '#default_value' => $this->getValueFromActiveFilters($facet, '0'),
-    ];
+    if ($options) {
+      $build[$facet->id()] = [
+        '#type' => 'select',
+        '#title' => $facet->getName(),
+        '#options' => $options,
+        '#multiple' => TRUE,
+        '#default_value' => $this->getValueFromActiveFilters($facet, '0'),
+      ];
+    }
 
     $build['#cache']['contexts'] = [
       'url.query_args',
