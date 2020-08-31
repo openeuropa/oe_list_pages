@@ -14,6 +14,5 @@ function oe_list_pages_post_update_0001() {
   \Drupal::service('module_installer')->install([
     'facets',
     'search_api',
-    'search_api_db',
   ]);
 }
