@@ -7,6 +7,7 @@ namespace Drupal\oe_list_pages_filters_test\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Pager\PagerManagerInterface;
+use Drupal\Core\State\StateInterface;
 use Drupal\facets\FacetManager\DefaultFacetManager;
 use Drupal\oe_list_pages\Form\ListFacetsForm;
 use Drupal\oe_list_pages\ListSourceFactory;
@@ -48,6 +49,13 @@ class FacetsFormTestController extends ControllerBase {
   protected $pagerManager;
 
   /**
+   * The state.
+   *
+   * @var \Drupal\Core\State\StateInterface
+   */
+  protected $state;
+
+  /**
    * Constructs a new FacetsFormTestController.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
@@ -58,12 +66,15 @@ class FacetsFormTestController extends ControllerBase {
    *   The list source factory.
    * @param \Drupal\Core\Pager\PagerManagerInterface $pagerManager
    *   The pager manager.
+   * @param \Drupal\Core\State\StateInterface $state
+   *   The state.
    */
-  public function __construct(EntityTypeManagerInterface $entityTypeManager, DefaultFacetManager $facets_manager, ListSourceFactory $listSourceFactory, PagerManagerInterface $pagerManager) {
+  public function __construct(EntityTypeManagerInterface $entityTypeManager, DefaultFacetManager $facets_manager, ListSourceFactory $listSourceFactory, PagerManagerInterface $pagerManager, StateInterface $state) {
     $this->entityTypeManager = $entityTypeManager;
     $this->facetsManager = $facets_manager;
     $this->listSourceFactory = $listSourceFactory;
     $this->pagerManager = $pagerManager;
+    $this->state = $state;
   }
 
   /**
@@ -74,14 +85,15 @@ class FacetsFormTestController extends ControllerBase {
       $container->get('entity_type.manager'),
       $container->get('facets.manager'),
       $container->get('oe_list_pages.list_source.factory'),
-      $container->get('pager.manager')
+      $container->get('pager.manager'),
+      $container->get('state')
     );
   }
 
   /**
    * Builds the page.
    */
-  public function build($ignore_filters = FALSE) {
+  public function build() {
     $list_source = $this->listSourceFactory->get('node', 'content_type_one');
 
     // Run the query for a given source and print the results on the page so
@@ -110,15 +122,8 @@ class FacetsFormTestController extends ControllerBase {
     ];
 
     $build['list_items']['#cache']['max-age'] = 0;
-
-    if ($ignore_filters) {
-      $ignored_filters = ['body'];
-      $build['form'] = \Drupal::formBuilder()->getForm(ListFacetsForm::class, $list_source, $ignored_filters);
-    }
-    else {
-      // Build the facets filters form.
-      $build['form'] = \Drupal::formBuilder()->getForm(ListFacetsForm::class, $list_source);
-    }
+    $ignored_filters = $this->state->get('oe_list_pages_test.ignored_filters', []);
+    $build['form'] = \Drupal::formBuilder()->getForm(ListFacetsForm::class, $list_source, $ignored_filters);
 
     return $build;
   }

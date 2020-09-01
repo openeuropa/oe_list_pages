@@ -32,6 +32,13 @@ class FacetsFormTest extends WebDriverTestBase {
   ];
 
   /**
+   * The state.
+   *
+   * @var \Drupal\Core\State\StateInterface
+   */
+  protected $state;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp() {
@@ -41,6 +48,8 @@ class FacetsFormTest extends WebDriverTestBase {
     $installer->installEntityMetaTypeOnContentEntityType('oe_list_page', 'node', [
       'content_type_one',
     ]);
+
+    $this->state = \Drupal::service('state');
 
     // Create some test nodes to index and search in.
     $date = new DrupalDateTime('20-10-2020');
@@ -168,8 +177,10 @@ class FacetsFormTest extends WebDriverTestBase {
   /**
    * Tests the facets list form with ignored filters.
    */
-  public function testFacetsFormIgnoredFilters(): void {
-    $this->drupalGet('/facets-form-test/ignore');
+  public function testFacetsIgnoredFiltersForm(): void {
+    // Tests the facets list form with ignored filters.
+    $this->state->set('oe_list_pages_test.ignored_filters', ['body']);
+    $this->drupalGet('/facets-form-test');
     $this->assertSession()->pageTextContains('Facets form test');
     $assert = $this->assertSession();
 
