@@ -188,6 +188,12 @@ class ListsSourceBaseTest extends EntityKernelTestBaseTest {
     $titles = ['With nothing', 'With a void', 'With a message', 'None'];
     $categories = ['cat1', 'cat2', 'cat1', 'cat1'];
     $bodies = ['Sending message', 'Receiving a message ', 'None', 'Receiving'];
+    $dates = [
+      strtotime('2020-08-06 12:00:00'),
+      strtotime('2020-08-13 12:00:00'),
+      strtotime('2020-08-20 12:00:00'),
+      strtotime('2020-08-27 12:00:00'),
+    ];
 
     // Add new entities.
     $entity_test_storage = \Drupal::entityTypeManager()->getStorage('entity_test_mulrev_changed');
@@ -197,6 +203,7 @@ class ListsSourceBaseTest extends EntityKernelTestBaseTest {
         'body' => $bodies[$i % $count],
         'category' => $categories[$i % $count],
         'type' => $bundle,
+        'created' => $dates[$i % $count],
       ])->save();
     }
   }

@@ -16,7 +16,7 @@ use Drupal\facets\FacetInterface;
  *   description = @Translation("A fulltext search widget."),
  * )
  */
-class ListPagesFulltextWidget extends ListPagesWidgetBase {
+class FulltextWidget extends ListPagesWidgetBase {
 
   /**
    * {@inheritdoc}

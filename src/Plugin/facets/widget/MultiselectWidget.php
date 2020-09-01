@@ -16,7 +16,7 @@ use Drupal\facets\Result\ResultInterface;
  *   description = @Translation("A multislect search widget."),
  * )
  */
-class ListPagesMultiselectWidget extends ListPagesWidgetBase {
+class MultiselectWidget extends ListPagesWidgetBase {
 
   /**
    * {@inheritdoc}
