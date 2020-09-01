@@ -156,7 +156,7 @@ class DateWidgetTest extends ListsSourceBaseTest {
     $list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
     foreach ($this->getTestFilterDateData() as $message => $data) {
       /** @var \Drupal\search_api\Query\QueryInterface $query */
-      $query = $list->getQuery(0, 0, [], [
+      $query = $list->getQuery(0, 0, [], [], [
         $facet_date->id() => array_values($data['filters']),
       ]);
       $query->execute();

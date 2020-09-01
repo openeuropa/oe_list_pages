@@ -127,8 +127,7 @@ class ListSource implements ListSourceInterface {
   /**
    * {@inheritdoc}
    */
-  public function getQuery(int $limit = 10, int $page = 0, array $ignored_filters = [], array $preset_filters = []): QueryInterface {
-
+  public function getQuery(int $limit = 10, int $page = 0, array $sort = [], array $ignored_filters = [], array $preset_filters = []): QueryInterface {
     $query = $this->index->query([
       'offset' => ($limit * $page),
     ]);
@@ -142,6 +141,11 @@ class ListSource implements ListSourceInterface {
     $query->setSearchId($this->getSearchId());
     $query->addCondition($this->getBundleKey(), $this->getBundle());
     $query->addCondition('search_api_datasource', 'entity:' . $this->getEntityType());
+
+    foreach ($sort as $name => $direction) {
+      $query->sort($name, $direction);
+    }
+
     return $query;
   }
 

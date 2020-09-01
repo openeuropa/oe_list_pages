@@ -61,7 +61,6 @@ class ListsQueryTest extends ListsSourceBaseTest {
     $this->assertCount(2, $item_results->getResultItems());
 
     $default_facets = $default_results->getExtraData('search_api_facets');
-    $item_facets = $default_results->getExtraData('search_api_facets');
     $expected_facets_category = [
       [
         'count' => 2,
@@ -92,7 +91,7 @@ class ListsQueryTest extends ListsSourceBaseTest {
     \Drupal::requestStack()->push($request);
 
     /** @var \Drupal\search_api\Query\QueryInterface $default_query */
-    $query = $this->list->getQuery(2, 0, [$facet_id], []);
+    $query = $this->list->getQuery(2, 0, [], [$facet_id], []);
     $query->execute();
     /** @var \Drupal\search_api\Query\ResultSetInterface $results */
     $results = $query->getResults();
@@ -107,7 +106,7 @@ class ListsQueryTest extends ListsSourceBaseTest {
     $search_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
     $facet_id = $this->generateFacetId('category', $search_id);
     /** @var \Drupal\search_api\Query\QueryInterface $default_query */
-    $query = $this->list->getQuery(2, 0, [], [$facet_id => ['third class']]);
+    $query = $this->list->getQuery(2, 0, [], [], [$facet_id => ['third class']]);
     $query->execute();
     /** @var \Drupal\search_api\Query\ResultSetInterface $results */
     $results = $query->getResults();
@@ -118,9 +117,56 @@ class ListsQueryTest extends ListsSourceBaseTest {
   }
 
   /**
-   * Create test content.
+   * Tests that the query can sort by a given field.
    */
-  protected function createTestContent($bundle, $count): void {
+  public function testQuerySorting(): void {
+    $item_list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
+    $item_list->getIndex()->indexItems();
+
+    $query = $this->list->getQuery();
+    $query->execute();
+    /** @var \Drupal\search_api\Query\ResultSetInterface $results */
+    $results = $query->getResults();
+    $titles = [];
+    foreach ($results as $result) {
+      $titles[] = $result->getOriginalObject()->getEntity()->label();
+    }
+
+    $this->assertEquals([
+      'foo bar baz 1',
+      'foo bar baz 2',
+      'foo bar baz 3',
+      'foo bar baz 4',
+      'foo bar baz 5',
+    ], $titles);
+
+    $query = $this->list->getQuery(10, 0, ['name' => 'DESC']);
+    $query->execute();
+    /** @var \Drupal\search_api\Query\ResultSetInterface $results */
+    $results = $query->getResults();
+    $titles = [];
+    foreach ($results as $result) {
+      $titles[] = $result->getOriginalObject()->getEntity()->label();
+    }
+
+    $this->assertEquals([
+      'foo bar baz 5',
+      'foo bar baz 4',
+      'foo bar baz 3',
+      'foo bar baz 2',
+      'foo bar baz 1',
+    ], $titles);
+  }
+
+  /**
+   * Create test content.
+   *
+   * @param string $bundle
+   *   The bundle to create the content for.
+   * @param int $count
+   *   The number of items to create.
+   */
+  protected function createTestContent(string $bundle, int $count): void {
     $categories = ['first class', 'second class', 'third class'];
 
     // Add new entities.
