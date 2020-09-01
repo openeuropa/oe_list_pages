@@ -81,7 +81,7 @@ class FacetsFormTestController extends ControllerBase {
   /**
    * Builds the page.
    */
-  public function build() {
+  public function build($ignore_filters = FALSE) {
     $list_source = $this->listSourceFactory->get('node', 'content_type_one');
 
     // Run the query for a given source and print the results on the page so
@@ -111,8 +111,14 @@ class FacetsFormTestController extends ControllerBase {
 
     $build['list_items']['#cache']['max-age'] = 0;
 
-    // Build the facets filters form.
-    $build['form'] = \Drupal::formBuilder()->getForm(ListFacetsForm::class, $list_source);
+    if ($ignore_filters) {
+      $ignored_filters = ['body'];
+      $build['form'] = \Drupal::formBuilder()->getForm(ListFacetsForm::class, $list_source, $ignored_filters);
+    }
+    else {
+      // Build the facets filters form.
+      $build['form'] = \Drupal::formBuilder()->getForm(ListFacetsForm::class, $list_source);
+    }
 
     return $build;
   }

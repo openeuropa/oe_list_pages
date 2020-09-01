@@ -81,7 +81,7 @@ class FacetsFormTest extends WebDriverTestBase {
     $this->assertSession()->pageTextContains('Facets form test');
 
     $assert = $this->assertSession();
-
+    $assert->fieldExists('Body');
     $this->assertDefaultFormStatus();
 
     // Filter by body to only find 1 result.
@@ -163,6 +163,28 @@ class FacetsFormTest extends WebDriverTestBase {
     $this->getSession()->getPage()->pressButton('Search');
     $assert->pageTextContains('that yellow fruit');
     $assert->pageTextNotContains('that red fruit');
+  }
+
+  /**
+   * Tests the facets list form with ignored filters.
+   */
+  public function testFacetsFormIgnoredFilters(): void {
+    $this->drupalGet('/facets-form-test/ignore');
+    $this->assertSession()->pageTextContains('Facets form test');
+    $assert = $this->assertSession();
+
+    // Body is not present.
+    $this->assertSession()->fieldNotExists('Body');
+
+    // Filter by multiselect.
+    $this->getSession()->getPage()->selectFieldOption('Select one', 'test1');
+    $this->getSession()->getPage()->pressButton('Search');
+    $assert->pageTextContains('that yellow fruit');
+    $assert->pageTextNotContains('that red fruit');
+    $this->getSession()->getPage()->selectFieldOption('Select one', 'test2');
+    $this->getSession()->getPage()->pressButton('Search');
+    $assert->pageTextNotContains('that yellow fruit');
+    $assert->pageTextContains('that red fruit');
   }
 
   /**
