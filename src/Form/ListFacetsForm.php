@@ -7,6 +7,7 @@ namespace Drupal\oe_list_pages\Form;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\facets\FacetInterface;
 use Drupal\facets\FacetManager\DefaultFacetManager;
 use Drupal\facets\Utility\FacetsUrlGenerator;
 use Drupal\oe_list_pages\ListSourceInterface;
@@ -77,6 +78,14 @@ class ListFacetsForm extends FormBase {
     if (!$facets) {
       return [];
     }
+
+    // Sort facets by weight.
+    uasort($facets, function (FacetInterface $a, FacetInterface $b) {
+      if ($a->getWeight() == $b->getWeight()) {
+        return 0;
+      }
+      return ($a->getWeight() < $b->getWeight()) ? -1 : 1;
+    });
 
     foreach ($facets as $facet) {
       $widget = $facet->getWidgetInstance();
