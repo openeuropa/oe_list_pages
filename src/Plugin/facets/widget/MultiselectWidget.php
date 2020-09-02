@@ -12,8 +12,8 @@ use Drupal\facets\Result\ResultInterface;
  *
  * @FacetsWidget(
  *   id = "oe_list_pages_multiselect",
- *   label = @Translation("List pages multislect"),
- *   description = @Translation("A multislect search widget."),
+ *   label = @Translation("List pages multiselect"),
+ *   description = @Translation("A multiselect search widget."),
  * )
  */
 class MultiselectWidget extends ListPagesWidgetBase {
