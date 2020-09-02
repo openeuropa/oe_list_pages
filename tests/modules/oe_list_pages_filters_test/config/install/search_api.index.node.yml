@@ -5,6 +5,7 @@ dependencies:
     - node
     - search_api
   config:
+    - field.storage.node.body
     - field.storage.node.field_select_one
     - field.storage.node.field_select_two
     - search_api.server.database_server
@@ -13,6 +14,22 @@ name: Node
 description: ''
 read_only: false
 field_settings:
+  body:
+    label: Body
+    datasource_id: 'entity:node'
+    property_path: body
+    type: text
+    dependencies:
+      config:
+        - field.storage.node.body
+  created:
+    label: Created
+    datasource_id: 'entity:node'
+    property_path: created
+    type: date
+    dependencies:
+      module:
+        - node
   field_select_one:
     label: 'Select one'
     datasource_id: 'entity:node'

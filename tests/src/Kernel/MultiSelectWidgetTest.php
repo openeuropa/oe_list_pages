@@ -34,18 +34,9 @@ class MultiSelectWidgetTest extends ListsSourceBaseTest {
     $default_list_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
     $facet_active = $this->createFacet('body', $default_list_id);
     $facet_active->setActiveItems(['message']);
-    $output = $this->widget->build($facet_active)[$facet_active->id()];
-    $this->assertSame('array', gettype($output));
-    $this->assertEquals('select', $output['#type']);
-    $this->assertEquals('message', $output['#default_value']);
-
-    // Now without active result.
-    $default_list_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'entity_test_mulrev_changed', 'inactive');
-    $facet_inactive = $this->createFacet('body', $default_list_id, 'inactive');
-    $output = $this->widget->build($facet_inactive)[$facet_inactive->id()];
-    $this->assertSame('array', gettype($output));
-    $this->assertEquals('select', $output['#type']);
-    $this->assertEmpty($output['#default_value']);
+    $output = $this->widget->build($facet_active);
+    // There are no results so we should not see the widget element.
+    $this->assertFalse(isset($output[$facet_active->id()]));
   }
 
   /**

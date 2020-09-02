@@ -18,7 +18,11 @@ class ListPagesWidgetBase extends WidgetPluginBase implements ListPagesWidgetInt
    */
   public function prepareValueForUrl(FacetInterface $facet, array &$form, FormStateInterface $form_state): array {
     $value = $form_state->getValue($facet->id());
-    return is_array($value) ? $value : [$value];
+    if (!$value) {
+      return [];
+    }
+
+    return is_array($value) ? array_values($value) : [$value];
   }
 
   /**

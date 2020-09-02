@@ -125,7 +125,13 @@ class ListSourceFactory implements ListSourceFactoryInterface {
     $facets = $this->facetsManager->getFacetsByFacetSourceId($id);
     foreach ($facets as $facet) {
       $field_id = $facet->getFieldIdentifier();
-      $filters[$field_id] = $facet->getFacetSource()->getIndex()->getField($field_id)->getLabel();
+      $field = $facet->getFacetSource()->getIndex()->getField($field_id);
+      if (!$field) {
+        // In case the field is missing from the index, don't crash the
+        // application.
+        continue;
+      }
+      $filters[$field_id] = $field->getLabel();
     }
 
     $bundle_field_id = $this->entityTypeManager->getDefinition($entity_type)->getKey('bundle');

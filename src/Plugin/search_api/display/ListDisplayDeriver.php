@@ -16,6 +16,8 @@ class ListDisplayDeriver extends DisplayDeriverBase {
    * {@inheritdoc}
    */
   public function getDerivativeDefinitions($base_plugin_definition) {
+    $this->derivatives = [];
+
     $index_storage = $this->entityTypeManager->getStorage('search_api_index');
 
     // Loop through all available data sources from enabled indexes.
