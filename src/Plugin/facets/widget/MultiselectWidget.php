@@ -35,7 +35,7 @@ class MultiselectWidget extends ListPagesWidgetBase {
         '#title' => $facet->getName(),
         '#options' => $options,
         '#multiple' => TRUE,
-        '#default_value' => $this->getValueFromActiveFilters($facet, '0'),
+        '#default_value' => $facet->getActiveItems(),
       ];
     }
 
@@ -45,13 +45,6 @@ class MultiselectWidget extends ListPagesWidgetBase {
     ];
 
     return $build;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getQueryType() {
-    return 'string';
   }
 
 }
