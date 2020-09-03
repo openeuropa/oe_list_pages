@@ -26,7 +26,7 @@ class DateStatusQueryType extends QueryTypePluginBase implements ContainerFactor
   /**
    * Option for upcoming items.
    */
-  const UPCOMING = 'coming';
+  const UPCOMING = 'upcoming';
 
   /**
    * Option for past items.
@@ -118,27 +118,13 @@ class DateStatusQueryType extends QueryTypePluginBase implements ContainerFactor
   }
 
   /**
-   * Provides default options.
-   *
-   * @return array
-   *   The default options.
-   */
-  protected function defaultOptions(): array {
-    return [
-      DateStatusQueryType::PAST => t('Past'),
-      DateStatusQueryType::UPCOMING => t('Upcoming'),
-    ];
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function build() {
     $now = $this->getCurrentTime();
-    $count = [];
+    $count = $facet_results = [];
     $count[self::UPCOMING] = $count[self::PAST] = 0;
     if (!empty($this->results)) {
-      $facet_results = [];
       foreach ($this->results as $result) {
         $result_filter = $result['filter'];
         $now->getTimestamp() > $result_filter ? $count[self::UPCOMING]++ : $count[self::PAST]++;
@@ -146,10 +132,10 @@ class DateStatusQueryType extends QueryTypePluginBase implements ContainerFactor
     }
 
     // Get default options for status.
-    $default_options = $this->defaultOptions();
-    foreach ($default_options as $raw => $display) {
-      $item_count = $count[$raw] ?? 0;
-      $result = new Result($this->facet, $raw, $display, $item_count);
+    $default_options = [self::PAST, self::UPCOMING];
+    foreach ($default_options as $option) {
+      $item_count = $count[$option] ?? 0;
+      $result = new Result($this->facet, $option, $option, $item_count);
       $facet_results[] = $result;
     }
 

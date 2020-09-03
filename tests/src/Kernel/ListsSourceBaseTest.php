@@ -73,6 +73,7 @@ class ListsSourceBaseTest extends EntityKernelTestBaseTest {
     $this->installConfig([
       'emr',
       'emr_node',
+      'facets',
       'oe_list_pages',
       'search_api_test_example_content',
       'search_api_test_db',

@@ -14,11 +14,18 @@ use Drupal\oe_list_pages\Plugin\facets\query_type\DateStatusQueryType;
 class StatusDateTest extends ListsSourceBaseTest {
 
   /**
-   * The widget.
+   * The facet without processor configuration.
    *
-   * @var \Drupal\oe_list_pages\Plugin\facets\widget\MultiselectWidget
+   * @var \Drupal\facets\FacetInterface
    */
-  protected $widget;
+  protected $facet_no_config;
+
+  /**
+   * The facet with processor configuration.
+   *
+   * @var \Drupal\facets\FacetInterface
+   */
+  protected $facet_with_config;
 
   /**
    * {@inheritdoc}
@@ -26,25 +33,61 @@ class StatusDateTest extends ListsSourceBaseTest {
   protected function setUp() {
     parent::setUp();
     $default_list_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'item');
-    $this->facet_active = $this->createFacet('created', $default_list_id, '', 'oe_list_pages_multiselect', []);
-    $this->facet_active->addProcessor([
+    $this->facet_no_config = $this->createFacet('created', $default_list_id, '', 'oe_list_pages_multiselect', []);
+    $this->facet_no_config->addProcessor([
       'processor_id' => 'oe_list_pages_date_status_processor',
       'weights' => [],
-      'settings' => [],
+      'settings' => [
+      ],
     ]);
-    $this->facet_active->save();
+
+    $this->facet_no_config->save();
   }
 
   /**
    * Tests widget with status processor.
    */
   public function testWidgetFormValue(): void {
+    $default_list_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'item');
+    // Configuration options for the processor.
+    $processor_options = [
+      'default_status' => DateStatusQueryType::UPCOMING,
+      'upcoming_label' => 'Coming items',
+      'past_label' => 'Past items'
+    ];
+    $this->facet_with_config = $this->createFacet('created', $default_list_id, 'options', 'oe_list_pages_multiselect', []);
+    $this->facet_with_config->addProcessor([
+      'processor_id' => 'oe_list_pages_date_status_processor',
+      'weights' => ['pre_query' => 60, 'build' => 35],
+      'settings' => $processor_options,
+    ]);
+    $this->facet_with_config->save();
 
-    $build = $this->facetManager->build($this->facet_active);
-    $actual = $build[0][$this->facet_active->id()];
+    $build = $this->facetManager->build($this->facet_no_config);
+    $actual = $build[0][$this->facet_no_config->id()];
     $this->assertSame('array', gettype($actual));
     $this->assertEquals('select', $actual['#type']);
-    $this->assertEquals(DateStatusProcessor::defaultOptions(), $actual['#options']);
+    $default_options = [
+      '' => t('- None -'),
+      DateStatusQueryType::UPCOMING => t('Upcoming'),
+      DateStatusQueryType::PAST => t('Past'),
+    ];
+
+    $this->assertEquals($default_options, $actual['#options']);
+    $this->assertEquals([], $actual['#default_value']);
+    $build = $this->facetManager->build($this->facet_with_config);
+    $actual = $build[0][$this->facet_with_config->id()];
+    $this->assertSame('array', gettype($actual));
+    $this->assertEquals('select', $actual['#type']);
+
+    $default_options = [
+      '' => t('- None -'),
+      DateStatusQueryType::UPCOMING => t('Coming items'),
+      DateStatusQueryType::PAST => t('Past items'),
+    ];
+
+    $this->assertEquals($default_options, $actual['#options']);
+    $this->assertEquals([DateStatusQueryType::UPCOMING], $actual['#default_value']);
   }
 
   /**
@@ -68,19 +111,19 @@ class StatusDateTest extends ListsSourceBaseTest {
     $query = $list->getQuery(0, 0, [], [], []);
     $query->execute();
     $results = $query->getResults();
-    $this->assertCount(1, $results->getResultItems());
+    $this->assertCount(4, $results->getResultItems());
 
-    $query = $list->getQuery(0, 0, [], [], [$this->facet_active->id() => [DateStatusQueryType::PAST]]);
+    $query = $list->getQuery(0, 0, [], [], [$this->facet_no_config->id() => [DateStatusQueryType::PAST]]);
     $query->execute();
     $results = $query->getResults();
     $this->assertCount(3, $results->getResultItems());
 
-    $query = $list->getQuery(0, 0, [], [], [$this->facet_active->id() => [DateStatusQueryType::UPCOMING]]);
+    $query = $list->getQuery(0, 0, [], [], [$this->facet_no_config->id() => [DateStatusQueryType::UPCOMING]]);
     $query->execute();
     $results = $query->getResults();
     $this->assertCount(1, $results->getResultItems());
 
-    $query = $list->getQuery(0, 0, [], [], [$this->facet_active->id() => [DateStatusQueryType::PAST, DateStatusQueryType::UPCOMING]]);
+    $query = $list->getQuery(0, 0, [], [], [$this->facet_no_config->id() => [DateStatusQueryType::PAST, DateStatusQueryType::UPCOMING]]);
     $query->execute();
     $results = $query->getResults();
     $this->assertCount(4, $results->getResultItems());
