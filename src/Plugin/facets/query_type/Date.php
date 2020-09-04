@@ -7,7 +7,7 @@ namespace Drupal\oe_list_pages\Plugin\facets\query_type;
 use Drupal\Component\Datetime\DateTimePlus;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItem;
 use Drupal\facets\QueryType\QueryTypePluginBase;
-use Drupal\oe_list_pages\Plugin\facets\processor\DateProcessorHandler;
+use Drupal\oe_list_pages\Plugin\facets\processor\DateUrlProcessor;
 
 /**
  * Query type plugin that filters the result by the date active filters.
@@ -34,7 +34,7 @@ class Date extends QueryTypePluginBase {
   public function execute() {
     $query = $this->query;
 
-    $active_items = DateProcessorHandler::structureActiveItems($this->facet);
+    $active_items = DateUrlProcessor::structureActiveItems($this->facet);
 
     // Only alter the query when there's an actual query object to alter.
     if (empty($query) || !$active_items) {

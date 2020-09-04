@@ -21,7 +21,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   label = @Translation("Date status"),
  * )
  */
-class DateStatusQueryType extends QueryTypePluginBase implements ContainerFactoryPluginInterface {
+class DateStatus extends QueryTypePluginBase implements ContainerFactoryPluginInterface {
 
   /**
    * Option for upcoming items.
@@ -41,7 +41,7 @@ class DateStatusQueryType extends QueryTypePluginBase implements ContainerFactor
   protected $time;
 
   /**
-   * Constructs the DateStatusQueryType plugin.
+   * Constructs the DateStatus plugin.
    *
    * @param array $configuration
    *   The plugin configuration.
@@ -90,16 +90,15 @@ class DateStatusQueryType extends QueryTypePluginBase implements ContainerFactor
     if (count($active_items)) {
       $filter = $query->createConditionGroup('OR', ['facet:' . $field_identifier]);
       foreach ($active_items as $value) {
-        if ($value == self::PAST) {
+        if ($value === self::PAST) {
           $filter->addCondition($this->facet->getFieldIdentifier(), $now->getTimestamp(), "<=");
-          $query->sort($this->facet->getFieldIdentifier(), 'DESC');
         }
-        elseif ($value = self::UPCOMING) {
+        elseif ($value === self::UPCOMING) {
           $filter->addCondition($this->facet->getFieldIdentifier(), $now->getTimestamp(), ">");
-          $query->sort($this->facet->getFieldIdentifier(), 'ASC');
         }
       }
       $query->addConditionGroup($filter);
+      $this->applySort($query, $active_items, $this->facet->getFieldIdentifier());
     }
   }
 
@@ -132,7 +131,7 @@ class DateStatusQueryType extends QueryTypePluginBase implements ContainerFactor
     }
 
     // Get default options for status.
-    $default_options = [self::PAST, self::UPCOMING];
+    $default_options = [self::UPCOMING, self::PAST];
     foreach ($default_options as $option) {
       $item_count = $count[$option] ?? 0;
       $result = new Result($this->facet, $option, $option, $item_count);
@@ -141,6 +140,35 @@ class DateStatusQueryType extends QueryTypePluginBase implements ContainerFactor
 
     $this->facet->setResults($facet_results);
     return $this->facet;
+  }
+
+  /**
+   * Changes the sort on the query depending the chosen filter.
+   *
+   * With this type of filter, the order of the items is dependent on the
+   * chosen filter so we need to change the sort accordingly.
+   *
+   * When applying the sort, we have to override potentially existing sorting
+   * so we don't use the ::sort() method on the query object.
+   *
+   * @param \Drupal\search_api\Query\QueryInterface $query
+   *   The query.
+   * @param array $active_items
+   *   The active items.
+   * @param string $field_name
+   *   The field name to sort by.
+   */
+  protected function applySort(QueryInterface $query, array $active_items, string $field_name): void {
+    $sorts = &$query->getSorts();
+    if (count($active_items) > 1) {
+      // In case we have both options selected, we sort ASC.
+      $sorts[$field_name] = 'ASC';
+      return;
+    }
+
+    $item = reset($active_items);
+    // Past items should be sorted DESC whereas upcoming ones ASC.
+    $sorts[$field_name] = $item === self::PAST ? 'DESC' : 'ASC';
   }
 
 }

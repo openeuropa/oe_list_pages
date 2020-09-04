@@ -21,7 +21,7 @@ use Drupal\facets\Plugin\facets\processor\UrlProcessorHandler;
  *   locked = false
  * )
  */
-class DateProcessorHandler extends UrlProcessorHandler {
+class DateUrlProcessor extends UrlProcessorHandler {
 
   /**
    * {@inheritdoc}

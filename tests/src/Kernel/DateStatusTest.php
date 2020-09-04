@@ -5,12 +5,12 @@ declare(strict_types = 1);
 namespace Drupal\Tests\oe_list_pages\Kernel;
 
 use Drupal\oe_list_pages\ListSourceFactory;
-use Drupal\oe_list_pages\Plugin\facets\query_type\DateStatusQueryType;
+use Drupal\oe_list_pages\Plugin\facets\query_type\DateStatus;
 
 /**
  * Test for status date processor and query type.
  */
-class StatusDateTest extends ListsSourceBaseTest {
+class DateStatusTest extends ListsSourceBaseTest {
 
   /**
    * The facet without processor configuration.
@@ -42,7 +42,7 @@ class StatusDateTest extends ListsSourceBaseTest {
     $default_list_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'item');
     // Configuration options for the processor.
     $processor_options = [
-      'default_status' => DateStatusQueryType::UPCOMING,
+      'default_status' => DateStatus::UPCOMING,
       'upcoming_label' => 'Coming items',
       'past_label' => 'Past items',
     ];
@@ -60,8 +60,8 @@ class StatusDateTest extends ListsSourceBaseTest {
     $this->assertEquals('select', $actual['#type']);
     $default_options = [
       '' => t('- None -'),
-      DateStatusQueryType::UPCOMING => t('Upcoming'),
-      DateStatusQueryType::PAST => t('Past'),
+      DateStatus::UPCOMING => t('Upcoming'),
+      DateStatus::PAST => t('Past'),
     ];
 
     $this->assertEquals($default_options, $actual['#options']);
@@ -73,12 +73,12 @@ class StatusDateTest extends ListsSourceBaseTest {
 
     $default_options = [
       '' => t('- None -'),
-      DateStatusQueryType::UPCOMING => t('Coming items'),
-      DateStatusQueryType::PAST => t('Past items'),
+      DateStatus::UPCOMING => t('Coming items'),
+      DateStatus::PAST => t('Past items'),
     ];
 
     $this->assertEquals($default_options, $actual['#options']);
-    $this->assertEquals([DateStatusQueryType::UPCOMING], $actual['#default_value']);
+    $this->assertEquals([DateStatus::UPCOMING], $actual['#default_value']);
   }
 
   /**
@@ -89,35 +89,72 @@ class StatusDateTest extends ListsSourceBaseTest {
     $values['dates'] = [
       strtotime('-2 days'),
       strtotime('-1 days'),
-      time(),
       strtotime('+1 days'),
+      strtotime('+2 days'),
+    ];
+    $values['titles'] = [
+      'oldest',
+      'old',
+      'tomorrow',
+      'future',
     ];
     $this->createTestContent('item', 4, $values);
-    $item_list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
-    $item_list->getIndex()->indexItems();
-
-    // Search for categories.
     $list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
+    $list->getIndex()->indexItems();
+
     /** @var \Drupal\search_api\Query\QueryInterface $default_query */
-    $query = $list->getQuery(0, 0, [], [], []);
+    $query = $list->getQuery();
+    $query->execute();
+    $results = $query->getResults();
+
+    // We have no facet configuration so we get all results.
+    $this->assertCount(4, $results->getResultItems());
+
+    $query = $list->getQuery(0, 0, [], [], [$this->facet->id() => [DateStatus::PAST]]);
+    $query->execute();
+    $results = $query->getResults();
+    $this->assertCount(2, $results->getResultItems());
+    $this->assertSort($results->getResultItems(), [
+      'old',
+      'oldest',
+    ]);
+
+    $query = $list->getQuery(0, 0, [], [], [$this->facet->id() => [DateStatus::UPCOMING]]);
+    $query->execute();
+    $results = $query->getResults();
+    $this->assertCount(2, $results->getResultItems());
+    $this->assertSort($results->getResultItems(), [
+      'tomorrow',
+      'future',
+    ]);
+
+    $query = $list->getQuery(0, 0, [], [], [$this->facet->id() => [DateStatus::PAST, DateStatus::UPCOMING]]);
     $query->execute();
     $results = $query->getResults();
     $this->assertCount(4, $results->getResultItems());
+    $this->assertSort($results->getResultItems(), [
+      'oldest',
+      'old',
+      'tomorrow',
+      'future',
+    ]);
+  }
 
-    $query = $list->getQuery(0, 0, [], [], [$this->facet->id() => [DateStatusQueryType::PAST]]);
-    $query->execute();
-    $results = $query->getResults();
-    $this->assertCount(3, $results->getResultItems());
+  /**
+   * Asserts the results are sorted in the correct order.
+   *
+   * @param \Drupal\search_api\Item\ItemInterface[] $results
+   *   The results.
+   * @param array $expected_titles
+   *   The expected titles in the correct order.
+   */
+  protected function assertSort(array $results, array $expected_titles): void {
+    $titles = [];
+    foreach ($results as $result) {
+      $titles[] = $result->getOriginalObject()->getValue()->label();
+    }
 
-    $query = $list->getQuery(0, 0, [], [], [$this->facet->id() => [DateStatusQueryType::UPCOMING]]);
-    $query->execute();
-    $results = $query->getResults();
-    $this->assertCount(1, $results->getResultItems());
-
-    $query = $list->getQuery(0, 0, [], [], [$this->facet->id() => [DateStatusQueryType::PAST, DateStatusQueryType::UPCOMING]]);
-    $query->execute();
-    $results = $query->getResults();
-    $this->assertCount(4, $results->getResultItems());
+    $this->assertEquals($expected_titles, $titles);
   }
 
 }

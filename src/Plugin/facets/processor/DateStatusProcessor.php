@@ -10,16 +10,16 @@ use Drupal\facets\Processor\BuildProcessorInterface;
 use Drupal\facets\Processor\PreQueryProcessorInterface;
 use Drupal\facets\Processor\ProcessorPluginBase;
 use Drupal\facets\Result\Result;
-use Drupal\oe_list_pages\Plugin\facets\query_type\DateStatusQueryType;
+use Drupal\oe_list_pages\Plugin\facets\query_type\DateStatus;
 
 /**
- * Provides a processor to handle ongoing/past status.
+ * Provides a processor to handle upcoming/past status.
  *
  * @FacetsProcessor(
  *   id = "oe_list_pages_date_status_processor",
  *   label = @Translation("Ongoing/Past status"),
- *   description = @Translation("Assign correct query type for ongoing/past
- *   status"), stages = {
+ *   description = @Translation("Assign correct query type for upcoming/past status"),
+ *   stages = {
  *     "pre_query" = 60,
  *     "build" = 35
  *   }
@@ -33,7 +33,7 @@ class DateStatusProcessor extends ProcessorPluginBase implements PreQueryProcess
   public function preQuery(FacetInterface $facet) {
     $active_items = $facet->getActiveItems();
     $default_status = $this->getConfiguration()['default_status'];
-    if (empty($active_items) && !empty($default_status)) {
+    if (empty($active_items) && $default_status) {
       $facet->setActiveItems([$default_status]);
     }
   }
@@ -47,8 +47,8 @@ class DateStatusProcessor extends ProcessorPluginBase implements PreQueryProcess
   protected function defaultOptions(): array {
     return [
       '' => $this->t('- None -'),
-      DateStatusQueryType::UPCOMING => $this->getConfiguration()['upcoming_label'],
-      DateStatusQueryType::PAST => $this->getConfiguration()['past_label'],
+      DateStatus::UPCOMING => $this->getConfiguration()['upcoming_label'],
+      DateStatus::PAST => $this->getConfiguration()['past_label'],
     ];
   }
 
@@ -66,6 +66,7 @@ class DateStatusProcessor extends ProcessorPluginBase implements PreQueryProcess
         $result->setDisplayValue($default_options[$result->getRawValue()]);
         $facet_results[] = $result;
       }
+
       return $facet_results;
     }
 
