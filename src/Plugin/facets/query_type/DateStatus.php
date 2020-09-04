@@ -125,7 +125,7 @@ class DateStatus extends QueryTypePluginBase implements ContainerFactoryPluginIn
     $count[self::UPCOMING] = $count[self::PAST] = 0;
     if (!empty($this->results)) {
       foreach ($this->results as $result) {
-        $result_filter = $result['filter'];
+        $result_filter = trim($result['filter'], '"');
         $now->getTimestamp() > $result_filter ? $count[self::UPCOMING]++ : $count[self::PAST]++;
       }
     }
