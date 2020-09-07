@@ -1,0 +1,13 @@
+plugin.plugin_configuration.facets_processor.oe_list_pages_date_status_processor:
+  type: mapping
+  label: 'Ongoing/Past status processor'
+  mapping:
+    default_status:
+      type: string
+      label: 'Default status'
+    upcoming_label:
+      type: string
+      label: 'Upcoming label'
+    past_label:
+      type: string
+      label: 'Past label'

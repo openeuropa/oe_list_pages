@@ -1,8 +1,7 @@
 oe_list_pages_filters_test.test_facets_form:
-  path: '/facets-form-test/{ignore_filters}'
+  path: '/facets-form-test'
   defaults:
     _title: 'Facets form test'
     _controller: \Drupal\oe_list_pages_filters_test\Controller\FacetsFormTestController::build
-    ignore_filters: FALSE
   requirements:
     _permission: 'access content'

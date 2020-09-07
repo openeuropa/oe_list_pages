@@ -73,6 +73,7 @@ class ListsSourceBaseTest extends EntityKernelTestBaseTest {
     $this->installConfig([
       'emr',
       'emr_node',
+      'facets',
       'oe_list_pages',
       'search_api_test_example_content',
       'search_api_test_db',
@@ -183,12 +184,25 @@ class ListsSourceBaseTest extends EntityKernelTestBaseTest {
    *   The bundle.
    * @param int $count
    *   The number of items to create.
+   * @param array $values
+   *   An array with predefined values.
    */
-  protected function createTestContent(string $bundle, int $count): void {
-    $titles = ['With nothing', 'With a void', 'With a message', 'None'];
-    $categories = ['cat1', 'cat2', 'cat1', 'cat1'];
-    $bodies = ['Sending message', 'Receiving a message ', 'None', 'Receiving'];
-    $dates = [
+  protected function createTestContent(string $bundle, int $count, array $values = []): void {
+    $titles = $values['titles'] ?? [
+      'With nothing',
+      'With a void',
+      'With a message',
+      'None',
+    ];
+    $categories = $values['categories'] ?? ['cat1', 'cat2', 'cat1', 'cat1'];
+    $bodies = $values['bodies'] ?? [
+      'Sending message',
+      'Receiving a message ',
+      'None',
+      'Receiving',
+    ];
+
+    $dates = $values['dates'] ?? [
       strtotime('2020-08-06 12:00:00'),
       strtotime('2020-08-13 12:00:00'),
       strtotime('2020-08-20 12:00:00'),

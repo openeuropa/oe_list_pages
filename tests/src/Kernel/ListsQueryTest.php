@@ -159,14 +159,9 @@ class ListsQueryTest extends ListsSourceBaseTest {
   }
 
   /**
-   * Create test content.
-   *
-   * @param string $bundle
-   *   The bundle to create the content for.
-   * @param int $count
-   *   The number of items to create.
+   * {@inheritdoc}
    */
-  protected function createTestContent(string $bundle, int $count): void {
+  protected function createTestContent(string $bundle, int $count, array $values = []): void {
     $categories = ['first class', 'second class', 'third class'];
 
     // Add new entities.
