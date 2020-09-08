@@ -7,3 +7,6 @@ services:
     arguments: ['@facets.manager', '@plugin.manager.facets.query_type']
     tags:
       - { name: event_subscriber }
+  oe_list_pages.execution_manager:
+    class: Drupal\oe_list_pages\ListExecutionManager
+    arguments: ['@oe_list_pages.list_source.factory']
