@@ -110,15 +110,7 @@ class ListExecutionManager implements ListExecutionManagerInterface {
   }
 
   /**
-   * Builds the list content to be rendered.
-   *
-   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
-   *   The content entity.
-   * @param \Drupal\oe_list_pages\ListExecution $listExecution
-   *   The list execution.
-   *
-   * @return array
-   *   The list render array.
+   * {@inheritdoc}
    */
   public function buildList(ContentEntityInterface $entity, ListExecution $listExecution): array {
     $build = [];

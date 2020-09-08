@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages;
 
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
@@ -21,5 +22,18 @@ interface ListExecutionManagerInterface {
    *   The list execution.
    */
   public function executeList(EntityInterface $entity): ?ListExecution;
+
+  /**
+   * Builds the list content to be rendered.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The content entity.
+   * @param \Drupal\oe_list_pages\ListExecution $listExecution
+   *   The list execution.
+   *
+   * @return array
+   *   The list render array.
+   */
+  public function buildList(ContentEntityInterface $entity, ListExecution $listExecution): array;
 
 }
