@@ -9,4 +9,4 @@ services:
       - { name: event_subscriber }
   oe_list_pages.execution_manager:
     class: Drupal\oe_list_pages\ListExecutionManager
-    arguments: ['@oe_list_pages.list_source.factory']
+    arguments: ['@oe_list_pages.list_source.factory', '@entity_type.manager', '@pager.manager', '@request_stack']
