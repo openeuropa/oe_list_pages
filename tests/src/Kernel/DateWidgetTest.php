@@ -4,8 +4,8 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\oe_list_pages\Kernel;
 
-use Drupal\datetime\Plugin\Field\FieldType\DateTimeItem;
 use Drupal\oe_list_pages\ListSourceFactory;
+use Drupal\oe_list_pages\Plugin\facets\query_type\Date;
 use Drupal\oe_list_pages\Plugin\facets\widget\DateWidget;
 
 /**
@@ -16,9 +16,7 @@ class DateWidgetTest extends ListsSourceBaseTest {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
-    'datetime',
-  ];
+  public static $modules = [];
 
   /**
    * The widget.
@@ -42,7 +40,7 @@ class DateWidgetTest extends ListsSourceBaseTest {
   public function testWidgetFormValue(): void {
     $default_list_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
 
-    $facet_active = $this->createFacet('created', $default_list_id, '', 'oe_list_pages_date', ['date_type' => DateTimeItem::DATETIME_TYPE_DATE]);
+    $facet_active = $this->createFacet('created', $default_list_id, '', 'oe_list_pages_date', ['date_type' => Date::DATETIME_TYPE_DATE]);
     // Set the date in ATOM format as submitted also by the widget.
     $facet_active->setActiveItems([
       'bt',
@@ -97,7 +95,7 @@ class DateWidgetTest extends ListsSourceBaseTest {
     }
 
     // Test the widget form with datetime type.
-    $facet_active = $this->createFacet('created', $default_list_id, 'datetime', 'oe_list_pages_date', ['date_type' => DateTimeItem::DATETIME_TYPE_DATETIME]);
+    $facet_active = $this->createFacet('created', $default_list_id, 'datetime', 'oe_list_pages_date', ['date_type' => Date::DATETIME_TYPE_DATETIME]);
     $facet_active->setActiveItems([
       'bt',
       '2020-08-14T15:26:45+02:00',
@@ -126,7 +124,7 @@ class DateWidgetTest extends ListsSourceBaseTest {
 
     // Now without active result.
     $default_list_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
-    $facet_inactive = $this->createFacet('created', $default_list_id, 'inactive', 'oe_list_pages_date', ['date_type' => DateTimeItem::DATETIME_TYPE_DATE]);
+    $facet_inactive = $this->createFacet('created', $default_list_id, 'inactive', 'oe_list_pages_date', ['date_type' => Date::DATETIME_TYPE_DATE]);
     $build = $this->widget->build($facet_inactive);
     $form_elements = [
       $facet_inactive->id() . '_first_date' => 'datetime',

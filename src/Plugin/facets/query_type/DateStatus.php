@@ -7,7 +7,6 @@ namespace Drupal\oe_list_pages\Plugin\facets\query_type;
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 use Drupal\facets\QueryType\QueryTypePluginBase;
 use Drupal\facets\Result\Result;
 use Drupal\search_api\Query\QueryInterface;
@@ -22,6 +21,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * )
  */
 class DateStatus extends QueryTypePluginBase implements ContainerFactoryPluginInterface {
+
+  /**
+   * Defines the timezone that dates should be stored in.
+   */
+  const STORAGE_TIMEZONE = 'UTC';
 
   /**
    * Option for upcoming items.
@@ -112,7 +116,7 @@ class DateStatus extends QueryTypePluginBase implements ContainerFactoryPluginIn
     $now = new DrupalDateTime();
     $current_time = $this->time->getCurrentTime();
     $now->setTimestamp($current_time);
-    $now->setTimezone(new \DateTimeZone(DateTimeItemInterface::STORAGE_TIMEZONE));
+    $now->setTimezone(new \DateTimeZone(self::STORAGE_TIMEZONE));
     return $now;
   }
 
