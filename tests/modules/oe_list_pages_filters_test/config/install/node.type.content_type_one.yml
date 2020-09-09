@@ -4,10 +4,6 @@ status: true
 dependencies:
   module:
     - emr
-third_party_settings:
-  emr:
-    entity_meta_bundles:
-      - oe_list_page
 name: 'Content type one'
 type: content_type_one
 description: ''
