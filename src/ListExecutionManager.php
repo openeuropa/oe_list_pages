@@ -9,6 +9,7 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\Pager\PagerManagerInterface;
+use Drupal\oe_list_pages\Form\ListFacetsForm;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
@@ -83,7 +84,14 @@ class ListExecutionManager implements ListExecutionManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function executeList($entity): ?ListExecution {
+  public function executeList($entity): ?ListExecutionResultsResults {
+
+    static $executed_lists = [];
+
+    if (!empty($executed_lists[$entity->uuid()])) {
+      return $executed_lists[$entity->uuid()];
+    }
+
     // The number of items to show on a page.
     // @todo take this value from the list_page meta plugin.
     $limit = 10;
@@ -105,69 +113,11 @@ class ListExecutionManager implements ListExecutionManagerInterface {
     $sort = $sort ? [$sort['name'] => $sort['direction']] : [];
     $query = $list_source->getQuery($limit, $current_page, $sort);
     $result = $query->execute();
-    $listExecution = new ListExecution($query, $result, $list_source, $wrapper);
+    $listExecution = new ListExecutionResultsResults($query, $result, $list_source, $wrapper);
+
+    $executed_lists[$entity->uuid()] = $listExecution;
+
     return $listExecution;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function buildList(ContentEntityInterface $entity, ListExecution $listExecution): array {
-    $build = [];
-
-    $cache = new CacheableMetadata();
-    $cache->addCacheTags($entity->getEntityType()->getListCacheTags());
-    $list_source = $listExecution->getListSource();
-    if (!$list_source) {
-      $cache->applyTo($build);
-      return $build;
-    }
-
-    $query = $listExecution->getQuery();
-    $result = $listExecution->getResults();
-    $wrapper = $listExecution->getListPluginWrapper();
-
-    // Determine the view mode to render with and the sorting.
-    $bundle_entity_type = $this->entityTypeManager->getDefinition($wrapper->getSourceEntityType())->getBundleEntityType();
-    $storage = $this->entityTypeManager->getStorage($bundle_entity_type);
-    $bundle = $storage->load($wrapper->getSourceEntityBundle());
-    $view_mode = $bundle->getThirdPartySetting('oe_list_pages', 'default_view_mode', 'teaser');
-    $cache->addCacheableDependency($query);
-    $cache->addCacheTags(['search_api_list:' . $query->getIndex()->id()]);
-
-    if (!$result->getResultCount()) {
-      $cache->applyTo($build);
-      return $build;
-    }
-
-    $this->pager->createPager($result->getResultCount(), $query->getOption('limit'));
-
-    $items = [];
-
-    // Build the entities.
-    $builder = $this->entityTypeManager->getViewBuilder($wrapper->getSourceEntityType());
-    foreach ($result->getResultItems() as $item) {
-      $entity = $item->getOriginalObject()->getEntity();
-      $cache->addCacheableDependency($entity);
-      $entity = $this->entityRepository->getTranslationFromContext($entity);
-      $items[] = $builder->view($entity, $view_mode);
-    }
-
-    $build['list'] = [
-      '#type' => 'pattern',
-      '#id' => 'list_item_block_one_column',
-      '#fields' => [
-        'items' => $items,
-      ],
-    ];
-
-    $build['pager'] = [
-      '#type' => 'pager',
-    ];
-
-    $cache->applyTo($build);
-
-    return $build;
   }
 
 }
