@@ -18,7 +18,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   id = "oe_list_page_results",
  *   label = @Translation("List page results"),
  *   deriver = "Drupal\oe_list_pages\Plugin\ExtraField\Derivative\ListPageDeriver",
-  *  visible = true
+ *   visible = true
  * )
  */
 class ListPageResults extends ExtraFieldDisplayFormattedBase implements ContainerFactoryPluginInterface {

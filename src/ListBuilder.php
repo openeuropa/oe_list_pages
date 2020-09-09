@@ -11,7 +11,6 @@ use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Pager\PagerManagerInterface;
 use Drupal\oe_list_pages\Form\ListFacetsForm;
-use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Handles the list pages component building.
@@ -72,6 +71,7 @@ class ListBuilder implements ListBuilderInterface {
    * @param \Drupal\Core\Entity\EntityRepositoryInterface $entityRepository
    *   The entity repository.
    * @param \Drupal\Core\Form\FormBuilderInterface $formBuilder
+   *   The form builder.
    */
   public function __construct(ListExecutionManagerInterface $listExecutionManager, EntityTypeManager $entityTypeManager, PagerManagerInterface $pager, EntityRepositoryInterface $entityRepository, FormBuilderInterface $formBuilder) {
     $this->listExecutionManager = $listExecutionManager;

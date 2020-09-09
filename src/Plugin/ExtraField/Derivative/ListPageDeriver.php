@@ -22,7 +22,7 @@ class ListPageDeriver extends DeriverBase implements ContainerDeriverInterface {
   protected $entityTypeManager;
 
   /**
-   * The entity_type.bundle.info service
+   * The entity_type.bundle.info service.
    *
    * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface
    */
@@ -70,7 +70,7 @@ class ListPageDeriver extends DeriverBase implements ContainerDeriverInterface {
       }
       $bundle_entity_storage = $this->entityTypeManager->getStorage($entity_type->getBundleEntityType());
       $bundles = $this->entityTypeBundleInfo->getBundleInfo($entity_type->id());
-      foreach($bundles as $bundle_id => $bundle_definition) {
+      foreach ($bundles as $bundle_id => $bundle_definition) {
         $bundle = $bundle_entity_storage->load($bundle_id);
         $meta_bundles = $bundle->getThirdPartySetting('emr', 'entity_meta_bundles', []);
 

@@ -4,12 +4,9 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages;
 
-use Drupal\Core\Cache\CacheableMetadata;
-use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\Pager\PagerManagerInterface;
-use Drupal\oe_list_pages\Form\ListFacetsForm;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**

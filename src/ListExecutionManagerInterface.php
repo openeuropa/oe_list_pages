@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages;
 
-use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 
 /**

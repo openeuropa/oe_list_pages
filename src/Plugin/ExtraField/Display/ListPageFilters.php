@@ -26,10 +26,11 @@ class ListPageFilters extends ExtraFieldDisplayFormattedBase implements Containe
   use StringTranslationTrait;
 
   /**
+   * The list builder.
+   *
    * @var \Drupal\oe_list_pages\ListBuilderInterface
    */
   protected $listBuilder;
-
 
   /**
    * ListPageFilters constructor.
