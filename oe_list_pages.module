@@ -17,3 +17,16 @@ function oe_list_pages_facets_search_api_query_type_mapping_alter($backend_plugi
   $query_types['date_comparison'] = 'date_query_type';
   $query_types['oe_list_pages_date_status_comparison'] = 'oe_list_pages_date_status_query_type';
 }
+
+/**
+ * Implements hook_theme().
+ */
+function oe_list_pages_theme($existing, $type, $theme, $path) {
+  return [
+    'oe_list_pages_results' => [
+      'variables' => [
+        'items' => NULL,
+      ],
+    ],
+  ];
+}

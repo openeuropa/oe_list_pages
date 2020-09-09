@@ -70,7 +70,10 @@ class DateWidgetTest extends ListsSourceBaseTest {
 
     // Test widget if we choose the greater than or less than operator.
     foreach (['gt', 'lt'] as $operator_key) {
-      $facet_active->setActiveItems([$operator_key, '2020-08-14T15:26:45+02:00']);
+      $facet_active->setActiveItems([
+        $operator_key,
+        '2020-08-14T15:26:45+02:00',
+      ]);
       $build = $this->widget->build($facet_active);
       $actual = $build[$facet_active->id() . '_op'];
       $this->assertSame('array', gettype($actual));

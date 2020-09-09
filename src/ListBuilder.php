@@ -129,11 +129,8 @@ class ListBuilder implements ListBuilderInterface {
     }
 
     $build['list'] = [
-      '#type' => 'pattern',
-      '#id' => 'list_item_block_one_column',
-      '#fields' => [
-        'items' => $items,
-      ],
+      '#theme' => 'item_list__oe_list_pages_results',
+      '#items' => $items,
     ];
 
     $build['pager'] = [

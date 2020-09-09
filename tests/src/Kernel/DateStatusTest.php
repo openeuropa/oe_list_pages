@@ -128,7 +128,12 @@ class DateStatusTest extends ListsSourceBaseTest {
       'future',
     ]);
 
-    $query = $list->getQuery(0, 0, [], [], [$this->facet->id() => [DateStatus::PAST, DateStatus::UPCOMING]]);
+    $query = $list->getQuery(0, 0, [], [], [
+      $this->facet->id() => [
+        DateStatus::PAST,
+        DateStatus::UPCOMING,
+      ],
+    ]);
     $query->execute();
     $results = $query->getResults();
     $this->assertCount(4, $results->getResultItems());

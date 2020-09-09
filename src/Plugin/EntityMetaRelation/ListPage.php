@@ -130,8 +130,14 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
         'exposed_filters',
       ];
       foreach (array_keys($options) as $option) {
-        NestedArray::setValue($form, array_merge($parents, [$option, '#value']), 0);
-        NestedArray::setValue($form, array_merge($parents, [$option, '#checked']), FALSE);
+        NestedArray::setValue($form, array_merge($parents, [
+          $option,
+          '#value',
+        ]), 0);
+        NestedArray::setValue($form, array_merge($parents, [
+          $option,
+          '#checked',
+        ]), FALSE);
       }
     }
     return $form[$key];

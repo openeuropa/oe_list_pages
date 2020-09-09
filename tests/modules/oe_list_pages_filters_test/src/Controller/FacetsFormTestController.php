@@ -103,7 +103,7 @@ class FacetsFormTestController extends ControllerBase {
     $result = $query->execute();
     $item_list = [];
 
-    /* @var $items \Drupal\search_api\Item\ItemInterface[] */
+    /** @var \Drupal\search_api\Item\ItemInterface[] $items */
     $items = $result->getResultItems();
     foreach ($items as $item) {
       /** @var \Drupal\Core\Entity\EntityInterface $entity */
