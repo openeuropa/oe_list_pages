@@ -127,7 +127,7 @@ class ListSource implements ListSourceInterface {
   /**
    * {@inheritdoc}
    */
-  public function getQuery(int $limit = 10, int $page = 0, array $sort = [], array $ignored_filters = [], array $preset_filters = []): QueryInterface {
+  public function getQuery(int $limit = 10, int $page = 0, string $language = NULL, array $sort = [], array $ignored_filters = [], array $preset_filters = []): QueryInterface {
     $query = $this->index->query([
       'offset' => ($limit * $page),
     ]);
@@ -136,10 +136,23 @@ class ListSource implements ListSourceInterface {
       $query->setOption('limit', $limit);
     }
 
+    /** @var \Drupal\search_api\IndexInterface $index */
+    $index = $this->getIndex();
+    $fields = $index->getFields();
+
+    // Handle multilingual language fallback.
+    if ($language && in_array('language_with_fallback', array_keys($fields))) {
+      $query->addCondition('language_with_fallback', $language);
+    }
+
     $query_options = new ListQueryOptions($ignored_filters, $preset_filters);
     $query->setOption('oe_list_page_query_options', $query_options);
     $query->setSearchId($this->getSearchId());
-    $query->addCondition($this->getBundleKey(), $this->getBundle());
+
+    // Limit search to bundle.
+    if (in_array($this->getBundleKey(), array_keys($fields))) {
+      $query->addCondition($this->getBundleKey(), $this->getBundle());
+    }
     $query->addCondition('search_api_datasource', 'entity:' . $this->getEntityType());
 
     foreach ($sort as $name => $direction) {

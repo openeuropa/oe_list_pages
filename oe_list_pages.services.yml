@@ -9,7 +9,7 @@ services:
       - { name: event_subscriber }
   oe_list_pages.execution_manager:
     class: Drupal\oe_list_pages\ListExecutionManager
-    arguments: ['@oe_list_pages.list_source.factory', '@entity_type.manager', '@pager.manager', '@entity.repository', '@request_stack']
+    arguments: ['@oe_list_pages.list_source.factory', '@entity_type.manager', '@pager.manager', '@entity.repository', '@request_stack', '@language_manager']
   oe_list_pages.builder:
     class: Drupal\oe_list_pages\ListBuilder
     arguments: ['@oe_list_pages.execution_manager', '@entity_type.manager', '@pager.manager', '@entity.repository', '@form_builder']

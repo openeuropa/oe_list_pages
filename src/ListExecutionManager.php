@@ -6,6 +6,7 @@ namespace Drupal\oe_list_pages;
 
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManager;
+use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Pager\PagerManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -57,6 +58,13 @@ class ListExecutionManager implements ListExecutionManagerInterface {
   protected $entityRepository;
 
   /**
+   * The language manager.
+   *
+   * @var \Drupal\Core\Language\LanguageManagerInterface
+   */
+  protected $languageManager;
+
+  /**
    * ListManager constructor.
    *
    * @param \Drupal\oe_list_pages\ListSourceFactoryInterface $listSourceFactory
@@ -69,13 +77,16 @@ class ListExecutionManager implements ListExecutionManagerInterface {
    *   The entity repository.
    * @param \Symfony\Component\HttpFoundation\RequestStack $requestStack
    *   The request stack.
+   * @param \Drupal\Core\Language\LanguageManagerInterface $languageManager
+   *   The language manager.
    */
-  public function __construct(ListSourceFactoryInterface $listSourceFactory, EntityTypeManager $entityTypeManager, PagerManagerInterface $pager, EntityRepositoryInterface $entityRepository, RequestStack $requestStack) {
+  public function __construct(ListSourceFactoryInterface $listSourceFactory, EntityTypeManager $entityTypeManager, PagerManagerInterface $pager, EntityRepositoryInterface $entityRepository, RequestStack $requestStack, LanguageManagerInterface $languageManager) {
     $this->listSourceFactory = $listSourceFactory;
     $this->entityTypeManager = $entityTypeManager;
     $this->pager = $pager;
     $this->entityRepository = $entityRepository;
     $this->requestStack = $requestStack;
+    $this->languageManager = $languageManager;
   }
 
   /**
@@ -108,7 +119,8 @@ class ListExecutionManager implements ListExecutionManagerInterface {
     $sort = $bundle->getThirdPartySetting('oe_list_pages', 'default_sort', []);
     $current_page = (int) $this->requestStack->getCurrentRequest()->get('page', 0);
     $sort = $sort ? [$sort['name'] => $sort['direction']] : [];
-    $query = $list_source->getQuery($limit, $current_page, $sort);
+    $language = $this->languageManager->getCurrentLanguage()->getId();
+    $query = $list_source->getQuery($limit, $current_page, $language, $sort);
     $result = $query->execute();
     $listExecution = new ListExecutionResultsResults($query, $result, $list_source, $wrapper);
 

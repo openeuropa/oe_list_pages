@@ -54,12 +54,12 @@ class MultiSelectWidgetTest extends ListsSourceBaseTest {
     // Search for categories.
     $list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
     /** @var \Drupal\search_api\Query\QueryInterface $default_query */
-    $query = $list->getQuery(0, 0, [], [], [$facet_categories->id() => 'cat1']);
+    $query = $list->getQuery(0, 0, NULL, [], [], [$facet_categories->id() => 'cat1']);
     $query->execute();
     $results = $query->getResults();
     $this->assertCount(3, $results->getResultItems());
 
-    $query = $list->getQuery(0, 0, [], [], [$facet_categories->id() => ['cat2']]);
+    $query = $list->getQuery(0, 0, NULL, [], [], [$facet_categories->id() => ['cat2']]);
     $query->execute();
     $results = $query->getResults();
     $this->assertCount(1, $results->getResultItems());
