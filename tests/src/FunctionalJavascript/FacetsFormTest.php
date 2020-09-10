@@ -122,6 +122,7 @@ class FacetsFormTest extends WebDriverTestBase {
 
     // Filter by date.
     $this->getSession()->getPage()->pressButton('Reset');
+    $this->getSession()->getPage()->selectFieldOption('created_op', 'gt');
     $this->getSession()->getPage()->fillField('created_first_date[date]', '10/25/2020');
     $this->getSession()->getPage()->pressButton('Search');
     $assert->pageTextNotContains('that yellow fruit');
@@ -214,8 +215,8 @@ class FacetsFormTest extends WebDriverTestBase {
 
     // Assert the date field elements.
     $assert->fieldExists('created_op');
+    $this->assertFalse($this->getSession()->getPage()->findField('created_first_date[date]')->isVisible());
     $this->assertFalse($this->getSession()->getPage()->findField('created_second_date[date]')->isVisible());
-    $this->assertTrue($this->getSession()->getPage()->findField('created_first_date[date]')->isVisible());
 
     // Assert the multiselect has two values.
     $this->assertEquals([

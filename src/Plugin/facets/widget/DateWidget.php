@@ -64,10 +64,30 @@ class DateWidget extends ListPagesWidgetBase {
       '#title' => $facet->getName(),
       '#options' => $operators,
       '#default_value' => $this->getValueFromActiveFilters($facet, '0'),
+      '#empty_option' => $this->t('Select'),
     ];
 
     $build[$facet->id() . '_first_date_wrapper'] = [
       '#type' => 'container',
+      '#states' => [
+        'visible' => [
+          [
+            ':input[name="' . $facet->id() . '_op"]' => [
+              'value' => 'lt',
+            ],
+          ],
+          [
+            ':input[name="' . $facet->id() . '_op"]' => [
+              'value' => 'gt',
+            ],
+          ],
+          [
+            ':input[name="' . $facet->id() . '_op"]' => [
+              'value' => 'bt',
+            ],
+          ],
+        ],
+      ],
     ];
 
     $first_date_default = $this->getValueFromActiveFilters($facet, '1');
