@@ -92,7 +92,7 @@ class ListExecutionManager implements ListExecutionManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function executeList($entity): ?ListExecutionResultsResults {
+  public function executeList($entity): ?ListExecutionResults {
 
     static $executed_lists = [];
 
@@ -122,7 +122,7 @@ class ListExecutionManager implements ListExecutionManagerInterface {
     $language = $this->languageManager->getCurrentLanguage()->getId();
     $query = $list_source->getQuery($limit, $current_page, $language, $sort);
     $result = $query->execute();
-    $listExecution = new ListExecutionResultsResults($query, $result, $list_source, $wrapper);
+    $listExecution = new ListExecutionResults($query, $result, $list_source, $wrapper);
 
     $executed_lists[$entity->uuid()] = $listExecution;
 

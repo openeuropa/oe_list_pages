@@ -151,6 +151,11 @@ class ListBuilder implements ListBuilderInterface {
     $list_execution = $this->listExecutionManager->executeList($entity);
     $list_source = $list_execution->getListSource();
 
+    $plugin_wrapper = $list_execution->getListPluginWrapper();
+    $available_filters = $list_source->getAvailableFilters();
+    $list_config = $plugin_wrapper->getConfiguration();
+    $exposed_filters = $list_config['exposed_filters'];
+    $ignored_filters = array_diff(array_keys($available_filters), array_keys($exposed_filters));
     if (!$list_source) {
       return $build;
     }

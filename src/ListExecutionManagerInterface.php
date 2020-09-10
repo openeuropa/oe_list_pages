@@ -17,9 +17,9 @@ interface ListExecutionManagerInterface {
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The entity.
    *
-   * @return \Drupal\oe_list_pages\ListExecutionResultsResults
+   * @return \Drupal\oe_list_pages\ListExecutionResults
    *   The list execution.
    */
-  public function executeList(EntityInterface $entity): ?ListExecutionResultsResults;
+  public function executeList(EntityInterface $entity): ?ListExecutionResults;
 
 }

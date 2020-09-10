@@ -13,7 +13,7 @@ use Drupal\search_api\Query\ResultSetInterface;
  * Used to store information about query, search api results and original list
  * source.
  */
-class ListExecutionResultsResults implements ListExecutionResultsInterface {
+class ListExecutionResults implements ListExecutionResultsInterface {
 
   /**
    * The query.
