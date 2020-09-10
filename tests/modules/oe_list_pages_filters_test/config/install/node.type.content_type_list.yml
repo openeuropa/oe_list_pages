@@ -3,8 +3,12 @@ status: true
 dependencies:
   module:
     - emr
-name: 'Content type two'
-type: content_type_two
+third_party_settings:
+  emr:
+    entity_meta_bundles:
+      - oe_list_page
+name: 'List page'
+type: content_type_list
 description: ''
 help: ''
 new_revision: true

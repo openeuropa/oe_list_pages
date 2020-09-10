@@ -1,0 +1,13 @@
+<?php
+
+declare(strict_types = 1);
+
+/**
+ * Implements hook_install().
+ */
+function oe_list_pages_filters_test_install() {
+  $installer = \Drupal::service('emr.installer');
+  $installer->installEntityMetaTypeOnContentEntityType('oe_list_page', 'node', [
+    'content_type_list',
+  ]);
+}
