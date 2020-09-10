@@ -4,7 +4,9 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\oe_list_pages\Kernel;
 
+use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\oe_list_pages\ListSourceFactory;
+use Drupal\search_api\Item\Field;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -77,6 +79,130 @@ class ListsQueryTest extends ListsSourceBaseTest {
     ];
 
     $this->assertEquals($expected_facets_category, $default_facets['category']);
+  }
+
+  /**
+   * Tests the query functionality for multilingual fallback.
+   */
+  public function testQueryMultilingual(): void {
+    ConfigurableLanguage::createFromLangcode('es')->save();
+    ConfigurableLanguage::createFromLangcode('pt-pt')->save();
+
+    // Another list for another bundle.
+    $item_list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
+    $index = $item_list->getIndex();
+    $field_lang = new Field($index, 'language_with_fallback');
+    $field_lang->setType('string');
+    $field_lang->setPropertyPath('language_with_fallback');
+    // $field_lang->setDatasourceId('entity:entity_test_mulrev_changed');
+    $field_lang->setLabel('Language (with fallback)');
+    $index->addField($field_lang);
+    $processor = \Drupal::getContainer()
+      ->get('search_api.plugin_helper')
+      ->createProcessorPlugin($this->index, 'language_with_fallback');
+    $index->addProcessor($processor);
+    $index->setOption('index_directly', TRUE);
+    $index->save();
+
+    // Create test content and index it.
+    $this->createTranslatedTestContent('item');
+    $index->indexItems();
+
+    /** @var \Drupal\search_api\Query\QueryInterface $default_query */
+    $item_query_no_lang = $item_list->getQuery();
+    $item_query_en = $item_list->getQuery(0, 0, 'en');
+    $item_query_es = $item_list->getQuery(0, 0, 'es');
+    $item_query_pt = $item_list->getQuery(0, 0, 'pt-pt');
+
+    $item_query_no_lang->execute();
+    $item_query_en->execute();
+    $item_query_es->execute();
+    $item_query_pt->execute();
+
+    /** @var \Drupal\search_api\Query\ResultSetInterface $item_results_no_lang */
+    $item_results_no_lang = $item_query_no_lang->getResults();
+    /** @var \Drupal\search_api\Query\ResultSetInterface $item_results_en */
+    $item_results_en = $item_query_en->getResults();
+    /** @var \Drupal\search_api\Query\ResultSetInterface $item_results_es */
+    $item_results_es = $item_query_es->getResults();
+    /** @var \Drupal\search_api\Query\ResultSetInterface $item_results_pt */
+    $item_results_pt = $item_query_pt->getResults();
+
+    // Assert results.
+    $this->assertEquals(6, $item_results_no_lang->getResultCount());
+    $this->assertCount(6, $item_results_no_lang->getResultItems());
+
+    $this->assertEquals(4, $item_results_en->getResultCount());
+    $this->assertCount(4, $item_results_en->getResultItems());
+
+    $this->assertEquals(4, $item_results_es->getResultCount());
+    $this->assertCount(4, $item_results_es->getResultItems());
+
+    $this->assertEquals(4, $item_results_pt->getResultCount());
+    $this->assertCount(4, $item_results_pt->getResultItems());
+
+    $facets_en = $item_results_en->getExtraData('search_api_facets');
+    $facets_es = $item_results_es->getExtraData('search_api_facets');
+    $facets_pt = $item_results_pt->getExtraData('search_api_facets');
+    $expected_facets_category['en'] = [
+      [
+        'count' => 1,
+        'filter' => '"first"',
+      ],
+      [
+        'count' => 1,
+        'filter' => '"Portugues"',
+      ],
+      [
+        'count' => 1,
+        'filter' => '"second"',
+      ],
+      [
+        'count' => 1,
+        'filter' => '"third"',
+      ],
+    ];
+    $expected_facets_category['es'] = [
+      [
+        'count' => 1,
+        'filter' => '"Portugues"',
+      ],
+      [
+        'count' => 1,
+        'filter' => '"primero"',
+      ],
+      [
+        'count' => 1,
+        'filter' => '"segundo"',
+      ],
+      [
+        'count' => 1,
+        'filter' => '"third"',
+      ],
+    ];
+
+    $expected_facets_category['pt'] = [
+      [
+        'count' => 1,
+        'filter' => '"first"',
+      ],
+      [
+        'count' => 1,
+        'filter' => '"Portugues"',
+      ],
+      [
+        'count' => 1,
+        'filter' => '"second"',
+      ],
+      [
+        'count' => 1,
+        'filter' => '"third"',
+      ],
+    ];
+
+    $this->assertEquals($expected_facets_category['en'], $facets_en['category']);
+    $this->assertEquals($expected_facets_category['es'], $facets_es['category']);
+    $this->assertEquals($expected_facets_category['pt'], $facets_pt['category']);
   }
 
   /**
@@ -156,6 +282,44 @@ class ListsQueryTest extends ListsSourceBaseTest {
       'foo bar baz 2',
       'foo bar baz 1',
     ], $titles);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function createTranslatedTestContent(string $bundle, array $values = []): void {
+    $names = [
+      ['en' => 'first', 'es' => 'primero'],
+      ['en' => 'second', 'es' => 'segundo'],
+      ['en' => 'third'],
+    ];
+
+    // Add new entities with translations.
+    $entity_test_storage = \Drupal::entityTypeManager()->getStorage('entity_test_mulrev_changed');
+    for ($i = 0; $i <= count($names) - 1; $i++) {
+      $entity = $entity_test_storage->create([
+        'name' => $names[$i]['en'],
+        'category' => $names[$i]['en'],
+        'type' => $bundle,
+      ]);
+
+      if (!empty($names[$i]['es'])) {
+        $entity->addTranslation('es', ['category' => $names[$i]['es'], 'name' => $names[$i]['es']]);
+      }
+
+      $entity->save();
+    }
+
+    // Add a last item in a different default language.
+    $entity_test_storage = \Drupal::entityTypeManager()
+      ->getStorage('entity_test_mulrev_changed');
+    $entity = $entity_test_storage->create([
+      'name' => 'Portugues',
+      'category' => 'Portugues',
+      'langcode' => 'pt-pt',
+      'type' => $bundle,
+    ]);
+    $entity->save();
   }
 
   /**

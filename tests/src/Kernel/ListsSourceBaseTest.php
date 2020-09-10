@@ -25,6 +25,7 @@ class ListsSourceBaseTest extends EntityKernelTestBaseTest {
     'entity_reference_revisions',
     'oe_list_pages',
     'node',
+    'language',
     'emr',
     'emr_node',
     'search_api',
