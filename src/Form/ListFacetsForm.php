@@ -115,6 +115,8 @@ class ListFacetsForm extends FormBase {
       '#op' => 'reset',
     ];
 
+    $form['#cache']['tags'][] = 'config:facets_facet_list';
+
     return $form;
   }
 
