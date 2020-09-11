@@ -148,6 +148,10 @@ class DateWidget extends ListPagesWidgetBase {
 
     $values = [];
     $operator = $form_state->getValue($value_keys['operator'], NULL);
+    if (!$operator) {
+      return [];
+    }
+
     $values[] = $operator;
     if ($operator !== 'bt') {
       unset($value_keys['second_date']);
