@@ -304,7 +304,10 @@ class ListsQueryTest extends ListsSourceBaseTest {
       ]);
 
       if (!empty($names[$i]['es'])) {
-        $entity->addTranslation('es', ['category' => $names[$i]['es'], 'name' => $names[$i]['es']]);
+        $entity->addTranslation('es', [
+          'category' => $names[$i]['es'],
+          'name' => $names[$i]['es'],
+        ]);
       }
 
       $entity->save();

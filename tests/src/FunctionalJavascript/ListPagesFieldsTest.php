@@ -52,7 +52,7 @@ class ListPagesFieldsTest extends WebDriverTestBase {
     $this->clickLink('List Page');
     $page = $this->getSession()->getPage();
     $page->selectFieldOption('Source bundle', 'Content type two');
-    $this->assertSession()->assertWaitOnAjaxRequest();;
+    $this->assertSession()->assertWaitOnAjaxRequest();
     $page->checkField('Select two');
     $page->fillField('Title', 'List page for ct2');
     $page->pressButton('Save');
