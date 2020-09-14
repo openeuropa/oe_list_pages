@@ -4,10 +4,8 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages;
 
-use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\Language\LanguageManagerInterface;
-use Drupal\Core\Pager\PagerManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
@@ -37,27 +35,6 @@ class ListExecutionManager implements ListExecutionManagerInterface {
   protected $entityTypeManager;
 
   /**
-   * The pager manager.
-   *
-   * @var \Drupal\Core\Pager\PagerManagerInterface
-   */
-  protected $pagerManager;
-
-  /**
-   * The pager.
-   *
-   * @var \Drupal\Core\Pager\PagerManagerInterface
-   */
-  protected $pager;
-
-  /**
-   * The entity repository.
-   *
-   * @var \Drupal\Core\Entity\EntityRepositoryInterface
-   */
-  protected $entityRepository;
-
-  /**
    * The language manager.
    *
    * @var \Drupal\Core\Language\LanguageManagerInterface
@@ -71,20 +48,14 @@ class ListExecutionManager implements ListExecutionManagerInterface {
    *   The list source factory.
    * @param \Drupal\Core\Entity\EntityTypeManager $entityTypeManager
    *   The entity type manager.
-   * @param \Drupal\Core\Pager\PagerManagerInterface $pager
-   *   The pager.
-   * @param \Drupal\Core\Entity\EntityRepositoryInterface $entityRepository
-   *   The entity repository.
    * @param \Symfony\Component\HttpFoundation\RequestStack $requestStack
    *   The request stack.
    * @param \Drupal\Core\Language\LanguageManagerInterface $languageManager
    *   The language manager.
    */
-  public function __construct(ListSourceFactoryInterface $listSourceFactory, EntityTypeManager $entityTypeManager, PagerManagerInterface $pager, EntityRepositoryInterface $entityRepository, RequestStack $requestStack, LanguageManagerInterface $languageManager) {
+  public function __construct(ListSourceFactoryInterface $listSourceFactory, EntityTypeManager $entityTypeManager, RequestStack $requestStack, LanguageManagerInterface $languageManager) {
     $this->listSourceFactory = $listSourceFactory;
     $this->entityTypeManager = $entityTypeManager;
-    $this->pager = $pager;
-    $this->entityRepository = $entityRepository;
     $this->requestStack = $requestStack;
     $this->languageManager = $languageManager;
   }
@@ -93,8 +64,11 @@ class ListExecutionManager implements ListExecutionManagerInterface {
    * {@inheritdoc}
    */
   public function executeList($entity): ?ListExecutionResults {
+    $executed_lists = &drupal_static(__FUNCTION__);
 
-    static $executed_lists = [];
+    if (!isset($executed_lists)) {
+      $executed_lists = [];
+    }
 
     if (!empty($executed_lists[$entity->uuid()])) {
       return $executed_lists[$entity->uuid()];

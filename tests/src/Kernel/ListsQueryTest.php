@@ -94,7 +94,6 @@ class ListsQueryTest extends ListsSourceBaseTest {
     $field_lang = new Field($index, 'language_with_fallback');
     $field_lang->setType('string');
     $field_lang->setPropertyPath('language_with_fallback');
-    // $field_lang->setDatasourceId('entity:entity_test_mulrev_changed');
     $field_lang->setLabel('Language (with fallback)');
     $index->addField($field_lang);
     $processor = \Drupal::getContainer()

@@ -71,7 +71,6 @@ class ListPagesFieldsTest extends WebDriverTestBase {
     $node = Node::create($values);
     $node->save();
 
-    $date = new DrupalDateTime('20-11-2020');
     $values = [
       'title' => 'that red fruit',
       'type' => 'content_type_two',

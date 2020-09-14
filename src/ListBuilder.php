@@ -25,13 +25,6 @@ class ListBuilder implements ListBuilderInterface {
   protected $entityTypeManager;
 
   /**
-   * The pager manager.
-   *
-   * @var \Drupal\Core\Pager\PagerManagerInterface
-   */
-  protected $pagerManager;
-
-  /**
    * The pager.
    *
    * @var \Drupal\Core\Pager\PagerManagerInterface
