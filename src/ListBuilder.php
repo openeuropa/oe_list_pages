@@ -105,7 +105,7 @@ class ListBuilder implements ListBuilderInterface {
     $bundle = $storage->load($wrapper->getSourceEntityBundle());
     $view_mode = $bundle->getThirdPartySetting('oe_list_pages', 'default_view_mode', 'teaser');
     $cache->addCacheableDependency($query);
-    $cache->addCacheableDependency($bundle_entity_type);
+    $cache->addCacheableDependency($bundle);
     $cache->addCacheTags(['search_api_list:' . $query->getIndex()->id()]);
 
     if (!$result->getResultCount()) {
