@@ -36,9 +36,9 @@ class DateStatusTest extends ListsSourceBaseTest {
   }
 
   /**
-   * Tests widget with status processor.
+   * Tests the widget with a configured default value.
    */
-  public function testWidgetFormValue(): void {
+  public function testWithConfiguredDefaults(): void {
     $default_list_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'item');
     // Configuration options for the processor.
     $processor_options = [

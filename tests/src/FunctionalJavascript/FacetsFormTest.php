@@ -7,12 +7,17 @@ namespace Drupal\Tests\oe_list_pages\Functional;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\node\Entity\Node;
+use Drupal\oe_list_pages\ListSourceFactory;
+use Drupal\oe_list_pages\Plugin\facets\query_type\DateStatus;
 use Drupal\search_api\Entity\Index;
+use Drupal\Tests\oe_list_pages\Traits\FacetsTestTrait;
 
 /**
  * Tests the list facets form.
  */
 class FacetsFormTest extends WebDriverTestBase {
+
+  use FacetsTestTrait;
 
   /**
    * {@inheritdoc}
@@ -86,6 +91,7 @@ class FacetsFormTest extends WebDriverTestBase {
    * Tests the facets list form.
    */
   public function testFacetsForm(): void {
+    // Navigate to the form page.
     $this->drupalGet('/facets-form-test');
     $this->assertSession()->pageTextContains('Facets form test');
 
@@ -122,6 +128,7 @@ class FacetsFormTest extends WebDriverTestBase {
 
     // Filter by date.
     $this->getSession()->getPage()->pressButton('Reset');
+    $this->getSession()->getPage()->selectFieldOption('created_op', 'gt');
     $this->getSession()->getPage()->fillField('created_first_date[date]', '10/25/2020');
     $this->getSession()->getPage()->pressButton('Search');
     $assert->pageTextNotContains('that yellow fruit');
@@ -175,6 +182,85 @@ class FacetsFormTest extends WebDriverTestBase {
   }
 
   /**
+   * Tests the DateStatus facet processor and the widget default values.
+   */
+  public function testDateStatusFacet(): void {
+    $date = new DrupalDateTime('now');
+    $date->modify('-1 month');
+    $values = [
+      'title' => 'the node from the past',
+      'type' => 'content_type_one',
+      'body' => 'the past body',
+      'created' => $date->getTimestamp(),
+    ];
+
+    $node = Node::create($values);
+    $node->save();
+
+    $date->modify('+ 2 months');
+    $values = [
+      'title' => 'the node from the future',
+      'type' => 'content_type_one',
+      'body' => 'the future body',
+      'created' => $date->getTimestamp(),
+    ];
+
+    $node = Node::create($values);
+    $node->save();
+
+    // Index the nodes.
+    /** @var \Drupal\search_api\Entity\Index $index */
+    $index = Index::load('node');
+    $index->indexItems();
+
+    // Go to the form and assert we see both nodes.
+    $this->drupalGet('/facets-form-test');
+    $this->assertSession()->pageTextContains('Facets form test');
+
+    $assert = $this->assertSession();
+    $assert->pageTextContains('the node from the past');
+    $assert->pageTextContains('the node from the future');
+
+    // Create the status facet, defaulting to UPCOMING.
+    $source_id = ListSourceFactory::generateFacetSourcePluginId('node', 'content_type_one');
+    $facet = $this->createFacet('created', $source_id, '', 'oe_list_pages_multiselect');
+    $facet->set('name', 'Status');
+    $processor_options = [
+      'default_status' => DateStatus::UPCOMING,
+      'upcoming_label' => 'Upcoming',
+      'past_label' => 'Past',
+    ];
+    $facet->addProcessor([
+      'processor_id' => 'oe_list_pages_date_status_processor',
+      'weights' => ['pre_query' => 60, 'build' => 35],
+      'settings' => $processor_options,
+    ]);
+    $facet->save();
+
+    // Go back to the form and assert we don't see the past node anymore.
+    $this->drupalGet('/facets-form-test');
+    $assert->pageTextNotContains('the node from the past');
+    $assert->pageTextContains('the node from the future');
+    $this->assertEquals([
+      'Upcoming',
+      'Past',
+    ], array_values($this->getSelectOptions('Status')));
+    // The widget element has the UPCOMING option as pre-selected.
+    $this->assertEquals('selected', $this->getSession()->getPage()->findField('Status')->find('css', 'option[value="upcoming"]')->getAttribute('selected'));
+    $this->assertNull($this->getSession()->getPage()->findField('Status')->find('css', 'option[value="past"]')->getAttribute('selected'));
+
+    // Unset the Status field and search by the Body.
+    $this->getSession()->getPage()->findField('Status')->setValue([]);
+    $this->getSession()->getPage()->fillField('Body', 'past');
+    $this->getSession()->getPage()->pressButton('Search');
+    $assert->pageTextContains('the node from the past');
+    $assert->pageTextNotContains('the node from the future');
+    // None of the Status values are pre-selected.
+    $this->assertNull($this->getSession()->getPage()->findField('Status')->find('css', 'option[value="upcoming"]')->getAttribute('selected'));
+    $this->assertNull($this->getSession()->getPage()->findField('Status')->find('css', 'option[value="past"]')->getAttribute('selected'));
+  }
+
+  /**
    * Tests the facets list form with ignored filters.
    */
   public function testFacetsIgnoredFiltersForm(): void {
@@ -214,8 +300,8 @@ class FacetsFormTest extends WebDriverTestBase {
 
     // Assert the date field elements.
     $assert->fieldExists('created_op');
+    $this->assertFalse($this->getSession()->getPage()->findField('created_first_date[date]')->isVisible());
     $this->assertFalse($this->getSession()->getPage()->findField('created_second_date[date]')->isVisible());
-    $this->assertTrue($this->getSession()->getPage()->findField('created_first_date[date]')->isVisible());
 
     // Assert the multiselect has two values.
     $this->assertEquals([
