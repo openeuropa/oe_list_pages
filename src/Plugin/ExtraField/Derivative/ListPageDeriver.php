@@ -55,11 +55,6 @@ class ListPageDeriver extends DeriverBase implements ContainerDeriverInterface {
    * {@inheritdoc}
    */
   public function getDerivativeDefinitions($base_plugin_definition) {
-    $plugin_id = $base_plugin_definition['id'];
-
-    // Add the original, non-derived, plugin to the list.
-    $this->derivatives[$plugin_id] = $base_plugin_definition;
-
     $entity_types = $this->entityTypeManager->getDefinitions();
     foreach ($entity_types as $entity_type) {
       if (!($entity_type instanceof ContentEntityTypeInterface) || empty($entity_type->getBundleEntityType())) {
