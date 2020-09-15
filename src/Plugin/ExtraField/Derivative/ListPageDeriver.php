@@ -71,6 +71,7 @@ class ListPageDeriver extends DeriverBase implements ContainerDeriverInterface {
         }
 
         $key = $entity_type->id() . ':' . $bundle_id;
+        $this->derivatives[$key] = $base_plugin_definition;
         $this->derivatives[$key]['bundles'] = [$entity_type->id() . '.' . $bundle_id];
         $this->derivatives[$key]['derived'] = TRUE;
       }

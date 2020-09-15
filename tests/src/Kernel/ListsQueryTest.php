@@ -284,7 +284,10 @@ class ListsQueryTest extends ListsSourceBaseTest {
     \Drupal::requestStack()->push($request);
 
     /** @var \Drupal\search_api\Query\QueryInterface $default_query */
-    $query = $this->list->getQuery(['limit' => 2, 'ignored_filters' => [$facet_id]]);
+    $query = $this->list->getQuery([
+      'limit' => 2,
+      'ignored_filters' => [$facet_id],
+    ]);
     $query->execute();
     /** @var \Drupal\search_api\Query\ResultSetInterface $results */
     $results = $query->getResults();
@@ -299,7 +302,10 @@ class ListsQueryTest extends ListsSourceBaseTest {
     $search_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
     $facet_id = $this->generateFacetId('category', $search_id);
     /** @var \Drupal\search_api\Query\QueryInterface $default_query */
-    $query = $this->list->getQuery(['limit' => 2, 'preset_filters' => [$facet_id => ['third class']]]);
+    $query = $this->list->getQuery([
+      'limit' => 2,
+      'preset_filters' => [$facet_id => ['third class']],
+    ]);
     $query->execute();
     /** @var \Drupal\search_api\Query\ResultSetInterface $results */
     $results = $query->getResults();
@@ -333,7 +339,10 @@ class ListsQueryTest extends ListsSourceBaseTest {
       'foo bar baz 5',
     ], $titles);
 
-    $query = $this->list->getQuery(['limit' => 10, 'sort' => ['name' => 'DESC']]);
+    $query = $this->list->getQuery([
+      'limit' => 10,
+      'sort' => ['name' => 'DESC'],
+    ]);
     $query->execute();
     /** @var \Drupal\search_api\Query\ResultSetInterface $results */
     $results = $query->getResults();

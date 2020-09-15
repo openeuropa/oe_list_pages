@@ -1,0 +1,29 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.content_type_list
+  module:
+    - user
+id: node.content_type_list.default
+targetEntityType: node
+bundle: content_type_list
+mode: default
+content:
+  'extra_field_oe_list_page_filters:node:content_type_list':
+    weight: 2
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  'extra_field_oe_list_page_results:node:content_type_list':
+    weight: 1
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  links:
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden:
+  search_api_excerpt: true
