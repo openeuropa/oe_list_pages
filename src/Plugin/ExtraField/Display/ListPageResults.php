@@ -15,7 +15,7 @@ use Drupal\Core\Entity\ContentEntityInterface;
  *   deriver = "Drupal\oe_list_pages\Plugin\ExtraField\Derivative\ListPageDeriver",
  * )
  */
-class ListPageResults extends ListPageBaseFieldDisplay {
+class ListPageResults extends ListPageExtraFieldBase {
 
   /**
    * {@inheritdoc}

@@ -11,9 +11,9 @@ use Drupal\oe_list_pages\ListBuilderInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Base field for list page extra fields.
+ * Base class for list page extra fields.
  */
-abstract class ListPageBaseFieldDisplay extends ExtraFieldDisplayFormattedBase implements ContainerFactoryPluginInterface {
+abstract class ListPageExtraFieldBase extends ExtraFieldDisplayFormattedBase implements ContainerFactoryPluginInterface {
 
   use StringTranslationTrait;
 
