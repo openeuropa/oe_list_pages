@@ -37,6 +37,7 @@ class ListPagesFieldsTest extends WebDriverTestBase {
    * Test fields in a list page content type.
    */
   public function testListPagePluginFilters(): void {
+    // Create list for content type one.
     $this->drupalLogin($this->rootUser);
     $this->drupalGet('/node/add/content_type_list');
     $this->clickLink('List Page');
@@ -48,6 +49,7 @@ class ListPagesFieldsTest extends WebDriverTestBase {
     $page->fillField('Title', 'List page for ct1');
     $page->pressButton('Save');
 
+    // Create list for content type two.
     $this->drupalGet('/node/add/content_type_list');
     $this->clickLink('List Page');
     $page = $this->getSession()->getPage();
@@ -67,10 +69,8 @@ class ListPagesFieldsTest extends WebDriverTestBase {
       'field_select_one' => 'test1',
       'created' => $date->getTimestamp(),
     ];
-
     $node = Node::create($values);
     $node->save();
-
     $values = [
       'title' => 'that red fruit',
       'type' => 'content_type_two',
@@ -79,26 +79,22 @@ class ListPagesFieldsTest extends WebDriverTestBase {
       'status' => NodeInterface::PUBLISHED,
       'created' => $date->getTimestamp(),
     ];
-
     $node = Node::create($values);
     $node->save();
-
-    // Index the nodes.
     /** @var \Drupal\search_api\Entity\Index $index */
     $index = Index::load('node');
+    // Index the nodes.
     $index->indexItems();
 
+    // Check fields are visible in list nodes.
     $this->drupalGet('/node/1');
     $page = $this->getSession()->getPage();
     $this->assertSession()->fieldExists('Select one');
     $this->assertSession()->fieldExists('Published');
     $this->assertSession()->fieldNotExists('Created');
-
     $assert = $this->assertSession();
-
     $assert->pageTextContains('that yellow fruit');
     $assert->pageTextNotContains('that red fruit');
-
     $this->drupalGet('/node/2');
     $this->assertSession()->fieldExists('Select two');
     $this->assertSession()->fieldNotExists('Published');

@@ -8,10 +8,7 @@ use Drupal\search_api\Query\QueryInterface;
 use Drupal\search_api\Query\ResultSetInterface;
 
 /**
- * List source execution results value object.
- *
- * Used to store information about query, search api results and original list
- * source.
+ * Default list execution results implementation.
  */
 class ListExecutionResults implements ListExecutionResultsInterface {
 
@@ -23,7 +20,7 @@ class ListExecutionResults implements ListExecutionResultsInterface {
   protected $query;
 
   /**
-   * The resultset interface.
+   * The Search API results.
    *
    * @var \Drupal\search_api\Query\ResultSetInterface
    */
@@ -44,7 +41,7 @@ class ListExecutionResults implements ListExecutionResultsInterface {
   protected $listPluginWrapper;
 
   /**
-   * ListExecution constructor.
+   * ListExecutionResults constructor.
    *
    * @param \Drupal\search_api\Query\QueryInterface $query
    *   The query.

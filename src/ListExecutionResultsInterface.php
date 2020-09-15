@@ -10,7 +10,8 @@ use Drupal\search_api\Query\ResultSetInterface;
 /**
  * Interface for ListExecution results value object.
  *
- * Used to store information on executed queries originated from list sources.
+ * Used to store information about query, search api results and original list
+ * source.
  */
 interface ListExecutionResultsInterface {
 

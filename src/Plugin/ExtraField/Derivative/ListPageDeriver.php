@@ -15,14 +15,14 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class ListPageDeriver extends DeriverBase implements ContainerDeriverInterface {
 
   /**
-   * The entity_type.manager service.
+   * The entity type manager.
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
 
   /**
-   * The entity_type.bundle.info service.
+   * The entity type bundle info.
    *
    * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface
    */
@@ -53,9 +53,6 @@ class ListPageDeriver extends DeriverBase implements ContainerDeriverInterface {
 
   /**
    * {@inheritdoc}
-   *
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function getDerivativeDefinitions($base_plugin_definition) {
     $plugin_id = $base_plugin_definition['id'];
@@ -79,7 +76,6 @@ class ListPageDeriver extends DeriverBase implements ContainerDeriverInterface {
         }
 
         $key = $entity_type->id() . ':' . $bundle_id;
-        $this->derivatives[$key] = $base_plugin_definition;
         $this->derivatives[$key]['bundles'] = [$entity_type->id() . '.' . $bundle_id];
         $this->derivatives[$key]['derived'] = TRUE;
       }

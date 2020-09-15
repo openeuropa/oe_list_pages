@@ -9,7 +9,7 @@ use Drupal\Core\Language\LanguageManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
- * Handles the list pages execution.
+ * Default list execution manager implementation.
  */
 class ListExecutionManager implements ListExecutionManagerInterface {
 
@@ -64,11 +64,7 @@ class ListExecutionManager implements ListExecutionManagerInterface {
    * {@inheritdoc}
    */
   public function executeList($entity): ?ListExecutionResults {
-    $executed_lists = &drupal_static(__FUNCTION__);
-
-    if (!isset($executed_lists)) {
-      $executed_lists = [];
-    }
+    static $executed_lists = [];
 
     if (!empty($executed_lists[$entity->uuid()])) {
       return $executed_lists[$entity->uuid()];
@@ -83,6 +79,7 @@ class ListExecutionManager implements ListExecutionManagerInterface {
     $wrapper = $entity_meta->getWrapper();
     $list_source = $this->listSourceFactory->get($wrapper->getSourceEntityType(), $wrapper->getSourceEntityBundle());
     if (!$list_source) {
+      $executed_lists[$entity->uuid()] = NULL;
       return NULL;
     }
 
@@ -96,11 +93,11 @@ class ListExecutionManager implements ListExecutionManagerInterface {
     $language = $this->languageManager->getCurrentLanguage()->getId();
     $query = $list_source->getQuery($limit, $current_page, $language, $sort);
     $result = $query->execute();
-    $listExecution = new ListExecutionResults($query, $result, $list_source, $wrapper);
+    $list_execution = new ListExecutionResults($query, $result, $list_source, $wrapper);
 
-    $executed_lists[$entity->uuid()] = $listExecution;
+    $executed_lists[$entity->uuid()] = $list_execution;
 
-    return $listExecution;
+    return $list_execution;
   }
 
 }

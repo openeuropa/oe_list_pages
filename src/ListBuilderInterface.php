@@ -7,7 +7,10 @@ namespace Drupal\oe_list_pages;
 use Drupal\Core\Entity\ContentEntityInterface;
 
 /**
- * Defines the interface for ListBuilder.
+ * Defines the interface for list builders.
+ *
+ * List builders are responsible for building the rendering element for a given
+ * executed list.
  */
 interface ListBuilderInterface {
 

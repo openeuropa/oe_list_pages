@@ -13,7 +13,7 @@ use Drupal\Core\Pager\PagerManagerInterface;
 use Drupal\oe_list_pages\Form\ListFacetsForm;
 
 /**
- * Handles the list pages component building.
+ * Default list builder implementation.
  */
 class ListBuilder implements ListBuilderInterface {
 
@@ -53,7 +53,7 @@ class ListBuilder implements ListBuilderInterface {
   protected $listExecutionManager;
 
   /**
-   * ListManager constructor.
+   * ListBuilder constructor.
    *
    * @param \Drupal\oe_list_pages\ListExecutionManagerInterface $listExecutionManager
    *   The list execution manager.
@@ -79,12 +79,16 @@ class ListBuilder implements ListBuilderInterface {
    */
   public function buildList(ContentEntityInterface $entity): array {
 
-    $list_execution = $this->listExecutionManager->executeList($entity);
-
     $build = [];
-
     $cache = new CacheableMetadata();
     $cache->addCacheTags($entity->getEntityType()->getListCacheTags());
+
+    $list_execution = $this->listExecutionManager->executeList($entity);
+    if (empty($list_execution)) {
+      $cache->applyTo($build);
+      return $build;
+    }
+
     $list_source = $list_execution->getListSource();
     if (!$list_source) {
       $cache->applyTo($build);
@@ -101,6 +105,7 @@ class ListBuilder implements ListBuilderInterface {
     $bundle = $storage->load($wrapper->getSourceEntityBundle());
     $view_mode = $bundle->getThirdPartySetting('oe_list_pages', 'default_view_mode', 'teaser');
     $cache->addCacheableDependency($query);
+    $cache->addCacheableDependency($bundle_entity_type);
     $cache->addCacheTags(['search_api_list:' . $query->getIndex()->id()]);
 
     if (!$result->getResultCount()) {
@@ -144,6 +149,10 @@ class ListBuilder implements ListBuilderInterface {
     $list_execution = $this->listExecutionManager->executeList($entity);
     $list_source = $list_execution->getListSource();
 
+    if (!$list_source) {
+      return $build;
+    }
+
     $plugin_wrapper = $list_execution->getListPluginWrapper();
     $available_filters = $list_source->getAvailableFilters();
     $list_config = $plugin_wrapper->getConfiguration();
@@ -157,10 +166,6 @@ class ListBuilder implements ListBuilderInterface {
     // If filters are selected then ignore the non-selected.
     if (!empty($available_filters) && !empty($exposed_filters)) {
       $ignored_filters = array_diff(array_keys($available_filters), array_keys($exposed_filters));
-    }
-
-    if (!$list_source) {
-      return $build;
     }
 
     $build['form'] = $this->formBuilder->getForm(ListFacetsForm::class, $list_source, $ignored_filters);
