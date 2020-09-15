@@ -11,11 +11,11 @@ use Drupal\node\NodeInterface;
 use Drupal\search_api\Entity\Index;
 
 /**
- * Tests the List pages fields.
+ * Tests the list page filters.
  *
  * @group oe_list_pages
  */
-class ListPagesFieldsTest extends WebDriverTestBase {
+class ListPagesFiltersTest extends WebDriverTestBase {
 
   /**
    * {@inheritdoc}
@@ -87,15 +87,16 @@ class ListPagesFieldsTest extends WebDriverTestBase {
     $index->indexItems();
 
     // Check fields are visible in list nodes.
-    $this->drupalGet('/node/1');
-    $page = $this->getSession()->getPage();
+    $node = $this->drupalGetNodeByTitle('List page for ct1');
+    $this->drupalGet($node->toUrl());
     $this->assertSession()->fieldExists('Select one');
     $this->assertSession()->fieldExists('Published');
     $this->assertSession()->fieldNotExists('Created');
     $assert = $this->assertSession();
     $assert->pageTextContains('that yellow fruit');
     $assert->pageTextNotContains('that red fruit');
-    $this->drupalGet('/node/2');
+    $node = $this->drupalGetNodeByTitle('List page for ct2');
+    $this->drupalGet($node->toUrl());
     $this->assertSession()->fieldExists('Select two');
     $this->assertSession()->fieldNotExists('Published');
     $this->assertSession()->fieldNotExists('Created');
