@@ -143,7 +143,7 @@ class ListBuilder implements ListBuilderInterface {
    * {@inheritdoc}
    */
   public function buildFiltersForm(ContentEntityInterface $entity): array {
-    $build = $ignored_filters = [];
+    $build = $ignored_filters = $exposed_filters = [];
 
     $list_execution = $this->listExecutionManager->executeList($entity);
     $list_source = $list_execution->getListSource();
@@ -155,7 +155,10 @@ class ListBuilder implements ListBuilderInterface {
     $plugin_wrapper = $list_execution->getListPluginWrapper();
     $available_filters = $list_source->getAvailableFilters();
     $list_config = $plugin_wrapper->getConfiguration();
-    $exposed_filters = $list_config['exposed_filters'];
+
+    if (!empty($list_config['exposed_filters'])) {
+      $exposed_filters = $list_config['exposed_filters'];
+    }
 
     // By default ignore all filters.
     if (!empty($available_filters)) {
