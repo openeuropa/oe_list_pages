@@ -8,6 +8,7 @@ use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\oe_list_pages\ListSourceFactory;
 use Drupal\search_api\Item\Field;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 
 /**
  * Tests the List sources querying functionality.
@@ -50,7 +51,7 @@ class ListsQueryTest extends ListsSourceBaseTest {
     $default_results = $default_query->getResults();
 
     /** @var \Drupal\search_api\Query\QueryInterface $default_query */
-    $item_query = $item_list->getQuery(2);
+    $item_query = $item_list->getQuery(['limit' => 2]);
     $item_query->execute();
     /** @var \Drupal\search_api\Query\ResultSetInterface $results */
     $item_results = $item_query->getResults();
@@ -109,9 +110,9 @@ class ListsQueryTest extends ListsSourceBaseTest {
 
     /** @var \Drupal\search_api\Query\QueryInterface $default_query */
     $item_query_no_lang = $item_list->getQuery();
-    $item_query_en = $item_list->getQuery(0, 0, 'en');
-    $item_query_es = $item_list->getQuery(0, 0, 'es');
-    $item_query_pt = $item_list->getQuery(0, 0, 'pt-pt');
+    $item_query_en = $item_list->getQuery(['language' => 'en']);
+    $item_query_es = $item_list->getQuery(['language' => 'es']);
+    $item_query_pt = $item_list->getQuery(['language' => 'pt-pt']);
 
     $item_query_no_lang->execute();
     $item_query_en->execute();
@@ -216,7 +217,7 @@ class ListsQueryTest extends ListsSourceBaseTest {
     \Drupal::requestStack()->push($request);
 
     /** @var \Drupal\search_api\Query\QueryInterface $default_query */
-    $query = $this->list->getQuery(2, 0, NULL, [], [$facet_id], []);
+    $query = $this->list->getQuery(['limit' => 2, 'ignored_filters' => [$facet_id]]);
     $query->execute();
     /** @var \Drupal\search_api\Query\ResultSetInterface $results */
     $results = $query->getResults();
@@ -231,7 +232,7 @@ class ListsQueryTest extends ListsSourceBaseTest {
     $search_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
     $facet_id = $this->generateFacetId('category', $search_id);
     /** @var \Drupal\search_api\Query\QueryInterface $default_query */
-    $query = $this->list->getQuery(2, 0, NULL, [], [], [$facet_id => ['third class']]);
+    $query = $this->list->getQuery(['limit' => 2, 'preset_filters' => [$facet_id => ['third class']]]);
     $query->execute();
     /** @var \Drupal\search_api\Query\ResultSetInterface $results */
     $results = $query->getResults();
@@ -265,7 +266,7 @@ class ListsQueryTest extends ListsSourceBaseTest {
       'foo bar baz 5',
     ], $titles);
 
-    $query = $this->list->getQuery(10, 0, NULL, ['name' => 'DESC']);
+    $query = $this->list->getQuery(['limit' => 10, 'sort' => ['name' => 'DESC']]);
     $query->execute();
     /** @var \Drupal\search_api\Query\ResultSetInterface $results */
     $results = $query->getResults();
@@ -281,6 +282,46 @@ class ListsQueryTest extends ListsSourceBaseTest {
       'foo bar baz 2',
       'foo bar baz 1',
     ], $titles);
+  }
+
+  /**
+   * Tests that the options passed to the query builder are correct.
+   */
+  public function testQueryOptions(): void {
+    $item_list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
+
+    $valid = [
+      'limit' => 10,
+      'page' => 0,
+      'language' => NULL,
+      'sort' => [],
+      'ignored_filters' => [],
+      'preset_filters' => [],
+    ];
+
+    // This throws an exception if invalid.
+    $item_list->getQuery($valid);
+
+    $invalid = [
+      'limit' => 'string',
+      'page' => 'string',
+      'language' => [],
+      'sort' => 'string',
+      'ignored_filters' => 'string',
+      'preset_filters' => 'string',
+    ];
+
+    foreach ($invalid as $name => $value) {
+      $e = NULL;
+      try {
+        $item_list->getQuery([$name => $value]);
+      }
+      catch (\Exception $exception) {
+        $e = $exception;
+      }
+
+      $this->assertInstanceOf(InvalidOptionsException::class, $e, sprintf('The %s option is invalid', $name));
+    }
   }
 
   /**

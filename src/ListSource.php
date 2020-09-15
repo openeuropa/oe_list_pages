@@ -6,6 +6,7 @@ namespace Drupal\oe_list_pages;
 
 use Drupal\search_api\IndexInterface;
 use Drupal\search_api\Query\QueryInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
  * List sources are associated with a facet source.
@@ -127,13 +128,32 @@ class ListSource implements ListSourceInterface {
   /**
    * {@inheritdoc}
    */
-  public function getQuery(int $limit = 10, int $page = 0, string $language = NULL, array $sort = [], array $ignored_filters = [], array $preset_filters = []): QueryInterface {
-    $query = $this->index->query([
-      'offset' => ($limit * $page),
+  public function getQuery(array $options = []): QueryInterface {
+    $resolver = new OptionsResolver();
+    $resolver->setDefaults([
+      'limit' => 10,
+      'page' => 0,
+      'language' => NULL,
+      'sort' => [],
+      'ignored_filters' => [],
+      'preset_filters' => [],
     ]);
 
-    if ($limit) {
-      $query->setOption('limit', $limit);
+    $resolver->setAllowedTypes('limit', 'int');
+    $resolver->setAllowedTypes('page', 'int');
+    $resolver->setAllowedTypes('language', ['string', 'null']);
+    $resolver->setAllowedTypes('sort', 'array');
+    $resolver->setAllowedTypes('ignored_filters', 'array');
+    $resolver->setAllowedTypes('preset_filters', 'array');
+
+    $resolved_options = $resolver->resolve($options);
+
+    $query = $this->index->query([
+      'offset' => ($resolved_options['limit'] * $resolved_options['page']),
+    ]);
+
+    if ($resolved_options['limit']) {
+      $query->setOption('limit', $resolved_options['limit']);
     }
 
     /** @var \Drupal\search_api\IndexInterface $index */
@@ -141,11 +161,11 @@ class ListSource implements ListSourceInterface {
     $fields = $index->getFields();
 
     // Handle multilingual language fallback.
-    if ($language && in_array('language_with_fallback', array_keys($fields))) {
-      $query->addCondition('language_with_fallback', $language);
+    if ($resolved_options['language'] && in_array('language_with_fallback', array_keys($fields))) {
+      $query->addCondition('language_with_fallback', $resolved_options['language']);
     }
 
-    $query_options = new ListQueryOptions($ignored_filters, $preset_filters);
+    $query_options = new ListQueryOptions($resolved_options['ignored_filters'], $resolved_options['preset_filters']);
     $query->setOption('oe_list_page_query_options', $query_options);
     $query->setSearchId($this->getSearchId());
 
@@ -155,7 +175,7 @@ class ListSource implements ListSourceInterface {
     }
     $query->addCondition('search_api_datasource', 'entity:' . $this->getEntityType());
 
-    foreach ($sort as $name => $direction) {
+    foreach ($resolved_options['sort'] as $name => $direction) {
       $query->sort($name, $direction);
     }
 
