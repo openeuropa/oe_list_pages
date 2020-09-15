@@ -42,6 +42,13 @@ class ListExecutionManager implements ListExecutionManagerInterface {
   protected $languageManager;
 
   /**
+   * The already executed lists, keyed by entity UUID.
+   *
+   * @var \Drupal\oe_list_pages\ListExecutionResults[]
+   */
+  protected $executedLists = [];
+
+  /**
    * ListManager constructor.
    *
    * @param \Drupal\oe_list_pages\ListSourceFactoryInterface $listSourceFactory
@@ -64,10 +71,8 @@ class ListExecutionManager implements ListExecutionManagerInterface {
    * {@inheritdoc}
    */
   public function executeList($entity): ?ListExecutionResults {
-    static $executed_lists = [];
-
-    if (!empty($executed_lists[$entity->uuid()])) {
-      return $executed_lists[$entity->uuid()];
+    if (!empty($this->executedLists[$entity->uuid()])) {
+      return $this->executedLists[$entity->uuid()];
     }
 
     // The number of items to show on a page.
@@ -79,7 +84,7 @@ class ListExecutionManager implements ListExecutionManagerInterface {
     $wrapper = $entity_meta->getWrapper();
     $list_source = $this->listSourceFactory->get($wrapper->getSourceEntityType(), $wrapper->getSourceEntityBundle());
     if (!$list_source) {
-      $executed_lists[$entity->uuid()] = NULL;
+      $this->executedLists[$entity->uuid()] = NULL;
       return NULL;
     }
 
@@ -101,7 +106,7 @@ class ListExecutionManager implements ListExecutionManagerInterface {
     $result = $query->execute();
     $list_execution = new ListExecutionResults($query, $result, $list_source, $wrapper);
 
-    $executed_lists[$entity->uuid()] = $list_execution;
+    $this->executedLists[$entity->uuid()] = $list_execution;
 
     return $list_execution;
   }
