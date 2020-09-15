@@ -108,12 +108,15 @@ class ListBuilder implements ListBuilderInterface {
     $cache->addCacheableDependency($bundle);
     $cache->addCacheTags(['search_api_list:' . $query->getIndex()->id()]);
 
+    $this->pager->createPager($result->getResultCount(), $query->getOption('limit'));
+    $build['pager'] = [
+      '#type' => 'pager',
+    ];
+
     if (!$result->getResultCount()) {
       $cache->applyTo($build);
       return $build;
     }
-
-    $this->pager->createPager($result->getResultCount(), $query->getOption('limit'));
 
     $items = [];
 
@@ -129,10 +132,6 @@ class ListBuilder implements ListBuilderInterface {
     $build['list'] = [
       '#theme' => 'item_list__oe_list_pages_results',
       '#items' => $items,
-    ];
-
-    $build['pager'] = [
-      '#type' => 'pager',
     ];
 
     $cache->applyTo($build);
