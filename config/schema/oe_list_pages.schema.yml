@@ -21,6 +21,12 @@ node.type.*.third_party.oe_list_pages:
       label: 'The view mode to use when rendering the node in lists'
     default_sort:
       type: oe_list_pages.list_sort
+    default_exposed_filters:
+      type: sequence
+      label: 'Exposed filters'
+      sequence:
+        type: string
+        label: 'Exposed filter'
 
 media.type.*.third_party.oe_list_pages:
   type: mapping

@@ -56,8 +56,6 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $page = $this->getSession()->getPage();
     $page->selectFieldOption('Source bundle', 'Content type two');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $page->checkField('Override default exposed filters');
-    $page->checkField('Select two');
     $page->fillField('Title', 'List page for ct2');
     $page->pressButton('Save');
 
