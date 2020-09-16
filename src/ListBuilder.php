@@ -78,8 +78,10 @@ class ListBuilder implements ListBuilderInterface {
    * {@inheritdoc}
    */
   public function buildList(ContentEntityInterface $entity): array {
+    $build = [
+      'list' => [],
+    ];
 
-    $build = [];
     $cache = new CacheableMetadata();
     $cache->addCacheTags($entity->getEntityType()->getListCacheTags());
 
