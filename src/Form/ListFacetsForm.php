@@ -91,7 +91,7 @@ class ListFacetsForm extends FormBase {
       $widget = $facet->getWidgetInstance();
 
       // If facet id should be ignored due to query configuration.
-      if (in_array($facet->getFieldIdentifier(), $ignored_filters)) {
+      if (in_array($facet->id(), $ignored_filters)) {
         continue;
       }
 

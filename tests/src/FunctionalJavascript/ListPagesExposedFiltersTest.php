@@ -89,8 +89,8 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
     $entity_meta_wrapper = $entity_meta->getWrapper();
     $actual_exposed_filters = $entity_meta_wrapper->getConfiguration()['exposed_filters'];
     $this->assertEquals($actual_exposed_filters, [
-      'field_select_one' => 'field_select_one',
-      'status' => 'status',
+      'list_facet_source_node_content_type_onestatus' => 'list_facet_source_node_content_type_onestatus',
+      'select_one' => 'select_one',
     ]);
 
     $this->drupalGet('/node/1/edit');
@@ -110,7 +110,7 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
     $entity_meta_wrapper = $entity_meta->getWrapper();
     $actual_exposed_filters = $entity_meta_wrapper->getConfiguration()['exposed_filters'];
     $this->assertEquals($actual_exposed_filters, [
-      'field_select_two' => 'field_select_two',
+      'list_facet_source_node_content_type_twofield_select_two' => 'list_facet_source_node_content_type_twofield_select_two',
     ]);
 
     $this->drupalGet('/node/1/edit');

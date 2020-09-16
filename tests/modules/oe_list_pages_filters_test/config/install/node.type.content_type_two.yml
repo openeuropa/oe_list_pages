@@ -9,7 +9,7 @@ description: ''
 third_party_settings:
   oe_list_pages:
     default_exposed_filters:
-      - field_select_two
+      - list_facet_source_node_content_type_twofield_select_two
 help: ''
 new_revision: true
 preview_mode: 0
