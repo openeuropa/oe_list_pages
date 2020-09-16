@@ -230,12 +230,25 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
     // Get available filters.
     if ($list_source && $available_filters = $list_source->getAvailableFilters()) {
       $configuration = $this->getExposedFiltersConfiguration($list_source, $entity_meta_wrapper);
+
+      // Override checkbox.
+      $form[$key]['bundle_wrapper']['exposed_filters_wrapper']['exposed_filters_override'] = [
+        '#type' => 'checkbox',
+        '#title' => $this->t('Override default exposed filters'),
+        '#default_value' => isset($configuration),
+      ];
+
       $form[$key]['bundle_wrapper']['exposed_filters_wrapper']['exposed_filters'] = [
         '#type' => 'checkboxes',
         '#title' => $this->t('Exposed filters'),
         '#default_value' => $configuration,
         '#options' => $available_filters,
         '#required' => FALSE,
+        '#states' => [
+          'visible' => [
+            ':input[name="exposed_filters_wrapper[exposed_filters_override]"]' => ['checked' => TRUE],
+          ],
+        ],
       ];
     }
 
@@ -268,6 +281,12 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
       'exposed_filters_wrapper',
       'exposed_filters',
     ], []));
+
+    $override = $form_state->getValue('exposed_filters_wrapper')['exposed_filters_override'];
+    if (!$override) {
+      $selected_filters = NULL;
+    }
+
     $entity_meta_wrapper->setConfiguration(['exposed_filters' => $selected_filters] + $entity_meta_wrapper->getConfiguration());
     $host_entity->get('emr_entity_metas')->attach($entity_meta);
   }
@@ -355,14 +374,14 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
    *   The current entity meta wrapper.
    *
    * @return array
-   *   The current unserialized configuration if available.
+   *   The current unserialized configuration if available or NULL otherwise.
    */
-  protected function getExposedFiltersConfiguration(ListSourceInterface $list_source, EntityMetaWrapper $entity_meta_wrapper): array {
+  protected function getExposedFiltersConfiguration(ListSourceInterface $list_source, EntityMetaWrapper $entity_meta_wrapper): ?array {
     // Get currently saved configuration for exposed filters if applicable
     // (we have selected relevant entity type and bundle).
-    $configuration = [];
+    $configuration = NULL;
     if ($list_source && $entity_meta_wrapper->getSourceEntityType() === $list_source->getEntityType() && $entity_meta_wrapper->getSourceEntityBundle() === $list_source->getBundle()) {
-      $configuration = isset($entity_meta_wrapper->getConfiguration()['exposed_filters']) ? array_keys($entity_meta_wrapper->getConfiguration()['exposed_filters']) : [];
+      $configuration = isset($entity_meta_wrapper->getConfiguration()['exposed_filters']) ? array_keys($entity_meta_wrapper->getConfiguration()['exposed_filters']) : NULL;
     }
     return $configuration;
   }

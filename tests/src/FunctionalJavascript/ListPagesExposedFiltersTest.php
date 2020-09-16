@@ -72,6 +72,7 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
     $page = $this->getSession()->getPage();
     $page->selectFieldOption('Source bundle', 'Content type one');
     $this->assertSession()->assertWaitOnAjaxRequest();
+    $page->checkField('Override default exposed filters');
     $page->checkField('Select one');
     $page->checkField('Published');
     $page->fillField('Title', 'Node title');

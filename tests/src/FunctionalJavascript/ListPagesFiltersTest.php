@@ -44,6 +44,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $page = $this->getSession()->getPage();
     $page->selectFieldOption('Source bundle', 'Content type one');
     $this->assertSession()->assertWaitOnAjaxRequest();
+    $page->checkField('Override default exposed filters');
     $page->checkField('Select one');
     $page->checkField('Published');
     $page->fillField('Title', 'List page for ct1');
@@ -55,6 +56,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $page = $this->getSession()->getPage();
     $page->selectFieldOption('Source bundle', 'Content type two');
     $this->assertSession()->assertWaitOnAjaxRequest();
+    $page->checkField('Override default exposed filters');
     $page->checkField('Select two');
     $page->fillField('Title', 'List page for ct2');
     $page->pressButton('Save');
