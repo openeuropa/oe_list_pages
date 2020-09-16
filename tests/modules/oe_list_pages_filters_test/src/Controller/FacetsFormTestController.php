@@ -99,11 +99,11 @@ class FacetsFormTestController extends ControllerBase {
     // Run the query for a given source and print the results on the page so
     // we can assert them.
     $per_page = 10;
-    $query = $list_source->getQuery($per_page);
+    $query = $list_source->getQuery(['limit' => $per_page]);
     $result = $query->execute();
     $item_list = [];
 
-    /* @var $items \Drupal\search_api\Item\ItemInterface[] */
+    /** @var \Drupal\search_api\Item\ItemInterface[] $items */
     $items = $result->getResultItems();
     foreach ($items as $item) {
       /** @var \Drupal\Core\Entity\EntityInterface $entity */

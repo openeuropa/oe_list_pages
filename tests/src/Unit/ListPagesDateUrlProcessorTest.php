@@ -43,7 +43,11 @@ class ListPagesDateUrlProcessorTest extends UnitTestCase {
     ], $structured);
 
     $processor->preQuery($facet);
-    $this->assertEquals(['bt', '2020-08-16', '2020-08-20'], $facet->getActiveItems());
+    $this->assertEquals([
+      'bt',
+      '2020-08-16',
+      '2020-08-20',
+    ], $facet->getActiveItems());
 
     // Structure the data.
     $structured = DateUrlProcessor::structureActiveItems($facet);

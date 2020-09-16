@@ -6,17 +6,18 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
+        "php": ">=7.2",
         "drupal/core": "^8.8.2",
         "drupal/emr": "~1.0-beta7",
-        "drupal/search_api": "~1.17",
         "drupal/facets": "~1.5",
-        "php": ">=7.2"
+        "drupal/search_api": "~1.17"
     },
     "require-dev": {
         "composer/installers": "~1.5",
         "drupal-composer/drupal-scaffold": "~2.2",
         "drupal/config_devel": "~1.2",
         "drupal/drupal-extension": "~4.0",
+        "drupal/extra_field": "^1.1",
         "drush/drush": "~9.0@stable",
         "guzzlehttp/guzzle": "~6.3",
         "openeuropa/code-review": "^1.5.0",

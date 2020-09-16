@@ -7,23 +7,16 @@ dependencies:
     - node.type.content_type_one
     - search_api.server.database_server
 id: list_facet_source_node_content_type_onestatus
-name: 'Facet for status'
-url_alias: null
-weight: null
+name: 'Published'
+url_alias: 'status'
+weight: 0
 min_count: 1
 show_only_one_result: false
 field_identifier: status
 facet_source_id: 'list_facet_source:node:content_type_one'
 widget:
-  type: links
+  type: oe_list_pages_multiselect
   config:
-    soft_limit: 0
-    soft_limit_settings:
-      show_less_label: 'Show less'
-      show_more_label: 'Show more'
-    show_reset_link: false
-    hide_reset_when_no_selection: false
-    reset_text: 'Show all'
     show_numbers: false
 query_operator: null
 use_hierarchy: false

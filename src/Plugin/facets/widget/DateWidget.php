@@ -6,8 +6,8 @@ namespace Drupal\oe_list_pages\Plugin\facets\widget;
 
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\datetime\Plugin\Field\FieldType\DateTimeItem;
 use Drupal\facets\FacetInterface;
+use Drupal\oe_list_pages\Plugin\facets\query_type\Date;
 
 /**
  * The date widget that allows to filter by one or two dates.
@@ -25,7 +25,7 @@ class DateWidget extends ListPagesWidgetBase {
    */
   public function defaultConfiguration() {
     return [
-      'date_type' => DateTimeItem::DATETIME_TYPE_DATE,
+      'date_type' => Date::DATETIME_TYPE_DATE,
     ] + parent::defaultConfiguration();
   }
 
@@ -37,8 +37,8 @@ class DateWidget extends ListPagesWidgetBase {
       '#type' => 'select',
       '#title' => $this->t('Date type'),
       '#options' => [
-        DateTimeItem::DATETIME_TYPE_DATE => $this->t('Date only'),
-        DateTimeItem::DATETIME_TYPE_DATETIME => $this->t('Date and time'),
+        Date::DATETIME_TYPE_DATE => $this->t('Date only'),
+        Date::DATETIME_TYPE_DATETIME => $this->t('Date and time'),
       ],
       '#description' => $this->t('Choose the type of date to filter.'),
       '#default_value' => $this->getConfiguration()['date_type'],

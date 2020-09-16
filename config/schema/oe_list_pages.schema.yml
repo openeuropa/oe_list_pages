@@ -11,3 +11,34 @@ plugin.plugin_configuration.facets_processor.oe_list_pages_date_status_processor
     past_label:
       type: string
       label: 'Past label'
+
+node.type.*.third_party.oe_list_pages:
+  type: mapping
+  label: 'OE List page settings'
+  mapping:
+    default_view_mode:
+      type: string
+      label: 'The view mode to use when rendering the node in lists'
+    default_sort:
+      type: oe_list_pages.list_sort
+
+media.type.*.third_party.oe_list_pages:
+  type: mapping
+  label: 'OE List page settings'
+  mapping:
+    default_view_mode:
+      type: string
+      label: 'The view mode to use when rendering the media in lists'
+    default_sort:
+      type: oe_list_pages.list_sort
+
+oe_list_pages.list_sort:
+  type: mapping
+  label: 'Sorting criteria'
+  mapping:
+    name:
+      type: string
+      label: 'The field to sort by'
+    direction:
+      type: string
+      label: 'The direction of the sorting'

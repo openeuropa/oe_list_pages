@@ -5,7 +5,6 @@ declare(strict_types = 1);
 namespace Drupal\oe_list_pages\Plugin\facets\query_type;
 
 use Drupal\Component\Datetime\DateTimePlus;
-use Drupal\datetime\Plugin\Field\FieldType\DateTimeItem;
 use Drupal\facets\QueryType\QueryTypePluginBase;
 use Drupal\oe_list_pages\Plugin\facets\processor\DateUrlProcessor;
 
@@ -18,6 +17,16 @@ use Drupal\oe_list_pages\Plugin\facets\processor\DateUrlProcessor;
  * )
  */
 class Date extends QueryTypePluginBase {
+
+  /**
+   * Value for the 'datetime_type' setting: store only a date.
+   */
+  const DATETIME_TYPE_DATE = 'date';
+
+  /**
+   * Value for the 'datetime_type' setting: store a date and time.
+   */
+  const DATETIME_TYPE_DATETIME = 'datetime';
 
   /**
    * A map of operators to their SQL counterparts.
@@ -50,7 +59,7 @@ class Date extends QueryTypePluginBase {
 
     // Handle the BETWEEN case first where we have two dates to compare.
     if ($operator === 'bt' && $second_date) {
-      if ($widget_config['date_type'] === DateTimeItem::DATETIME_TYPE_DATE) {
+      if ($widget_config['date_type'] === self::DATETIME_TYPE_DATE) {
         $this->adaptDatesPerOperator($operator, $first_date, $second_date);
       }
 
@@ -60,7 +69,7 @@ class Date extends QueryTypePluginBase {
     }
 
     // Handle the single date comparison.
-    if ($widget_config['date_type'] === DateTimeItem::DATETIME_TYPE_DATE) {
+    if ($widget_config['date_type'] === self::DATETIME_TYPE_DATE) {
       $this->adaptDatesPerOperator($operator, $first_date);
     }
 

@@ -1,13 +1,8 @@
-uuid: 8d1be88d-b815-4a1a-8dde-9432b44155b9
 langcode: en
 status: true
 dependencies:
   module:
     - emr
-third_party_settings:
-  emr:
-    entity_meta_bundles:
-      - oe_list_page
 name: 'Content type one'
 type: content_type_one
 description: ''

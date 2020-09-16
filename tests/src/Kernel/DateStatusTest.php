@@ -110,7 +110,7 @@ class DateStatusTest extends ListsSourceBaseTest {
     // We have no facet configuration so we get all results.
     $this->assertCount(4, $results->getResultItems());
 
-    $query = $list->getQuery(0, 0, [], [], [$this->facet->id() => [DateStatus::PAST]]);
+    $query = $list->getQuery(['preset_filters' => [$this->facet->id() => [DateStatus::PAST]]]);
     $query->execute();
     $results = $query->getResults();
     $this->assertCount(2, $results->getResultItems());
@@ -119,7 +119,7 @@ class DateStatusTest extends ListsSourceBaseTest {
       'oldest',
     ]);
 
-    $query = $list->getQuery(0, 0, [], [], [$this->facet->id() => [DateStatus::UPCOMING]]);
+    $query = $list->getQuery(['preset_filters' => [$this->facet->id() => [DateStatus::UPCOMING]]]);
     $query->execute();
     $results = $query->getResults();
     $this->assertCount(2, $results->getResultItems());
@@ -128,7 +128,14 @@ class DateStatusTest extends ListsSourceBaseTest {
       'future',
     ]);
 
-    $query = $list->getQuery(0, 0, [], [], [$this->facet->id() => [DateStatus::PAST, DateStatus::UPCOMING]]);
+    $query = $list->getQuery([
+      'preset_filters' => [
+        $this->facet->id() => [
+          DateStatus::PAST,
+          DateStatus::UPCOMING,
+        ],
+      ],
+    ]);
     $query->execute();
     $results = $query->getResults();
     $this->assertCount(4, $results->getResultItems());

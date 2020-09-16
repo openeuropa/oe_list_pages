@@ -65,7 +65,7 @@ class FulltextWidgetTest extends ListsSourceBaseTest {
     // Search for body.
     $list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
     /** @var \Drupal\search_api\Query\QueryInterface $default_query */
-    $query = $list->getQuery(0, 0, [], [], [$facet_body->id() => 'message']);
+    $query = $list->getQuery(['preset_filters' => [$facet_body->id() => 'message']]);
     $query->execute();
     $results = $query->getResults();
 
@@ -74,7 +74,7 @@ class FulltextWidgetTest extends ListsSourceBaseTest {
 
     // Search for name.
     /** @var \Drupal\search_api\Query\QueryInterface $default_query */
-    $query = $list->getQuery(0, 0, [], [], [$facet_name->id() => 'message']);
+    $query = $list->getQuery(['preset_filters' => [$facet_name->id() => 'message']]);
     $query->execute();
     $results = $query->getResults();
     $this->assertCount(1, $results->getResultItems());

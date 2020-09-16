@@ -7,23 +7,16 @@ dependencies:
     - node.type.content_type_two
     - search_api.server.database_server
 id: list_facet_source_node_content_type_twofield_select_two
-name: 'Facet for field_select_two'
-url_alias: null
-weight: null
+name: 'Select two'
 min_count: 1
 show_only_one_result: false
 field_identifier: field_select_two
 facet_source_id: 'list_facet_source:node:content_type_two'
+url_alias: select_two
+weight: 0
 widget:
-  type: links
+  type: oe_list_pages_multiselect
   config:
-    soft_limit: 0
-    soft_limit_settings:
-      show_less_label: 'Show less'
-      show_more_label: 'Show more'
-    show_reset_link: false
-    hide_reset_when_no_selection: false
-    reset_text: 'Show all'
     show_numbers: false
 query_operator: null
 use_hierarchy: false
