@@ -116,7 +116,7 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
     $this->drupalGet('/node/1/edit');
     $this->clickLink('List Page');
     $this->assertFieldChecked('Select two');
-    $this->assertNoFieldChecked('Published');
+    $this->assertNoFieldChecked('Facet for status');
   }
 
   /**
