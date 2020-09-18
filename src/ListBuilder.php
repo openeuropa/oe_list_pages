@@ -10,6 +10,9 @@ use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Pager\PagerManagerInterface;
+use Drupal\Core\Url;
+use Drupal\facets\FacetManager\DefaultFacetManager;
+use Drupal\facets\Utility\FacetsUrlGenerator;
 use Drupal\oe_list_pages\Form\ListFacetsForm;
 
 /**
@@ -53,6 +56,20 @@ class ListBuilder implements ListBuilderInterface {
   protected $listExecutionManager;
 
   /**
+   * The facets manager.
+   *
+   * @var \Drupal\facets\FacetManager\DefaultFacetManager
+   */
+  protected $facetManager;
+
+  /**
+   * The facets URL generator.
+   *
+   * @var \Drupal\facets\Utility\FacetsUrlGenerator
+   */
+  protected $facetsUrlGenerator;
+
+  /**
    * ListBuilder constructor.
    *
    * @param \Drupal\oe_list_pages\ListExecutionManagerInterface $listExecutionManager
@@ -65,13 +82,19 @@ class ListBuilder implements ListBuilderInterface {
    *   The entity repository.
    * @param \Drupal\Core\Form\FormBuilderInterface $formBuilder
    *   The form builder.
+   * @param \Drupal\facets\FacetManager\DefaultFacetManager $facetManager
+   *   The facets manager.
+   * @param \Drupal\facets\Utility\FacetsUrlGenerator $facetsUrlGenerator
+   *   The facets URL generator.
    */
-  public function __construct(ListExecutionManagerInterface $listExecutionManager, EntityTypeManager $entityTypeManager, PagerManagerInterface $pager, EntityRepositoryInterface $entityRepository, FormBuilderInterface $formBuilder) {
+  public function __construct(ListExecutionManagerInterface $listExecutionManager, EntityTypeManager $entityTypeManager, PagerManagerInterface $pager, EntityRepositoryInterface $entityRepository, FormBuilderInterface $formBuilder, DefaultFacetManager $facetManager, FacetsUrlGenerator $facetsUrlGenerator) {
     $this->listExecutionManager = $listExecutionManager;
     $this->entityTypeManager = $entityTypeManager;
     $this->pager = $pager;
     $this->entityRepository = $entityRepository;
     $this->formBuilder = $formBuilder;
+    $this->facetManager = $facetManager;
+    $this->facetsUrlGenerator = $facetsUrlGenerator;
   }
 
   /**
@@ -181,6 +204,120 @@ class ListBuilder implements ListBuilderInterface {
     $build['form'] = $this->formBuilder->getForm(ListFacetsForm::class, $list_source, $ignored_filters);
 
     return $build;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+   * @SuppressWarnings(PHPMD.NPathComplexity)
+   */
+  public function buildSelectedFilters(ContentEntityInterface $entity): array {
+    $build = [];
+    $list_execution = $this->listExecutionManager->executeList($entity);
+    /** @var \Drupal\facets\FacetInterface[] $facets */
+    $facets = $this->facetManager->getFacetsByFacetSourceId($list_execution->getListSource()->getSearchId());
+    $keyed_facets = [];
+    $cache = new CacheableMetadata();
+    $cache->addCacheContexts(['url']);
+
+    // Prepare an array with all the active filters.
+    $active_filters = [];
+    $urls = [];
+    foreach ($facets as $facet) {
+      if (!$facet->getActiveItems()) {
+        continue;
+      }
+
+      if (!$facet->getResults()) {
+        continue;
+      }
+
+      $keyed_facets[$facet->id()] = $facet;
+      $items = $facet->getActiveItems();
+      $cache->addCacheableDependency($facet);
+      $active_filters[$facet->id()] = $items;
+    }
+
+    if (!$active_filters) {
+      $cache->applyTo($build);
+      return $build;
+    }
+
+    // Prepare the URL for each individual filter value that would remove it
+    // from the active filters.
+    foreach ($active_filters as $facet_id => $filters) {
+      foreach ($filters as $key => $value) {
+        $filter_remaining_active = $active_filters;
+        unset($filter_remaining_active[$facet_id][$key]);
+        $filter_remaining_active = array_filter($filter_remaining_active);
+        if (!$filter_remaining_active) {
+          // If there are no more active filters, we just generate a URL
+          // to the current page, with no query parameters.
+          $urls[$facet_id][$key] = Url::fromRoute('<current>');
+          continue;
+        }
+
+        // Re-key so that the URL generator always can rely on key 0.
+        foreach ($filter_remaining_active as $facet_id_remaining => &$values_remaining) {
+          $values_remaining = array_values($values_remaining);
+        }
+        if ($filter_remaining_active) {
+          $urls[$facet_id][$key] = $this->facetsUrlGenerator->getUrl($filter_remaining_active, FALSE);
+          continue;
+        }
+      }
+    }
+
+    $items = [];
+    foreach ($active_filters as $facet_id => $filters) {
+      $facet = $keyed_facets[$facet_id];
+      $facet_results = $facet->getResults();
+      $item = [
+        'name' => $facet->getName(),
+      ];
+      foreach ($filters as $key => $value) {
+        $display_value = $this->getFacetResultDisplayLabel($facet_results, $value);
+        $item['items'][] = [
+          'url' => $urls[$facet_id][$key],
+          'label' => $display_value,
+        ];
+      }
+
+      $items[$facet_id] = $item;
+    }
+
+    foreach ($items as $facet_id => $item) {
+      $build[$facet_id] = [
+        '#theme' => 'oe_list_pages_selected_facet',
+        '#label' => $item['name'],
+        '#items' => $item['items'],
+      ];
+    }
+
+    $cache->applyTo($build);
+    return $build;
+  }
+
+  /**
+   * Returns the display label of a facet result.
+   *
+   * @param \Drupal\facets\Result\Result[] $facet_results
+   *   All the results.
+   * @param string $value
+   *   The raw value.
+   *
+   * @return string|null
+   *   The display value.
+   */
+  protected function getFacetResultDisplayLabel(array $facet_results, string $value): ?string {
+    foreach ($facet_results as $facet_result) {
+      if ($facet_result->getRawValue() === $value) {
+        return $facet_result->getDisplayValue();
+      }
+    }
+
+    return NULL;
   }
 
 }

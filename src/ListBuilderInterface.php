@@ -36,4 +36,18 @@ interface ListBuilderInterface {
    */
   public function buildFiltersForm(ContentEntityInterface $entity): array;
 
+  /**
+   * Builds the list page selected filters.
+   *
+   * These are the filters that have been selected in the form and are currently
+   * filtering the list.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The content entity page.
+   *
+   * @return array
+   *   The filters render array.
+   */
+  public function buildSelectedFilters(ContentEntityInterface $entity): array;
+
 }
