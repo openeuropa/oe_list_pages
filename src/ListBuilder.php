@@ -339,7 +339,7 @@ class ListBuilder implements ListBuilderInterface {
   protected function getFacetResultDisplayLabel(array $facet_results, string $value): ?string {
     foreach ($facet_results as $facet_result) {
       if ($facet_result->getRawValue() === $value) {
-        return $facet_result->getDisplayValue();
+        return (string) $facet_result->getDisplayValue();
       }
     }
 
