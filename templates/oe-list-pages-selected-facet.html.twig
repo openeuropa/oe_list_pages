@@ -1,0 +1,6 @@
+<div>
+  <span>{{ label }}</span>:
+  {% for item in items %}
+    {{ link(item.label, item.url) }},
+  {% endfor %}
+</div>
