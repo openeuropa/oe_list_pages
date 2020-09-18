@@ -11,9 +11,12 @@ use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Pager\PagerManagerInterface;
 use Drupal\Core\Url;
+use Drupal\facets\FacetInterface;
 use Drupal\facets\FacetManager\DefaultFacetManager;
+use Drupal\facets\Processor\ProcessorPluginManager;
 use Drupal\facets\Utility\FacetsUrlGenerator;
 use Drupal\oe_list_pages\Form\ListFacetsForm;
+use Drupal\oe_list_pages\Plugin\facets\processor\DefaultStatusProcessorInterface;
 
 /**
  * Default list builder implementation.
@@ -70,6 +73,13 @@ class ListBuilder implements ListBuilderInterface {
   protected $facetsUrlGenerator;
 
   /**
+   * The facets processor plugin manager.
+   *
+   * @var \Drupal\facets\Processor\ProcessorPluginManager
+   */
+  protected $processorManager;
+
+  /**
    * ListBuilder constructor.
    *
    * @param \Drupal\oe_list_pages\ListExecutionManagerInterface $listExecutionManager
@@ -86,8 +96,10 @@ class ListBuilder implements ListBuilderInterface {
    *   The facets manager.
    * @param \Drupal\facets\Utility\FacetsUrlGenerator $facetsUrlGenerator
    *   The facets URL generator.
+   * @param \Drupal\facets\Processor\ProcessorPluginManager $processorManager
+   *   The facets processor plugin manager.
    */
-  public function __construct(ListExecutionManagerInterface $listExecutionManager, EntityTypeManager $entityTypeManager, PagerManagerInterface $pager, EntityRepositoryInterface $entityRepository, FormBuilderInterface $formBuilder, DefaultFacetManager $facetManager, FacetsUrlGenerator $facetsUrlGenerator) {
+  public function __construct(ListExecutionManagerInterface $listExecutionManager, EntityTypeManager $entityTypeManager, PagerManagerInterface $pager, EntityRepositoryInterface $entityRepository, FormBuilderInterface $formBuilder, DefaultFacetManager $facetManager, FacetsUrlGenerator $facetsUrlGenerator, ProcessorPluginManager $processorManager) {
     $this->listExecutionManager = $listExecutionManager;
     $this->entityTypeManager = $entityTypeManager;
     $this->pager = $pager;
@@ -95,6 +107,7 @@ class ListBuilder implements ListBuilderInterface {
     $this->formBuilder = $formBuilder;
     $this->facetManager = $facetManager;
     $this->facetsUrlGenerator = $facetsUrlGenerator;
+    $this->processorManager = $processorManager;
   }
 
   /**
@@ -262,10 +275,8 @@ class ListBuilder implements ListBuilderInterface {
         foreach ($filter_remaining_active as $facet_id_remaining => &$values_remaining) {
           $values_remaining = array_values($values_remaining);
         }
-        if ($filter_remaining_active) {
-          $urls[$facet_id][$key] = $this->facetsUrlGenerator->getUrl($filter_remaining_active, FALSE);
-          continue;
-        }
+
+        $urls[$facet_id][$key] = $this->facetsUrlGenerator->getUrl($filter_remaining_active, FALSE);
       }
     }
 
@@ -281,10 +292,25 @@ class ListBuilder implements ListBuilderInterface {
         $item['items'][] = [
           'url' => $urls[$facet_id][$key],
           'label' => $display_value,
+          'raw' => $value,
         ];
       }
 
       $items[$facet_id] = $item;
+    }
+
+    if ($this->countTotalSelectedFilters($items) === 1) {
+      // If we only have one selected filter, it means its URL will remove
+      // all filters. However, it can also be the filter of a facet that uses
+      // a DefaultStatusProcessorInterface processor, in which case we need
+      // kill the URL and only display it as a label.
+      $facet_id = key($items);
+      $facet = $keyed_facets[$facet_id];
+      if ($this->facetHasDefaultStatus($facet, reset($items[$facet_id]['items']))) {
+        foreach ($items as $facet_id => &$filters) {
+          $filters['items'][0]['url'] = NULL;
+        }
+      }
     }
 
     foreach ($items as $facet_id => $item) {
@@ -318,6 +344,57 @@ class ListBuilder implements ListBuilderInterface {
     }
 
     return NULL;
+  }
+
+  /**
+   * Counts the total number of selected filters to be returned.
+   *
+   * @param array $items
+   *   The list of selected filters ready to be printed.
+   *
+   * @return int
+   *   The total count.
+   */
+  protected function countTotalSelectedFilters(array $items): int {
+    $total = 0;
+    foreach ($items as $facet_id => $filters) {
+      foreach ($filters['items'] as $key => $value) {
+        $total++;
+      }
+    }
+
+    return $total;
+  }
+
+  /**
+   * Checks if the facet uses a default status processor.
+   *
+   * This processor sets a default active item to the facet if there are no
+   * other active items in the URL.
+   *
+   * @param \Drupal\facets\FacetInterface $facet
+   *   The facets.
+   * @param array $filters
+   *   The selected filters for this facet.
+   *
+   * @return bool
+   *   Whether the facet uses this type of processor.
+   */
+  protected function facetHasDefaultStatus(FacetInterface $facet, array $filters): bool {
+    $configs = $facet->getProcessorConfigs();
+    if (!$configs) {
+      return FALSE;
+    }
+
+    $plugin_ids = array_keys($configs);
+    foreach ($plugin_ids as $plugin_id) {
+      $processor = $this->processorManager->createInstance($plugin_id, ['facet' => $facet]);
+      if ($processor instanceof DefaultStatusProcessorInterface && $filters['raw'] === $configs[$plugin_id]['settings']['default_status']) {
+        return TRUE;
+      }
+    }
+
+    return FALSE;
   }
 
 }

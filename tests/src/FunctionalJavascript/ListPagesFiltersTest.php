@@ -36,7 +36,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
   /**
    * Test fields in a list page content type.
    */
-  public function testListPagePluginFilters(): void {
+  public function testListPageFilters(): void {
     // Create list for content type one.
     $this->drupalLogin($this->rootUser);
     $this->drupalGet('/node/add/content_type_list');
