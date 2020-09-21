@@ -230,14 +230,13 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
     // Get available filters.
     if ($list_source && $available_filters = $list_source->getAvailableFilters()) {
       $configuration = $this->getExposedFiltersConfiguration($list_source, $entity_meta_wrapper);
-      $overriden = $this->hasExposedFiltersOverriden($list_source, $entity_meta_wrapper);
 
       // Override checkbox.
       $form[$key]['bundle_wrapper']['exposed_filters_wrapper']['exposed_filters_override'] = [
         '#type' => 'checkbox',
         '#title' => $this->t('Override default exposed filters'),
         '#description' => $this->t('Configure which exposed filters should show up on this page.'),
-        '#default_value' => $overriden,
+        '#default_value' => $this->areExposedFiltersOverridden($list_source, $entity_meta_wrapper),
       ];
 
       $form[$key]['bundle_wrapper']['exposed_filters_wrapper']['exposed_filters'] = [
@@ -365,7 +364,7 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
   }
 
   /**
-   * Get whether the exposed filters are overriden.
+   * Get whether the exposed filters are overridden.
    *
    * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
    *   The selected list source.
@@ -373,14 +372,14 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
    *   The current entity meta wrapper.
    *
    * @return bool
-   *   Whether the exposed filters are overriden.
+   *   Whether the exposed filters are overridden.
    */
-  protected function hasExposedFiltersOverriden(ListSourceInterface $list_source, EntityMetaWrapper $entity_meta_wrapper): bool {
-    $overriden = FALSE;
+  protected function areExposedFiltersOverridden(ListSourceInterface $list_source, EntityMetaWrapper $entity_meta_wrapper): bool {
+    $overridden = FALSE;
     if ($list_source && $entity_meta_wrapper->getSourceEntityType() === $list_source->getEntityType() && $entity_meta_wrapper->getSourceEntityBundle() === $list_source->getBundle()) {
-      $overriden = (bool) $entity_meta_wrapper->getConfiguration()['override_exposed_filters'] ?? FALSE;
+      $overridden = (bool) $entity_meta_wrapper->getConfiguration()['override_exposed_filters'] ?? FALSE;
     }
-    return $overriden;
+    return $overridden;
   }
 
   /**
