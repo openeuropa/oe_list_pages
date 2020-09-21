@@ -117,6 +117,42 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
     $this->clickLink('List Page');
     $this->assertFieldChecked('Select two');
     $this->assertNoFieldChecked('Facet for status');
+
+    // Unselect all.
+    $page->uncheckField('Select two');
+    $page->uncheckField('Facet for status');
+    $page->pressButton('Save');
+    \Drupal::entityTypeManager()->getStorage('node')->resetCache();
+    \Drupal::entityTypeManager()->getStorage('entity_meta_relation')->resetCache();
+    $node = Node::load(1);
+    /** @var \Drupal\emr\Field\ComputedEntityMetasItemList $entity_meta_list */
+    $entity_meta_list = $node->get('emr_entity_metas');
+    $entity_meta = $entity_meta_list->getEntityMeta('oe_list_page');
+    $entity_meta_wrapper = $entity_meta->getWrapper();
+    $actual_exposed_filters = $entity_meta_wrapper->getConfiguration()['exposed_filters'];
+    $actual_override_exposed_filters = $entity_meta_wrapper->getConfiguration()['override_exposed_filters'];
+    $this->assertEquals($actual_override_exposed_filters, TRUE);
+    $this->assertEquals($actual_exposed_filters, []);
+
+    // Disable overriden exposed filters.
+    $this->drupalGet('/node/1/edit');
+    $this->clickLink('List Page');
+    $this->assertFieldChecked('Override default exposed filters');
+    $this->assertNoFieldChecked('Select two');
+    $this->assertNoFieldChecked('Facet for status');
+    $page->uncheckField('Override default exposed filters');
+    $page->pressButton('Save');
+    \Drupal::entityTypeManager()->getStorage('node')->resetCache();
+    \Drupal::entityTypeManager()->getStorage('entity_meta_relation')->resetCache();
+    $node = Node::load(1);
+    /** @var \Drupal\emr\Field\ComputedEntityMetasItemList $entity_meta_list */
+    $entity_meta_list = $node->get('emr_entity_metas');
+    $entity_meta = $entity_meta_list->getEntityMeta('oe_list_page');
+    $entity_meta_wrapper = $entity_meta->getWrapper();
+    $actual_exposed_filters = $entity_meta_wrapper->getConfiguration()['exposed_filters'];
+    $actual_override_exposed_filters = $entity_meta_wrapper->getConfiguration()['override_exposed_filters'];
+    $this->assertEquals($actual_override_exposed_filters, FALSE);
+    $this->assertEquals($actual_exposed_filters, []);
   }
 
   /**
