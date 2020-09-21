@@ -214,7 +214,7 @@ class ListBuilder implements ListBuilderInterface {
       $ignored_filters = array_diff(array_keys($available_filters), array_values($exposed_filters));
     }
 
-    $build['form'] = $this->formBuilder->getForm(ListFacetsForm::class, $list_source, $ignored_filters);
+    $build = $this->formBuilder->getForm(ListFacetsForm::class, $list_source, $ignored_filters);
 
     return $build;
   }

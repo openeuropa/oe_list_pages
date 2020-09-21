@@ -27,8 +27,22 @@ class ListPageFilters extends ListPageExtraFieldBase {
   /**
    * {@inheritdoc}
    */
+  public function view(ContentEntityInterface $entity) {
+    $form = $this->listBuilder->buildFiltersForm($entity);
+    if (!$form || !isset($form['facets'])) {
+      // Return just the cache so we have an empty rendered value in case there
+      // are no facets in the form.
+      return isset($form['#cache']) ? ['#cache' => $form['#cache']] : [];
+    }
+
+    return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function viewElements(ContentEntityInterface $entity) {
-    return [$this->listBuilder->buildFiltersForm($entity)];
+    // We take over the main ::view() method so we don't need this.
   }
 
 }

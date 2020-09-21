@@ -105,6 +105,11 @@ class ListFacetsForm extends FormBase {
       }
     }
 
+    if (!isset($form['facets'])) {
+      $cache->applyTo($form);
+      return $form;
+    }
+
     $form_state->set('source_id', $source_id);
 
     $form['actions']['#type'] = 'actions';

@@ -120,7 +120,6 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $assert = $this->assertSession();
     $assert->pageTextContains('that yellow fruit');
     $assert->pageTextNotContains('that red fruit');
-
   }
 
   /**
