@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\Tests\oe_list_pages\FunctionalJavascript;
 
 use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\facets\Entity\Facet;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
@@ -126,8 +127,35 @@ class ListPagesFiltersTest extends WebDriverTestBase {
    * Tests the selected filters.
    */
   public function testSelectedListPageFilters(): void {
+    // Create a default status facet for the date field.
+    $facet = Facet::create([
+      'id' => 'period',
+      'name' => 'Period',
+    ]);
+
+    $facet->setUrlAlias('period');
+    $facet->setFieldIdentifier('created');
+    $facet->setEmptyBehavior(['behavior' => 'none']);
+    $facet->setFacetSourceId('list_facet_source:node:content_type_one');
+    $facet->setWidget('oe_list_pages_multiselect', []);
+    $facet->addProcessor([
+      'processor_id' => 'url_processor_handler',
+      'weights' => ['pre_query' => -10, 'build' => -10],
+      'settings' => [],
+    ]);
+    $facet->addProcessor([
+      'processor_id' => 'oe_list_pages_date_status_processor',
+      'weights' => ['pre_query' => 60, 'build' => 35],
+      'settings' => [
+        'default_status' => 'past',
+        'upcoming_label' => 'Future',
+        'past_label' => 'Past',
+      ],
+    ]);
+    $facet->save();
+
     // Create some test nodes to index and search in.
-    $date = new DrupalDateTime('20-10-2020');
+    $date = new DrupalDateTime('20-10-2019');
     $values = [
       'title' => 'one yellow fruit',
       'type' => 'content_type_one',
@@ -163,6 +191,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $page->checkField('Override default exposed filters');
     $page->checkField('Select one');
     $page->checkField('Published');
+    $page->checkField('Period');
     $page->checkField('Created');
     $page->fillField('Title', 'List page for ct1');
     $page->pressButton('Save');
@@ -171,16 +200,26 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $this->drupalGet($node->toUrl());
     $this->assertSession()->pageTextContains('one yellow fruit');
     $this->assertSession()->pageTextContains('another yellow fruit');
-    $this->assertSession()->elementNotExists('css', '.field--name-extra-field-oe-list-page-selected-filtersnodecontent-type-list a');
     $this->assertSession()->linkNotExistsExact('Yes');
     $this->assertSession()->linkNotExistsExact('test1');
     $this->assertSession()->linkNotExistsExact('test2');
+    $this->assertSession()->linkNotExistsExact('Future');
+    // Past is showing up but it's not a link.
+    $this->assertSession()->linkNotExistsExact('Past');
+    // We have a default status facet, configured to show Past items.
+    $spans = $this->getSession()->getPage()->findAll('css', '.field--name-extra-field-oe-list-page-selected-filtersnodecontent-type-list span');
+    $this->assertCount(2, $spans);
+    $actual_values = [];
+    foreach ($spans as $span) {
+      $this->assertFalse($span->has('css', 'a'));
+      $actual_values[] = $span->getText();
+    }
+    $this->assertEquals(['Period', 'Past'], $actual_values);
 
     $this->getSession()->getPage()->selectFieldOption('Published', 'Yes', TRUE);
     $this->getSession()->getPage()->selectFieldOption('Select one', 'test1', TRUE);
     $this->getSession()->getPage()->selectFieldOption('Select one', 'test2', TRUE);
     $this->getSession()->getPage()->pressButton('Search');
-
     $this->assertSession()->pageTextContains('one yellow fruit');
     $this->assertSession()->pageTextContains('another yellow fruit');
     $this->assertSession()->elementExists('css', '.field--name-extra-field-oe-list-page-selected-filtersnodecontent-type-list');
@@ -190,8 +229,12 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $this->assertSession()->linkExistsExact('Yes');
     $this->assertSession()->linkExistsExact('test1');
     $this->assertSession()->linkExistsExact('test2');
+    $this->assertSession()->linkNotExistsExact('Future');
+    // Since we have other filters now, the Past status becomes a link as it
+    // can be removed.
+    $this->assertSession()->linkExistsExact('Past');
 
-    $this->assertSelectedFiltersLabels(['Published', 'Select one']);
+    $this->assertSelectedFiltersLabels(['Published', 'Period', 'Select one']);
 
     // Remove test2 from the selected filters.
     $this->getSession()->getPage()->clickLink('test2');
@@ -201,8 +244,10 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $this->assertSession()->linkExistsExact('Yes');
     $this->assertSession()->linkExistsExact('test1');
     $this->assertSession()->linkNotExistsExact('test2');
+    $this->assertSession()->linkNotExistsExact('Future');
+    $this->assertSession()->linkExistsExact('Past');
 
-    $this->assertSelectedFiltersLabels(['Published', 'Select one']);
+    $this->assertSelectedFiltersLabels(['Published', 'Period', 'Select one']);
 
     // Remove test1 as well.
     $this->getSession()->getPage()->clickLink('test1');
@@ -211,37 +256,62 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $this->assertSession()->pageTextContains('another yellow fruit');
     $this->assertSession()->linkNotExistsExact('test1');
     $this->assertSession()->linkNotExistsExact('test2');
-    $this->assertSelectedFiltersLabels(['Published']);
+    $this->assertSession()->linkNotExistsExact('Future');
+    $this->assertSession()->linkExistsExact('Past');
+    $this->assertSelectedFiltersLabels(['Published', 'Period']);
 
     // Filter by date.
-    // Node 1 was created on 20 October 2020.
-    // Node 2 was created on 25 October 2020.
+    // Node 1 was created on 20 October 2019.
+    // Node 2 was created on 25 October 2019.
     $this->getSession()->getPage()->selectFieldOption('Created', 'After');
-    $this->getSession()->getPage()->fillField('created_first_date[date]', '10/19/2020');
+    $this->getSession()->getPage()->fillField('created_first_date[date]', '10/19/2019');
     $this->getSession()->getPage()->pressButton('Search');
     $this->assertSession()->pageTextContains('one yellow fruit');
     $this->assertSession()->pageTextContains('another yellow fruit');
-    $this->assertSession()->linkExistsExact('After 19 October 2020');
+    $this->assertSession()->linkExistsExact('After 19 October 2019');
+    $this->assertSession()->linkExistsExact('Past');
 
-    $this->getSession()->getPage()->fillField('created_first_date[date]', '10/22/2020');
+    $this->getSession()->getPage()->fillField('created_first_date[date]', '10/22/2019');
     $this->getSession()->getPage()->pressButton('Search');
     $this->assertSession()->pageTextNotContains('one yellow fruit');
     $this->assertSession()->pageTextContains('another yellow fruit');
-    $this->assertSession()->linkExistsExact('After 22 October 2020');
+    $this->assertSession()->linkExistsExact('After 22 October 2019');
+    $this->assertSession()->linkExistsExact('Past');
     $this->getSession()->getPage()->selectFieldOption('Created', 'Before');
     $this->getSession()->getPage()->pressButton('Search');
     $this->assertSession()->pageTextContains('one yellow fruit');
     $this->assertSession()->pageTextNotContains('another yellow fruit');
-    $this->assertSession()->linkExistsExact('Before 22 October 2020');
+    $this->assertSession()->linkExistsExact('Before 22 October 2019');
+    $this->assertSession()->linkExistsExact('Past');
     $this->getSession()->getPage()->selectFieldOption('Created', 'In between');
-    $this->getSession()->getPage()->fillField('created_first_date[date]', '10/19/2020');
-    $this->getSession()->getPage()->fillField('created_second_date[date]', '10/26/2020');
+    $this->getSession()->getPage()->fillField('created_first_date[date]', '10/19/2019');
+    $this->getSession()->getPage()->fillField('created_second_date[date]', '10/26/2019');
     $this->getSession()->getPage()->pressButton('Search');
     $this->assertSession()->pageTextContains('one yellow fruit');
     $this->assertSession()->pageTextContains('another yellow fruit');
-    $this->assertSession()->linkExistsExact('Between 19 October 2020 and 26 October 2020');
+    $this->assertSession()->linkExistsExact('Between 19 October 2019 and 26 October 2019');
 
-    // @todo add test for the default status by adding a new date filter.
+    // Test the period filter with a default status.
+    $this->getSession()->getPage()->pressButton('Reset');
+    $this->getSession()->getPage()->selectFieldOption('Published', 'Yes', TRUE);
+    $this->getSession()->getPage()->pressButton('Search');
+    $this->assertSession()->linkNotExistsExact('Future');
+    $this->assertSession()->linkExistsExact('Past');
+    $this->getSession()->getPage()->selectFieldOption('Period', 'Future', TRUE);
+    $this->getSession()->getPage()->selectFieldOption('Period', 'Past', TRUE);
+    $this->getSession()->getPage()->pressButton('Search');
+    // Now both default status values are links.
+    $this->assertSession()->linkExistsExact('Future');
+    $this->assertSession()->linkExistsExact('Past');
+    // Remove Past and assert that Future remains a link because it is not
+    // configured as the default status.
+    $this->clickLink('Past');
+    $this->assertSession()->linkExistsExact('Future');
+    // The Past link is gone, and also as a simple string.
+    $this->assertSession()->linkNotExistsExact('Past');
+    $spans = $this->getSession()->getPage()->findAll('css', '.field--name-extra-field-oe-list-page-selected-filtersnodecontent-type-list span');
+    $this->assertCount(1, $spans);
+    $this->assertEquals('Period', $spans[0]->getText());
   }
 
   /**
