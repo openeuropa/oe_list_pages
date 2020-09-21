@@ -238,6 +238,7 @@ class ListBuilder implements ListBuilderInterface {
     $active_filters = [];
     $urls = [];
     foreach ($facets as $facet) {
+      $this->facetManager->build($facet);
       if (!$facet->getActiveItems()) {
         continue;
       }
