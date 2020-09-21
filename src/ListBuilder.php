@@ -158,7 +158,7 @@ class ListBuilder implements ListBuilderInterface {
     $available_filters = $list_source->getAvailableFilters();
     $list_config = $plugin_wrapper->getConfiguration();
 
-    if (!empty($list_config['exposed_filters'])) {
+    if ($list_config['override_exposed_filters']) {
       $exposed_filters = $list_config['exposed_filters'];
     }
     else {
@@ -174,7 +174,7 @@ class ListBuilder implements ListBuilderInterface {
     }
 
     // If filters are selected then ignore the non-selected.
-    if (!empty($available_filters) && !empty($exposed_filters)) {
+    if (!empty($available_filters)) {
       $ignored_filters = array_diff(array_keys($available_filters), array_values($exposed_filters));
     }
 
