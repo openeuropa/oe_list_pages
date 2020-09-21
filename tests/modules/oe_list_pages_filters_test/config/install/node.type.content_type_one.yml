@@ -5,6 +5,11 @@ dependencies:
     - emr
 name: 'Content type one'
 type: content_type_one
+third_party_settings:
+  oe_list_pages:
+    default_exposed_filters:
+      - body
+      - list_facet_source_node_content_type_onestatus
 description: ''
 help: ''
 new_revision: true

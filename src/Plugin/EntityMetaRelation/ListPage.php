@@ -230,12 +230,26 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
     // Get available filters.
     if ($list_source && $available_filters = $list_source->getAvailableFilters()) {
       $configuration = $this->getExposedFiltersConfiguration($list_source, $entity_meta_wrapper);
+
+      // Override checkbox.
+      $form[$key]['bundle_wrapper']['exposed_filters_wrapper']['exposed_filters_override'] = [
+        '#type' => 'checkbox',
+        '#title' => $this->t('Override default exposed filters'),
+        '#description' => $this->t('Configure which exposed filters should show up on this page.'),
+        '#default_value' => $this->areExposedFiltersOverridden($list_source, $entity_meta_wrapper),
+      ];
+
       $form[$key]['bundle_wrapper']['exposed_filters_wrapper']['exposed_filters'] = [
         '#type' => 'checkboxes',
         '#title' => $this->t('Exposed filters'),
         '#default_value' => $configuration,
         '#options' => $available_filters,
         '#required' => FALSE,
+        '#states' => [
+          'visible' => [
+            ':input[name="exposed_filters_wrapper[exposed_filters_override]"]' => ['checked' => TRUE],
+          ],
+        ],
       ];
     }
 
@@ -268,6 +282,9 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
       'exposed_filters_wrapper',
       'exposed_filters',
     ], []));
+
+    $override = $form_state->getValue('exposed_filters_wrapper')['exposed_filters_override'];
+    $entity_meta_wrapper->setConfiguration(['override_exposed_filters' => $override]);
     $entity_meta_wrapper->setConfiguration(['exposed_filters' => $selected_filters] + $entity_meta_wrapper->getConfiguration());
     $host_entity->get('emr_entity_metas')->attach($entity_meta);
   }
@@ -347,6 +364,25 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
   }
 
   /**
+   * Get whether the exposed filters are overridden.
+   *
+   * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
+   *   The selected list source.
+   * @param \Drupal\emr\EntityMetaWrapper $entity_meta_wrapper
+   *   The current entity meta wrapper.
+   *
+   * @return bool
+   *   Whether the exposed filters are overridden.
+   */
+  protected function areExposedFiltersOverridden(ListSourceInterface $list_source, EntityMetaWrapper $entity_meta_wrapper): bool {
+    $overridden = FALSE;
+    if ($list_source && $entity_meta_wrapper->getSourceEntityType() === $list_source->getEntityType() && $entity_meta_wrapper->getSourceEntityBundle() === $list_source->getBundle()) {
+      $overridden = (bool) $entity_meta_wrapper->getConfiguration()['override_exposed_filters'] ?? FALSE;
+    }
+    return $overridden;
+  }
+
+  /**
    * Get the exposed filters configuration.
    *
    * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
@@ -355,7 +391,7 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
    *   The current entity meta wrapper.
    *
    * @return array
-   *   The current unserialized configuration if available.
+   *   The current unserialized configuration.
    */
   protected function getExposedFiltersConfiguration(ListSourceInterface $list_source, EntityMetaWrapper $entity_meta_wrapper): array {
     // Get currently saved configuration for exposed filters if applicable

@@ -44,6 +44,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $page = $this->getSession()->getPage();
     $page->selectFieldOption('Source bundle', 'Content type one');
     $this->assertSession()->assertWaitOnAjaxRequest();
+    $page->checkField('Override default exposed filters');
     $page->checkField('Select one');
     $page->checkField('Published');
     $page->fillField('Title', 'List page for ct1');
@@ -55,8 +56,17 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $page = $this->getSession()->getPage();
     $page->selectFieldOption('Source bundle', 'Content type two');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $page->checkField('Select two');
     $page->fillField('Title', 'List page for ct2');
+    $page->pressButton('Save');
+
+    // Create list for content type one without exposed filters.
+    $this->drupalGet('/node/add/content_type_list');
+    $this->clickLink('List Page');
+    $page = $this->getSession()->getPage();
+    $page->selectFieldOption('Source bundle', 'Content type one');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $page->checkField('Override default exposed filters');
+    $page->fillField('Title', 'Another List page for ct1');
     $page->pressButton('Save');
 
     // Create some test nodes to index and search in.
@@ -102,6 +112,15 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $this->assertSession()->fieldNotExists('Created');
     $assert->pageTextContains('that red fruit');
     $assert->pageTextNotContains('that yellow fruit');
+    $node = $this->drupalGetNodeByTitle('Another List page for ct1');
+    $this->drupalGet($node->toUrl());
+    $this->assertSession()->fieldNotExists('Select one');
+    $this->assertSession()->fieldNotExists('Published');
+    $this->assertSession()->fieldNotExists('Created');
+    $assert = $this->assertSession();
+    $assert->pageTextContains('that yellow fruit');
+    $assert->pageTextNotContains('that red fruit');
+
   }
 
 }

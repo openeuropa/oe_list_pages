@@ -131,7 +131,7 @@ class ListSourceFactory implements ListSourceFactoryInterface {
         // application.
         continue;
       }
-      $filters[$field_id] = $field->getLabel();
+      $filters[$facet->id()] = $facet->label();
     }
 
     $bundle_field_id = $this->entityTypeManager->getDefinition($entity_type)->getKey('bundle');

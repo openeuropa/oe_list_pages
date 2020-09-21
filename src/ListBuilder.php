@@ -158,8 +158,14 @@ class ListBuilder implements ListBuilderInterface {
     $available_filters = $list_source->getAvailableFilters();
     $list_config = $plugin_wrapper->getConfiguration();
 
-    if (!empty($list_config['exposed_filters'])) {
+    if ($list_config['override_exposed_filters']) {
       $exposed_filters = $list_config['exposed_filters'];
+    }
+    else {
+      $bundle_entity_type = $this->entityTypeManager->getDefinition($plugin_wrapper->getSourceEntityType())->getBundleEntityType();
+      $storage = $this->entityTypeManager->getStorage($bundle_entity_type);
+      $bundle = $storage->load($plugin_wrapper->getSourceEntityBundle());
+      $exposed_filters = $bundle->getThirdPartySetting('oe_list_pages', 'default_exposed_filters', []);
     }
 
     // By default ignore all filters.
@@ -168,8 +174,8 @@ class ListBuilder implements ListBuilderInterface {
     }
 
     // If filters are selected then ignore the non-selected.
-    if (!empty($available_filters) && !empty($exposed_filters)) {
-      $ignored_filters = array_diff(array_keys($available_filters), array_keys($exposed_filters));
+    if (!empty($available_filters)) {
+      $ignored_filters = array_diff(array_keys($available_filters), array_values($exposed_filters));
     }
 
     $build['form'] = $this->formBuilder->getForm(ListFacetsForm::class, $list_source, $ignored_filters);

@@ -49,15 +49,15 @@ class ListsSourceTest extends ListsSourceBaseTest {
     // Filters for default bundle.
     $filters = $default_list->getAvailableFilters();
     $this->assertCount(3, $filters);
-    $this->assertArrayHasKey('category', $filters);
-    $this->assertArrayHasKey('keywords', $filters);
-    $this->assertArrayHasKey('width', $filters);
+    $this->assertArrayHasKey('list_facet_source_entity_test_mulrev_changed_entity_test_mulrev_changedcategory', $filters);
+    $this->assertArrayHasKey('list_facet_source_entity_test_mulrev_changed_entity_test_mulrev_changedkeywords', $filters);
+    $this->assertArrayHasKey('list_facet_source_entity_test_mulrev_changed_entity_test_mulrev_changedwidth', $filters);
     // Filters for item bundle.
     $filters_item = $item_list->getAvailableFilters();
     $this->assertCount(2, $filters_item);
-    $this->assertArrayHasKey('category', $filters_item);
-    $this->assertArrayNotHasKey('keywords', $filters_item);
-    $this->assertArrayHasKey('width', $filters_item);
+    $this->assertArrayHasKey('list_facet_source_entity_test_mulrev_changed_itemcategory', $filters_item);
+    $this->assertArrayNotHasKey('list_facet_source_entity_test_mulrev_changed_itemkeywords', $filters_item);
+    $this->assertArrayHasKey('list_facet_source_entity_test_mulrev_changed_itemwidth', $filters_item);
   }
 
 }
