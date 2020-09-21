@@ -202,7 +202,6 @@ class ListPagesFiltersTest extends WebDriverTestBase {
 
     $node = $this->drupalGetNodeByTitle('List page for ct1');
     $this->drupalGet($node->toUrl());
-    print_r($this->getSession()->getPage()->getContent());
     $this->assertSession()->pageTextContains('one yellow fruit');
     $this->assertSession()->pageTextContains('another yellow fruit');
     $this->assertSession()->linkNotExistsExact('Yes');
