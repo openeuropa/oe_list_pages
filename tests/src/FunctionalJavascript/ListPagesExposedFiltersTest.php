@@ -46,7 +46,7 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
    */
   public function testListPagePluginFiltersFormConfiguration(): void {
     $this->drupalLogin($this->rootUser);
-    $this->drupalGet('/node/add/content_type_list');
+    $this->drupalGet('/node/add/oe_list_page');
     $this->clickLink('List Page');
     $actual_entity_types = $this->getSelectOptions('Source entity type');
     $expected_entity_types = [
@@ -65,7 +65,7 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
     $expected_bundles = [
       'content_type_one' => 'Content type one',
       'content_type_two' => 'Content type two',
-      'content_type_list' => 'List page',
+      'oe_list_page' => 'List page',
     ];
     $this->assertEquals($expected_bundles, $actual_bundles);
     $page = $this->getSession()->getPage();

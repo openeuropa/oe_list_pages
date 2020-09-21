@@ -27,6 +27,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     'entity_reference_revisions',
     'oe_list_pages',
     'oe_list_pages_filters_test',
+    'oe_list_page_content_type',
     'node',
     'emr',
     'emr_node',
@@ -40,7 +41,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
   public function testListPageFilters(): void {
     // Create list for content type one.
     $this->drupalLogin($this->rootUser);
-    $this->drupalGet('/node/add/content_type_list');
+    $this->drupalGet('/node/add/oe_list_page');
     $this->clickLink('List Page');
     $page = $this->getSession()->getPage();
     $page->selectFieldOption('Source bundle', 'Content type one');
@@ -52,7 +53,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $page->pressButton('Save');
 
     // Create list for content type two.
-    $this->drupalGet('/node/add/content_type_list');
+    $this->drupalGet('/node/add/oe_list_page');
     $this->clickLink('List Page');
     $page = $this->getSession()->getPage();
     $page->selectFieldOption('Source bundle', 'Content type two');
@@ -61,7 +62,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $page->pressButton('Save');
 
     // Create list for content type one without exposed filters.
-    $this->drupalGet('/node/add/content_type_list');
+    $this->drupalGet('/node/add/oe_list_page');
     $this->clickLink('List Page');
     $page = $this->getSession()->getPage();
     $page->selectFieldOption('Source bundle', 'Content type one');
@@ -183,7 +184,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     // Create the list page that uses all the available facets.
     $admin = $this->createUser([], NULL, TRUE);
     $this->drupalLogin($admin);
-    $this->drupalGet('/node/add/content_type_list');
+    $this->drupalGet('/node/add/oe_list_page');
     $this->clickLink('List Page');
     $page = $this->getSession()->getPage();
     $page->selectFieldOption('Source bundle', 'Content type one');
@@ -207,7 +208,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     // Past is showing up but it's not a link.
     $this->assertSession()->linkNotExistsExact('Past');
     // We have a default status facet, configured to show Past items.
-    $spans = $this->getSession()->getPage()->findAll('css', '.field--name-extra-field-oe-list-page-selected-filtersnodecontent-type-list span');
+    $spans = $this->getSession()->getPage()->findAll('css', '.field--name-extra-field-oe-list-page-selected-filtersnodeoe-list-page span');
     $this->assertCount(2, $spans);
     $actual_values = [];
     foreach ($spans as $span) {
@@ -222,7 +223,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $this->getSession()->getPage()->pressButton('Search');
     $this->assertSession()->pageTextContains('one yellow fruit');
     $this->assertSession()->pageTextContains('another yellow fruit');
-    $this->assertSession()->elementExists('css', '.field--name-extra-field-oe-list-page-selected-filtersnodecontent-type-list');
+    $this->assertSession()->elementExists('css', '.field--name-extra-field-oe-list-page-selected-filtersnodeoe-list-page');
     $this->assertOptionSelected('Published', 'Yes');
     $this->assertOptionSelected('Select one', 'test1');
     $this->assertOptionSelected('Select one', 'test2');
@@ -309,7 +310,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $this->assertSession()->linkExistsExact('Future');
     // The Past link is gone, and also as a simple string.
     $this->assertSession()->linkNotExistsExact('Past');
-    $spans = $this->getSession()->getPage()->findAll('css', '.field--name-extra-field-oe-list-page-selected-filtersnodecontent-type-list span');
+    $spans = $this->getSession()->getPage()->findAll('css', '.field--name-extra-field-oe-list-page-selected-filtersnodeoe-list-page span');
     $this->assertCount(1, $spans);
     $this->assertEquals('Period', $spans[0]->getText());
   }
@@ -321,7 +322,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
    *   The expected labels.
    */
   protected function assertSelectedFiltersLabels(array $expected_labels): void {
-    $spans = $this->getSession()->getPage()->findAll('css', '.field--name-extra-field-oe-list-page-selected-filtersnodecontent-type-list span');
+    $spans = $this->getSession()->getPage()->findAll('css', '.field--name-extra-field-oe-list-page-selected-filtersnodeoe-list-page span');
     $this->assertCount(count($expected_labels), $spans);
     $labels = [];
     foreach ($spans as $span) {

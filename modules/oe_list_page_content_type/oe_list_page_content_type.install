@@ -2,7 +2,7 @@
 
 /**
  * @file
- * OE List Pages filters install file.
+ * OE List Page content type install file.
  */
 
 declare(strict_types = 1);
@@ -10,9 +10,9 @@ declare(strict_types = 1);
 /**
  * Implements hook_install().
  */
-function oe_list_pages_filters_test_install() {
+function oe_list_page_content_type_install() {
   $installer = \Drupal::service('emr.installer');
   $installer->installEntityMetaTypeOnContentEntityType('oe_list_page', 'node', [
-    'content_type_list',
+    'oe_list_page',
   ]);
 }
