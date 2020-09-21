@@ -235,6 +235,7 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
       $form[$key]['bundle_wrapper']['exposed_filters_wrapper']['exposed_filters_override'] = [
         '#type' => 'checkbox',
         '#title' => $this->t('Override default exposed filters'),
+        '#description' => $this->t('Configure which exposed filters should show up on this page.'),
         '#default_value' => isset($configuration),
       ];
 
