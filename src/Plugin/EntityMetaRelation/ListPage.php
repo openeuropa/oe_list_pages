@@ -377,7 +377,7 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
   protected function areExposedFiltersOverridden(ListSourceInterface $list_source, EntityMetaWrapper $entity_meta_wrapper): bool {
     $overridden = FALSE;
     if ($list_source && $entity_meta_wrapper->getSourceEntityType() === $list_source->getEntityType() && $entity_meta_wrapper->getSourceEntityBundle() === $list_source->getBundle()) {
-      $overridden = (bool) !empty($entity_meta_wrapper->getConfiguration()['override_exposed_filters']) ? $entity_meta_wrapper->getConfiguration()['override_exposed_filters'] : FALSE;
+      $overridden = !empty($entity_meta_wrapper->getConfiguration()['override_exposed_filters']) ? (bool) $entity_meta_wrapper->getConfiguration()['override_exposed_filters'] : FALSE;
     }
     return $overridden;
   }
