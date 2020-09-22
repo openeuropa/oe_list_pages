@@ -194,7 +194,7 @@ class ListBuilder implements ListBuilderInterface {
     $available_filters = $list_source->getAvailableFilters();
     $list_config = $plugin_wrapper->getConfiguration();
 
-    if ($list_config['override_exposed_filters']) {
+    if (!empty($list_config['override_exposed_filters']) && $list_config['override_exposed_filters']) {
       $exposed_filters = $list_config['exposed_filters'];
     }
     else {
