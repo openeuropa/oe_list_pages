@@ -43,9 +43,7 @@ class DateWidgetTest extends ListsSourceBaseTest {
     $facet_active = $this->createFacet('created', $default_list_id, '', 'oe_list_pages_date', ['date_type' => Date::DATETIME_TYPE_DATE]);
     // Set the date in ATOM format as submitted also by the widget.
     $facet_active->setActiveItems([
-      'bt',
-      '2020-08-14T15:26:45+02:00',
-      '2020-08-21T15:26:45+02:00',
+      'bt|2020-08-14T15:26:45+02:00|2020-08-21T15:26:45+02:00',
     ]);
 
     $build = $this->widget->build($facet_active);
@@ -71,8 +69,7 @@ class DateWidgetTest extends ListsSourceBaseTest {
     // Test widget if we choose the greater than or less than operator.
     foreach (['gt', 'lt'] as $operator_key) {
       $facet_active->setActiveItems([
-        $operator_key,
-        '2020-08-14T15:26:45+02:00',
+        "$operator_key|2020-08-14T15:26:45+02:00",
       ]);
       $build = $this->widget->build($facet_active);
       $actual = $build[$facet_active->id() . '_op'];
@@ -100,9 +97,7 @@ class DateWidgetTest extends ListsSourceBaseTest {
     // Test the widget form with datetime type.
     $facet_active = $this->createFacet('created', $default_list_id, 'datetime', 'oe_list_pages_date', ['date_type' => Date::DATETIME_TYPE_DATETIME]);
     $facet_active->setActiveItems([
-      'bt',
-      '2020-08-14T15:26:45+02:00',
-      '2020-08-21T15:26:45+02:00',
+      'bt|2020-08-14T15:26:45+02:00|2020-08-21T15:26:45+02:00',
     ]);
 
     $build = $this->widget->build($facet_active);
@@ -157,7 +152,7 @@ class DateWidgetTest extends ListsSourceBaseTest {
     $list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
     foreach ($this->getTestFilterDateData() as $message => $data) {
       /** @var \Drupal\search_api\Query\QueryInterface $query */
-      $query = $list->getQuery(['preset_filters' => [$facet_date->id() => array_values($data['filters'])]]);
+      $query = $list->getQuery(['preset_filters' => [$facet_date->id() => [implode('|', $data['filters'])]]]);
       $query->execute();
       $results = $query->getResults();
       $this->assertCount($data['expected_count'], $results->getResultItems(), $message);

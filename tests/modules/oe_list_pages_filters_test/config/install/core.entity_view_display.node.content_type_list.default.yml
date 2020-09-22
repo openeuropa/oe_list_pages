@@ -10,6 +10,11 @@ targetEntityType: node
 bundle: content_type_list
 mode: default
 content:
+  'extra_field_oe_list_page_selected_filters:node:content_type_list':
+    weight: 2
+    region: content
+    settings: {  }
+    third_party_settings: {  }
   'extra_field_oe_list_page_filters:node:content_type_list':
     weight: 2
     region: content

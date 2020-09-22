@@ -44,7 +44,7 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
   /**
    * Test exposed filters configuration.
    */
-  public function testListPagePluginFilters(): void {
+  public function testListPagePluginFiltersFormConfiguration(): void {
     $this->drupalLogin($this->rootUser);
     $this->drupalGet('/node/add/content_type_list');
     $this->clickLink('List Page');

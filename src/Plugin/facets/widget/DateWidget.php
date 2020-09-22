@@ -63,7 +63,7 @@ class DateWidget extends ListPagesWidgetBase {
       '#type' => 'select',
       '#title' => $facet->getName(),
       '#options' => $operators,
-      '#default_value' => $this->getValueFromActiveFilters($facet, '0'),
+      '#default_value' => $this->getOperatorFromActiveFilters($facet),
       '#empty_option' => $this->t('Select'),
     ];
 
@@ -90,8 +90,7 @@ class DateWidget extends ListPagesWidgetBase {
       ],
     ];
 
-    $first_date_default = $this->getValueFromActiveFilters($facet, '1');
-    $first_date_default = $first_date_default ? new DrupalDateTime($first_date_default) : NULL;
+    $first_date_default = $this->getDateFromActiveFilters($facet, 'first');
 
     $build[$facet->id() . '_first_date_wrapper'][$facet->id() . '_first_date'] = [
       '#type' => 'datetime',
@@ -103,9 +102,8 @@ class DateWidget extends ListPagesWidgetBase {
 
     // We only care about the second date if the operator is "bt".
     $second_date_default = NULL;
-    if ($this->getValueFromActiveFilters($facet, '0') === 'bt') {
-      $second_date_default = $this->getValueFromActiveFilters($facet, '2');
-      $second_date_default = new DrupalDateTime($second_date_default);
+    if ($this->getOperatorFromActiveFilters($facet) === 'bt') {
+      $second_date_default = $this->getDateFromActiveFilters($facet, 'second');
     }
 
     $build[$facet->id() . '_second_date_wrapper'] = [
@@ -177,6 +175,36 @@ class DateWidget extends ListPagesWidgetBase {
     }
 
     return [implode('|', $values)];
+  }
+
+  /**
+   * Returns the operator from the active filter.
+   *
+   * @param \Drupal\facets\FacetInterface $facet
+   *   The facet to check the active items from.
+   *
+   * @return string|null
+   *   The operator.
+   */
+  public function getOperatorFromActiveFilters(FacetInterface $facet): ?string {
+    $active_filters = Date::getActiveItems($facet);
+    return $active_filters['operator'] ?? NULL;
+  }
+
+  /**
+   * Returns a date part from the active filter.
+   *
+   * @param \Drupal\facets\FacetInterface $facet
+   *   The facet to check the active items from.
+   * @param string $part
+   *   The date part to return.
+   *
+   * @return \Drupal\Core\Datetime\DrupalDateTime|null
+   *   The date object.
+   */
+  public function getDateFromActiveFilters(FacetInterface $facet, string $part): ?DrupalDateTime {
+    $active_filters = Date::getActiveItems($facet);
+    return $active_filters[$part] ?? NULL;
   }
 
   /**

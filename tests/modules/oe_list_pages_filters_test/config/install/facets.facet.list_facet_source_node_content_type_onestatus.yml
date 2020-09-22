@@ -1,14 +1,9 @@
 langcode: en
 status: true
-dependencies:
-  module:
-    - facets
-  config:
-    - node.type.content_type_one
-    - search_api.server.database_server
+dependencies: {  }
 id: list_facet_source_node_content_type_onestatus
-name: 'Published'
-url_alias: 'status'
+name: Published
+url_alias: status
 weight: 0
 min_count: 1
 show_only_one_result: false
@@ -18,14 +13,27 @@ widget:
   type: oe_list_pages_multiselect
   config:
     show_numbers: false
-query_operator: null
+query_operator: or
 use_hierarchy: false
 expand_hierarchy: false
 enable_parent_when_child_gets_disabled: true
-hard_limit: null
+hard_limit: 0
 exclude: false
-only_visible_when_facet_source_is_visible: null
-processor_configs: {  }
+only_visible_when_facet_source_is_visible: false
+processor_configs:
+  boolean_item:
+    processor_id: boolean_item
+    weights:
+      build: 35
+    settings:
+      on_value: 'Yes'
+      off_value: 'No'
+  url_processor_handler:
+    processor_id: url_processor_handler
+    weights:
+      pre_query: 50
+      build: 15
+    settings: {  }
 empty_behavior:
   behavior: none
-show_title: null
+show_title: false

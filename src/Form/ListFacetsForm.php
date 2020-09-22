@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages\Form;
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
@@ -71,12 +72,16 @@ class ListFacetsForm extends FormBase {
       return [];
     }
 
+    $cache = new CacheableMetadata();
+    $cache->addCacheTags(['config:facets_facet_list']);
+
     $source_id = $list_source->getSearchId();
 
     /** @var \Drupal\facets\FacetInterface[] $facets */
     $facets = $this->facetsManager->getFacetsByFacetSourceId($source_id);
     if (!$facets) {
-      return [];
+      $cache->applyTo($form);
+      return $form;
     }
 
     // Sort facets by weight.
@@ -100,6 +105,11 @@ class ListFacetsForm extends FormBase {
       }
     }
 
+    if (!isset($form['facets'])) {
+      $cache->applyTo($form);
+      return $form;
+    }
+
     $form_state->set('source_id', $source_id);
 
     $form['actions']['#type'] = 'actions';
@@ -115,7 +125,7 @@ class ListFacetsForm extends FormBase {
       '#op' => 'reset',
     ];
 
-    $form['#cache']['tags'][] = 'config:facets_facet_list';
+    $cache->applyTo($form);
 
     return $form;
   }

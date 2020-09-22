@@ -121,6 +121,8 @@ class FacetsFormTest extends WebDriverTestBase {
     $this->getSession()->getPage()->pressButton('Search');
     $assert->pageTextNotContains('that yellow fruit');
     $assert->pageTextNotContains('that red fruit');
+    $this->getSession()->getPage()->pressButton('Reset');
+    $this->assertDefaultFormStatus();
     $this->getSession()->getPage()->selectFieldOption('Select one', 'test2');
     $this->getSession()->getPage()->pressButton('Search');
     $assert->pageTextNotContains('that yellow fruit');
