@@ -316,6 +316,53 @@ class ListPagesFiltersTest extends WebDriverTestBase {
   }
 
   /**
+   * Testing the pager information regarding the current query.
+   */
+  public function testListPagePagerInfo(): void {
+    // Create some test nodes to index and search in.
+    $date = new DrupalDateTime('20-10-2019');
+    for ($i = 1; $i <= 23; $i++) {
+      $date->modify('+1 day');
+      $values = [
+        'title' => 'Node title ' . $i,
+        'type' => 'content_type_one',
+        'body' => 'Node body ' . $i,
+        'status' => NodeInterface::PUBLISHED,
+        'created' => $date->getTimestamp(),
+      ];
+      $node = Node::create($values);
+      $node->save();
+    }
+
+    /** @var \Drupal\search_api\Entity\Index $index */
+    $index = Index::load('node');
+    $index->indexItems();
+
+    // Create the list page.
+    $admin = $this->createUser([], NULL, TRUE);
+    $this->drupalLogin($admin);
+    $this->drupalGet('/node/add/oe_list_page');
+    $this->clickLink('List Page');
+    $page = $this->getSession()->getPage();
+    $page->selectFieldOption('Source bundle', 'Content type one');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $page->fillField('Title', 'List page for ct1');
+    $page->pressButton('Save');
+
+    $this->assertSession()->pageTextContains('Showing results 1 to 10');
+    $this->getSession()->getPage()->clickLink('Next');
+    $this->assertSession()->pageTextContains('Showing results 10 to 20');
+    $this->getSession()->getPage()->clickLink('Next');
+    $this->assertSession()->pageTextContains('Showing results 20 to 23');
+
+    // Search to trigger no results.
+    $this->getSession()->getPage()->fillField('Body', 'not going to find anything');
+    $this->getSession()->getPage()->pressButton('Search');
+    $this->assertSession()->pageTextContains('No results have been found');
+    $this->assertSession()->pageTextNotContains('Showing results');
+  }
+
+  /**
    * Asserts the selected filters labels from the page.
    *
    * @param array $expected_labels

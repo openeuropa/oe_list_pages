@@ -10,6 +10,7 @@ use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Pager\PagerManagerInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
 use Drupal\facets\FacetInterface;
 use Drupal\facets\FacetManager\DefaultFacetManager;
@@ -22,6 +23,8 @@ use Drupal\oe_list_pages\Plugin\facets\processor\DefaultStatusProcessorInterface
  * Default list builder implementation.
  */
 class ListBuilder implements ListBuilderInterface {
+
+  use StringTranslationTrait;
 
   /**
    * The entity type manager.
@@ -328,6 +331,45 @@ class ListBuilder implements ListBuilderInterface {
       ];
     }
 
+    $cache->applyTo($build);
+    return $build;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+   * @SuppressWarnings(PHPMD.NPathComplexity)
+   */
+  public function buildPagerInfo(ContentEntityInterface $entity): array {
+    $cache = new CacheableMetadata();
+    $cache->addCacheContexts(['url']);
+    $list_execution = $this->listExecutionManager->executeList($entity);
+    $results = $list_execution->getResults();
+    if (!$results->getResultCount()) {
+      $build = [
+        '#markup' => $this->t('No results have been found'),
+      ];
+      $cache->applyTo($build);
+      return $build;
+    }
+
+    $offset = $results->getQuery()->getOption('offset', FALSE);
+    $limit = $results->getQuery()->getOption('limit', FALSE);
+    if ($offset === FALSE || $limit == FALSE) {
+      $cache->applyTo($build);
+      return $build;
+    }
+
+    $first = $offset === 0 ? 1 : $offset;
+    $last = $limit + $offset;
+    if (count($results->getResultItems()) < $limit) {
+      $last = $results->getResultCount();
+    }
+
+    $build = [
+      '#markup' => $this->t('Showing results @first to @last', ['@first' => $first, '@last' => $last]),
+    ];
     $cache->applyTo($build);
     return $build;
   }

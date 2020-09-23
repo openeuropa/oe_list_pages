@@ -20,8 +20,13 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
-  'extra_field_oe_list_page_results:node:oe_list_page':
+  'extra_field_oe_list_page_pager_info:node:oe_list_page':
     weight: 1
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  'extra_field_oe_list_page_results:node:oe_list_page':
+    weight: 2
     region: content
     settings: {  }
     third_party_settings: {  }
