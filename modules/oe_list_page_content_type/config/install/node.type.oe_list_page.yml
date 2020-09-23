@@ -8,7 +8,7 @@ third_party_settings:
     entity_meta_bundles:
       - oe_list_page
 name: 'List page'
-type: content_type_list
+type: oe_list_page
 description: ''
 help: ''
 new_revision: true

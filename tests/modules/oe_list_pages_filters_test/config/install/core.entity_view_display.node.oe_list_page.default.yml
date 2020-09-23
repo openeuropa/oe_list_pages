@@ -2,25 +2,25 @@ langcode: en
 status: true
 dependencies:
   config:
-    - node.type.content_type_list
+    - node.type.oe_list_page
   module:
     - user
-id: node.content_type_list.default
+id: node.oe_list_page.default
 targetEntityType: node
-bundle: content_type_list
+bundle: oe_list_page
 mode: default
 content:
-  'extra_field_oe_list_page_selected_filters:node:content_type_list':
+  'extra_field_oe_list_page_selected_filters:node:oe_list_page':
     weight: 2
     region: content
     settings: {  }
     third_party_settings: {  }
-  'extra_field_oe_list_page_filters:node:content_type_list':
+  'extra_field_oe_list_page_filters:node:oe_list_page':
     weight: 2
     region: content
     settings: {  }
     third_party_settings: {  }
-  'extra_field_oe_list_page_results:node:content_type_list':
+  'extra_field_oe_list_page_results:node:oe_list_page':
     weight: 1
     region: content
     settings: {  }
