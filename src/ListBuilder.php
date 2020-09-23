@@ -285,11 +285,13 @@ class ListBuilder implements ListBuilderInterface {
     foreach ($active_filters as $facet_id => $filters) {
       $facet = $keyed_facets[$facet_id];
       $facet_results = $facet->getResults();
-      $item = [
-        'name' => $facet->getName(),
-      ];
+      $item = [];
       foreach ($filters as $key => $value) {
         $display_value = $this->getFacetResultDisplayLabel($facet_results, $value);
+        if (!$display_value) {
+          continue;
+        }
+
         $item['items'][] = [
           'url' => $urls[$facet_id][$key],
           'label' => $display_value,
@@ -297,6 +299,10 @@ class ListBuilder implements ListBuilderInterface {
         ];
       }
 
+      if (!$item['items']) {
+        continue;
+      }
+      $item['name'] = $facet->getName();
       $items[$facet_id] = $item;
     }
 
