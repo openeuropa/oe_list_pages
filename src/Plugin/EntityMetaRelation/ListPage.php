@@ -19,6 +19,7 @@ use Drupal\emr\EntityMetaWrapper;
 use Drupal\emr\Plugin\EntityMetaRelationContentFormPluginBase;
 use Drupal\oe_list_pages\ListPageEvents;
 use Drupal\oe_list_pages\ListPageSourceAlterEvent;
+use Drupal\oe_list_pages\ListPresetFiltersBuilder;
 use Drupal\oe_list_pages\ListSourceFactory;
 use Drupal\oe_list_pages\ListSourceInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -47,30 +48,38 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
    *
    * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface
    */
-  private $entityTypeBundleInfo;
+  protected $entityTypeBundleInfo;
 
   /**
    * The event dispatcher.
    *
    * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
    */
-  private $eventDispatcher;
+  protected $eventDispatcher;
 
   /**
    * The list source factory.
    *
    * @var \Drupal\oe_list_pages\ListSourceFactory
    */
-  private $listSourceFactory;
+  protected $listSourceFactory;
+
+  /**
+   * The preset filters builder.
+   *
+   * @var \Drupal\oe_list_pages\ListPresetFiltersBuilder
+   */
+  protected $presetFiltersBuilder;
 
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityFieldManagerInterface $entity_field_manager, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $dispatcher, ListSourceFactory $list_source_factory) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityFieldManagerInterface $entity_field_manager, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $dispatcher, ListSourceFactory $list_source_factory, ListPresetFiltersBuilder $preset_filters_builder) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_field_manager, $entity_type_manager);
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
     $this->eventDispatcher = $dispatcher;
     $this->listSourceFactory = $list_source_factory;
+    $this->presetFiltersBuilder = $preset_filters_builder;
   }
 
   /**
@@ -85,7 +94,8 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
       $container->get('entity_type.manager'),
       $container->get('entity_type.bundle.info'),
       $container->get('event_dispatcher'),
-      $container->get('oe_list_pages.list_source.factory')
+      $container->get('oe_list_pages.list_source.factory'),
+      $container->get('oe_list_pages.preset_filters_builder'),
     );
   }
 
@@ -271,10 +281,13 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
       ],
       '#default_value' => $entity_meta_wrapper->getConfiguration()['items_per_page'] ?? 10,
     ];
+    $preset_filters = $entity_meta_wrapper->getConfiguration()['preset_filters'];
+
+    $form_state->set('oe_list_pages_available_filters', $available_filters);
+    $form = $this->presetFiltersBuilder->buildDefaultFilters($form, $form_state, $this->getFormKey(), $list_source, $available_filters, $preset_filters);
 
     // Set the entity meta so we use it in the submit handler.
     $form_state->set($entity_meta_bundle . '_entity_meta', $entity_meta);
-
     return $form;
   }
 
@@ -302,13 +315,20 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
       'exposed_filters',
     ], []));
 
+    $preset_filters = array_filter($form_state->getValue([
+      'preset_filters_wrapper',
+      'current_filters',
+    ], []));
+
     $override = $form_state->getValue('exposed_filters_wrapper')['exposed_filters_override'];
     $configuration = $entity_meta_wrapper->getConfiguration();
     $configuration['override_exposed_filters'] = $override;
     $configuration['exposed_filters'] = $override ? $selected_filters : [];
     $configuration['items_per_page'] = (int) $form_state->getValue('items_per_page');
     $configuration['exposed_filters'] = $override ? $selected_filters : [];
+    $configuration['preset_filters'] = $preset_filters;
     $entity_meta_wrapper->setConfiguration($configuration);
+
     $host_entity->get('emr_entity_metas')->attach($entity_meta);
   }
 
