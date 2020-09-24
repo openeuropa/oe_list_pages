@@ -7,7 +7,7 @@ namespace Drupal\oe_list_pages\Plugin\ExtraField\Display;
 use Drupal\Core\Entity\ContentEntityInterface;
 
 /**
- * Extra field displaying the lits page results.
+ * Extra field displaying the list page results.
  *
  * @ExtraFieldDisplay(
  *   id = "oe_list_page_results",
