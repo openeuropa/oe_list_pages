@@ -1,0 +1,11 @@
+name: OpenEuropa List Page Adress
+description: This submodule adds support for Address fields in List Pages.
+package: OpenEuropa
+
+type: module
+core: 8.x
+
+dependencies:
+  - address:address
+  - oe_list_pages:oe_list_pages
+
