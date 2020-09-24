@@ -59,7 +59,6 @@ class DateStatusTest extends ListsSourceBaseTest {
     $this->assertSame('array', gettype($actual));
     $this->assertEquals('select', $actual['#type']);
     $default_options = [
-      '' => t('- None -'),
       DateStatus::UPCOMING => t('Upcoming'),
       DateStatus::PAST => t('Past'),
     ];
@@ -72,7 +71,6 @@ class DateStatusTest extends ListsSourceBaseTest {
     $this->assertEquals('select', $actual['#type']);
 
     $default_options = [
-      '' => t('- None -'),
       DateStatus::UPCOMING => t('Coming items'),
       DateStatus::PAST => t('Past items'),
     ];
