@@ -1,0 +1,26 @@
+msgid ""
+msgstr ""
+
+msgid "Showing results @start to @end"
+msgstr "Treffer @start bis @end"
+
+msgid "Next"
+msgstr "Nächste Seite"
+
+msgid "Previous"
+msgstr "Vorherige Seite"
+
+msgid "Go to page @number"
+msgstr "Gehe zu Seite @number"
+
+msgid "Go to previous page"
+msgstr "Zur vorherigen Seite"
+
+msgid "Go to next page"
+msgstr "Zur nächsten Seite"
+
+msgid "First"
+msgstr "Erste Seite"
+
+msgid "Last"
+msgstr "Letzte Seite"

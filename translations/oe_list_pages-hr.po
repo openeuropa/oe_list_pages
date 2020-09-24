@@ -1,0 +1,26 @@
+msgid ""
+msgstr ""
+
+msgid "Showing results @start to @end"
+msgstr "Rezultati @start do @end"
+
+msgid "Next"
+msgstr "Sljedeća"
+
+msgid "Previous"
+msgstr "Prethodna"
+
+msgid "Go to page @number"
+msgstr "Idi na stranicu @number"
+
+msgid "Go to previous page"
+msgstr "Idi na prethodnu stranicu"
+
+msgid "Go to next page"
+msgstr "Idi na sljedeću stranicu"
+
+msgid "First"
+msgstr "Prva"
+
+msgid "Last"
+msgstr "Posljednja"

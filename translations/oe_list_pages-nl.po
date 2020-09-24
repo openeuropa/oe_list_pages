@@ -1,0 +1,26 @@
+msgid ""
+msgstr ""
+
+msgid "Showing results @start to @end"
+msgstr "Resultaten @start tot en met @end"
+
+msgid "Next"
+msgstr "Volgende"
+
+msgid "Previous"
+msgstr "Vorige"
+
+msgid "Go to page @number"
+msgstr "Ga naar pagina @number"
+
+msgid "Go to previous page"
+msgstr "Ga naar vorige pagina"
+
+msgid "Go to next page"
+msgstr "Ga naar volgende paginа"
+
+msgid "First"
+msgstr "Eerste"
+
+msgid "Last"
+msgstr "Laatste"
