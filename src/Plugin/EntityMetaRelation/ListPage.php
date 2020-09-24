@@ -235,6 +235,7 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
     // Try to get the list source for the selected entity type and bundle.
     $list_source = $this->listSourceFactory->get($selected_entity_type, $selected_bundle);
 
+    $available_filters = [];
     // Get available filters.
     if ($list_source && $available_filters = $list_source->getAvailableFilters()) {
       $configuration = $this->getExposedFiltersConfiguration($list_source, $entity_meta_wrapper);
@@ -281,9 +282,9 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
       ],
       '#default_value' => $entity_meta_wrapper->getConfiguration()['items_per_page'] ?? 10,
     ];
-    $preset_filters = $entity_meta_wrapper->getConfiguration()['preset_filters'];
 
     $form_state->set('oe_list_pages_available_filters', $available_filters);
+    $preset_filters = $entity_meta_wrapper->getConfiguration()['preset_filters'] ?? [];
     $form = $this->presetFiltersBuilder->buildDefaultFilters($form, $form_state, $this->getFormKey(), $list_source, $available_filters, $preset_filters);
 
     // Set the entity meta so we use it in the submit handler.

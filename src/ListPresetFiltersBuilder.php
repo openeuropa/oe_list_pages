@@ -75,8 +75,16 @@ class ListPresetFiltersBuilder {
 
   /**
    * {@inheritdoc}
+   *
+   * @SuppressWarnings(PHPMD.CyclomaticComplexity)
    */
-  public function buildDefaultFilters(array $form, FormStateInterface $form_state, string $form_key, ListSourceInterface $list_source, array $available_filters, array $preset_filters = []) {
+  public function buildDefaultFilters(array $form, FormStateInterface $form_state, string $form_key, ListSourceInterface $list_source = NULL, array $available_filters = [], array $preset_filters = []) {
+
+    // List source doesn't exist yet.
+    if (empty($list_source)) {
+      return $form;
+    }
+
     // Store the form key for ajax processing.
     $form['oe_list_pages_form_key'] = [
       '#type' => 'value',
