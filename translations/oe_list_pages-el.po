@@ -24,3 +24,9 @@ msgstr "Πρώτη"
 
 msgid "Last"
 msgstr "Τελευταία"
+
+msgid "Clear filters"
+msgstr "Εκκαθάριση φίλτρων"
+
+msgid "Filter by"
+msgstr "Φιλτράρισμα ανά"

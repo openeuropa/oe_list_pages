@@ -24,3 +24,9 @@ msgstr "Pirmas"
 
 msgid "Last"
 msgstr "Paskutinis"
+
+msgid "Clear filters"
+msgstr "Valyti filtrus"
+
+msgid "Filter by"
+msgstr "Filtruoti pagal"

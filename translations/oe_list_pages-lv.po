@@ -24,3 +24,9 @@ msgstr "Pirmā"
 
 msgid "Last"
 msgstr "Pēdējā"
+
+msgid "Clear filters"
+msgstr "Notīrīt filtrus"
+
+msgid "Filter by"
+msgstr "Atlasīt pēc"

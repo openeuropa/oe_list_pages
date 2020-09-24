@@ -24,3 +24,9 @@ msgstr "Céad lch."
 
 msgid "Last"
 msgstr "Lch. deir"
+
+msgid "Clear filters"
+msgstr "Glan na scagairí"
+
+msgid "Filter by"
+msgstr "Scagadh de réir"

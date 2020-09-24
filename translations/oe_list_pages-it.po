@@ -24,3 +24,9 @@ msgstr "Prima"
 
 msgid "Last"
 msgstr "Ultima"
+
+msgid "Clear filters"
+msgstr "Cancella filtri"
+
+msgid "Filter by"
+msgstr "Filtra per"

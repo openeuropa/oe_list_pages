@@ -121,7 +121,7 @@ class ListFacetsForm extends FormBase {
 
     $form['actions']['reset'] = [
       '#type' => 'submit',
-      '#value' => $this->t('Reset'),
+      '#value' => $this->t('Clear filters'),
       '#op' => 'reset',
     ];
 

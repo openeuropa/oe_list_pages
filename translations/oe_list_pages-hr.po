@@ -24,3 +24,9 @@ msgstr "Prva"
 
 msgid "Last"
 msgstr "Posljednja"
+
+msgid "Clear filters"
+msgstr "Poništi filtre"
+
+msgid "Filter by"
+msgstr "Filtriranje"

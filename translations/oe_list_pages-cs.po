@@ -24,3 +24,9 @@ msgstr "První"
 
 msgid "Last"
 msgstr "Poslední"
+
+msgid "Clear filters"
+msgstr "Vymazat obsah filtrů"
+
+msgid "Filter by"
+msgstr "Filtrovat podle"

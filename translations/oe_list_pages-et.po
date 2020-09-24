@@ -24,3 +24,9 @@ msgstr "Esimene"
 
 msgid "Last"
 msgstr "Viimane"
+
+msgid "Clear filters"
+msgstr "Tühjenda filtrid"
+
+msgid "Filter by"
+msgstr "Filtreeri"

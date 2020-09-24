@@ -24,3 +24,9 @@ msgstr "L-ewwel"
 
 msgid "Last"
 msgstr "L-aħħar"
+
+msgid "Clear filters"
+msgstr "Neħħi l-filtri"
+
+msgid "Filter by"
+msgstr "Iffiltra skont"

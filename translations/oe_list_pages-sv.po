@@ -24,3 +24,9 @@ msgstr "Första"
 
 msgid "Last"
 msgstr "Sista"
+
+msgid "Clear filters"
+msgstr "Rensa sökkriterier"
+
+msgid "Filter by"
+msgstr "Filtrera efter"

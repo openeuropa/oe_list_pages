@@ -24,3 +24,9 @@ msgstr "Első"
 
 msgid "Last"
 msgstr "Utolsó"
+
+msgid "Clear filters"
+msgstr "Szűrők törlése"
+
+msgid "Filter by"
+msgstr "Szűrési feltételek"

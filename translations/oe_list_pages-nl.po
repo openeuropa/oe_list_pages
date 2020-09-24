@@ -24,3 +24,9 @@ msgstr "Eerste"
 
 msgid "Last"
 msgstr "Laatste"
+
+msgid "Clear filters"
+msgstr "Filters wissen"
+
+msgid "Filter by"
+msgstr "Filteren op"

@@ -24,3 +24,9 @@ msgstr "Ensimmäinen"
 
 msgid "Last"
 msgstr "Viimeinen"
+
+msgid "Clear filters"
+msgstr "Tyhjennä rajaimet"
+
+msgid "Filter by"
+msgstr "Rajaimet"

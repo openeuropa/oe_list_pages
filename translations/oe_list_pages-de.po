@@ -24,3 +24,9 @@ msgstr "Erste Seite"
 
 msgid "Last"
 msgstr "Letzte Seite"
+
+msgid "Clear filters"
+msgstr "Zurücksetzen"
+
+msgid "Filter by"
+msgstr "Filtern nach"
