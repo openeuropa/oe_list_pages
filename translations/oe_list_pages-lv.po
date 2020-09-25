@@ -1,0 +1,32 @@
+msgid ""
+msgstr ""
+
+msgid "Showing results @start to @end"
+msgstr "Tiek rādīts(i) @start līdz @end rezultāti"
+
+msgid "Next"
+msgstr "Nākamā"
+
+msgid "Previous"
+msgstr "Iepriekšējā"
+
+msgid "Go to page @number"
+msgstr "Doties uz @number. lapu"
+
+msgid "Go to previous page"
+msgstr "Uz iepriekšējo lapu"
+
+msgid "Go to next page"
+msgstr "Uz nākamo lapu"
+
+msgid "First"
+msgstr "Pirmā"
+
+msgid "Last"
+msgstr "Pēdējā"
+
+msgid "Clear filters"
+msgstr "Notīrīt filtrus"
+
+msgid "Filter by"
+msgstr "Atlasīt pēc"

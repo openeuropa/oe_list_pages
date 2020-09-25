@@ -1,0 +1,32 @@
+msgid ""
+msgstr ""
+
+msgid "Showing results @start to @end"
+msgstr "Visar resultat @start–@end"
+
+msgid "Next"
+msgstr "Nästa"
+
+msgid "Previous"
+msgstr "Föregående"
+
+msgid "Go to page @number"
+msgstr "Gå till sida @number"
+
+msgid "Go to previous page"
+msgstr "Gå till föregående sida"
+
+msgid "Go to next page"
+msgstr "Gå till nästa sida"
+
+msgid "First"
+msgstr "Första"
+
+msgid "Last"
+msgstr "Sista"
+
+msgid "Clear filters"
+msgstr "Rensa sökkriterier"
+
+msgid "Filter by"
+msgstr "Filtrera efter"

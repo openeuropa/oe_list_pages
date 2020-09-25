@@ -7,28 +7,28 @@ namespace Drupal\oe_list_pages\Plugin\ExtraField\Display;
 use Drupal\Core\Entity\ContentEntityInterface;
 
 /**
- * Extra field displaying the list page results.
+ * Extra field displaying the list page pager.
  *
  * @ExtraFieldDisplay(
- *   id = "oe_list_page_results",
- *   label = @Translation("List page results"),
+ *   id = "oe_list_page_pager_info",
+ *   label = @Translation("List page pager info"),
  *   deriver = "Drupal\oe_list_pages\Plugin\ExtraField\Derivative\ListPageDeriver",
  * )
  */
-class ListPageResults extends ListPageExtraFieldBase {
+class ListPagePagerInfo extends ListPageExtraFieldBase {
 
   /**
    * {@inheritdoc}
    */
   public function getLabel() {
-    return $this->t('List page results');
+    return $this->t('List page pager info');
   }
 
   /**
    * {@inheritdoc}
    */
   public function viewElements(ContentEntityInterface $entity) {
-    return [$this->listBuilder->buildList($entity)];
+    return [$this->listBuilder->buildPagerInfo($entity)];
   }
 
 }

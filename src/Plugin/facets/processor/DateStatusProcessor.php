@@ -57,6 +57,9 @@ class DateStatusProcessor extends DefaultStatusProcessorBase implements PreQuery
 
     // Otherwise provide default labels.
     foreach ($default_options as $raw => $display) {
+      if ($raw === '') {
+        continue;
+      }
       $result = new Result($facet, $raw, $display, 0);
       $facet_results[] = $result;
     }

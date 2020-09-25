@@ -1,0 +1,32 @@
+msgid ""
+msgstr ""
+
+msgid "Showing results @start to @end"
+msgstr "Zobrazujú sa výsledky @start až @end"
+
+msgid "Next"
+msgstr "Nasledujúca"
+
+msgid "Previous"
+msgstr "Predchádzajúca"
+
+msgid "Go to page @number"
+msgstr "Prejsť na stranu @number"
+
+msgid "Go to previous page"
+msgstr "Prejsť na predchádzajúcu stranu"
+
+msgid "Go to next page"
+msgstr "Prejsť na ďalšiu stranu"
+
+msgid "First"
+msgstr "Prvá"
+
+msgid "Last"
+msgstr "Posledná"
+
+msgid "Clear filters"
+msgstr "Vymazať obsah filtrov"
+
+msgid "Filter by"
+msgstr "Usporiadať podľa"

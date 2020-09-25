@@ -1,0 +1,32 @@
+  msgid ""
+msgstr ""
+
+msgid "Showing results @start to @end"
+msgstr "Rodomi rezultatai: @start iš @end"
+
+msgid "Next"
+msgstr "Kitas"
+
+msgid "Previous"
+msgstr "Ankstesnis"
+
+msgid "Go to page @number"
+msgstr "Eiti į @number puslapį"
+
+msgid "Go to previous page"
+msgstr "Atgal į buvusį puslapį"
+
+msgid "Go to next page"
+msgstr "Toliau į kitą puslapį"
+
+msgid "First"
+msgstr "Pirmas"
+
+msgid "Last"
+msgstr "Paskutinis"
+
+msgid "Clear filters"
+msgstr "Valyti filtrus"
+
+msgid "Filter by"
+msgstr "Filtruoti pagal"

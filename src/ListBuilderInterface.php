@@ -50,4 +50,15 @@ interface ListBuilderInterface {
    */
   public function buildSelectedFilters(ContentEntityInterface $entity): array;
 
+  /**
+   * Builds a descriptive pager information message.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The content entity page.
+   *
+   * @return array
+   *   The pager info render array.
+   */
+  public function buildPagerInfo(ContentEntityInterface $entity): array;
+
 }

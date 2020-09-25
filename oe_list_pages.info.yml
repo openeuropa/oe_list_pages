@@ -17,3 +17,7 @@ config_devel:
     - field.field.entity_meta.oe_list_page.list_page_plugin_config
     - field.storage.entity_meta.list_page_plugin
     - field.storage.entity_meta.list_page_plugin_config
+
+'interface translation project': oe_list_pages
+# The path to the actual translations is defined in
+# oe_list_pages_locale_translation_projects_alter().
