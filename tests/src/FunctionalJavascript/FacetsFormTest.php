@@ -112,7 +112,7 @@ class FacetsFormTest extends WebDriverTestBase {
     ], array_values($this->getSelectOptions('Select one')));
 
     // Reset the form.
-    $this->getSession()->getPage()->pressButton('Reset');
+    $this->getSession()->getPage()->pressButton('Clear filters');
     $this->assertDefaultFormStatus();
 
     // Filter by body and multiselect.
@@ -121,7 +121,7 @@ class FacetsFormTest extends WebDriverTestBase {
     $this->getSession()->getPage()->pressButton('Search');
     $assert->pageTextNotContains('that yellow fruit');
     $assert->pageTextNotContains('that red fruit');
-    $this->getSession()->getPage()->pressButton('Reset');
+    $this->getSession()->getPage()->pressButton('Clear filters');
     $this->assertDefaultFormStatus();
     $this->getSession()->getPage()->selectFieldOption('Select one', 'test2');
     $this->getSession()->getPage()->pressButton('Search');
@@ -129,7 +129,7 @@ class FacetsFormTest extends WebDriverTestBase {
     $assert->pageTextContains('that red fruit');
 
     // Filter by date.
-    $this->getSession()->getPage()->pressButton('Reset');
+    $this->getSession()->getPage()->pressButton('Clear filters');
     $this->getSession()->getPage()->selectFieldOption('created_op', 'gt');
     $this->getSession()->getPage()->fillField('created_first_date[date]', '10/25/2020');
     $this->getSession()->getPage()->pressButton('Search');

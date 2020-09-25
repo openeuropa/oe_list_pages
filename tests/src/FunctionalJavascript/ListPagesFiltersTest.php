@@ -293,7 +293,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $this->assertSession()->linkExistsExact('Between 19 October 2019 and 26 October 2019');
 
     // Test the period filter with a default status.
-    $this->getSession()->getPage()->pressButton('Reset');
+    $this->getSession()->getPage()->pressButton('Clear filters');
     $this->getSession()->getPage()->selectFieldOption('Published', 'Yes', TRUE);
     $this->getSession()->getPage()->pressButton('Search');
     $this->assertSession()->linkNotExistsExact('Future');
