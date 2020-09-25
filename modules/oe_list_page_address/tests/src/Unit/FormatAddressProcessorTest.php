@@ -6,7 +6,7 @@ use CommerceGuys\Addressing\Country\Country;
 use CommerceGuys\Addressing\Country\CountryRepositoryInterface;
 use Drupal\facets\Entity\Facet;
 use Drupal\facets\Result\Result;
-use Drupal\oe_list_page_address\Plugin\facets\processor\FormatAddressProcessor;
+use Drupal\oe_list_page_address\Plugin\facets\processor\FormatCountryCodeProcessor;
 use Drupal\Tests\UnitTestCase;
 
 /**
@@ -35,7 +35,7 @@ class FormatAddressProcessorTest extends UnitTestCase {
       ->will($this->returnValue($country));
 
     $facet = new Facet([], 'facets_facet');
-    $processor = new FormatAddressProcessor([], 'format_address', [], $country_repository);
+    $processor = new FormatCountryCodeProcessor([], 'oe_list_page_address_format_country_code', [], $country_repository);
 
     $original_results = [
       new Result($facet, 'GB', 0, 10),

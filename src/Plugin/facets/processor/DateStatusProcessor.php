@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\oe_list_pages\Plugin\facets\processor;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\TypedData\ComplexDataDefinitionInterface;
 use Drupal\facets\FacetInterface;
 use Drupal\facets\Processor\BuildProcessorInterface;
 use Drupal\facets\Processor\PreQueryProcessorInterface;
@@ -102,6 +103,27 @@ class DateStatusProcessor extends DefaultStatusProcessorBase implements PreQuery
    */
   public function getQueryType() {
     return 'oe_list_pages_date_status_comparison';
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function supportsFacet(FacetInterface $facet) {
+    $data_definition = $facet->getDataDefinition();
+    if ($data_definition->getDataType() == "field_item:daterange") {
+      return TRUE;
+    }
+    if (!($data_definition instanceof ComplexDataDefinitionInterface)) {
+      return FALSE;
+    }
+
+    $property_definitions = $data_definition->getPropertyDefinitions();
+    foreach ($property_definitions as $definition) {
+      if ($definition->getDataType() == "field_item:daterange") {
+        return TRUE;
+      }
+    }
+    return FALSE;
   }
 
 }

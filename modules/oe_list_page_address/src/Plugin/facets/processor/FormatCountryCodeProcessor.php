@@ -10,28 +10,28 @@ use Drupal\facets\Processor\ProcessorPluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Transforms the results to show the translated entity label.
+ * Transforms country code of an Address field into the full country name.
  *
  * @FacetsProcessor(
- *   id = "format_address",
- *   label = @Translation("Transform Address Codes into Full Names"),
- *   description = @Translation("Transform Address Codes into Full Names."),
+ *   id = "oe_list_page_address_format_country_code",
+ *   label = @Translation("Transform country codes into full names"),
+ *   description = @Translation("Transform country codes from an Address field in to their related full name."),
  *   stages = {
  *     "build" = 5
  *   }
  * )
  */
-class FormatAddressProcessor extends ProcessorPluginBase implements BuildProcessorInterface, ContainerFactoryPluginInterface {
+class FormatCountryCodeProcessor extends ProcessorPluginBase implements BuildProcessorInterface, ContainerFactoryPluginInterface {
 
   /**
-   * The subdivision repository.
+   * The country repository.
    *
    * @var \CommerceGuys\Addressing\Country\CountryRepositoryInterface
    */
   protected $countryRepository;
 
   /**
-   * Constructs a new object.
+   * Constructs a new FormatCountryCodeProcessor.
    *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.

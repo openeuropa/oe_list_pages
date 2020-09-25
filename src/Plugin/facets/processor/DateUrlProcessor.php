@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\oe_list_pages\Plugin\facets\processor;
 
 use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Core\TypedData\ComplexDataDefinitionInterface;
 use Drupal\facets\FacetInterface;
 use Drupal\facets\Plugin\facets\processor\UrlProcessorHandler;
 use Drupal\facets\Result\Result;
@@ -73,6 +74,27 @@ class DateUrlProcessor extends UrlProcessorHandler {
     $result = new Result($facet, $active_filters['_raw'], $display, 0);
     $facet_results[] = $result;
     return $facet_results;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function supportsFacet(FacetInterface $facet) {
+    $data_definition = $facet->getDataDefinition();
+    if ($data_definition->getDataType() == "field_item:daterange") {
+      return TRUE;
+    }
+    if (!($data_definition instanceof ComplexDataDefinitionInterface)) {
+      return FALSE;
+    }
+
+    $property_definitions = $data_definition->getPropertyDefinitions();
+    foreach ($property_definitions as $definition) {
+      if ($definition->getDataType() == "field_item:daterange") {
+        return TRUE;
+      }
+    }
+    return FALSE;
   }
 
 }
