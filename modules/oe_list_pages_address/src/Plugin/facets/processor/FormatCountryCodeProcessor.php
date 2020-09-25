@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\oe_list_page_address\Plugin\facets\processor;
+namespace Drupal\oe_list_pages_address\Plugin\facets\processor;
 
 use CommerceGuys\Addressing\Country\CountryRepositoryInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -13,7 +13,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Transforms country code of an Address field into the full country name.
  *
  * @FacetsProcessor(
- *   id = "oe_list_page_address_format_country_code",
+ *   id = "oe_list_pages_address_format_country_code",
  *   label = @Translation("Transform country codes into full names"),
  *   description = @Translation("Transform country codes from an Address field in to their related full name."),
  *   stages = {
