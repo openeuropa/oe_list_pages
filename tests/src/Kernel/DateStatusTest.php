@@ -138,10 +138,10 @@ class DateStatusTest extends ListsSourceBaseTest {
     $results = $query->getResults();
     $this->assertCount(4, $results->getResultItems());
     $this->assertSort($results->getResultItems(), [
-      'oldest',
-      'old',
-      'tomorrow',
       'future',
+      'tomorrow',
+      'old',
+      'oldest',
     ]);
   }
 
