@@ -165,7 +165,7 @@ class DateStatus extends QueryTypePluginBase implements ContainerFactoryPluginIn
   protected function applySort(QueryInterface $query, array $active_items, string $field_name): void {
     $sorts = &$query->getSorts();
     if (count($active_items) > 1) {
-      // In case we have both options selected, we sort ASC.
+      // In case we have both options selected, we sort DESC.
       $sorts[$field_name] = 'DESC';
       return;
     }
