@@ -59,6 +59,7 @@ class MultiSelectWidgetTest extends ListsSourceBaseTest {
     $results = $query->getResults();
     $this->assertCount(3, $results->getResultItems());
 
+    $this->container->get('kernel')->rebuildContainer();
     $query = $list->getQuery(['preset_filters' => [$facet_categories->id() => 'cat2']]);
     $query->execute();
     $results = $query->getResults();

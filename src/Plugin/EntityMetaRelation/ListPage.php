@@ -273,6 +273,7 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
       ];
     }
 
+
     $form[$key]['items_per_page'] = [
       '#type' => 'select',
       '#title' => $this->t('The number of items to show per page'),
@@ -289,7 +290,7 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
 
     $bundle_entity_type = $this->entityTypeManager->getDefinition($entity_meta_wrapper->getSourceEntityType())->getBundleEntityType();
     $storage = $this->entityTypeManager->getStorage($bundle_entity_type);
-    $bundle = $storage->load($selected_bundle);
+    $bundle = $storage->load($entity->bundle());
     $default_values_allowed = $bundle->getThirdPartySetting('oe_list_pages', 'default_values_allowed', FALSE);
 
     if ($default_values_allowed) {
