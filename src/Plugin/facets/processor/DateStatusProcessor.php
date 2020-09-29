@@ -112,8 +112,13 @@ class DateStatusProcessor extends DefaultStatusProcessorBase implements PreQuery
    * {@inheritdoc}
    */
   public function supportsFacet(FacetInterface $facet) {
+    $supported_types = [
+      "field_item:daterange",
+      "field_item:datetime",
+      "datetime_iso8601",
+    ];
     $data_definition = $facet->getDataDefinition();
-    if ($data_definition->getDataType() == "field_item:daterange") {
+    if (in_array($data_definition->getDataType(), $supported_types)) {
       return TRUE;
     }
     if (!($data_definition instanceof ComplexDataDefinitionInterface)) {
@@ -122,7 +127,7 @@ class DateStatusProcessor extends DefaultStatusProcessorBase implements PreQuery
 
     $property_definitions = $data_definition->getPropertyDefinitions();
     foreach ($property_definitions as $definition) {
-      if ($definition->getDataType() == "field_item:daterange") {
+      if (in_array($definition->getDataType(), $supported_types)) {
         return TRUE;
       }
     }
