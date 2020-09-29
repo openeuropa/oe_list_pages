@@ -95,7 +95,7 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
       $container->get('entity_type.bundle.info'),
       $container->get('event_dispatcher'),
       $container->get('oe_list_pages.list_source.factory'),
-      $container->get('oe_list_pages.preset_filters_builder'),
+      $container->get('oe_list_pages.preset_filters_builder')
     );
   }
 

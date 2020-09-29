@@ -6,6 +6,8 @@ namespace Drupal\oe_list_pages;
 
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Form\SubformState;
+use Drupal\Core\Render\Element;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\facets\Exception\InvalidProcessorException;
 use Drupal\facets\FacetInterface;
@@ -113,11 +115,13 @@ class ListPresetFiltersBuilder {
       $filter_key = $form_state->getValue('preset_filters_wrapper')['edit']['filter_key'];
       // Replace correct labels.
       $facet = $this->getFacetById($list_source, $filter_key);
+      $submitted_form = $form_state->getCompleteForm();
+      $subform_state = SubformState::createForSubform($submitted_form['emr_plugins_oe_list_page']['preset_filters_wrapper']['edit'][$facet->id()], $submitted_form, $form_state);
       if (!empty($facet)) {
         $widget = $facet->getWidgetInstance();
         if ($widget instanceof ListPagesWidgetInterface) {
           // Get active filters from form_state values in the filter key.
-          $active_filters[$facet->id()] = $widget->prepareValueForUrl($facet, $form, $form_state);
+          $active_filters[$facet->id()] = $widget->prepareValueForUrl($facet, $form, $subform_state);
         }
       }
 
@@ -255,16 +259,18 @@ class ListPresetFiltersBuilder {
     $list_source->getQuery()->execute();
 
     $facet = $this->getFacetById($list_source, $filter_key);
-    if (!empty($facet)) {
+    if (!empty($facet) && ($widget = $facet->getWidgetInstance()) && ($widget instanceof ListPagesWidgetInterface)) {
       // Set active item for value edition.
       if (!empty($current_filters[$filter_key])) {
         $facet->setActiveItems($current_filters[$filter_key]);
       }
-      $this->facetsManager->build($facet);
-      $form[$form_key]['preset_filters_wrapper']['edit'][$facet->id()] = $facet->getWidgetInstance()
-        ->build($facet);
-      $form[$form_key]['preset_filters_wrapper']['edit'][$facet->id()]['#tree'] = FALSE;
-      $form[$form_key]['preset_filters_wrapper']['edit'][$facet->id()]['#parents'] = ['preset_filters_wrapper', 'edit'][$facet->id()];
+
+      $form[$form_key]['preset_filters_wrapper']['edit'][$facet->id()] = $widget->buildDefaultValuesWidget($facet, [
+        'preset_filters_wrapper',
+        'edit',
+        $facet->id(),
+      ]);
+      $form[$form_key]['preset_filters_wrapper']['edit'][$facet->id()]['#type'] = 'container';
     }
 
     $form[$form_key]['preset_filters_wrapper']['edit']['filter_key'] = [
@@ -277,16 +283,25 @@ class ListPresetFiltersBuilder {
       'wrapper' => $form[$form_key]['#id'],
     ];
 
+    $facet_widget_keys = $this->getWidgetKeys($form[$form_key]['preset_filters_wrapper']['edit'][$facet->id()]);
+    $limit_validation_errors = array_merge($facet_widget_keys, [
+      ['bundle'],
+      ['preset_filters_wrapper', 'edit'],
+      ['preset_filters_wrapper', 'current_filters'],
+    ]);
+
     $form[$form_key]['preset_filters_wrapper']['edit']['set_value'] = [
       '#value' => $this->t('Set default value'),
       '#type' => 'button',
       '#name' => 'set-default-filter',
+      '#limit_validation_errors' => $limit_validation_errors,
       '#ajax' => $ajax_definition,
     ];
 
     $form[$form_key]['preset_filters_wrapper']['edit']['cancel'] = [
       '#value' => $this->t('Remove default value'),
       '#type' => 'button',
+      '#limit_validation_errors' => $limit_validation_errors,
       '#name' => 'remove-default-filter',
       '#ajax' => $ajax_definition,
     ];
@@ -312,6 +327,32 @@ class ListPresetFiltersBuilder {
         return $facet;
       }
     }
+  }
+
+  /**
+   * Get all the keys used by elements in the widget.
+   *
+   * @param array $element
+   *   The widget element.
+   *
+   * @return array
+   *   The keys.
+   */
+  protected function getWidgetKeys(array $element) {
+    $keys = [];
+    $children = Element::Children($element);
+
+    foreach ($children as $child_key) {
+      $keys[] = [$child_key];
+      if (!empty($element[$child_key])) {
+        $child_keys = $this->getWidgetKeys($element[$child_key]);
+        if (!empty($child_keys)) {
+          $keys = array_merge($keys, $child_keys);
+        }
+      }
+    }
+
+    return $keys;
   }
 
 }

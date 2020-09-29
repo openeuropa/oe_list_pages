@@ -50,7 +50,14 @@ class DateWidget extends ListPagesWidgetBase {
   /**
    * {@inheritdoc}
    */
-  public function build(FacetInterface $facet) {
+  public function build(FacetInterface $facet, array $parents = []) {
+    return $this->buildDefaultValuesWidget($facet, []);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildDefaultValuesWidget(FacetInterface $facet, array $parents = []): ?array {
     $date_type = $facet->getWidgetInstance()->getConfiguration()['date_type'];
 
     $operators = [
@@ -67,22 +74,32 @@ class DateWidget extends ListPagesWidgetBase {
       '#empty_option' => $this->t('Select'),
     ];
 
+    $operator_id = $facet->id() . '_op';
+    if (!empty($parents)) {
+      $name = array_shift($parents);
+      if (count($parents)) {
+        $name .= '[' . implode('][', $parents) . ']';
+      }
+      $operator_id = $name . '[' . $operator_id . ']';
+    }
+
     $build[$facet->id() . '_first_date_wrapper'] = [
       '#type' => 'container',
+      '#tree' => TRUE,
       '#states' => [
         'visible' => [
           [
-            ':input[name="' . $facet->id() . '_op"]' => [
+            ':input[name="' . $operator_id . '"]' => [
               'value' => 'lt',
             ],
           ],
           [
-            ':input[name="' . $facet->id() . '_op"]' => [
+            ':input[name="' . $operator_id . '" ]' => [
               'value' => 'gt',
             ],
           ],
           [
-            ':input[name="' . $facet->id() . '_op"]' => [
+            ':input[name="' . $operator_id . '"]' => [
               'value' => 'bt',
             ],
           ],
@@ -108,10 +125,11 @@ class DateWidget extends ListPagesWidgetBase {
 
     $build[$facet->id() . '_second_date_wrapper'] = [
       '#type' => 'container',
+      '#tree' => TRUE,
       // We only show the second date if the operator is "bt".
       '#states' => [
         'visible' => [
-          ':input[name="' . $facet->id() . '_op"]' => [
+          ':input[name="' . $operator_id . '"]' => [
             'value' => 'bt',
           ],
         ],
@@ -140,8 +158,8 @@ class DateWidget extends ListPagesWidgetBase {
   public function prepareValueForUrl(FacetInterface $facet, array &$form, FormStateInterface $form_state): array {
     $value_keys = [
       'operator' => $facet->id() . '_op',
-      'first_date' => $facet->id() . '_first_date',
-      'second_date' => $facet->id() . '_second_date',
+      'first_date' => [$facet->id() . '_first_date_wrapper', $facet->id() . '_first_date'],
+      'second_date' => [$facet->id() . '_second_date_wrapper', $facet->id() . '_second_date'],
     ];
 
     $values = [];

@@ -13,6 +13,19 @@ use Drupal\facets\FacetInterface;
 interface ListPagesWidgetInterface {
 
   /**
+   * Builds the widget selection for default values.
+   *
+   * @param \Drupal\facets\FacetInterface $facet
+   *   The facet.
+   * @param array $parents
+   *   The list of parents.
+   *
+   * @return mixed
+   *   The rendered widget.
+   */
+  public function buildDefaultValuesWidget(FacetInterface $facet, array $parents = []): ?array;
+
+  /**
    * Prepares the values to be passed to the URL generator from the submission.
    *
    * @param \Drupal\facets\FacetInterface $facet

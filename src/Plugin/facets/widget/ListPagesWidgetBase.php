@@ -28,6 +28,13 @@ class ListPagesWidgetBase extends WidgetPluginBase implements ListPagesWidgetInt
   /**
    * {@inheritdoc}
    */
+  public function buildDefaultValuesWidget(FacetInterface $facet, array $parents = []): ?array {
+    return $this->build($facet);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getValueFromActiveFilters(FacetInterface $facet, string $key): ?string {
     $active_filters = $facet->getActiveItems();
     return $active_filters[$key] ?? NULL;
