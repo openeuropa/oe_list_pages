@@ -6,6 +6,7 @@ package: Testing
 core: 8.x
 
 dependencies:
+  - drupal:entity_reference
   - drupal:options
   - extra_field:extra_field
   - oe_list_pages:oe_list_pages

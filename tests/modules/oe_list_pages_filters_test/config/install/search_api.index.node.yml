@@ -3,6 +3,7 @@ status: true
 dependencies:
   config:
     - field.storage.node.body
+    - field.storage.node.field_reference
     - field.storage.node.field_select_one
     - field.storage.node.field_select_two
     - search_api.server.database_server
@@ -30,6 +31,14 @@ field_settings:
     dependencies:
       module:
         - node
+  field_reference:
+    label: Reference
+    datasource_id: 'entity:node'
+    property_path: field_reference
+    type: integer
+    dependencies:
+      config:
+        - field.storage.node.field_reference
   field_select_one:
     label: 'Select one'
     datasource_id: 'entity:node'

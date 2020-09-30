@@ -24,7 +24,7 @@ class MultiSelectWidgetTest extends ListsSourceBaseTest {
    */
   protected function setUp() {
     parent::setUp();
-    $this->widget = new MultiselectWidget([], 'oe_list_pages_multiselect', [], $this->entityTypeManager);
+    $this->widget = new MultiselectWidget([], 'oe_list_pages_multiselect', [], $this->entityTypeManager, $this->container->get('entity_field.manager'));
   }
 
   /**

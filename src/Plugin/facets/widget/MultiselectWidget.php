@@ -4,7 +4,9 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages\Plugin\facets\widget;
 
+use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\facets\FacetInterface;
@@ -31,6 +33,13 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
   protected $entityTypeManager;
 
   /**
+   * The entity field manager.
+   *
+   * @var \Drupal\Core\Entity\EntityFieldManagerInterface
+   */
+  protected $entityFieldManager;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
@@ -38,25 +47,26 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('entity_type.manager')
+      $container->get('entity_type.manager'),
+      $container->get('entity_field.manager')
     );
   }
 
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, EntityFieldManagerInterface $entity_field_manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->entityTypeManager = $entity_type_manager;
+    $this->entityFieldManager = $entity_field_manager;
   }
 
   /**
    * {@inheritdoc}
    */
   public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source = NULL, array $filter_value = []): string {
-    $field_id = $facet->getFieldIdentifier();
-    $field_config = $this->entityTypeManager->getStorage('field_config')->load($list_source->getEntityType() . '.' . $list_source->getBundle() . '.' . $field_id);
-    $field_type = !empty($field_config) ? $field_config->getType() : NULL;
+    $field_definition = $this->getFieldDefinition($facet, $list_source);
+    $field_type = !empty($field_definition) ? $field_definition->getType() : NULL;
     $entity_storage = $this->entityTypeManager->getStorage($list_source->getEntityType());
     if ($field_type === 'entity_reference') {
       $referenced_entities = $entity_storage->loadMultiple($filter_value);
@@ -65,8 +75,8 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
       }, $referenced_entities));
     }
     elseif (in_array($field_type, ['list_integer', 'list_float', 'list_string'])) {
-      return implode(', ', array_map(function ($value) use ($field_config) {
-        return $field_config->getSetting('allowed_values')[$value];
+      return implode(', ', array_map(function ($value) use ($field_definition) {
+        return $field_definition->getSetting('allowed_values')[$value];
       }, $filter_value));
     }
     else {
@@ -75,22 +85,35 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
   }
 
   /**
+   * Gets field definition for the field used in the facet.
+   * @param \Drupal\facets\FacetInterface $facet
+   *   The facet.
+   * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
+   *   The list source.
+   *
+   * @return \Drupal\Core\Field\FieldDefinitionInterface
+   *   The field definition.
+   */
+  protected function getFieldDefinition(FacetInterface $facet, ListSourceInterface $list_source): FieldDefinitionInterface {
+    $field_id = $list_source->getIndex()->getField($facet->getFieldIdentifier())->getOriginalFieldIdentifier();
+    $field_definitions = $this->entityFieldManager->getFieldDefinitions($list_source->getEntityType(), $list_source->getBundle());
+    return $field_definitions[$field_id];
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function buildDefaultValuesWidget(FacetInterface $facet, ListSourceInterface $list_source = NULL, array $parents = []): ?array {
-    $field_id = $facet->getFieldIdentifier();
-    $field_config = $this->entityTypeManager->getStorage('field_config')->load($list_source->getEntityType() . '.' . $list_source->getBundle() . '.' . $field_id);
-    $field_type = !empty($field_config) ? $field_config->getType() : NULL;
+    $field_definition = $this->getFieldDefinition($facet, $list_source);
+    $field_type = !empty($field_definition) ? $field_definition->getType() : NULL;
     $entity_storage = $this->entityTypeManager->getStorage($list_source->getEntityType());
     if ($field_type === 'entity_reference') {
       for ($i = 0; $i < count($facet->getActiveItems()) + 1; $i++) {
         $form[$facet->id() . '_' . $i] = [
           '#type' => 'entity_autocomplete',
-          '#target_type' => $field_config->getTargetEntityTypeId(),
+          '#target_type' => $field_definition->getTargetEntityTypeId(),
           '#default_value' => !empty($facet->getActiveItems() && $facet->getActiveItems()[$i]) ? $entity_storage->load($facet->getActiveItems()[$i]) : NULL,
-          '#selection_settings' => [
-            'target_bundles' => $field_config->getSettings()['handler_settings']['target_bundles'],
-          ],
+          '#selection_settings' => $field_definition->getSettings()['handler_settings'],
         ];
       }
 
@@ -106,7 +129,7 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
         '#type' => 'select',
         '#default_value' => $facet->getActiveItems()[0],
         '#multiple' => TRUE,
-        '#options' => $field_config->getSetting('allowed_values'),
+        '#options' => $field_definition->getSetting('allowed_values'),
       ];
 
       return $form;
