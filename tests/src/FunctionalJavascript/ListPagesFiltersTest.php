@@ -386,9 +386,22 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $page->fillField('Title', 'List page for ct1');
     $page->pressButton('Save');
 
+    // By default we show only 10 results.
+    $this->assertCount(10, $this->getSession()->getPage()->findAll('css', '.node--type-content-type-one'));
     $this->assertSession()->pageTextContains('Showing results 1 to 10');
     $this->getSession()->getPage()->clickLink('Next');
     $this->assertSession()->pageTextContains('Showing results 10 to 20');
+    $this->getSession()->getPage()->clickLink('Next');
+    $this->assertSession()->pageTextContains('Showing results 20 to 23');
+
+    // Update the node to show 20 results.
+    $node = $this->drupalGetNodeByTitle('List page for ct1');
+    $this->drupalGet($node->toUrl('edit-form'));
+    $this->clickLink('List Page');
+    $this->getSession()->getPage()->selectFieldOption('The number of items to show per page', '20');
+    $page->pressButton('Save');
+    $this->assertCount(20, $this->getSession()->getPage()->findAll('css', '.node--type-content-type-one'));
+    $this->assertSession()->pageTextContains('Showing results 1 to 20');
     $this->getSession()->getPage()->clickLink('Next');
     $this->assertSession()->pageTextContains('Showing results 20 to 23');
 
