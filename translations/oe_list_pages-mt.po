@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 
-msgid "Showing results @start to @end"
+msgid "Showing results @first to @last"
 msgstr "Qed jintwerew ir-riżultati @start sa @end"
 
 msgid "Next"
