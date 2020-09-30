@@ -6,6 +6,7 @@ namespace Drupal\oe_list_pages\Plugin\facets\widget;
 
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Field\EntityReferenceFieldItemListInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -67,8 +68,8 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
   public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source = NULL, array $filter_value = []): string {
     $field_definition = $this->getFieldDefinition($facet, $list_source);
     $field_type = !empty($field_definition) ? $field_definition->getType() : NULL;
-    $entity_storage = $this->entityTypeManager->getStorage($list_source->getEntityType());
-    if ($field_type === 'entity_reference') {
+    if (in_array(EntityReferenceFieldItemListInterface::class, class_implements($field_definition->getClass()))) {
+      $entity_storage = $this->entityTypeManager->getStorage($field_definition->getSetting('target_type'));
       $referenced_entities = $entity_storage->loadMultiple($filter_value);
       return implode(', ', array_map(function ($referenced_entity) {
         return $referenced_entity->label();
@@ -86,6 +87,7 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
 
   /**
    * Gets field definition for the field used in the facet.
+   *
    * @param \Drupal\facets\FacetInterface $facet
    *   The facet.
    * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
@@ -106,22 +108,27 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
   public function buildDefaultValuesWidget(FacetInterface $facet, ListSourceInterface $list_source = NULL, array $parents = []): ?array {
     $field_definition = $this->getFieldDefinition($facet, $list_source);
     $field_type = !empty($field_definition) ? $field_definition->getType() : NULL;
-    $entity_storage = $this->entityTypeManager->getStorage($list_source->getEntityType());
-    if ($field_type === 'entity_reference') {
+
+    if (in_array(EntityReferenceFieldItemListInterface::class, class_implements($field_definition->getClass()))) {
       for ($i = 0; $i < count($facet->getActiveItems()) + 1; $i++) {
+        $entity_storage = $this->entityTypeManager->getStorage($field_definition->getSetting('target_type'));
+        $selection_settings = [
+          'match_operator' => 'CONTAINS',
+          'match_limit' => 10,
+        ] + $field_definition->getSettings()['handler_settings'];
+
         $form[$facet->id() . '_' . $i] = [
           '#type' => 'entity_autocomplete',
-          '#target_type' => $field_definition->getTargetEntityTypeId(),
+          '#target_type' => $field_definition->getSetting('target_type'),
           '#default_value' => !empty($facet->getActiveItems() && $facet->getActiveItems()[$i]) ? $entity_storage->load($facet->getActiveItems()[$i]) : NULL,
-          '#selection_settings' => $field_definition->getSettings()['handler_settings'],
+          '#selection_handler' => $field_definition->getSetting('handler'),
+          '#selection_settings' => $selection_settings,
         ];
       }
-
       $form['input_count'] = [
         '#type' => 'value',
         '#value' => $i,
       ];
-
       return $form;
     }
     elseif (in_array($field_type, ['list_integer', 'list_float', 'list_string'])) {
