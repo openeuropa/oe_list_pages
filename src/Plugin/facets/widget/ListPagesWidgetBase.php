@@ -6,7 +6,9 @@ namespace Drupal\oe_list_pages\Plugin\facets\widget;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\facets\FacetInterface;
+use Drupal\facets\Processor\ProcessorInterface;
 use Drupal\facets\Widget\WidgetPluginBase;
+use Drupal\oe_list_pages\ListSourceInterface;
 
 /**
  * Base class for facet widgets.
@@ -28,7 +30,31 @@ class ListPagesWidgetBase extends WidgetPluginBase implements ListPagesWidgetInt
   /**
    * {@inheritdoc}
    */
-  public function buildDefaultValuesWidget(FacetInterface $facet, array $parents = []): ?array {
+  public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source = NULL, array $filter_value = []): string {
+    $active_items = $facet->getActiveItems();
+    $facet->setActiveItems($filter_value);
+    foreach ($facet->getProcessorsByStage(ProcessorInterface::STAGE_BUILD) as $processor) {
+      $results = $processor->build($facet, []);
+    }
+    $filter_label = [];
+    foreach ($filter_value as $value) {
+      $filter_label[$value] = $value;
+      foreach ($results as $result) {
+        if ($result->getRawValue() == $value) {
+          $filter_label[$value] = $result->getDisplayValue();
+        }
+      }
+    }
+
+    // Reset active items.
+    $facet->setActiveItems($active_items);
+    return implode(', ', $filter_label);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildDefaultValuesWidget(FacetInterface $facet, ListSourceInterface $list_source = NULL, array $parents = []): ?array {
     return $this->build($facet);
   }
 

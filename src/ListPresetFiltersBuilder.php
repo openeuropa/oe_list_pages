@@ -9,11 +9,8 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\SubformState;
 use Drupal\Core\Render\Element;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\facets\Exception\InvalidProcessorException;
 use Drupal\facets\FacetInterface;
 use Drupal\facets\FacetManager\DefaultFacetManager;
-use Drupal\facets\Processor\BuildProcessorInterface;
-use Drupal\facets\Processor\ProcessorInterface;
 use Drupal\oe_list_pages\Plugin\facets\widget\ListPagesWidgetInterface;
 
 /**
@@ -181,23 +178,12 @@ class ListPresetFiltersBuilder {
 
     foreach ($current_filters as $filter_key => $filter_value) {
       $facet = $this->getFacetById($list_source, $filter_key);
-      $active_items = $facet->getActiveItems();
-      $facet->setActiveItems($filter_value);
-      foreach ($facet->getProcessorsByStage(ProcessorInterface::STAGE_BUILD) as $processor) {
-        if (!$processor instanceof BuildProcessorInterface) {
-          throw new InvalidProcessorException("The processor {$processor->getPluginDefinition()['id']} has a build definition but doesn't implement the required BuildProcessorInterface interface");
-        }
-        $results = $processor->build($facet, []);
+      $widget = $facet->getWidgetInstance();
+      $filter_value_label = '';
+      if ($widget instanceof ListPagesWidgetInterface) {
+        $filter_value_label = $widget->getDefaultValuesLabel($facet, $list_source, $filter_value);
       }
-      foreach ($results as $result) {
-        if ($result->getRawValue() == $filter_value[0]) {
-          $filter_value = $result->getDisplayValue();
-        }
-      }
-      // Reset active items.
-      $facet->setActiveItems($active_items);
 
-      $filter_value_label = is_array($filter_value) ? implode(', ', $filter_value) : $filter_value;
       $rows[] = [$available_filters[$filter_key], $filter_value_label];
     }
 
@@ -265,7 +251,7 @@ class ListPresetFiltersBuilder {
         $facet->setActiveItems($current_filters[$filter_key]);
       }
 
-      $form[$form_key]['preset_filters_wrapper']['edit'][$facet->id()] = $widget->buildDefaultValuesWidget($facet, [
+      $form[$form_key]['preset_filters_wrapper']['edit'][$facet->id()] = $widget->buildDefaultValuesWidget($facet, $list_source, [
         'preset_filters_wrapper',
         'edit',
         $facet->id(),

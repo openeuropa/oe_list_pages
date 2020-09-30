@@ -6,6 +6,7 @@ namespace Drupal\oe_list_pages\Plugin\facets\widget;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\facets\FacetInterface;
+use Drupal\oe_list_pages\ListSourceInterface;
 
 /**
  * Interface for list pages widget.
@@ -17,13 +18,30 @@ interface ListPagesWidgetInterface {
    *
    * @param \Drupal\facets\FacetInterface $facet
    *   The facet.
+   * @param \Drupal\oe_list_pages\ListSourceInterface|null $list_source
+   *   The list source.
    * @param array $parents
    *   The list of parents.
    *
    * @return mixed
    *   The rendered widget.
    */
-  public function buildDefaultValuesWidget(FacetInterface $facet, array $parents = []): ?array;
+  public function buildDefaultValuesWidget(FacetInterface $facet, ListSourceInterface $list_source = NULL, array $parents = []): ?array;
+
+  /**
+   * Renders the label for the filter values set as default values.
+   *
+   * @param \Drupal\facets\FacetInterface $facet
+   *   The facet.
+   * @param \Drupal\oe_list_pages\ListSourceInterface|null $list_source
+   *   The list source.
+   * @param array $filter_value
+   *   The filter value.
+   *
+   * @return string
+   *   The label.
+   */
+  public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source = NULL, array $filter_value = []): string;
 
   /**
    * Prepares the values to be passed to the URL generator from the submission.

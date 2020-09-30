@@ -7,6 +7,7 @@ namespace Drupal\oe_list_pages\Plugin\facets\widget;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\facets\FacetInterface;
+use Drupal\oe_list_pages\ListSourceInterface;
 use Drupal\oe_list_pages\Plugin\facets\query_type\Date;
 
 /**
@@ -51,13 +52,13 @@ class DateWidget extends ListPagesWidgetBase {
    * {@inheritdoc}
    */
   public function build(FacetInterface $facet, array $parents = []) {
-    return $this->buildDefaultValuesWidget($facet, []);
+    return $this->buildDefaultValuesWidget($facet, NULL, []);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildDefaultValuesWidget(FacetInterface $facet, array $parents = []): ?array {
+  public function buildDefaultValuesWidget(FacetInterface $facet, ListSourceInterface $list_source = NULL, array $parents = []): ?array {
     $date_type = $facet->getWidgetInstance()->getConfiguration()['date_type'];
 
     $operators = [
