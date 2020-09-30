@@ -75,13 +75,14 @@ class ListExecutionManager implements ListExecutionManagerInterface {
       return $this->executedLists[$entity->uuid()];
     }
 
-    // The number of items to show on a page.
-    // @todo take this value from the list_page meta plugin.
-    $limit = 10;
     /** @var \Drupal\emr\Entity\EntityMetaInterface $entity_meta */
     $entity_meta = $entity->get('emr_entity_metas')->getEntityMeta('oe_list_page');
     /** @var \Drupal\oe_list_pages\ListPageWrapper $wrapper */
     $wrapper = $entity_meta->getWrapper();
+
+    // The number of items to show on the page.
+    $limit = $wrapper->getConfiguration()['items_per_page'] ?? 10;
+
     $list_source = $this->listSourceFactory->get($wrapper->getSourceEntityType(), $wrapper->getSourceEntityBundle());
     if (!$list_source) {
       $this->executedLists[$entity->uuid()] = NULL;
