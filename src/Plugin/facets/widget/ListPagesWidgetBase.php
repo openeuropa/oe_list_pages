@@ -30,6 +30,13 @@ class ListPagesWidgetBase extends WidgetPluginBase implements ListPagesWidgetInt
   /**
    * {@inheritdoc}
    */
+  public function prepareDefaultValueFilter(FacetInterface $facet, array &$form, FormStateInterface $form_state): array {
+    return $this->prepareValueForUrl($facet, $form, $form_state);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source = NULL, array $filter_value = []): string {
     $active_items = $facet->getActiveItems();
     $facet->setActiveItems($filter_value);

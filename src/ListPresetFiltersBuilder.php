@@ -117,8 +117,7 @@ class ListPresetFiltersBuilder {
       if (!empty($facet)) {
         $widget = $facet->getWidgetInstance();
         if ($widget instanceof ListPagesWidgetInterface) {
-          // Get active filters from form_state values in the filter key.
-          $active_filters[$facet->id()] = $widget->prepareValueForUrl($facet, $form, $subform_state);
+          $active_filters[$facet->id()] = $widget->prepareDefaultValueFilter($facet, $form, $subform_state);
         }
       }
 

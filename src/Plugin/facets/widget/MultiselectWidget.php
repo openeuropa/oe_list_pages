@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\oe_list_pages\Plugin\facets\widget;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\facets\FacetInterface;
 use Drupal\facets\Result\ResultInterface;
@@ -82,13 +83,20 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
     $field_type = !empty($field_config) ? $field_config->getType() : NULL;
     $entity_storage = $this->entityTypeManager->getStorage($list_source->getEntityType());
     if ($field_type === 'entity_reference') {
-      $form[$facet->id()] = [
-        '#type' => 'entity_autocomplete',
-        '#target_type' => $field_config->getTargetEntityTypeId(),
-        '#default_value' => !empty($facet->getActiveItems()) ? $entity_storage->load($facet->getActiveItems()[0]) : NULL,
-        '#selection_settings' => [
-          'target_bundles' => $field_config->getSettings()['handler_settings']['target_bundles'],
-        ],
+      for ($i = 0; $i < count($facet->getActiveItems()) + 1; $i++) {
+        $form[$facet->id() . '_' . $i] = [
+          '#type' => 'entity_autocomplete',
+          '#target_type' => $field_config->getTargetEntityTypeId(),
+          '#default_value' => !empty($facet->getActiveItems() && $facet->getActiveItems()[$i]) ? $entity_storage->load($facet->getActiveItems()[$i]) : NULL,
+          '#selection_settings' => [
+            'target_bundles' => $field_config->getSettings()['handler_settings']['target_bundles'],
+          ],
+        ];
+      }
+
+      $form['input_count'] = [
+        '#type' => 'value',
+        '#value' => $i,
       ];
 
       return $form;
@@ -135,6 +143,26 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
     ];
 
     return $build;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function prepareDefaultValueFilter(FacetInterface $facet, array &$form, FormStateInterface $form_state): array {
+    $count = $form_state->getValue('input_count', 0);
+    // Used for multi inputs.
+    if ($count) {
+      for ($i = 0; $i < $count; $i++) {
+        $value = $form_state->getValue($facet->id() . '_' . $i);
+        if (!empty($value)) {
+          $values[] = $value;
+        }
+      }
+      return $values;
+    }
+    else {
+      return $this->prepareValueForUrl($facet, $form, $form_state);
+    }
   }
 
 }
