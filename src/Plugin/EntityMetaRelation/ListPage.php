@@ -253,6 +253,16 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
       ];
     }
 
+    $form[$key]['items_per_page'] = [
+      '#type' => 'select',
+      '#title' => $this->t('The number of items to show per page'),
+      '#options' => [
+        10 => '10',
+        20 => '20',
+      ],
+      '#default_value' => $entity_meta_wrapper->getConfiguration()['items_per_page'] ?? 10,
+    ];
+
     // Set the entity meta so we use it in the submit handler.
     $form_state->set($entity_meta_bundle . '_entity_meta', $entity_meta);
 
@@ -284,8 +294,11 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
     ], []));
 
     $override = $form_state->getValue('exposed_filters_wrapper')['exposed_filters_override'];
-    $entity_meta_wrapper->setConfiguration(['override_exposed_filters' => $override]);
-    $entity_meta_wrapper->setConfiguration(['exposed_filters' => $selected_filters] + $entity_meta_wrapper->getConfiguration());
+    $configuration = $entity_meta_wrapper->getConfiguration();
+    $configuration['override_exposed_filters'] = $override;
+    $configuration['exposed_filters'] = $selected_filters;
+    $configuration['items_per_page'] = (int) $form_state->getValue('items_per_page');
+    $entity_meta_wrapper->setConfiguration($configuration);
     $host_entity->get('emr_entity_metas')->attach($entity_meta);
   }
 
