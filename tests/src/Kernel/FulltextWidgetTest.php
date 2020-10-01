@@ -55,6 +55,10 @@ class FulltextWidgetTest extends ListsSourceBaseTest {
     $this->createTestContent('item', 4);
     // Another list for another bundle.
     $item_list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
+
+    $ignorecase_processor = \Drupal::getContainer()->get('search_api.plugin_helper')->createProcessorPlugin($item_list->getIndex(), 'ignorecase', ['all_fields' => TRUE]);
+    $item_list->getIndex()->addProcessor($ignorecase_processor);
+    $item_list->getIndex()->save();
     $item_list->getIndex()->indexItems();
 
     // Create facets for body and name.
