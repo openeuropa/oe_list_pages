@@ -59,8 +59,8 @@ class DateUrlProcessor extends UrlProcessorHandler {
     if ($operator === 'bt') {
       $display = new FormattableMarkup('@operator @first and @second', [
         '@operator' => $operators[$operator],
-        '@first' => $first_date->format('d F Y'),
-        '@second' => $second_date->format('d F Y'),
+        '@first' => $first_date->format('j F Y'),
+        '@second' => $second_date->format('j F Y'),
       ]);
       $result = new Result($facet, $active_filters['_raw'], $display, 0);
       $facet_results[] = $result;
@@ -69,7 +69,7 @@ class DateUrlProcessor extends UrlProcessorHandler {
 
     $display = new FormattableMarkup('@operator @first', [
       '@operator' => $operators[$operator],
-      '@first' => $first_date->format('d F Y'),
+      '@first' => $first_date->format('j F Y'),
     ]);
     $result = new Result($facet, $active_filters['_raw'], $display, 0);
     $facet_results[] = $result;

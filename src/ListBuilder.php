@@ -18,6 +18,7 @@ use Drupal\facets\Processor\ProcessorPluginManager;
 use Drupal\facets\Utility\FacetsUrlGenerator;
 use Drupal\oe_list_pages\Form\ListFacetsForm;
 use Drupal\oe_list_pages\Plugin\facets\processor\DefaultStatusProcessorInterface;
+use Drupal\oe_list_pages\Plugin\facets\widget\FulltextWidget;
 
 /**
  * Default list builder implementation.
@@ -246,14 +247,16 @@ class ListBuilder implements ListBuilderInterface {
         continue;
       }
 
-      if (!$facet->getResults()) {
+      // If the facet doesn't have results, we cannot get any display value
+      // later on. Except for the facets which use a full text widget because
+      // we can use the actual submitted value.
+      if (!$facet->getResults() && !$facet->getWidgetInstance() instanceof FulltextWidget) {
         continue;
       }
 
       $keyed_facets[$facet->id()] = $facet;
-      $items = $facet->getActiveItems();
       $cache->addCacheableDependency($facet);
-      $active_filters[$facet->id()] = $items;
+      $active_filters[$facet->id()] = $facet->getActiveItems();
     }
 
     if (!$active_filters) {
@@ -287,10 +290,9 @@ class ListBuilder implements ListBuilderInterface {
     $items = [];
     foreach ($active_filters as $facet_id => $filters) {
       $facet = $keyed_facets[$facet_id];
-      $facet_results = $facet->getResults();
       $item = [];
       foreach ($filters as $key => $value) {
-        $display_value = $this->getFacetResultDisplayLabel($facet_results, $value);
+        $display_value = $this->getFacetResultDisplayLabel($facet, $value);
         if (!$display_value) {
           continue;
         }
@@ -377,16 +379,22 @@ class ListBuilder implements ListBuilderInterface {
   /**
    * Returns the display label of a facet result.
    *
-   * @param \Drupal\facets\Result\Result[] $facet_results
-   *   All the results.
+   * @param \Drupal\facets\FacetInterface $facet
+   *   The facet.
    * @param string $value
    *   The raw value.
    *
    * @return string|null
    *   The display value.
    */
-  protected function getFacetResultDisplayLabel(array $facet_results, string $value): ?string {
-    foreach ($facet_results as $facet_result) {
+  protected function getFacetResultDisplayLabel(FacetInterface $facet, string $value): ?string {
+    if ($facet->getWidgetInstance() instanceof FulltextWidget) {
+      // For facets that use the full text widget, the actual value is the
+      // selected item.
+      return $value;
+    }
+
+    foreach ($facet->getResults() as $facet_result) {
       if ($facet_result->getRawValue() === $value) {
         return (string) $facet_result->getDisplayValue();
       }

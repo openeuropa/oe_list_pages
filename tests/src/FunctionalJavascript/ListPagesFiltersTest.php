@@ -193,6 +193,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $page->checkField('Select one');
     $page->checkField('Published');
     $page->checkField('Period');
+    $page->checkField('Body');
     $page->checkField('Created');
     $page->fillField('Title', 'List page for ct1');
     $page->pressButton('Save');
@@ -291,6 +292,40 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $this->assertSession()->pageTextContains('one yellow fruit');
     $this->assertSession()->pageTextContains('another yellow fruit');
     $this->assertSession()->linkExistsExact('Between 19 October 2019 and 26 October 2019');
+
+    // Test that the full text widget-based filter shows also the selected
+    // value.
+    $this->getSession()->getPage()->pressButton('Clear filters');
+    $this->getSession()->getPage()->fillField('Body', 'banana');
+    $this->getSession()->getPage()->selectFieldOption('Select one', 'test1', TRUE);
+    $this->getSession()->getPage()->pressButton('Search');
+    $this->assertSelectedFiltersLabels(['Body', 'Period', 'Select one']);
+    $this->assertSession()->linkExistsExact('banana');
+    $this->assertSession()->linkExistsExact('test1');
+    $this->assertSession()->pageTextContains('one yellow fruit');
+    $this->assertSession()->pageTextNotContains('another yellow fruit');
+    // Remove the select field and assert we still show the link with the
+    // text filter.
+    $this->getSession()->getPage()->clickLink('test1');
+    $this->assertSelectedFiltersLabels(['Body', 'Period']);
+    $this->assertSession()->linkExistsExact('banana');
+    $this->assertSession()->linkNotExistsExact('test1');
+    $this->assertSession()->pageTextContains('one yellow fruit');
+    $this->assertSession()->pageTextNotContains('another yellow fruit');
+    // Add back the select and remove the text filter.
+    $this->getSession()->getPage()->selectFieldOption('Select one', 'test1', TRUE);
+    $this->getSession()->getPage()->pressButton('Search');
+    $this->assertSelectedFiltersLabels(['Body', 'Period', 'Select one']);
+    $this->assertSession()->linkExistsExact('banana');
+    $this->assertSession()->linkExistsExact('test1');
+    $this->assertSession()->pageTextContains('one yellow fruit');
+    $this->assertSession()->pageTextNotContains('another yellow fruit');
+    $this->getSession()->getPage()->clickLink('banana');
+    $this->assertSelectedFiltersLabels(['Period', 'Select one']);
+    $this->assertSession()->linkNotExistsExact('banana');
+    $this->assertSession()->linkExistsExact('test1');
+    $this->assertSession()->pageTextContains('one yellow fruit');
+    $this->assertSession()->pageTextNotContains('another yellow fruit');
 
     // Test the period filter with a default status.
     $this->getSession()->getPage()->pressButton('Clear filters');
