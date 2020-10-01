@@ -68,7 +68,15 @@ class FulltextWidgetTest extends ListsSourceBaseTest {
     $query = $list->getQuery(['preset_filters' => [$facet_body->id() => 'message']]);
     $query->execute();
     $results = $query->getResults();
+    // Asserts results.
+    $this->assertCount(3, $results->getResultItems());
 
+    // Search for body with Uppercase.
+    $list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
+    /** @var \Drupal\search_api\Query\QueryInterface $default_query */
+    $query = $list->getQuery(['preset_filters' => [$facet_body->id() => 'Message']]);
+    $query->execute();
+    $results = $query->getResults();
     // Asserts results.
     $this->assertCount(3, $results->getResultItems());
 

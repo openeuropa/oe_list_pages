@@ -138,7 +138,7 @@ class ListsSourceBaseTest extends EntityKernelTestBaseTest {
     $categories = $values['categories'] ?? ['cat1', 'cat2', 'cat1', 'cat1'];
     $bodies = $values['bodies'] ?? [
       'Sending message',
-      'Receiving a message ',
+      'Receiving a Message ',
       'None',
       'Receiving',
     ];
