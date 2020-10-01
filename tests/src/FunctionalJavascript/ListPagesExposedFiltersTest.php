@@ -164,8 +164,21 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
     $this->assertFieldChecked('Override default exposed filters');
     $this->assertFieldChecked('Select two');
     $this->assertFieldChecked('Facet for status');
+    // Switch to other ct and check overriden is maintained.
+    $page->selectFieldOption('Source bundle', 'Content type one');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->assertSession()->checkboxChecked('Published');
+    $this->assertSession()->checkboxChecked('Body');
+    $this->assertSession()->checkboxNotChecked('Select one');
+    $this->assertSession()->checkboxNotChecked('Created');
+    // Switch back.
+    $page->selectFieldOption('Source bundle', 'Content type two');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->assertFieldChecked('Select two');
+    $this->assertFieldChecked('Facet for status');
     $page->uncheckField('Override default exposed filters');
     $page->pressButton('Save');
+
     \Drupal::entityTypeManager()->getStorage('entity_meta_relation')->resetCache();
     $node = $this->drupalGetNodeByTitle('Node title', TRUE);
     /** @var \Drupal\emr\Field\ComputedEntityMetasItemList $entity_meta_list */

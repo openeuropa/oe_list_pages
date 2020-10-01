@@ -134,10 +134,6 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
           $option,
           '#value',
         ]), 0);
-        NestedArray::setValue($form, array_merge($parents, [
-          $option,
-          '#checked',
-        ]), FALSE);
       }
     }
     return $form[$key];
@@ -247,6 +243,10 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
         '#description' => $this->t('Configure which exposed filters should show up on this page.'),
         '#default_value' => $overridden,
       ];
+
+      $input = $form_state->getUserInput();
+      $input['exposed_filters_wrapper']['exposed_filters'] = $configuration;
+      $form_state->setUserInput($input);
 
       $form[$key]['bundle_wrapper']['exposed_filters_wrapper']['exposed_filters'] = [
         '#type' => 'checkboxes',
