@@ -132,12 +132,33 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
     $this->assertEquals(TRUE, $actual_override_exposed_filters);
     $this->assertEquals([], $actual_exposed_filters);
 
+    // Add back some overridden exposed filters so that we can remove them all
+    // at once.
+    $this->drupalGet($node->toUrl('edit-form'));
+    $this->clickLink('List Page');
+    $page->checkField('Select two');
+    $page->checkField('Facet for status');
+    $page->pressButton('Save');
+    \Drupal::entityTypeManager()->getStorage('entity_meta_relation')->resetCache();
+    $node = $this->drupalGetNodeByTitle('Node title', TRUE);
+    /** @var \Drupal\emr\Field\ComputedEntityMetasItemList $entity_meta_list */
+    $entity_meta_list = $node->get('emr_entity_metas');
+    $entity_meta = $entity_meta_list->getEntityMeta('oe_list_page');
+    $entity_meta_wrapper = $entity_meta->getWrapper();
+    $actual_exposed_filters = $entity_meta_wrapper->getConfiguration()['exposed_filters'];
+    $actual_override_exposed_filters = $entity_meta_wrapper->getConfiguration()['override_exposed_filters'];
+    $this->assertEquals(TRUE, $actual_override_exposed_filters);
+    $this->assertEquals([
+      'list_facet_source_node_content_type_twofield_select_two' => 'list_facet_source_node_content_type_twofield_select_two',
+      'list_facet_source_node_content_type_twostatus' => 'list_facet_source_node_content_type_twostatus',
+    ], $actual_exposed_filters);
+
     // Disable the overridden exposed filters to return back to the defaults.
     $this->drupalGet($node->toUrl('edit-form'));
     $this->clickLink('List Page');
     $this->assertFieldChecked('Override default exposed filters');
-    $this->assertNoFieldChecked('Select two');
-    $this->assertNoFieldChecked('Facet for status');
+    $this->assertFieldChecked('Select two');
+    $this->assertFieldChecked('Facet for status');
     $page->uncheckField('Override default exposed filters');
     $page->pressButton('Save');
     \Drupal::entityTypeManager()->getStorage('entity_meta_relation')->resetCache();
