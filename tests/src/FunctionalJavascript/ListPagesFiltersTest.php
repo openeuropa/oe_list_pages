@@ -68,6 +68,8 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $page->selectFieldOption('Source bundle', 'Content type one');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $page->checkField('Override default exposed filters');
+    $page->uncheckField('Body');
+    $page->uncheckField('Published');
     $page->fillField('Title', 'Another List page for ct1');
     $page->pressButton('Save');
 
