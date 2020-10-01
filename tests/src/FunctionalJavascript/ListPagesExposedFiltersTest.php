@@ -72,8 +72,13 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
     $page->selectFieldOption('Source bundle', 'Content type one');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $page->checkField('Override default exposed filters');
+    // By default, the CT exposed filters are Body and Status.
+    $this->assertSession()->checkboxChecked('Published');
+    $this->assertSession()->checkboxChecked('Body');
+    $this->assertSession()->checkboxNotChecked('Select one');
+    $this->assertSession()->checkboxNotChecked('Created');
+    $page->uncheckField('Body');
     $page->checkField('Select one');
-    $page->checkField('Published');
     $page->fillField('Title', 'Node title');
 
     $page->pressButton('Save');
