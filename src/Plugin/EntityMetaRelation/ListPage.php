@@ -284,8 +284,10 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
     ], []));
 
     $override = $form_state->getValue('exposed_filters_wrapper')['exposed_filters_override'];
-    $entity_meta_wrapper->setConfiguration(['override_exposed_filters' => $override]);
-    $entity_meta_wrapper->setConfiguration(['exposed_filters' => $selected_filters] + $entity_meta_wrapper->getConfiguration());
+    $configuration = $entity_meta_wrapper->getConfiguration();
+    $configuration['override_exposed_filters'] = $override;
+    $configuration['exposed_filters'] = $override ? $selected_filters : [];
+    $entity_meta_wrapper->setConfiguration($configuration);
     $host_entity->get('emr_entity_metas')->attach($entity_meta);
   }
 
