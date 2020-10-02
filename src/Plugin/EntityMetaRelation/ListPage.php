@@ -134,10 +134,6 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
           $option,
           '#value',
         ]), 0);
-        NestedArray::setValue($form, array_merge($parents, [
-          $option,
-          '#checked',
-        ]), FALSE);
       }
     }
     return $form[$key];
@@ -145,6 +141,8 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
 
   /**
    * {@inheritdoc}
+   *
+   * @SuppressWarnings(PHPMD.CyclomaticComplexity)
    */
   public function build(array $form, FormStateInterface $form_state, ContentEntityInterface $entity): array {
     $key = $this->getFormKey();
@@ -230,14 +228,25 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
     // Get available filters.
     if ($list_source && $available_filters = $list_source->getAvailableFilters()) {
       $configuration = $this->getExposedFiltersConfiguration($list_source, $entity_meta_wrapper);
+      $overridden = $this->areExposedFiltersOverridden($list_source, $entity_meta_wrapper);
+      if (!$overridden && !$configuration) {
+        // If the exposed filters are not overridden, the $configuration should
+        // be empty so we want to default to the defaults set in the bundle
+        // third party setting.
+        $configuration = $this->getBundleDefaultExposedFilters($list_source, $entity_meta_wrapper);
+      }
 
       // Override checkbox.
       $form[$key]['bundle_wrapper']['exposed_filters_wrapper']['exposed_filters_override'] = [
         '#type' => 'checkbox',
         '#title' => $this->t('Override default exposed filters'),
         '#description' => $this->t('Configure which exposed filters should show up on this page.'),
-        '#default_value' => $this->areExposedFiltersOverridden($list_source, $entity_meta_wrapper),
+        '#default_value' => $overridden,
       ];
+
+      $input = $form_state->getUserInput();
+      $input['exposed_filters_wrapper']['exposed_filters'] = $configuration;
+      $form_state->setUserInput($input);
 
       $form[$key]['bundle_wrapper']['exposed_filters_wrapper']['exposed_filters'] = [
         '#type' => 'checkboxes',
@@ -284,8 +293,10 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
     ], []));
 
     $override = $form_state->getValue('exposed_filters_wrapper')['exposed_filters_override'];
-    $entity_meta_wrapper->setConfiguration(['override_exposed_filters' => $override]);
-    $entity_meta_wrapper->setConfiguration(['exposed_filters' => $selected_filters] + $entity_meta_wrapper->getConfiguration());
+    $configuration = $entity_meta_wrapper->getConfiguration();
+    $configuration['override_exposed_filters'] = $override;
+    $configuration['exposed_filters'] = $override ? $selected_filters : [];
+    $entity_meta_wrapper->setConfiguration($configuration);
     $host_entity->get('emr_entity_metas')->attach($entity_meta);
   }
 
@@ -401,6 +412,24 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
       $configuration = isset($entity_meta_wrapper->getConfiguration()['exposed_filters']) ? array_keys($entity_meta_wrapper->getConfiguration()['exposed_filters']) : [];
     }
     return $configuration;
+  }
+
+  /**
+   * Get the default exposed filters configuration from the bundle.
+   *
+   * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
+   *   The selected list source.
+   * @param \Drupal\emr\EntityMetaWrapper $entity_meta_wrapper
+   *   The current entity meta wrapper.
+   *
+   * @return array
+   *   The exposed filters.
+   */
+  protected function getBundleDefaultExposedFilters(ListSourceInterface $list_source, EntityMetaWrapper $entity_meta_wrapper): array {
+    $bundle_entity_type = $this->entityTypeManager->getDefinition($list_source->getEntityType())->getBundleEntityType();
+    $storage = $this->entityTypeManager->getStorage($bundle_entity_type);
+    $bundle = $storage->load($list_source->getBundle());
+    return $bundle->getThirdPartySetting('oe_list_pages', 'default_exposed_filters', []);
   }
 
 }
