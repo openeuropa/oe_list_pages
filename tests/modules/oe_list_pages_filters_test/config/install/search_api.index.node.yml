@@ -1,14 +1,14 @@
 langcode: en
 status: true
 dependencies:
-  module:
-    - node
-    - search_api
   config:
     - field.storage.node.body
     - field.storage.node.field_select_one
     - field.storage.node.field_select_two
     - search_api.server.database_server
+  module:
+    - node
+    - search_api
 id: node
 name: Node
 description: ''
@@ -81,6 +81,17 @@ datasource_settings:
 processor_settings:
   add_url: {  }
   aggregated_field: {  }
+  ignorecase:
+    all_fields: true
+    fields:
+      - body
+      - field_select_one
+      - field_select_two
+      - title
+      - type
+    weights:
+      preprocess_index: -20
+      preprocess_query: -20
   language_with_fallback: {  }
   rendered_item: {  }
 tracker_settings:

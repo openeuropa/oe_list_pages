@@ -100,16 +100,23 @@ class FacetsFormTest extends WebDriverTestBase {
     $this->assertDefaultFormStatus();
 
     // Filter by body to only find 1 result.
-    $this->getSession()->getPage()->fillField('Body', 'banana');
+    $this->getSession()->getPage()->fillField('Body', 'Banana');
     $this->getSession()->getPage()->pressButton('Search');
 
     // Assert results and form changes.
     $assert->pageTextContains('that yellow fruit');
     $assert->pageTextNotContains('that red fruit');
-    $assert->fieldValueEquals('Body', 'banana');
+    $assert->fieldValueEquals('Body', 'Banana');
     $this->assertEquals([
       'test1',
     ], array_values($this->getSelectOptions('Select one')));
+
+    // Check that the text-based facet ignores the case.
+    $this->getSession()->getPage()->fillField('Body', 'baNAna');
+    $this->getSession()->getPage()->pressButton('Search');
+    $assert->pageTextContains('that yellow fruit');
+    $assert->pageTextNotContains('that red fruit');
+    $assert->fieldValueEquals('Body', 'baNAna');
 
     // Reset the form.
     $this->getSession()->getPage()->pressButton('Clear filters');
