@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 
 msgid "Showing results @first to @last"
-msgstr "Torthaí ó @start go @end"
+msgstr "Torthaí ó @first go @last"
 
 msgid "Next"
 msgstr "Ar aghaidh"

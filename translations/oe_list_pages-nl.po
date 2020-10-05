@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 
 msgid "Showing results @first to @last"
-msgstr "Resultaten @start tot en met @end"
+msgstr "Resultaten @first tot en met @last"
 
 msgid "Next"
 msgstr "Volgende"
