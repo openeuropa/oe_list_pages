@@ -2,7 +2,7 @@
 msgstr ""
 
 msgid "Showing results @first to @last"
-msgstr "Rodomi rezultatai: @start iš @end"
+msgstr "Rodomi rezultatai: @first iš @last"
 
 msgid "Next"
 msgstr "Kitas"
