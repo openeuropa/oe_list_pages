@@ -53,6 +53,15 @@ class FulltextWidgetTest extends ListsSourceBaseTest {
    */
   public function testQueryType(): void {
     $this->createTestContent('item', 4);
+
+    // Add another one with the body in a Cyrillic language.
+    $entity_test_storage = \Drupal::entityTypeManager()->getStorage('entity_test_mulrev_changed');
+    $entity_test_storage->create([
+      'name' => 'Това е банан',
+      'body' => 'Това е банан',
+      'type' => 'item',
+    ])->save();
+
     // Another list for another bundle.
     $item_list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
 
@@ -90,6 +99,27 @@ class FulltextWidgetTest extends ListsSourceBaseTest {
     $query->execute();
     $results = $query->getResults();
     $this->assertCount(1, $results->getResultItems());
+
+    // Search in Cyrillic with Uppercase.
+    /** @var \Drupal\search_api\Query\QueryInterface $default_query */
+    $query = $list->getQuery(['preset_filters' => [$facet_name->id() => 'Това е банан']]);
+    $query->execute();
+    $results = $query->getResults();
+    $this->assertCount(1, $results->getResultItems());
+
+    // Search in Cyrillic with lowercase.
+    /** @var \Drupal\search_api\Query\QueryInterface $default_query */
+    $query = $list->getQuery(['preset_filters' => [$facet_name->id() => 'това е банан']]);
+    $query->execute();
+    $results = $query->getResults();
+    $this->assertCount(1, $results->getResultItems());
+
+    // Search for non-existing.
+    /** @var \Drupal\search_api\Query\QueryInterface $default_query */
+    $query = $list->getQuery(['preset_filters' => [$facet_name->id() => 'not found']]);
+    $query->execute();
+    $results = $query->getResults();
+    $this->assertCount(0, $results->getResultItems());
   }
 
   /**
