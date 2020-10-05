@@ -1,0 +1,13 @@
+name: OpenEuropa List Pages Filters Test
+type: module
+description: The test module for filters of OE List Pages.
+
+package: Testing
+core: 8.x
+
+dependencies:
+  - drupal:options
+  - extra_field:extra_field
+  - oe_list_pages:oe_list_pages
+  - oe_list_pages:oe_list_page_content_type
+  - search_api:search_api_db

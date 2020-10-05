@@ -1,0 +1,32 @@
+msgid ""
+msgstr ""
+
+msgid "Showing results @first to @last"
+msgstr "Tulemused @first kuni @last"
+
+msgid "Next"
+msgstr "Järgmine"
+
+msgid "Previous"
+msgstr "Eelmine"
+
+msgid "Go to page @number"
+msgstr "Mine lehele @number"
+
+msgid "Go to previous page"
+msgstr "Mine eelmisele lehele"
+
+msgid "Go to next page"
+msgstr "Mine järgmisele lehele"
+
+msgid "First"
+msgstr "Esimene"
+
+msgid "Last"
+msgstr "Viimane"
+
+msgid "Clear filters"
+msgstr "Tühjenda filtrid"
+
+msgid "Filter by"
+msgstr "Filtreeri"

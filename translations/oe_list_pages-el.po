@@ -1,0 +1,32 @@
+msgid ""
+msgstr ""
+
+msgid "Showing results @first to @last"
+msgstr "Εμφάνιση αποτελεσμάτων @first έως @last"
+
+msgid "Next"
+msgstr "Επόμενη"
+
+msgid "Previous"
+msgstr "Προηγούμενη"
+
+msgid "Go to page @number"
+msgstr "πήγαινε στη σελίδα @number"
+
+msgid "Go to previous page"
+msgstr "Προηγούμενη σελίδα"
+
+msgid "Go to next page"
+msgstr "Επόμενη σελίδα"
+
+msgid "First"
+msgstr "Πρώτη"
+
+msgid "Last"
+msgstr "Τελευταία"
+
+msgid "Clear filters"
+msgstr "Εκκαθάριση φίλτρων"
+
+msgid "Filter by"
+msgstr "Φιλτράρισμα ανά"

@@ -1,0 +1,32 @@
+msgid ""
+msgstr ""
+
+msgid "Showing results @first to @last"
+msgstr "Megjelenített eredmények: @first–@last."
+
+msgid "Next"
+msgstr "Következő"
+
+msgid "Previous"
+msgstr "Előző"
+
+msgid "Go to page @number"
+msgstr "@number. oldalra ugrás"
+
+msgid "Go to previous page"
+msgstr "Ugrás az előző oldalra"
+
+msgid "Go to next page"
+msgstr "Ugrás a következő oldalra"
+
+msgid "First"
+msgstr "Első"
+
+msgid "Last"
+msgstr "Utolsó"
+
+msgid "Clear filters"
+msgstr "Szűrők törlése"
+
+msgid "Filter by"
+msgstr "Szűrési feltételek"

@@ -1,0 +1,9 @@
+name: OpenEuropa List Pages Test Event Subscriber
+type: module
+description: The test module for OE List Pages plugin event subscriber.
+
+package: Testing
+core: 8.x
+
+dependencies:
+  - oe_list_pages

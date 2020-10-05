@@ -1,0 +1,11 @@
+name: OpenEuropa List Page content type
+description: The OpenEuropa List Page content type.
+package: OpenEuropa
+
+type: module
+core: 8.x
+
+dependencies:
+  - emr:emr_node
+  - oe_list_pages:oe_list_pages
+

@@ -1,0 +1,32 @@
+msgid ""
+msgstr ""
+
+msgid "Showing results @first to @last"
+msgstr "Qed jintwerew ir-riżultati @first sa @last"
+
+msgid "Next"
+msgstr "Li Jmiss"
+
+msgid "Previous"
+msgstr "Preċedenti"
+
+msgid "Go to page @number"
+msgstr "Mur fil-paġna @number"
+
+msgid "Go to previous page"
+msgstr "Mur fil-Paġna Preċedenti"
+
+msgid "Go to next page"
+msgstr "Mur fil-Paġna Li Jmiss"
+
+msgid "First"
+msgstr "L-ewwel"
+
+msgid "Last"
+msgstr "L-aħħar"
+
+msgid "Clear filters"
+msgstr "Neħħi l-filtri"
+
+msgid "Filter by"
+msgstr "Iffiltra skont"

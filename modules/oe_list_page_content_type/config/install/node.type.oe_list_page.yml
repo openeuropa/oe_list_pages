@@ -1,0 +1,16 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - emr
+third_party_settings:
+  emr:
+    entity_meta_bundles:
+      - oe_list_page
+name: 'List page'
+type: oe_list_page
+description: ''
+help: ''
+new_revision: true
+preview_mode: 0
+display_submitted: false

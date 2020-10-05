@@ -1,0 +1,15 @@
+facet.widget.config.oe_list_pages_fulltext:
+  type: facet.widget.default_config
+  label: 'Fulltext widget configuration'
+  mapping:
+    fulltext_all_fields:
+      type: boolean
+      label: 'Search on all fulltext fields'
+
+facet.widget.config.oe_list_pages_date:
+  type: facet.widget.default_config
+  label: 'Date widget configuration'
+  mapping:
+    date_type:
+      type: string
+      label: 'Date type of date facet widget'

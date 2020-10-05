@@ -1,0 +1,32 @@
+msgid ""
+msgstr ""
+
+msgid "Showing results @first to @last"
+msgstr "Se afișează rezultatele de la @first la @last"
+
+msgid "Next"
+msgstr "Următor"
+
+msgid "Previous"
+msgstr "Anterior"
+
+msgid "Go to page @number"
+msgstr "Mergi la pagina @number"
+
+msgid "Go to previous page"
+msgstr "Mergi la pagina anterioară"
+
+msgid "Go to next page"
+msgstr "Mergi la pagina următoare"
+
+msgid "First"
+msgstr "Primul"
+
+msgid "Last"
+msgstr "Ultima"
+
+msgid "Clear filters"
+msgstr "Anulează filtrele"
+
+msgid "Filter by"
+msgstr "Filtrează după"

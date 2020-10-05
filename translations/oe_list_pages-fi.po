@@ -1,0 +1,32 @@
+msgid ""
+msgstr ""
+
+msgid "Showing results @first to @last"
+msgstr "Näytetään tulokset @first – @last"
+
+msgid "Next"
+msgstr "Seuraava"
+
+msgid "Previous"
+msgstr "Edellinen"
+
+msgid "Go to page @number"
+msgstr "Siirry sivulle @number"
+
+msgid "Go to previous page"
+msgstr "Siirry edelliselle sivulle"
+
+msgid "Go to next page"
+msgstr "Siirry seuraavalle sivulle"
+
+msgid "First"
+msgstr "Ensimmäinen"
+
+msgid "Last"
+msgstr "Viimeinen"
+
+msgid "Clear filters"
+msgstr "Tyhjennä rajaimet"
+
+msgid "Filter by"
+msgstr "Rajaimet"

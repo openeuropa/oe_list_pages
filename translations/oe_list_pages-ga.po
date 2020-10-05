@@ -1,0 +1,32 @@
+msgid ""
+msgstr ""
+
+msgid "Showing results @first to @last"
+msgstr "Torthaí ó @first go @last"
+
+msgid "Next"
+msgstr "Ar aghaidh"
+
+msgid "Previous"
+msgstr "Siar"
+
+msgid "Go to page @number"
+msgstr "Téigh chuig leathanach @number"
+
+msgid "Go to previous page"
+msgstr "Téigh chuig an leathanach roimhe"
+
+msgid "Go to next page"
+msgstr "Téigh chuig an gcéad leathanach eile"
+
+msgid "First"
+msgstr "Céad lch."
+
+msgid "Last"
+msgstr "Lch. deir"
+
+msgid "Clear filters"
+msgstr "Glan na scagairí"
+
+msgid "Filter by"
+msgstr "Scagadh de réir"

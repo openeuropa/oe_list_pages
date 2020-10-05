@@ -1,0 +1,45 @@
+plugin.plugin_configuration.facets_processor.oe_list_pages_date_status_processor:
+  type: mapping
+  label: 'Ongoing/Past status processor'
+  mapping:
+    default_status:
+      type: string
+      label: 'Default status'
+    upcoming_label:
+      type: string
+      label: 'Upcoming label'
+    past_label:
+      type: string
+      label: 'Past label'
+
+node.type.*.third_party.oe_list_pages:
+  type: oe_list_pages.bundle_third_party_settings
+  label: 'List page settings for nodes'
+
+media.type.*.third_party.oe_list_pages:
+  type: oe_list_pages.bundle_third_party_settings
+  label: 'List page settings for media'
+
+oe_list_pages.bundle_third_party_settings:
+  type: mapping
+  label: 'OE List page default settings'
+  mapping:
+    default_view_mode:
+      type: string
+      label: 'The view mode to use when rendering the item in a list'
+    default_sort:
+      type: mapping
+      label: 'Sorting criteria'
+      mapping:
+        name:
+          type: string
+          label: 'The field to sort by'
+        direction:
+          type: string
+          label: 'The direction of the sorting'
+    default_exposed_filters:
+      type: sequence
+      label: 'Exposed filters'
+      sequence:
+        type: string
+        label: 'Exposed filter (saved as facet id)'

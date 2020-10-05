@@ -1,0 +1,20 @@
+<?php
+
+/**
+ * @file
+ * OE List Page content type install file.
+ */
+
+declare(strict_types = 1);
+
+/**
+ * Implements hook_install().
+ */
+function oe_list_page_content_type_install() {
+  if (!\Drupal::service('config.installer')->isSyncing()) {
+    $installer = \Drupal::service('emr.installer');
+    $installer->installEntityMetaTypeOnContentEntityType('oe_list_page', 'node', [
+      'oe_list_page',
+    ]);
+  }
+}

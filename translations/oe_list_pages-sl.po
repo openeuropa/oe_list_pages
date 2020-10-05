@@ -1,0 +1,32 @@
+msgid ""
+msgstr ""
+
+msgid "Showing results @first to @last"
+msgstr "Prikazani rezultati @first do @last"
+
+msgid "Next"
+msgstr "Naslednja"
+
+msgid "Previous"
+msgstr "Prejšnja"
+
+msgid "Go to page @number"
+msgstr "Pojdi na stran %number"
+
+msgid "Go to previous page"
+msgstr "Pojdi na prejšnjo stran"
+
+msgid "Go to next page"
+msgstr "Pojdi na naslednjo stran"
+
+msgid "First"
+msgstr "Prva"
+
+msgid "Last"
+msgstr "Zadnja"
+
+msgid "Clear filters"
+msgstr "Počisti filtre"
+
+msgid "Filter by"
+msgstr "Filtriraj po"

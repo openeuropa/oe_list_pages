@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_select_one
+    - node.type.content_type_one
+  module:
+    - options
+id: node.content_type_one.field_select_one
+field_name: field_select_one
+entity_type: node
+bundle: content_type_one
+label: 'select one'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string
