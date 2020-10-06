@@ -10,7 +10,8 @@
         "drupal/core": "^8.8.2",
         "drupal/emr": "~1.0-beta7",
         "drupal/facets": "~1.5",
-        "drupal/search_api": "~1.17"
+        "drupal/search_api": "~1.17",
+        "symfony/options-resolver": "~4.0"
     },
     "require-dev": {
         "composer/installers": "~1.5",
