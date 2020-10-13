@@ -153,6 +153,7 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
    * {@inheritdoc}
    *
    * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+   * @SuppressWarnings(PHPMD.NPathComplexity)
    */
   public function build(array $form, FormStateInterface $form_state, ContentEntityInterface $entity): array {
     $key = $this->getFormKey();
@@ -273,7 +274,6 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
       ];
     }
 
-
     $form[$key]['items_per_page'] = [
       '#type' => 'select',
       '#title' => $this->t('The number of items to show per page'),
@@ -285,10 +285,7 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
     ];
 
     $form_state->set('oe_list_pages_available_filters', $available_filters);
-    $preset_filters = $entity_meta_wrapper->getConfiguration()['preset_filters'] ?? [];
-    $form = $this->presetFiltersBuilder->buildDefaultFilters($form, $form_state, $this->getFormKey(), $list_source, $available_filters, $preset_filters);
-
-    $bundle_entity_type = $this->entityTypeManager->getDefinition($entity_meta_wrapper->getSourceEntityType())->getBundleEntityType();
+    $bundle_entity_type = $entity->getEntityType()->getBundleEntityType();
     $storage = $this->entityTypeManager->getStorage($bundle_entity_type);
     $bundle = $storage->load($entity->bundle());
     $default_values_allowed = $bundle->getThirdPartySetting('oe_list_pages', 'default_values_allowed', FALSE);
