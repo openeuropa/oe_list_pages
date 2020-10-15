@@ -76,6 +76,7 @@ class FulltextWidgetTest extends ListsSourceBaseTest {
     $facet_name = $this->createFacet('name', $default_list_id, '', 'oe_list_pages_fulltext', ['fulltext_all_fields' => FALSE]);
 
     // Search for body.
+    $this->container->get('kernel')->rebuildContainer();
     $list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
     /** @var \Drupal\search_api\Query\QueryInterface $default_query */
     $query = $list->getQuery(['preset_filters' => [$facet_body->id() => 'message']]);
@@ -85,6 +86,7 @@ class FulltextWidgetTest extends ListsSourceBaseTest {
     $this->assertCount(3, $results->getResultItems());
 
     // Search for body with Uppercase.
+    $this->container->get('kernel')->rebuildContainer();
     $list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
     /** @var \Drupal\search_api\Query\QueryInterface $default_query */
     $query = $list->getQuery(['preset_filters' => [$facet_body->id() => 'Message']]);
@@ -94,6 +96,7 @@ class FulltextWidgetTest extends ListsSourceBaseTest {
     $this->assertCount(3, $results->getResultItems());
 
     // Search for name.
+    $this->container->get('kernel')->rebuildContainer();
     /** @var \Drupal\search_api\Query\QueryInterface $default_query */
     $query = $list->getQuery(['preset_filters' => [$facet_name->id() => 'message']]);
     $query->execute();
@@ -101,6 +104,7 @@ class FulltextWidgetTest extends ListsSourceBaseTest {
     $this->assertCount(1, $results->getResultItems());
 
     // Search in Cyrillic with Uppercase.
+    $this->container->get('kernel')->rebuildContainer();
     /** @var \Drupal\search_api\Query\QueryInterface $default_query */
     $query = $list->getQuery(['preset_filters' => [$facet_name->id() => 'Това е банан']]);
     $query->execute();
@@ -108,6 +112,7 @@ class FulltextWidgetTest extends ListsSourceBaseTest {
     $this->assertCount(1, $results->getResultItems());
 
     // Search in Cyrillic with lowercase.
+    $this->container->get('kernel')->rebuildContainer();
     /** @var \Drupal\search_api\Query\QueryInterface $default_query */
     $query = $list->getQuery(['preset_filters' => [$facet_name->id() => 'това е банан']]);
     $query->execute();
@@ -115,6 +120,7 @@ class FulltextWidgetTest extends ListsSourceBaseTest {
     $this->assertCount(1, $results->getResultItems());
 
     // Search for non-existing.
+    $this->container->get('kernel')->rebuildContainer();
     /** @var \Drupal\search_api\Query\QueryInterface $default_query */
     $query = $list->getQuery(['preset_filters' => [$facet_name->id() => 'not found']]);
     $query->execute();
