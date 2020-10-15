@@ -292,7 +292,7 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
 
     if ($default_values_allowed) {
       $preset_filters = $entity_meta_wrapper->getConfiguration()['preset_filters'] ?? [];
-      $form = $this->presetFiltersBuilder->buildDefaultFilters($form, $form_state, $this->getFormKey(), $list_source, $available_filters, $preset_filters);
+      $this->presetFiltersBuilder->buildDefaultFilters($form, $form_state, $this->getFormKey(), $list_source, $available_filters, $preset_filters);
     }
 
     // Set the entity meta so we use it in the submit handler.

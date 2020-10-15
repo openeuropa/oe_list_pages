@@ -59,7 +59,7 @@ interface ListPagesWidgetInterface {
   public function prepareValueForUrl(FacetInterface $facet, array &$form, FormStateInterface $form_state): array;
 
   /**
-   * Prepares the values to be save in default filter values.
+   * Prepares the values to be saved in default filter values.
    *
    * @param \Drupal\facets\FacetInterface $facet
    *   The facet.

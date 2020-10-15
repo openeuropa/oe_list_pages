@@ -73,11 +73,11 @@ class ListPresetFiltersBuilder {
   }
 
   /**
-   * {@inheritdoc}
+   * Build form component for default filter values edition.
    *
    * @SuppressWarnings(PHPMD.CyclomaticComplexity)
    */
-  public function buildDefaultFilters(array $form, FormStateInterface $form_state, string $form_key, ListSourceInterface $list_source = NULL, array $available_filters = [], array $preset_filters = []) {
+  public function buildDefaultFilters(array &$form, FormStateInterface &$form_state, string $form_key, ListSourceInterface $list_source = NULL, array $available_filters = [], array $preset_filters = []) {
 
     // List source doesn't exist yet.
     if (empty($list_source)) {
@@ -92,7 +92,7 @@ class ListPresetFiltersBuilder {
 
     $form[$form_key]['preset_filters_wrapper'] = [
       '#type' => 'container',
-      '#title' => t('Default filter values'),
+      '#title' => $this->t('Default filter values'),
       '#tree' => TRUE,
       '#attributes' => [
         'id' => 'list-page-default-filters',
@@ -100,7 +100,7 @@ class ListPresetFiltersBuilder {
     ];
 
     $form[$form_key]['preset_filters_wrapper']['label'] = [
-      '#title' => t('Default filter values'),
+      '#title' => $this->t('Default filter values'),
       '#type' => 'label',
     ];
 
@@ -169,8 +169,8 @@ class ListPresetFiltersBuilder {
    */
   protected function buildSummaryPresetFilters(array $form, FormStateInterface $form_state, string $form_key, ListSourceInterface $list_source, array $available_filters, array $current_filters) {
     $header = [
-      ['data' => t('Filter')],
-      ['data' => t('Default value')],
+      ['data' => $this->t('Filter')],
+      ['data' => $this->t('Default value')],
     ];
 
     $rows = [];
@@ -194,10 +194,10 @@ class ListPresetFiltersBuilder {
 
     $form[$form_key]['preset_filters_wrapper']['summary']['table'] = [
       '#type' => 'table',
-      '#title' => t('Default filter values'),
+      '#title' => $this->t('Default filter values'),
       '#header' => $header,
       '#rows' => $rows,
-      '#empty' => t('No default values set.'),
+      '#empty' => $this->t('No default values set.'),
     ];
 
     $form[$form_key]['preset_filters_wrapper']['summary']['add_new'] = [
@@ -239,9 +239,6 @@ class ListPresetFiltersBuilder {
       '#type' => 'fieldset',
       '#title' => $this->t('Set default value for :filter', [':filter' => $available_filters[$filter_key]]),
     ];
-
-    // Execute list source query so we have results.
-    $list_source->getQuery()->execute();
 
     $facet = $this->getFacetById($list_source, $filter_key);
     if (!empty($facet) && ($widget = $facet->getWidgetInstance()) && ($widget instanceof ListPagesWidgetInterface)) {
