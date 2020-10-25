@@ -180,6 +180,7 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
    */
   public function prepareDefaultValueFilter(FacetInterface $facet, array &$form, FormStateInterface $form_state): array {
     $count = $form_state->getValue('input_count', 0);
+    $values = [];
     // Used for multi inputs.
     if ($count) {
       for ($i = 0; $i < $count; $i++) {
