@@ -91,8 +91,8 @@ class ListPagesTestSubscriber implements EventSubscriberInterface {
     $build = $event->getBuild();
     $build['#channel_elements'][] = [
       '#type' => 'html_tag',
-      '#tag' => 'copyright',
-      '#value' => t('Copyright 2019 Dries Buytaert'),
+      '#tag' => 'custom_tag',
+      '#value' => 'custom_value',
     ];
     $event->setBuild($build);
   }

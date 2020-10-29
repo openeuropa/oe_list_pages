@@ -7,6 +7,7 @@ namespace Drupal\oe_list_pages\Controller;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\Core\Cache\CacheableResponse;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Theme\ThemeManagerInterface;
@@ -81,37 +82,26 @@ class ListPageRssController extends ControllerBase {
    *   The rendered RSS feed.
    */
   public function build(NodeInterface $node): Response {
-
-    $items = $this->getItemList($node);
-
-    // Get the favicon location.
-    $theme = $this->themeManager->getActiveTheme();
-    if (file_exists($favicon = $theme->getPath() . '/favicon.ico')) {
-      $image_url = file_create_url($favicon);
-    }
-    else {
-      $image_url = file_create_url('core/misc/favicon.ico');
-    }
-
     // Build the render array for the RSS feed.
     $default_title = $node->getTitle() . ' - RSS';
-    $default_link = $node->toUrl('canonical', ['absolute' => TRUE])->toString();
+    $default_link = $node->toUrl('canonical', ['absolute' => TRUE])->toString(TRUE);
     $build = [
       '#theme' => 'oe_list_pages_rss',
       '#title' => $default_title,
-      '#link' => $default_link,
+      '#link' => $default_link->getGeneratedUrl(),
       '#description' => '',
-      '#langcode' => $node->language()->getId(),
-      '#image_url' => $image_url,
+      '#language' => $node->language()->getId(),
+      '#copyright' => $this->getCopyright(),
+      '#image_url' => $this->getDefaultImageUrl(),
       '#image_title' => $default_title,
-      '#image_link' => $default_link,
+      '#image_link' => $default_link->getGeneratedUrl(),
       '#channel_elements' => [],
-      '#items' => $items,
+      '#items' => $this->getItemList($node),
     ];
 
     $cache_metadata = CacheableMetadata::createFromRenderArray($build);
     $cache_metadata->addCacheableDependency($node);
-    $cache_metadata->addCacheableDependency($theme);
+    $cache_metadata->addCacheableDependency($default_link);
     $cache_metadata->applyTo($build);
 
     // Dispatch event to allow modules to alter the build before being rendered.
@@ -120,7 +110,7 @@ class ListPageRssController extends ControllerBase {
     $build = $event->getBuild();
 
     // Create the response and add the xml type header.
-    $response = new Response('', 200);
+    $response = new CacheableResponse('', 200);
     $response->headers->set('Content-Type', 'application/rss+xml; charset=utf-8');
 
     // Render the list and add it to the response.
@@ -131,6 +121,7 @@ class ListPageRssController extends ControllerBase {
       throw new NotFoundHttpException();
     }
     $response->setContent($output);
+    $response->addCacheableDependency($cache_metadata);
 
     return $response;
   }
@@ -165,6 +156,33 @@ class ListPageRssController extends ControllerBase {
       return AccessResult::forbidden($this->t('Node type does not have List Page meta configured.'));
     }
     return AccessResult::allowed();
+  }
+
+  /**
+   * Gets the default image url.
+   *
+   * @return string
+   *   The default image url.
+   */
+  protected function getDefaultImageUrl(): string {
+    // Get the favicon location.
+    $theme = $this->themeManager->getActiveTheme();
+    if (file_exists($favicon = $theme->getPath() . '/favicon.ico')) {
+      return file_create_url($favicon);
+    }
+    else {
+      return file_create_url('core/misc/favicon.ico');
+    }
+  }
+
+  /**
+   * Gets the default copyright value.
+   *
+   * @return string
+   *   The default copyright value.
+   */
+  protected function getCopyright(): string {
+    return '© European Union, 1995-' . date('Y');
   }
 
 }
