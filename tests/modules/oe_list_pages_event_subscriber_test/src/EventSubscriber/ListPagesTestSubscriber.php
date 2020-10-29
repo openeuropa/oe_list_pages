@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\oe_list_pages_event_subscriber_test\EventSubscriber;
 
 use Drupal\Core\State\StateInterface;
+use Drupal\oe_list_pages\ListPageRssBuildAlterEvent;
 use Drupal\oe_list_pages\ListPageEvents;
 use Drupal\oe_list_pages\ListPageSourceAlterEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -38,6 +39,7 @@ class ListPagesTestSubscriber implements EventSubscriberInterface {
     return [
       ListPageEvents::ALTER_ENTITY_TYPES => ['onEntityTypesAlter'],
       ListPageEvents::ALTER_BUNDLES => ['onBundlesAlter'],
+      ListPageEvents::ALTER_RSS_BUILD => ['onRssBuildAlter'],
     ];
   }
 
@@ -77,6 +79,22 @@ class ListPagesTestSubscriber implements EventSubscriberInterface {
     $allowed_bundles = $allowed[$entity_type] ?? [];
 
     $event->setBundles($entity_type, array_intersect($bundles, $allowed_bundles));
+  }
+
+  /**
+   * Event handler for adding channel information.
+   *
+   * @param \Drupal\oe_list_pages\ListPageRssBuildAlterEvent $event
+   *   The event object.
+   */
+  public function onRssBuildAlter(ListPageRssBuildAlterEvent $event): void {
+    $build = $event->getBuild();
+    $build['#channel_elements'][] = [
+      '#type' => 'html_tag',
+      '#tag' => 'copyright',
+      '#value' => t('Copyright 2019 Dries Buytaert'),
+    ];
+    $event->setBuild($build);
   }
 
 }
