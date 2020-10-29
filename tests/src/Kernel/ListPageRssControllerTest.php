@@ -12,7 +12,7 @@ use Symfony\Component\DomCrawler\Crawler;
 /**
  * Tests the List page RSS feeds.
  */
-class ListRssTest extends ListsEntityMetaTestBase {
+class ListPageRssControllerTest extends ListsEntityMetaTestBase {
 
 
   /**
@@ -36,7 +36,7 @@ class ListRssTest extends ListsEntityMetaTestBase {
   /**
    * Test access to list page RSS route.
    */
-  public function testRssAccess(): void {
+  public function testAccess(): void {
     $user = $this->createUser([], ['access content']);
     // Create a node with list page metadata.
     $list_page = $this->nodeStorage->create([
@@ -70,7 +70,7 @@ class ListRssTest extends ListsEntityMetaTestBase {
   /**
    * Test access to list page RSS route.
    */
-  public function testRssControllerBuild(): void {
+  public function testBuild(): void {
     // Create a node with list page metadata.
     $list_page = $this->nodeStorage->create([
       'type' => $this->nodeType->id(),
@@ -95,12 +95,13 @@ class ListRssTest extends ListsEntityMetaTestBase {
     $this->assertEquals('http://localhost/node/1', $channel->filterXPath('//link')->text());
     $this->assertEquals('', $channel->filterXPath('//description')->text());
     $this->assertEquals('en', $channel->filterXPath('//language')->text());
+    $this->assertEquals('© European Union, 1995-' . date('Y'), $channel->filterXPath('//copyright')->text());
     $this->assertEquals('http://localhost/core/misc/favicon.ico', $channel->filterXPath('//image/url')->text());
     $this->assertEquals('List Page - RSS', $channel->filterXPath('//image/title')->text());
     $this->assertEquals('http://localhost/node/1', $channel->filterXPath('//image/link')->text());
     // Assert modules subscribing to the ListPageRssBuildAlterEvent can
     // alter the build.
-    $this->assertEquals('Copyright 2019 Dries Buytaert', $channel->filterXPath('//copyright')->text());
+    $this->assertEquals('custom_value', $channel->filterXPath('//custom_tag')->text());
   }
 
 }
