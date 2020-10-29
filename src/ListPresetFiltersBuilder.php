@@ -128,8 +128,8 @@ class ListPresetFiltersBuilder {
     }
     // Removing default filter value.
     elseif (!empty($triggering_element) && $triggering_element['#name'] == 'remove-default-filter') {
-      $filter_key = $form_state->getValue('preset_filters_wrapper')['edit']['filter_key'];
-      unset($current_filters[$filter_key]);
+      $delete_filter_key = $triggering_element['#delete_filter_key'];
+      unset($current_filters[$delete_filter_key]);
     }
 
     $form[$form_key]['preset_filters_wrapper']['current_filters'] = [
@@ -137,7 +137,7 @@ class ListPresetFiltersBuilder {
       '#value' => $current_filters,
     ];
 
-    $filter_key = $form_state->getValue('preset_filters_wrapper')['summary']['add_new'];
+    $filter_key = !empty($triggering_element['#filter_key']) ? $triggering_element['#filter_key'] : $form_state->getValue('preset_filters_wrapper')['summary']['add_new'];
     if (empty($filter_key)) {
       $form = $this->buildSummaryPresetFilters($form, $form_state, $form_key, $list_source, $available_filters, $current_filters);
     }
@@ -171,6 +171,7 @@ class ListPresetFiltersBuilder {
     $header = [
       ['data' => $this->t('Filter')],
       ['data' => $this->t('Default value')],
+      ['data' => $this->t('Operations')],
     ];
 
     $rows = [];
@@ -183,7 +184,34 @@ class ListPresetFiltersBuilder {
         $filter_value_label = $widget->getDefaultValuesLabel($facet, $list_source, $filter_value);
       }
 
-      $rows[] = [$available_filters[$filter_key], $filter_value_label];
+      $rows[] = [
+        [
+          'data' => $available_filters[$filter_key],
+          'filter_key' => $filter_key,
+        ],
+        ['data' => $filter_value_label],
+        ['data' => ''],
+      ];
+      $form[$form_key]['preset_filters_wrapper']['buttons'][$filter_key]['edit_button'] = [
+        '#type' => 'button',
+        '#value' => $this->t('Edit'),
+        '#filter_key' => $filter_key,
+        '#ajax' => [
+          'callback' => [$this, 'editDefaultValue'],
+          'wrapper' => $form[$form_key]['#id'],
+        ],
+      ];
+
+      $form[$form_key]['preset_filters_wrapper']['buttons'][$filter_key]['delete_button'] = [
+        '#type' => 'button',
+        '#value' => $this->t('Delete'),
+        '#name' => 'remove-default-filter',
+        '#delete_filter_key' => $filter_key,
+        '#ajax' => [
+          'callback' => [$this, 'editDefaultValue'],
+          'wrapper' => $form[$form_key]['#id'],
+        ],
+      ];
     }
 
     $form[$form_key]['preset_filters_wrapper']['summary'] = [
@@ -202,7 +230,7 @@ class ListPresetFiltersBuilder {
 
     $form[$form_key]['preset_filters_wrapper']['summary']['add_new'] = [
       '#type' => 'select',
-      '#title' => $this->t('Set default value for:'),
+      '#title' => $this->t('Add default value for:'),
       '#options' => ['' => $this->t('- None -')] + $available_filters,
       '#ajax' => [
         'callback' => [$this, 'editDefaultValue'],
@@ -210,6 +238,31 @@ class ListPresetFiltersBuilder {
       ],
     ];
 
+    $form[$form_key]['preset_filters_wrapper']['#pre_render'][] = [get_class($this), 'preRenderOperationButtons'];
+    return $form;
+  }
+
+  /**
+   * Uses prerender to move operation buttons to table rows.
+   *
+   * This is needed for ajax to properly work in these buttons.
+   *
+   * @param array $form
+   *   The form to alter.
+   *
+   * @return array
+   *   The altered array.
+   */
+  public static function preRenderOperationButtons(array $form) {
+    $rows =& $form['summary']['table']['#rows'];
+    for ($i = 0; $i < count($rows); $i++) {
+      $filter_key = $rows[$i][0]['filter_key'];
+      $rows[$i][2]['data'] = [
+        'edit_button' => $form['buttons'][$filter_key]['edit_button'],
+        'delete_button' => $form['buttons'][$filter_key]['delete_button'],
+      ];
+    }
+    unset($form['buttons']);
     return $form;
   }
 
@@ -277,14 +330,6 @@ class ListPresetFiltersBuilder {
       '#type' => 'button',
       '#name' => 'set-default-filter',
       '#limit_validation_errors' => $limit_validation_errors,
-      '#ajax' => $ajax_definition,
-    ];
-
-    $form[$form_key]['preset_filters_wrapper']['edit']['cancel'] = [
-      '#value' => $this->t('Remove default value'),
-      '#type' => 'button',
-      '#limit_validation_errors' => $limit_validation_errors,
-      '#name' => 'remove-default-filter',
       '#ajax' => $ajax_definition,
     ];
 
