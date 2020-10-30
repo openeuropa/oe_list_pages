@@ -81,8 +81,9 @@ class ListPageRssControllerTest extends ListsEntityMetaTestBase {
     // Create the list page rss controller.
     $entity_type_manager = $this->container->get('entity_type.manager');
     $event_dispatcher = $this->container->get('event_dispatcher');
+    $renderer = $this->container->get('renderer');
     $theme_manager = $this->container->get('theme.manager');
-    $controller = new ListPageRssController($entity_type_manager, $event_dispatcher, $theme_manager);
+    $controller = new ListPageRssController($entity_type_manager, $event_dispatcher, $renderer, $theme_manager);
     $response = $controller->build($list_page);
 
     // Assert the response has the correct content type header set.

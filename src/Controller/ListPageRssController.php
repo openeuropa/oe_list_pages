@@ -10,6 +10,7 @@ use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Cache\CacheableResponse;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Theme\ThemeManagerInterface;
 use Drupal\node\NodeInterface;
 use Drupal\oe_list_pages\ListPageRssBuildAlterEvent;
@@ -39,6 +40,13 @@ class ListPageRssController extends ControllerBase {
   protected $eventDispatcher;
 
   /**
+   * The renderer service.
+   *
+   * @var \Drupal\Core\Render\RendererInterface
+   */
+  protected $renderer;
+
+  /**
    * The theme manager.
    *
    * @var \Drupal\Core\Theme\ThemeManagerInterface
@@ -52,12 +60,15 @@ class ListPageRssController extends ControllerBase {
    *   The entity type manager.
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
    *   The event dispatcher.
+   * @param \Drupal\Core\Render\RendererInterface $renderer
+   *   The event dispatcher.
    * @param \Drupal\Core\Theme\ThemeManagerInterface $theme_manager
    *   The theme manager.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, EventDispatcherInterface $event_dispatcher, ThemeManagerInterface $theme_manager) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, EventDispatcherInterface $event_dispatcher, RendererInterface $renderer, ThemeManagerInterface $theme_manager) {
     $this->entityTypeManager = $entity_type_manager;
     $this->eventDispatcher = $event_dispatcher;
+    $this->renderer = $renderer;
     $this->themeManager = $theme_manager;
   }
 
@@ -68,6 +79,7 @@ class ListPageRssController extends ControllerBase {
     return new static(
       $container->get('entity_type.manager'),
       $container->get('event_dispatcher'),
+      $container->get('renderer'),
       $container->get('theme.manager')
     );
   }
@@ -117,9 +129,7 @@ class ListPageRssController extends ControllerBase {
     $response->headers->set('Content-Type', 'application/rss+xml; charset=utf-8');
 
     // Render the list and add it to the response.
-    /** @var \Drupal\Core\Render\RendererInterface $renderer */
-    $renderer = \Drupal::service('renderer');
-    $output = (string) $renderer->renderRoot($build);
+    $output = (string) $this->renderer->renderRoot($build);
     if (empty($output)) {
       throw new NotFoundHttpException();
     }
