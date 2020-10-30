@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\oe_list_pages_event_subscriber_test\EventSubscriber;
 
 use Drupal\Core\State\StateInterface;
-use Drupal\oe_list_pages\ListPageRssBuildAlterEvent;
+use Drupal\oe_list_pages\ListPageRssAlterEvent;
 use Drupal\oe_list_pages\ListPageEvents;
 use Drupal\oe_list_pages\ListPageSourceAlterEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -84,10 +84,10 @@ class ListPagesTestSubscriber implements EventSubscriberInterface {
   /**
    * Event handler for adding channel information.
    *
-   * @param \Drupal\oe_list_pages\ListPageRssBuildAlterEvent $event
+   * @param \Drupal\oe_list_pages\ListPageRssAlterEvent $event
    *   The event object.
    */
-  public function onRssBuildAlter(ListPageRssBuildAlterEvent $event): void {
+  public function onRssBuildAlter(ListPageRssAlterEvent $event): void {
     $build = $event->getBuild();
     $build['#channel_elements'][] = [
       '#type' => 'html_tag',

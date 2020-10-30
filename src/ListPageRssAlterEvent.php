@@ -10,7 +10,7 @@ use Symfony\Component\EventDispatcher\Event;
 /**
  * Event thrown in order to alter the RSS build before its rendered.
  */
-class ListPageRssBuildAlterEvent extends Event {
+class ListPageRssAlterEvent extends Event {
 
   /**
    * The render array for the list page RSS list.
@@ -20,23 +20,23 @@ class ListPageRssBuildAlterEvent extends Event {
   protected $build;
 
   /**
-   * The list page being rendered.
+   * The node being rendered.
    *
    * @var \Drupal\node\NodeInterface
    */
-  protected $listPage;
+  protected $node;
 
   /**
    * Constructs the object.
    *
    * @param array $build
    *   The render array for the list page RSS list.
-   * @param \Drupal\node\NodeInterface $list_page
-   *   The list page being rendered.
+   * @param \Drupal\node\NodeInterface $node
+   *   The node being rendered.
    */
-  public function __construct(array $build, NodeInterface $list_page) {
+  public function __construct(array $build, NodeInterface $node) {
     $this->build = $build;
-    $this->listPage = $list_page;
+    $this->node = $node;
   }
 
   /**
@@ -65,8 +65,8 @@ class ListPageRssBuildAlterEvent extends Event {
    * @return \Drupal\node\NodeInterface
    *   The list page being processed.
    */
-  public function getListPage(): NodeInterface {
-    return $this->listPage;
+  public function getNode(): NodeInterface {
+    return $this->node;
   }
 
 }

@@ -14,6 +14,12 @@ use Symfony\Component\DomCrawler\Crawler;
  */
 class ListPageRssControllerTest extends ListsEntityMetaTestBase {
 
+  /**
+   * Node with list page metadata configured.
+   *
+   * @var \Drupal\node\NodeInterface
+   */
+  protected $listPageNode;
 
   /**
    * {@inheritdoc}
@@ -31,20 +37,19 @@ class ListPageRssControllerTest extends ListsEntityMetaTestBase {
     $this->installConfig(['language']);
     // Set up a current user to ensure anonymous users are available.
     $this->setUpCurrentUser();
+
+    // Create a node with list page metadata.
+    $this->listPageNode = $this->nodeStorage->create([
+      'type' => $this->nodeType->id(),
+      'title' => 'List Page',
+    ]);
+    $this->listPageNode->save();
   }
 
   /**
    * Test access to list page RSS route.
    */
-  public function testAccess(): void {
-    $user = $this->createUser([], ['access content']);
-    // Create a node with list page metadata.
-    $list_page = $this->nodeStorage->create([
-      'type' => $this->nodeType->id(),
-      'title' => 'List Page',
-    ]);
-    $list_page->save();
-
+  public function testListPageRssAccess(): void {
     // Create a content type without list page metadata.
     $values = ['type' => 'article', 'name' => 'Article'];
     $this->nodeType = NodeType::create($values);
@@ -56,35 +61,35 @@ class ListPageRssControllerTest extends ListsEntityMetaTestBase {
     ]);
     $article->save();
 
+    // Assert we can not access an RSS route if the user does not have
+    // node access permissions.
+    $user = $this->createUser();
+    $route = Url::fromRoute('entity.node.list_page_rss', ['node' => $this->listPageNode->id()]);
+    $this->assertFalse($route->access($user));
+
     // Assert we can access an RSS route for a node that has list page
-    // metadata assigned to it.
-    $route = Url::fromRoute('entity.node.list_page_rss', ['node' => $list_page->id()]);
+    // metadata assigned to it and a user with appropriate permissions.
+    $user = $this->createUser([], ['access content']);
     $this->assertTrue($route->access($user));
 
     // Assert we can not access an RSS route for a node that does not have
-    // list page metadata assigned to it.
+    // list page metadata assigned to it even with a user with appropriate
+    // permissions.
     $route = Url::fromRoute('entity.node.list_page_rss', ['node' => $article->id()]);
     $this->assertFalse($route->access($user));
   }
 
   /**
-   * Test access to list page RSS route.
+   * Test rendering of the list page RSS feed.
    */
-  public function testBuild(): void {
-    // Create a node with list page metadata.
-    $list_page = $this->nodeStorage->create([
-      'type' => $this->nodeType->id(),
-      'title' => 'List Page',
-    ]);
-    $list_page->save();
-
+  public function testListPageRssBuild(): void {
     // Create the list page rss controller.
     $entity_type_manager = $this->container->get('entity_type.manager');
     $event_dispatcher = $this->container->get('event_dispatcher');
     $renderer = $this->container->get('renderer');
     $theme_manager = $this->container->get('theme.manager');
     $controller = new ListPageRssController($entity_type_manager, $event_dispatcher, $renderer, $theme_manager);
-    $response = $controller->build($list_page);
+    $response = $controller->build($this->listPageNode);
 
     // Assert the response has the correct content type header set.
     $this->assertEquals('application/rss+xml; charset=utf-8', $response->headers->get('Content-Type'));
