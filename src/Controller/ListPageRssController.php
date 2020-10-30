@@ -79,12 +79,17 @@ class ListPageRssController extends ControllerBase {
    *   The list page node.
    *
    * @return string
-   *   The rendered RSS feed.
+   *   The RSS feed response.
    */
   public function build(NodeInterface $node): Response {
     // Build the render array for the RSS feed.
     $default_title = $node->getTitle() . ' - RSS';
     $default_link = $node->toUrl('canonical', ['absolute' => TRUE])->toString(TRUE);
+    $default_image = [
+      'url' => $this->getDefaultImageUrl(),
+      'title' => $default_title,
+      'link' => $default_link->getGeneratedUrl(),
+    ];
     $build = [
       '#theme' => 'oe_list_pages_rss',
       '#title' => $default_title,
@@ -92,9 +97,7 @@ class ListPageRssController extends ControllerBase {
       '#description' => '',
       '#language' => $node->language()->getId(),
       '#copyright' => $this->getCopyright(),
-      '#image_url' => $this->getDefaultImageUrl(),
-      '#image_title' => $default_title,
-      '#image_link' => $default_link->getGeneratedUrl(),
+      '#image' => $default_image,
       '#channel_elements' => [],
       '#items' => $this->getItemList($node),
     ];
