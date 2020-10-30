@@ -12,6 +12,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Theme\ThemeManagerInterface;
+use Drupal\emr\Entity\EntityMetaInterface;
 use Drupal\node\NodeInterface;
 use Drupal\oe_list_pages\ListPageRssBuildAlterEvent;
 use Drupal\oe_list_pages\ListPageEvents;
@@ -162,13 +163,14 @@ class ListPageRssController extends ControllerBase {
    *   The access result.
    */
   public function checkAccess(NodeInterface $node): AccessResultInterface {
-    $bundle_entity_storage = $this->entityTypeManager->getStorage('node_type');
-    $bundle = $bundle_entity_storage->load($node->bundle());
-    $configured_meta_bundles = $bundle->getThirdPartySetting('emr', 'entity_meta_bundles');
-    if (!$configured_meta_bundles || !in_array('oe_list_page', $configured_meta_bundles)) {
-      return AccessResult::forbidden($this->t('Node type does not have List Page meta configured.'));
+    $entity_meta_list = $node->get('emr_entity_metas')->getValue();
+    foreach ($entity_meta_list as $entity_meta) {
+      $entity_meta = reset($entity_meta);
+      if ($entity_meta instanceof EntityMetaInterface && $entity_meta->bundle() === 'oe_list_page') {
+        return AccessResult::allowed();
+      }
     }
-    return AccessResult::allowed();
+    return AccessResult::forbidden($this->t('Node type does not have List Page meta configured.'));
   }
 
   /**
