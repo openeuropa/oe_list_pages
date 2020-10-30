@@ -11,10 +11,11 @@ use Drupal\Core\Cache\CacheableResponse;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Render\RendererInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Theme\ThemeManagerInterface;
 use Drupal\emr\Entity\EntityMetaInterface;
 use Drupal\node\NodeInterface;
-use Drupal\oe_list_pages\ListPageRssBuildAlterEvent;
+use Drupal\oe_list_pages\ListPageRssAlterEvent;
 use Drupal\oe_list_pages\ListPageEvents;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -121,7 +122,7 @@ class ListPageRssController extends ControllerBase {
     $cache_metadata->applyTo($build);
 
     // Dispatch event to allow modules to alter the build before being rendered.
-    $event = new ListPageRssBuildAlterEvent($build, $node);
+    $event = new ListPageRssAlterEvent($build, $node);
     $this->eventDispatcher->dispatch(ListPageEvents::ALTER_RSS_BUILD, $event);
     $build = $event->getBuild();
 
@@ -193,11 +194,11 @@ class ListPageRssController extends ControllerBase {
   /**
    * Gets the default copyright value.
    *
-   * @return string
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
    *   The default copyright value.
    */
-  protected function getCopyright(): string {
-    return '© European Union, 1995-' . date('Y');
+  protected function getCopyright(): TranslatableMarkup {
+    return $this->t('© European Union, @startdate-@enddate', ['@startdate' => '1995', '@enddate' => date('Y')]);
   }
 
 }
