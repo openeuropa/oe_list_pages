@@ -6,8 +6,6 @@ namespace Drupal\Tests\oe_list_pages\Kernel;
 
 use Drupal\Core\Url;
 use Drupal\node\Entity\NodeType;
-use Drupal\oe_list_pages\Controller\ListPageRssController;
-use Symfony\Component\DomCrawler\Crawler;
 
 /**
  * Tests the List page RSS feeds.
@@ -26,7 +24,6 @@ class ListPageRssControllerTest extends ListsEntityMetaTestBase {
    */
   public static $modules = [
     'language',
-    'oe_list_pages_event_subscriber_test',
   ];
 
   /**
@@ -77,37 +74,6 @@ class ListPageRssControllerTest extends ListsEntityMetaTestBase {
     // permissions.
     $route = Url::fromRoute('entity.node.list_page_rss', ['node' => $article->id()]);
     $this->assertFalse($route->access($user));
-  }
-
-  /**
-   * Test rendering of the list page RSS feed.
-   */
-  public function testListPageRssBuild(): void {
-    // Create the list page rss controller.
-    $entity_type_manager = $this->container->get('entity_type.manager');
-    $event_dispatcher = $this->container->get('event_dispatcher');
-    $renderer = $this->container->get('renderer');
-    $theme_manager = $this->container->get('theme.manager');
-    $controller = new ListPageRssController($entity_type_manager, $event_dispatcher, $renderer, $theme_manager);
-    $response = $controller->build($this->listPageNode);
-
-    // Assert the response has the correct content type header set.
-    $this->assertEquals('application/rss+xml; charset=utf-8', $response->headers->get('Content-Type'));
-    $crawler = new Crawler($response->getContent());
-
-    // Assert contents of channel elements.
-    $channel = $crawler->filterXPath('//rss[@version=2.0]/channel');
-    $this->assertEquals('List Page - RSS', $channel->filterXPath('//title')->text());
-    $this->assertEquals('http://localhost/node/1', $channel->filterXPath('//link')->text());
-    $this->assertEquals('', $channel->filterXPath('//description')->text());
-    $this->assertEquals('en', $channel->filterXPath('//language')->text());
-    $this->assertEquals('© European Union, 1995-' . date('Y'), $channel->filterXPath('//copyright')->text());
-    $this->assertEquals('http://localhost/core/misc/favicon.ico', $channel->filterXPath('//image/url')->text());
-    $this->assertEquals('List Page - RSS', $channel->filterXPath('//image/title')->text());
-    $this->assertEquals('http://localhost/node/1', $channel->filterXPath('//image/link')->text());
-    // Assert modules subscribing to the ListPageRssBuildAlterEvent can
-    // alter the build.
-    $this->assertEquals('custom_value', $channel->filterXPath('//custom_tag')->text());
   }
 
 }

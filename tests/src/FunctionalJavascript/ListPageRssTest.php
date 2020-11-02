@@ -4,8 +4,12 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\oe_list_pages\FunctionalJavascript;
 
+use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Url;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
+use Drupal\node\Entity\Node;
+use Drupal\node\NodeInterface;
+use Drupal\search_api\Entity\Index;
 use Symfony\Component\DomCrawler\Crawler;
 
 /**
@@ -18,11 +22,14 @@ class ListPageRssTest extends WebDriverTestBase {
    */
   protected static $modules = [
     'oe_list_pages',
+    'oe_list_pages_event_subscriber_test',
     'oe_list_pages_filters_test',
     'oe_list_page_content_type',
     'node',
     'emr',
     'emr_node',
+    'search_api',
+    'search_api_db',
   ];
 
   /**
@@ -40,22 +47,52 @@ class ListPageRssTest extends WebDriverTestBase {
     $page->fillField('Title', 'List page test');
     $page->pressButton('Save');
 
+    // Create some test nodes to index and search in.
+    $date = new DrupalDateTime('20-10-2020');
+    $values = [
+      'title' => 'that yellow fruit',
+      'type' => 'content_type_one',
+      'body' => 'this is a banana',
+      'status' => NodeInterface::PUBLISHED,
+      'field_select_one' => 'test1',
+      'created' => $date->getTimestamp(),
+    ];
+    $node = Node::create($values);
+    $node->save();
+    $values = [
+      'title' => 'that red fruit',
+      'type' => 'content_type_two',
+      'body' => 'this is a cherry',
+      'field_select_two' => 'test2',
+      'status' => NodeInterface::PUBLISHED,
+      'created' => $date->getTimestamp(),
+    ];
+    $node = Node::create($values);
+    $node->save();
+    /** @var \Drupal\search_api\Entity\Index $index */
+    $index = Index::load('node');
+    // Index the nodes.
+    $index->indexItems();
+
     $node = $this->drupalGetNodeByTitle('List page test');
     $this->drupalLogout();
+
+    // Assert contents of channel elements.
     $this->drupalGet(Url::fromRoute('entity.node.list_page_rss', ['node' => $node->id()]));
     $response = $this->getTextContent();
-
     $crawler = new Crawler($response);
-    // Assert contents of channel elements.
     $channel = $crawler->filterXPath('//rss[@version=2.0]/channel');
-    $this->assertEquals('List page test - RSS', $channel->filterXPath('//title')->text());
+    $this->assertEquals('Drupal | List page test', $channel->filterXPath('//title')->text());
     $this->assertEquals('http://web:8080/build/node/1', $channel->filterXPath('//link')->text());
     $this->assertEquals('', $channel->filterXPath('//description')->text());
     $this->assertEquals('en', $channel->filterXPath('//language')->text());
     $this->assertEquals('© European Union, 1995-' . date('Y'), $channel->filterXPath('//copyright')->text());
     $this->assertEquals('http://web:8080/build/core/misc/favicon.ico', $channel->filterXPath('//image/url')->text());
-    $this->assertEquals('List page test - RSS', $channel->filterXPath('//image/title')->text());
+    $this->assertEquals('Drupal | List page test', $channel->filterXPath('//image/title')->text());
     $this->assertEquals('http://web:8080/build/node/1', $channel->filterXPath('//image/link')->text());
+    // Assert modules subscribing to the ListPageRssBuildAlterEvent can
+    // alter the build.
+    $this->assertEquals('custom_value', $channel->filterXPath('//custom_tag')->text());
 
     // Change the node title and assert the response has changed.
     $node->set('title', 'List page test updated');
@@ -64,7 +101,14 @@ class ListPageRssTest extends WebDriverTestBase {
     $response = $this->getTextContent();
     $crawler = new Crawler($response);
     $channel = $crawler->filterXPath('//rss[@version=2.0]/channel');
-    $this->assertEquals('List page test updated - RSS', $channel->filterXPath('//title')->text());
+    $this->assertEquals('Drupal | List page test updated', $channel->filterXPath('//title')->text());
+
+    // Set filter values on url and assert the description was changed.
+    $this->drupalGet(Url::fromRoute('entity.node.list_page_rss', ['node' => $node->id()], ['query' => ['f[0]' => 'status:1']]));
+    $response = $this->getTextContent();
+    $crawler = new Crawler($response);
+    $channel = $crawler->filterXPath('//rss[@version=2.0]/channel');
+    $this->assertEquals('Published: Yes', $channel->filterXPath('//description')->text());
   }
 
 }
