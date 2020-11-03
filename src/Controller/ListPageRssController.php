@@ -11,6 +11,7 @@ use Drupal\Core\Cache\CacheableResponse;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Render\Element;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Theme\ThemeManagerInterface;
@@ -207,7 +208,7 @@ class ListPageRssController extends ControllerBase {
    * @return string
    *   The channel title.
    */
-  protected function getChannelTitle(NodeInterface $node, CacheableMetadata &$cache_metadata): string {
+  protected function getChannelTitle(NodeInterface $node, CacheableMetadata $cache_metadata): string {
     $site_config = $this->configFactory->get('system.site');
     $cache_metadata->addCacheableDependency($site_config);
     $site_name = $site_config->get('name');
@@ -246,11 +247,14 @@ class ListPageRssController extends ControllerBase {
     $selected_filter_information = $this->listBuilder->buildSelectedFilters($node);
     $filter_cache = CacheableMetadata::createFromRenderArray($selected_filter_information);
     $cache_metadata = $cache_metadata->merge($filter_cache);
-    // Remove the cache information.
-    unset($selected_filter_information['#cache']);
+    // Extract the selected filter information.
     $selected_filters = [];
-    foreach ($selected_filter_information as $filter_information) {
+    foreach (Element::children($selected_filter_information) as $child) {
+      $filter_information = $selected_filter_information[$child];
       $filter_values = [];
+      if (!isset($filter_information['#items'])) {
+        continue;
+      }
       foreach ($filter_information['#items'] as $filter_value_information) {
         $filter_values[] = $filter_value_information['label'];
       }

@@ -61,9 +61,9 @@ class ListPageRssTest extends WebDriverTestBase {
     $node->save();
     $values = [
       'title' => 'that red fruit',
-      'type' => 'content_type_two',
+      'type' => 'content_type_one',
       'body' => 'this is a cherry',
-      'field_select_two' => 'test2',
+      'field_select_one' => 'test2',
       'status' => NodeInterface::PUBLISHED,
       'created' => $date->getTimestamp(),
     ];
@@ -103,12 +103,19 @@ class ListPageRssTest extends WebDriverTestBase {
     $channel = $crawler->filterXPath('//rss[@version=2.0]/channel');
     $this->assertEquals('Drupal | List page test updated', $channel->filterXPath('//title')->text());
 
-    // Set filter values on url and assert the description was changed.
+    // Set filter values on the url and assert the description was changed.
     $this->drupalGet(Url::fromRoute('entity.node.list_page_rss', ['node' => $node->id()], ['query' => ['f[0]' => 'status:1']]));
     $response = $this->getTextContent();
     $crawler = new Crawler($response);
     $channel = $crawler->filterXPath('//rss[@version=2.0]/channel');
     $this->assertEquals('Published: Yes', $channel->filterXPath('//description')->text());
+
+    // Set a filter with multiple values on the url and asser the change.
+    $this->drupalGet(Url::fromRoute('entity.node.list_page_rss', ['node' => $node->id()], ['query' => ['f[0]' => 'select_one:test1', 'f[1]' => 'select_one:test2']]));
+    $response = $this->getTextContent();
+    $crawler = new Crawler($response);
+    $channel = $crawler->filterXPath('//rss[@version=2.0]/channel');
+    $this->assertEquals('Select one: test1 - test2', $channel->filterXPath('//description')->text());
   }
 
 }
