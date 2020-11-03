@@ -1,0 +1,26 @@
+{#
+/**
+ * @file
+ * Default theme implementation to display an item in a RSS feed.
+ *
+ * Available variables:
+ * - title: RSS item title.
+ * - link: RSS item link.
+ * - description: RSS body text.
+ * - item_elements: RSS item elements to be rendered as XML (pubDate, creator,
+ *   guid).
+ */
+#}
+<item>
+  <title>{{ title }}</title>
+  <link>{{ link }}</link>
+  <description>{{ description }}</description>
+  {% for item in item_elements -%}
+    <{{ item.key }}{{ item.attributes -}}
+    {% if item.value -%}
+      >{{ item.value }}</{{ item.key }}>
+    {% else -%}
+      {{ ' />' }}
+    {% endif %}
+  {%- endfor %}
+</item>

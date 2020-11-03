@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages\Controller;
 
+use DateTimeInterface;
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
@@ -11,6 +12,7 @@ use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Cache\CacheableResponse;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Render\RendererInterface;
@@ -19,6 +21,7 @@ use Drupal\Core\Url;
 use Drupal\emr\Entity\EntityMetaInterface;
 use Drupal\node\NodeInterface;
 use Drupal\oe_list_pages\ListBuilderInterface;
+use Drupal\oe_list_pages\ListExecutionManagerInterface;
 use Drupal\oe_list_pages\ListPageRssAlterEvent;
 use Drupal\oe_list_pages\ListPageEvents;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -38,6 +41,13 @@ class ListPageRssController extends ControllerBase {
   protected $configFactory;
 
   /**
+   * The date formatter.
+   *
+   * @var \Drupal\Core\Datetime\DateFormatterInterface
+   */
+  protected $dateFormatter;
+
+  /**
    * The entity type manager.
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
@@ -50,6 +60,13 @@ class ListPageRssController extends ControllerBase {
    * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
    */
   protected $eventDispatcher;
+
+  /**
+   * The list execution manager.
+   *
+   * @var \Drupal\oe_list_pages\ListExecutionManagerInterface
+   */
+  protected $listExecutionManager;
 
   /**
    * The list builder.
@@ -77,21 +94,27 @@ class ListPageRssController extends ControllerBase {
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The entity type manager.
+   * @param \Drupal\Core\Datetime\DateFormatterInterface $date_formatter
+   *   The date formatter.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
    *   The event dispatcher.
    * @param \Drupal\oe_list_pages\ListBuilderInterface $list_builder
    *   The list builder.
+   * @param \Drupal\oe_list_pages\ListExecutionManagerInterface $list_execution_manager
+   *   The list execution manager.
    * @param \Drupal\Core\Render\RendererInterface $renderer
    *   The event dispatcher.
    * @param \Drupal\Core\Theme\ThemeManagerInterface $theme_manager
    *   The theme manager.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EventDispatcherInterface $event_dispatcher, ListBuilderInterface $list_builder, RendererInterface $renderer, ThemeManagerInterface $theme_manager) {
+  public function __construct(ConfigFactoryInterface $config_factory, DateFormatterInterface $date_formatter, EntityTypeManagerInterface $entity_type_manager, EventDispatcherInterface $event_dispatcher, ListBuilderInterface $list_builder, ListExecutionManagerInterface $list_execution_manager, RendererInterface $renderer, ThemeManagerInterface $theme_manager) {
     $this->configFactory = $config_factory;
+    $this->dateFormatter = $date_formatter;
     $this->entityTypeManager = $entity_type_manager;
     $this->eventDispatcher = $event_dispatcher;
+    $this->listExecutionManager = $list_execution_manager;
     $this->listBuilder = $list_builder;
     $this->renderer = $renderer;
     $this->themeManager = $theme_manager;
@@ -103,9 +126,11 @@ class ListPageRssController extends ControllerBase {
   public static function create(ContainerInterface $container): ListPageRssController {
     return new static(
       $container->get('config.factory'),
+      $container->get('date.formatter'),
       $container->get('entity_type.manager'),
       $container->get('event_dispatcher'),
       $container->get('oe_list_pages.builder'),
+      $container->get('oe_list_pages.execution_manager'),
       $container->get('renderer'),
       $container->get('theme.manager')
     );
@@ -134,7 +159,8 @@ class ListPageRssController extends ControllerBase {
       '#copyright' => $this->getChannelCopyright(),
       '#image' => $this->getChannelImage($cache_metadata),
       '#channel_elements' => [],
-      '#items' => $this->getItemList($node),
+      '#items' => $this->getItemList($node, $cache_metadata),
+      '#list_page' => $node,
     ];
     $cache_metadata->addCacheableDependency($default_link);
     $cache_metadata->applyTo($build);
@@ -164,12 +190,37 @@ class ListPageRssController extends ControllerBase {
    *
    * @param \Drupal\node\NodeInterface $node
    *   The node containing the list.
+   * @param \Drupal\Core\Cache\CacheableMetadata $cache_metadata
+   *   The current cache metadata.
    *
    * @return array
    *   Array of items to be rendered.
    */
-  protected function getItemList(NodeInterface $node): array {
-    return [];
+  protected function getItemList(NodeInterface $node, CacheableMetadata $cache_metadata): array {
+    $execution_result = $this->listExecutionManager->executeList($node);
+    $results = $execution_result->getResults();
+    $result_items = [];
+    foreach ($results->getResultItems() as $item) {
+      /** @var \Drupal\Core\Entity\EntityInterface $entity */
+      $entity = $item->getOriginalObject()->getEntity();
+      $cache_metadata->addCacheableDependency($entity);
+      $creation_date = $entity->get('changed')->value;
+      $result_items[] = [
+        '#theme' => 'oe_list_pages_rss_item',
+        '#title' => $entity->label(),
+        '#link' => $entity->toUrl('canonical', ['absolute' => TRUE]),
+        '#description' => '',
+        '#item_elements' => [
+          [
+            'key' => 'pubDate',
+            'value' => $this->dateFormatter->format($creation_date, 'custom', DateTimeInterface::RFC822),
+            'attributes' => '',
+          ],
+        ],
+        '#entity' => $entity,
+      ];
+    }
+    return $result_items;
   }
 
   /**
