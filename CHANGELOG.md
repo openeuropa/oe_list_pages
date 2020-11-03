@@ -1,10 +1,20 @@
-# Change Log
+# Changelog
+
+## [0.3.0](https://github.com/openeuropa/oe_list_pages/tree/0.3.0) (2020-11-03)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.2.0...0.3.0)
+
+**Merged pull requests:**
+
+- EWPP-0: Update facets module. [\#43](https://github.com/openeuropa/oe_list_pages/pull/43) ([imanoleguskiza](https://github.com/imanoleguskiza))
 
 ## [0.2.0](https://github.com/openeuropa/oe_list_pages/tree/0.2.0) (2020-10-07)
+
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.1.0...0.2.0)
 
 **Merged pull requests:**
 
+- EWPP-0000: Preparing for 0.2.0 release. [\#39](https://github.com/openeuropa/oe_list_pages/pull/39) ([hernani](https://github.com/hernani))
 - EWPP-000: Requiring Symfony Options Resolver. [\#38](https://github.com/openeuropa/oe_list_pages/pull/38) ([upchuk](https://github.com/upchuk))
 - EWPP-000: Fix namepace for base extra field classes. [\#37](https://github.com/openeuropa/oe_list_pages/pull/37) ([hernani](https://github.com/hernani))
 - EWPP-331: Fixing the lowercase setting in full text search. [\#36](https://github.com/openeuropa/oe_list_pages/pull/36) ([upchuk](https://github.com/upchuk))
