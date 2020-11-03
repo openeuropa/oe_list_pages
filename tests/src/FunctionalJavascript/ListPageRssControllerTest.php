@@ -56,6 +56,7 @@ class ListPageRssControllerTest extends WebDriverTestBase {
       'status' => NodeInterface::PUBLISHED,
       'field_select_one' => 'test1',
       'created' => $date->getTimestamp(),
+      'changed' => $date->getTimestamp(),
     ];
     $node = Node::create($values);
     $node->save();
@@ -65,22 +66,21 @@ class ListPageRssControllerTest extends WebDriverTestBase {
       'body' => 'this is a cherry',
       'field_select_one' => 'test2',
       'status' => NodeInterface::PUBLISHED,
-      'created' => $date->getTimestamp(),
+      'changed' => $date->getTimestamp(),
     ];
     $node = Node::create($values);
     $node->save();
     /** @var \Drupal\search_api\Entity\Index $index */
     $index = Index::load('node');
-    // Index the nodes.
     $index->indexItems();
 
     $node = $this->drupalGetNodeByTitle('List page test');
     $this->drupalLogout();
 
-    // Assert contents of channel elements.
     $this->drupalGet(Url::fromRoute('entity.node.list_page_rss', ['node' => $node->id()]));
     $response = $this->getTextContent();
     $crawler = new Crawler($response);
+    // Assert contents of channel elements.
     $channel = $crawler->filterXPath('//rss[@version=2.0]/channel');
     $this->assertEquals('Drupal | List page test', $channel->filterXPath('//title')->text());
     $this->assertEquals('http://web:8080/build/node/1', $channel->filterXPath('//link')->text());
@@ -93,6 +93,18 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     // Assert modules subscribing to the ListPageRssBuildAlterEvent can
     // alter the build.
     $this->assertEquals('custom_value', $channel->filterXPath('//custom_tag')->text());
+
+    // Assert contents of items.
+    $items = $channel->filterXPath('//item');
+    $this->assertEquals(2, $items->count());
+    $first_item = $items->eq(0);
+    $this->assertEquals('that yellow fruit', $first_item->filterXpath('//title')->text());
+    $this->assertEquals('http://web:8080/build/node/2', $first_item->filterXpath('//link')->text());
+    $this->assertEquals('Tue, 20 Oct 20 00:00:00 +1100', $first_item->filterXpath('//pubDate')->text());
+    $second_item = $items->eq(1);
+    $this->assertEquals('that red fruit', $second_item->filterXpath('//title')->text());
+    $this->assertEquals('http://web:8080/build/node/3', $second_item->filterXpath('//link')->text());
+    $this->assertEquals('Tue, 20 Oct 20 00:00:00 +1100', $second_item->filterXpath('//pubDate')->text());
 
     // Change the node title and assert the response has changed.
     $node->set('title', 'List page test updated');
