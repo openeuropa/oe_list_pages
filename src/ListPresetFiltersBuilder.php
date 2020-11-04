@@ -110,26 +110,25 @@ class ListPresetFiltersBuilder {
     // Adding default filter value.
     if (!empty($triggering_element) && $triggering_element['#name'] == 'set-default-filter') {
       $filter_key = $form_state->getValue('preset_filters_wrapper')['edit']['filter_key'];
+      $filter_id = $form_state->getValue('preset_filters_wrapper')['edit']['filter_id'];
       // Replace correct labels.
       $facet = $this->getFacetById($list_source, $filter_key);
       $submitted_form = $form_state->getCompleteForm();
-      $subform_state = SubformState::createForSubform($submitted_form['emr_plugins_oe_list_page']['preset_filters_wrapper']['edit'][$facet->id()], $submitted_form, $form_state);
+      $subform_state = SubformState::createForSubform($submitted_form['emr_plugins_oe_list_page']['preset_filters_wrapper']['edit'][$filter_id], $submitted_form, $form_state);
       if (!empty($facet)) {
         $widget = $facet->getWidgetInstance();
         if ($widget instanceof ListPagesWidgetInterface) {
-          $active_filters[$facet->id()] = $widget->prepareDefaultValueFilter($facet, $form, $subform_state);
+          $current_filters[$filter_id] = [
+            'facet_id' => $filter_key,
+            'values' => $widget->prepareDefaultValueFilter($facet, $form, $subform_state),
+          ];
         }
-      }
-
-      $filter_value = $active_filters[$filter_key] ?? '';
-      if (!empty($filter_key)) {
-        $current_filters = array_merge($current_filters, [$filter_key => $filter_value]);
       }
     }
     // Removing default filter value.
-    elseif (!empty($triggering_element) && $triggering_element['#name'] == 'remove-default-filter') {
-      $delete_filter_key = $triggering_element['#delete_filter_key'];
-      unset($current_filters[$delete_filter_key]);
+    elseif (!empty($triggering_element) && $triggering_element['#op'] == 'remove-default-filter') {
+      $delete_filter_id = $triggering_element['#filter_id'];
+      unset($current_filters[$delete_filter_id]);
     }
 
     $form[$form_key]['preset_filters_wrapper']['current_filters'] = [
@@ -137,15 +136,30 @@ class ListPresetFiltersBuilder {
       '#value' => $current_filters,
     ];
 
-    $filter_key = !empty($triggering_element['#filter_key']) ? $triggering_element['#filter_key'] : $form_state->getValue('preset_filters_wrapper')['summary']['add_new'];
+    $filter_key = !empty($triggering_element['#filter_facet_id']) ? $triggering_element['#filter_facet_id'] : $form_state->getValue('preset_filters_wrapper')['summary']['add_new'];
+
     if (empty($filter_key)) {
       $form = $this->buildSummaryPresetFilters($form, $form_state, $form_key, $list_source, $available_filters, $current_filters);
     }
     else {
-      $form = $this->buildEditPresetFilter($form, $form_state, $form_key, $list_source, $available_filters, $current_filters, $filter_key);
+      $filter_id = !empty($triggering_element['#filter_id']) ? $triggering_element['#filter_id'] : '';
+      $form = $this->buildEditPresetFilter($form, $form_state, $form_key, $list_source, $available_filters, $current_filters, $filter_key, $filter_id);
     }
 
     return $form;
+  }
+
+  /**
+   * Generates the filter id.
+   *
+   * @param string $id
+   *   The facet id.
+   *
+   * @return string
+   *   The filter id.
+   */
+  public static function generateFilterId(string $id): string {
+    return md5($id);
   }
 
   /**
@@ -176,37 +190,50 @@ class ListPresetFiltersBuilder {
 
     $rows = [];
 
-    foreach ($current_filters as $filter_key => $filter_value) {
-      $facet = $this->getFacetById($list_source, $filter_key);
+    foreach ($current_filters as $filter_key => $filter) {
+      $facet = $this->getFacetById($list_source, $filter['facet_id']);
       $widget = $facet->getWidgetInstance();
       $filter_value_label = '';
       if ($widget instanceof ListPagesWidgetInterface) {
-        $filter_value_label = $widget->getDefaultValuesLabel($facet, $list_source, $filter_value);
+        $filter_value_label = $widget->getDefaultValuesLabel($facet, $list_source, $filter['values']);
       }
 
       $rows[] = [
         [
-          'data' => $available_filters[$filter_key],
+          'data' => $available_filters[$filter['facet_id']],
           'filter_key' => $filter_key,
         ],
         ['data' => $filter_value_label],
         ['data' => ''],
       ];
-      $form[$form_key]['preset_filters_wrapper']['buttons'][$filter_key]['edit_button'] = [
+
+      $limit_validation_errors = [
+        ['bundle'],
+        ['preset_filters_wrapper', 'edit'],
+        ['preset_filters_wrapper', 'buttons'],
+        ['preset_filters_wrapper', 'current_filters'],
+      ];
+
+      $form[$form_key]['preset_filters_wrapper']['buttons'][$filter_key]['edit-' . $filter_key] = [
         '#type' => 'button',
         '#value' => $this->t('Edit'),
-        '#filter_key' => $filter_key,
+        '#name' => 'edit-' . $filter_key,
+        '#filter_id' => $filter_key,
+        '#filter_facet_id' => $filter['facet_id'],
+        '#limit_validation_errors' => $limit_validation_errors,
         '#ajax' => [
           'callback' => [$this, 'editDefaultValue'],
           'wrapper' => $form[$form_key]['#id'],
         ],
       ];
 
-      $form[$form_key]['preset_filters_wrapper']['buttons'][$filter_key]['delete_button'] = [
+      $form[$form_key]['preset_filters_wrapper']['buttons'][$filter_key]['delete-' . $filter_key] = [
         '#type' => 'button',
         '#value' => $this->t('Delete'),
-        '#name' => 'remove-default-filter',
-        '#delete_filter_key' => $filter_key,
+        '#name' => 'delete-' . $filter_key,
+        '#filter_id' => $filter_key,
+        '#op' => 'remove-default-filter',
+        '#limit_validation_errors' => $limit_validation_errors,
         '#ajax' => [
           'callback' => [$this, 'editDefaultValue'],
           'wrapper' => $form[$form_key]['#id'],
@@ -258,8 +285,8 @@ class ListPresetFiltersBuilder {
     for ($i = 0; $i < count($rows); $i++) {
       $filter_key = $rows[$i][0]['filter_key'];
       $rows[$i][2]['data'] = [
-        'edit_button' => $form['buttons'][$filter_key]['edit_button'],
-        'delete_button' => $form['buttons'][$filter_key]['delete_button'],
+        'edit-' . $filter_key => $form['buttons'][$filter_key]['edit-' . $filter_key],
+        'delete-' . $filter_key => $form['buttons'][$filter_key]['delete-' . $filter_key],
       ];
     }
     unset($form['buttons']);
@@ -283,11 +310,17 @@ class ListPresetFiltersBuilder {
    *   An array of currently set filters.
    * @param string $filter_key
    *   The filter key.
+   * @param string $filter_id
+   *   The filter id.
    *
    * @return array
    *   The built form.
    */
-  protected function buildEditPresetFilter(array $form, FormStateInterface $form_state, string $form_key, ListSourceInterface $list_source, array $available_filters, array $current_filters, string $filter_key) {
+  protected function buildEditPresetFilter(array $form, FormStateInterface $form_state, string $form_key, ListSourceInterface $list_source, array $available_filters, array $current_filters, string $filter_key, string $filter_id = '') {
+    if (empty($filter_id)) {
+      $filter_id = self::generateFilterId($filter_key);
+    }
+
     $form[$form_key]['preset_filters_wrapper']['edit'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Set default value for :filter', [':filter' => $available_filters[$filter_key]]),
@@ -296,17 +329,22 @@ class ListPresetFiltersBuilder {
     $facet = $this->getFacetById($list_source, $filter_key);
     if (!empty($facet) && ($widget = $facet->getWidgetInstance()) && ($widget instanceof ListPagesWidgetInterface)) {
       // Set active item for value edition.
-      if (!empty($current_filters[$filter_key])) {
-        $facet->setActiveItems($current_filters[$filter_key]);
+      if (!empty($current_filters[$filter_id])) {
+        $facet->setActiveItems($current_filters[$filter_id]['values']);
       }
 
-      $form[$form_key]['preset_filters_wrapper']['edit'][$facet->id()] = $widget->buildDefaultValuesWidget($facet, $list_source, [
+      $form[$form_key]['preset_filters_wrapper']['edit'][$filter_id] = $widget->buildDefaultValuesWidget($facet, $list_source, [
         'preset_filters_wrapper',
         'edit',
-        $facet->id(),
+        $filter_id,
       ]);
-      $form[$form_key]['preset_filters_wrapper']['edit'][$facet->id()]['#type'] = 'container';
+      $form[$form_key]['preset_filters_wrapper']['edit'][$filter_id]['#type'] = 'container';
     }
+
+    $form[$form_key]['preset_filters_wrapper']['edit']['filter_id'] = [
+      '#value' => $filter_id,
+      '#type' => 'hidden',
+    ];
 
     $form[$form_key]['preset_filters_wrapper']['edit']['filter_key'] = [
       '#value' => $filter_key,
@@ -318,7 +356,7 @@ class ListPresetFiltersBuilder {
       'wrapper' => $form[$form_key]['#id'],
     ];
 
-    $facet_widget_keys = $this->getWidgetKeys($form[$form_key]['preset_filters_wrapper']['edit'][$facet->id()]);
+    $facet_widget_keys = $this->getWidgetKeys($form[$form_key]['preset_filters_wrapper']['edit'][$filter_id]);
     $limit_validation_errors = array_merge($facet_widget_keys, [
       ['bundle'],
       ['preset_filters_wrapper', 'edit'],
@@ -329,6 +367,14 @@ class ListPresetFiltersBuilder {
       '#value' => $this->t('Set default value'),
       '#type' => 'button',
       '#name' => 'set-default-filter',
+      '#limit_validation_errors' => $limit_validation_errors,
+      '#ajax' => $ajax_definition,
+    ];
+
+    $form[$form_key]['preset_filters_wrapper']['edit']['cancel_value'] = [
+      '#value' => $this->t('Cancel'),
+      '#type' => 'button',
+      '#name' => 'cancel-default-filter',
       '#limit_validation_errors' => $limit_validation_errors,
       '#ajax' => $ajax_definition,
     ];
