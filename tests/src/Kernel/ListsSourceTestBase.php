@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\oe_list_pages\Kernel;
 
-use Drupal\KernelTests\Core\Entity\EntityKernelTestBaseTest;
+use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\oe_list_pages\ListSourceFactory;
 use Drupal\search_api\Entity\Index;
 use Drupal\Tests\oe_list_pages\Traits\FacetsTestTrait;
@@ -12,7 +12,7 @@ use Drupal\Tests\oe_list_pages\Traits\FacetsTestTrait;
 /**
  * Tests the List sources and their properties.
  */
-class ListsSourceBaseTest extends EntityKernelTestBaseTest {
+abstract class ListsSourceTestBase extends EntityKernelTestBase {
 
   use FacetsTestTrait;
 
