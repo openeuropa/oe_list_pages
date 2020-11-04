@@ -9,7 +9,7 @@
         "php": ">=7.2",
         "drupal/core": "^8.8.2",
         "drupal/emr": "~1.0-beta7",
-        "drupal/facets": "~1.5",
+        "drupal/facets": "~1.6",
         "drupal/search_api": "~1.17",
         "symfony/options-resolver": "~4.0"
     },
@@ -56,11 +56,6 @@
             "build/profiles/contrib/{$name}": ["type:drupal-profile"],
             "build/modules/contrib/{$name}": ["type:drupal-module"],
             "build/themes/contrib/{$name}": ["type:drupal-theme"]
-        },
-        "patches": {
-            "drupal/facets": {
-                "https://www.drupal.org/project/facets/issues/3170242": "https://www.drupal.org/files/issues/2020-09-10/3170242-2.patch"
-            }
         }
     },
     "config": {
