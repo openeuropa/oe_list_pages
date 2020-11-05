@@ -132,7 +132,7 @@ class ListPageRssController extends ControllerBase {
       '#description' => $this->getChannelDescription($node, $cache_metadata),
       '#language' => $node->language()->getId(),
       '#copyright' => $this->getChannelCopyright(),
-      '#image' => $this->getChannelImage(),
+      '#image' => $this->getChannelImage($cache_metadata),
       '#channel_elements' => [],
       '#items' => $this->getItemList($node),
     ];
@@ -182,21 +182,16 @@ class ListPageRssController extends ControllerBase {
    *   The access result.
    */
   public function checkAccess(NodeInterface $node): AccessResultInterface {
-    if ($node->isNew()) {
-      return AccessResult::forbidden($this->t('Node is still being stored.'))->addCacheableDependency($node);
+    $entity_meta = $node->get('emr_entity_metas')->getEntityMeta('oe_list_page');
+    if ($entity_meta instanceof EntityMetaInterface && !$entity_meta->isNew()) {
+      return AccessResult::allowed()->addCacheableDependency($node);
     }
-    $entity_meta_list = $node->get('emr_entity_metas')->getValue();
-    foreach ($entity_meta_list as $entity_meta) {
-      $entity_meta = reset($entity_meta);
-      if ($entity_meta instanceof EntityMetaInterface && $entity_meta->bundle() === 'oe_list_page') {
-        return AccessResult::allowed()->addCacheableDependency($node);
-      }
-    }
+
     return AccessResult::forbidden($this->t('Node type does not have List Page meta configured.'))->addCacheableDependency($node);
   }
 
   /**
-   * Get the RSS channel title.
+   * Get the channel title.
    *
    * @param \Drupal\node\NodeInterface $node
    *   The node being rendered.
@@ -214,24 +209,30 @@ class ListPageRssController extends ControllerBase {
   }
 
   /**
-   * Gets the channel image array.
+   * Get the channel image array.
+   *
+   * @param \Drupal\Core\Cache\CacheableMetadata $cache_metadata
+   *   The current cache metadata.
    *
    * @return array
    *   The image information array.
    */
-  protected function getChannelImage(): array {
-    $title = new FormattableMarkup('@title logo', ['@title' => 'European Commission']);
-    // Get the favicon location.
+  protected function getChannelImage(CacheableMetadata $cache_metadata): array {
+    $title = $this->t('@title logo', ['@title' => 'European Commission']);
+    // Get the logo location.
     $theme = $this->themeManager->getActiveTheme();
+    $site_url = Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString(TRUE);
+    $cache_metadata->addCacheableDependency($site_url);
+
     return [
       'url' => file_create_url($theme->getLogo()),
       'title' => $title,
-      'link' => Url::fromRoute('<front>', [], ['absolute' => TRUE]),
+      'link' => $site_url->getGeneratedUrl(),
     ];
   }
 
   /**
-   * Gets the channel description.
+   * Get the channel description.
    *
    * @param \Drupal\node\NodeInterface $node
    *   The node being rendered.
@@ -262,7 +263,7 @@ class ListPageRssController extends ControllerBase {
   }
 
   /**
-   * Gets the channel copyright value.
+   * Get the channel copyright value.
    *
    * @return \Drupal\Component\Render\FormattableMarkup
    *   The default copyright value.
