@@ -210,6 +210,7 @@ class ListPageRssController extends ControllerBase {
         '#theme' => 'oe_list_pages_rss_item',
         '#title' => $entity->label(),
         '#link' => $entity->toUrl('canonical', ['absolute' => TRUE]),
+        '#guid' => $entity->toUrl('canonical', ['absolute' => TRUE]),
         '#description' => '',
         '#item_elements' => [
           [
