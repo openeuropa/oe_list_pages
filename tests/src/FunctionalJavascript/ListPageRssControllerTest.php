@@ -100,6 +100,7 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     $first_item = $items->eq(0);
     $this->assertEquals('that yellow fruit', $first_item->filterXpath('//title')->text());
     $this->assertEquals('http://web:8080/build/node/2', $first_item->filterXpath('//link')->text());
+    $this->assertEquals('http://web:8080/build/node/2', $first_item->filterXpath('//guid')->text());
     $this->assertEquals('Tue, 20 Oct 20 00:00:00 +1100', $first_item->filterXpath('//pubDate')->text());
     // Assert modules subscribing to the ListPageRssItemAlterEvent can
     // alter the item build.
@@ -108,6 +109,7 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     $second_item = $items->eq(1);
     $this->assertEquals('that red fruit', $second_item->filterXpath('//title')->text());
     $this->assertEquals('http://web:8080/build/node/3', $second_item->filterXpath('//link')->text());
+    $this->assertEquals('http://web:8080/build/node/3', $second_item->filterXpath('//guid')->text());
     $this->assertEquals('Tue, 20 Oct 20 00:00:00 +1100', $second_item->filterXpath('//pubDate')->text());
 
     // Change the node title and assert the response has changed.

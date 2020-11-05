@@ -45,6 +45,7 @@ function oe_list_pages_theme($existing, $type, $theme, $path) {
       'variables' => [
         'title' => '',
         'link' => '',
+        'guid' => '',
         'description' => '',
         'item_elements' => [],
       ],
