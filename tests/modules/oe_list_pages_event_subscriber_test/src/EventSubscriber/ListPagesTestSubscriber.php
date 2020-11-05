@@ -7,6 +7,7 @@ namespace Drupal\oe_list_pages_event_subscriber_test\EventSubscriber;
 use Drupal\Core\State\StateInterface;
 use Drupal\oe_list_pages\ListPageRssAlterEvent;
 use Drupal\oe_list_pages\ListPageEvents;
+use Drupal\oe_list_pages\ListPageRssItemAlterEvent;
 use Drupal\oe_list_pages\ListPageSourceAlterEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -40,6 +41,7 @@ class ListPagesTestSubscriber implements EventSubscriberInterface {
       ListPageEvents::ALTER_ENTITY_TYPES => ['onEntityTypesAlter'],
       ListPageEvents::ALTER_BUNDLES => ['onBundlesAlter'],
       ListPageEvents::ALTER_RSS_BUILD => ['onRssBuildAlter'],
+      ListPageEvents::ALTER_RSS_ITEM_BUILD => ['onRssItemBuildAlter'],
     ];
   }
 
@@ -93,6 +95,24 @@ class ListPagesTestSubscriber implements EventSubscriberInterface {
       '#type' => 'html_tag',
       '#tag' => 'custom_tag',
       '#value' => 'custom_value',
+    ];
+    $event->setBuild($build);
+  }
+
+  /**
+   * Event handler for adding channel information.
+   *
+   * @param \Drupal\oe_list_pages\ListPageRssItemAlterEvent $event
+   *   The event object.
+   */
+  public function onRssItemBuildAlter(ListPageRssItemAlterEvent $event): void {
+    $build = $event->getBuild();
+    $entity = $event->getEntity();
+    $creation_date = $entity->get('changed')->value;
+    $build['#item_elements'][] = [
+      'key' => 'creationDate',
+      'attributes' => '',
+      'value' => date('d/m/Y', (int) $creation_date),
     ];
     $event->setBuild($build);
   }

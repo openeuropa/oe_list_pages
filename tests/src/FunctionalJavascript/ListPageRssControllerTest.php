@@ -90,7 +90,7 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     $this->assertEquals('http://web:8080/build/core/themes/classy/logo.svg', $channel->filterXPath('//image/url')->text());
     $this->assertEquals('European Commission logo', $channel->filterXPath('//image/title')->text());
     $this->assertEquals('http://web:8080/build/', $channel->filterXPath('//image/link')->text());
-    // Assert modules subscribing to the ListPageRssBuildAlterEvent can
+    // Assert modules subscribing to the ListPageRssAlterEvent can
     // alter the build.
     $this->assertEquals('custom_value', $channel->filterXPath('//custom_tag')->text());
 
@@ -101,6 +101,10 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     $this->assertEquals('that yellow fruit', $first_item->filterXpath('//title')->text());
     $this->assertEquals('http://web:8080/build/node/2', $first_item->filterXpath('//link')->text());
     $this->assertEquals('Tue, 20 Oct 20 00:00:00 +1100', $first_item->filterXpath('//pubDate')->text());
+    // Assert modules subscribing to the ListPageRssItemAlterEvent can
+    // alter the item build.
+    $this->assertEquals('20/10/2020', $first_item->filterXpath('//creationDate')->text());
+
     $second_item = $items->eq(1);
     $this->assertEquals('that red fruit', $second_item->filterXpath('//title')->text());
     $this->assertEquals('http://web:8080/build/node/3', $second_item->filterXpath('//link')->text());

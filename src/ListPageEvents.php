@@ -24,10 +24,17 @@ final class ListPageEvents {
   const ALTER_BUNDLES = 'oe_list_pages.bundles_alter';
 
   /**
-   * Event fired when the RSS build before its rendered.
+   * Event fired after the RSS is built and before its rendered.
    *
    * @var string
    */
   const ALTER_RSS_BUILD = "oe_list_pages.rss_build_alter";
+
+  /**
+   * Event fired after the RSS item is built and before its rendered.
+   *
+   * @var string
+   */
+  const ALTER_RSS_ITEM_BUILD = "oe_list_pages.rss_build_item_alter";
 
 }
