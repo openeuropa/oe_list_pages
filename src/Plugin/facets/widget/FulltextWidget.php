@@ -6,6 +6,7 @@ namespace Drupal\oe_list_pages\Plugin\facets\widget;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\facets\FacetInterface;
+use Drupal\oe_list_pages\ListSourceInterface;
 
 /**
  * The fulltext search widget.
@@ -64,6 +65,15 @@ class FulltextWidget extends ListPagesWidgetBase {
     ];
 
     return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildDefaultValuesWidget(FacetInterface $facet, ListSourceInterface $list_source = NULL, array $parents = []): ?array {
+    $build = $this->build($facet);
+    $build[$facet->id()]['#required'] = TRUE;
+    return $build;
   }
 
 }

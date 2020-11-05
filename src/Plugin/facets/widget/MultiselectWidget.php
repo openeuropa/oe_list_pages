@@ -136,6 +136,7 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
         '#type' => 'select',
         '#default_value' => $facet->getActiveItems()[0],
         '#multiple' => TRUE,
+        '#required' => TRUE,
         '#options' => $field_definition->getSetting('allowed_values'),
       ];
 

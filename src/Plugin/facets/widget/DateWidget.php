@@ -52,7 +52,9 @@ class DateWidget extends ListPagesWidgetBase {
    * {@inheritdoc}
    */
   public function build(FacetInterface $facet, array $parents = []) {
-    return $this->buildDefaultValuesWidget($facet, NULL, []);
+    $build = $this->buildDefaultValuesWidget($facet, NULL, []);
+    $build[$facet->id() . '_op']['#required'] = FALSE;
+    return $build;
   }
 
   /**
@@ -71,6 +73,7 @@ class DateWidget extends ListPagesWidgetBase {
       '#type' => 'select',
       '#title' => $facet->getName(),
       '#options' => $operators,
+      '#required' => TRUE,
       '#default_value' => $this->getOperatorFromActiveFilters($facet),
       '#empty_option' => $this->t('Select'),
     ];
