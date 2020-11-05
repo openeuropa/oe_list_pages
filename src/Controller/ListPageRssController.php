@@ -24,6 +24,7 @@ use Drupal\oe_list_pages\ListBuilderInterface;
 use Drupal\oe_list_pages\ListExecutionManagerInterface;
 use Drupal\oe_list_pages\ListPageRssAlterEvent;
 use Drupal\oe_list_pages\ListPageEvents;
+use Drupal\oe_list_pages\ListPageRssItemAlterEvent;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -205,7 +206,7 @@ class ListPageRssController extends ControllerBase {
       $entity = $item->getOriginalObject()->getEntity();
       $cache_metadata->addCacheableDependency($entity);
       $creation_date = $entity->get('changed')->value;
-      $result_items[] = [
+      $result_item = [
         '#theme' => 'oe_list_pages_rss_item',
         '#title' => $entity->label(),
         '#link' => $entity->toUrl('canonical', ['absolute' => TRUE]),
@@ -219,6 +220,12 @@ class ListPageRssController extends ControllerBase {
         ],
         '#entity' => $entity,
       ];
+
+      // Dispatch event to allow to alter the item build before being rendered.
+      $event = new ListPageRssItemAlterEvent($result_item, $entity);
+      $this->eventDispatcher->dispatch(ListPageEvents::ALTER_RSS_ITEM_BUILD, $event);
+
+      $result_items[] = $event->getBuild();
     }
     return $result_items;
   }
