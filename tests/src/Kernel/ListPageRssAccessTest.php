@@ -8,9 +8,9 @@ use Drupal\Core\Url;
 use Drupal\node\Entity\NodeType;
 
 /**
- * Tests the List page RSS feeds.
+ * Tests the List page RSS feed access.
  */
-class ListPageRssControllerTest extends ListsEntityMetaTestBase {
+class ListPageRssAccessTest extends ListsEntityMetaTestBase {
 
   /**
    * Node with list page metadata configured.

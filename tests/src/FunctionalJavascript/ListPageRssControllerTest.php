@@ -13,9 +13,9 @@ use Drupal\search_api\Entity\Index;
 use Symfony\Component\DomCrawler\Crawler;
 
 /**
- * Test list page RSS feeds.
+ * Test the list page RSS feed controller.
  */
-class ListPageRssTest extends WebDriverTestBase {
+class ListPageRssControllerTest extends WebDriverTestBase {
 
   /**
    * {@inheritdoc}
@@ -110,12 +110,25 @@ class ListPageRssTest extends WebDriverTestBase {
     $channel = $crawler->filterXPath('//rss[@version=2.0]/channel');
     $this->assertEquals('Published: Yes', $channel->filterXPath('//description')->text());
 
-    // Set a filter with multiple values on the url and asser the change.
+    // Set a filter with multiple values on the url and assert the change.
     $this->drupalGet(Url::fromRoute('entity.node.list_page_rss', ['node' => $node->id()], ['query' => ['f[0]' => 'select_one:test1', 'f[1]' => 'select_one:test2']]));
     $response = $this->getTextContent();
     $crawler = new Crawler($response);
     $channel = $crawler->filterXPath('//rss[@version=2.0]/channel');
     $this->assertEquals('Select one: test1, test2', $channel->filterXPath('//description')->text());
+
+    // Set multiple filters on the url and assert the change.
+    $this->drupalGet(Url::fromRoute('entity.node.list_page_rss', ['node' => $node->id()], [
+      'query' => [
+        'f[0]' => 'status:1',
+        'f[1]' => 'select_one:test1',
+        'f[2]' => 'select_one:test2',
+      ],
+    ]));
+    $response = $this->getTextContent();
+    $crawler = new Crawler($response);
+    $channel = $crawler->filterXPath('//rss[@version=2.0]/channel');
+    $this->assertEquals('Published: Yes | Select one: test1, test2', $channel->filterXPath('//description')->text());
   }
 
 }
