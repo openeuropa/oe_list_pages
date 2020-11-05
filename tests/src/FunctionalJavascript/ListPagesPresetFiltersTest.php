@@ -124,6 +124,19 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $page = $this->getSession()->getPage();
     $page->fillField('Title', 'List page for ct1');
 
+    // Set preset filter for body and cancel.
+    $page->selectFieldOption('Add default value for', 'Body');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert = $this->assertSession();
+    $assert->pageTextContains('Set default value for Body');
+    $body_filter_id = $this->getSession()->getPage()->find('css', 'input[name="preset_filters_wrapper[edit][filter_id]"]')->getValue();
+    $page = $this->getSession()->getPage();
+    $filter_id = 'preset_filters_wrapper[edit][' . $body_filter_id . '][body]';
+    $page->fillField($filter_id, 'cherry');
+    $page->pressButton('Cancel');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->assertDefaultValueForFilters(['' => t('No default values set')]);
+
     // Set preset filter for body.
     $page->selectFieldOption('Add default value for', 'Body');
     $this->assertSession()->assertWaitOnAjaxRequest();
@@ -265,6 +278,17 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
       'Created' => 'After 19 October 2019',
     ]);
     $this->assertSession()->elementTextNotContains('css', '#list-page-default-filters table', 'Published');
+
+    // Edit preset filter for body and cancel.
+    $page->pressButton('edit-' . $body_filter_id);
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->assertSession()->pageTextContains('Set default value for Body');
+    $page = $this->getSession()->getPage();
+    $this->assertSession()->fieldValueEquals('preset_filters_wrapper[edit][' . $body_filter_id . '][body]', 'cherry');
+    $page->fillField('preset_filters_wrapper[edit][' . $body_filter_id . '][body]', 'banana');
+    $page->pressButton('Cancel');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->assertDefaultValueForFilters(['Body' => 'cherry', 'Created' => 'After 19 October 2019']);
 
     // Edit preset filter for body.
     $page->pressButton('edit-' . $body_filter_id);
