@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages\Controller;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Cache\CacheableMetadata;
@@ -13,8 +14,8 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Render\RendererInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Theme\ThemeManagerInterface;
+use Drupal\Core\Url;
 use Drupal\emr\Entity\EntityMetaInterface;
 use Drupal\node\NodeInterface;
 use Drupal\oe_list_pages\ListBuilderInterface;
@@ -22,7 +23,6 @@ use Drupal\oe_list_pages\ListPageRssAlterEvent;
 use Drupal\oe_list_pages\ListPageEvents;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -117,27 +117,22 @@ class ListPageRssController extends ControllerBase {
    * @param \Drupal\node\NodeInterface $node
    *   The list page node.
    *
-   * @return string
+   * @return \Drupal\Core\Cache\CacheableResponse
    *   The RSS feed response.
    */
-  public function build(NodeInterface $node): Response {
+  public function build(NodeInterface $node): CacheableResponse {
     // Build the render array for the RSS feed.
     $cache_metadata = CacheableMetadata::createFromObject($node);
     $default_title = $this->getChannelTitle($node, $cache_metadata);
     $default_link = $node->toUrl('canonical', ['absolute' => TRUE])->toString(TRUE);
-    $default_image = [
-      'url' => $this->getDefaultImageUrl(),
-      'title' => $default_title,
-      'link' => $default_link->getGeneratedUrl(),
-    ];
     $build = [
       '#theme' => 'oe_list_pages_rss',
       '#title' => $default_title,
       '#link' => $default_link->getGeneratedUrl(),
-      '#description' => $this->getDefaultDescription($node, $cache_metadata),
+      '#description' => $this->getChannelDescription($node, $cache_metadata),
       '#language' => $node->language()->getId(),
-      '#copyright' => $this->getCopyright(),
-      '#image' => $default_image,
+      '#copyright' => $this->getChannelCopyright(),
+      '#image' => $this->getChannelImage(),
       '#channel_elements' => [],
       '#items' => $this->getItemList($node),
     ];
@@ -187,14 +182,17 @@ class ListPageRssController extends ControllerBase {
    *   The access result.
    */
   public function checkAccess(NodeInterface $node): AccessResultInterface {
+    if ($node->isNew()) {
+      return AccessResult::forbidden($this->t('Node is still being stored.'))->addCacheableDependency($node);
+    }
     $entity_meta_list = $node->get('emr_entity_metas')->getValue();
     foreach ($entity_meta_list as $entity_meta) {
       $entity_meta = reset($entity_meta);
       if ($entity_meta instanceof EntityMetaInterface && $entity_meta->bundle() === 'oe_list_page') {
-        return AccessResult::allowed();
+        return AccessResult::allowed()->addCacheableDependency($node);
       }
     }
-    return AccessResult::forbidden($this->t('Node type does not have List Page meta configured.'));
+    return AccessResult::forbidden($this->t('Node type does not have List Page meta configured.'))->addCacheableDependency($node);
   }
 
   /**
@@ -216,24 +214,24 @@ class ListPageRssController extends ControllerBase {
   }
 
   /**
-   * Gets the default image url.
+   * Gets the channel image array.
    *
-   * @return string
-   *   The default image url.
+   * @return array
+   *   The image information array.
    */
-  protected function getDefaultImageUrl(): string {
+  protected function getChannelImage(): array {
+    $title = new FormattableMarkup('@title logo', ['@title' => 'European Commission']);
     // Get the favicon location.
     $theme = $this->themeManager->getActiveTheme();
-    if (file_exists($favicon = $theme->getPath() . '/favicon.ico')) {
-      return file_create_url($favicon);
-    }
-    else {
-      return file_create_url('core/misc/favicon.ico');
-    }
+    return [
+      'url' => file_create_url($theme->getLogo()),
+      'title' => $title,
+      'link' => Url::fromRoute('<front>', [], ['absolute' => TRUE]),
+    ];
   }
 
   /**
-   * Gets the default description.
+   * Gets the channel description.
    *
    * @param \Drupal\node\NodeInterface $node
    *   The node being rendered.
@@ -243,10 +241,10 @@ class ListPageRssController extends ControllerBase {
    * @return string
    *   The default description.
    */
-  protected function getDefaultDescription(NodeInterface $node, CacheableMetadata &$cache_metadata): string {
+  protected function getChannelDescription(NodeInterface $node, CacheableMetadata $cache_metadata): string {
     $selected_filter_information = $this->listBuilder->buildSelectedFilters($node);
     $filter_cache = CacheableMetadata::createFromRenderArray($selected_filter_information);
-    $cache_metadata = $cache_metadata->merge($filter_cache);
+    $cache_metadata->addCacheableDependency($filter_cache);
     // Extract the selected filter information.
     $selected_filters = [];
     foreach (Element::children($selected_filter_information) as $child) {
@@ -258,19 +256,19 @@ class ListPageRssController extends ControllerBase {
       foreach ($filter_information['#items'] as $filter_value_information) {
         $filter_values[] = $filter_value_information['label'];
       }
-      $selected_filters[] = $filter_information['#label'] . ': ' . implode(' - ', $filter_values);
+      $selected_filters[] = $filter_information['#label'] . ': ' . implode(', ', $filter_values);
     }
-    return implode(', ', $selected_filters);
+    return implode(' | ', $selected_filters);
   }
 
   /**
-   * Gets the default copyright value.
+   * Gets the channel copyright value.
    *
-   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   * @return \Drupal\Component\Render\FormattableMarkup
    *   The default copyright value.
    */
-  protected function getCopyright(): TranslatableMarkup {
-    return $this->t('© European Union, @startdate-@enddate', ['@startdate' => '1995', '@enddate' => date('Y')]);
+  protected function getChannelCopyright(): FormattableMarkup {
+    return new FormattableMarkup('© @copyright_name, 1995-@enddate', ['@copyright_name' => $this->t('European Union'), '@enddate' => date('Y')]);
   }
 
 }

@@ -87,9 +87,9 @@ class ListPageRssTest extends WebDriverTestBase {
     $this->assertEquals('', $channel->filterXPath('//description')->text());
     $this->assertEquals('en', $channel->filterXPath('//language')->text());
     $this->assertEquals('© European Union, 1995-' . date('Y'), $channel->filterXPath('//copyright')->text());
-    $this->assertEquals('http://web:8080/build/core/misc/favicon.ico', $channel->filterXPath('//image/url')->text());
-    $this->assertEquals('Drupal | List page test', $channel->filterXPath('//image/title')->text());
-    $this->assertEquals('http://web:8080/build/node/1', $channel->filterXPath('//image/link')->text());
+    $this->assertEquals('http://web:8080/build/core/themes/classy/logo.svg', $channel->filterXPath('//image/url')->text());
+    $this->assertEquals('European Commission logo', $channel->filterXPath('//image/title')->text());
+    $this->assertEquals('http://web:8080/build/', $channel->filterXPath('//image/link')->text());
     // Assert modules subscribing to the ListPageRssBuildAlterEvent can
     // alter the build.
     $this->assertEquals('custom_value', $channel->filterXPath('//custom_tag')->text());
@@ -115,7 +115,7 @@ class ListPageRssTest extends WebDriverTestBase {
     $response = $this->getTextContent();
     $crawler = new Crawler($response);
     $channel = $crawler->filterXPath('//rss[@version=2.0]/channel');
-    $this->assertEquals('Select one: test1 - test2', $channel->filterXPath('//description')->text());
+    $this->assertEquals('Select one: test1, test2', $channel->filterXPath('//description')->text());
   }
 
 }
