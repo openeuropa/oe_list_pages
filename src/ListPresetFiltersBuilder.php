@@ -359,6 +359,7 @@ class ListPresetFiltersBuilder {
     $facet_widget_keys = $this->getWidgetKeys($form[$form_key]['preset_filters_wrapper']['edit'][$filter_id]);
     $limit_validation_errors = array_merge($facet_widget_keys, [
       ['bundle'],
+      ['oe_list_pages_form_key'],
       ['preset_filters_wrapper', 'edit'],
       ['preset_filters_wrapper', 'current_filters'],
     ]);
@@ -375,7 +376,7 @@ class ListPresetFiltersBuilder {
       '#value' => $this->t('Cancel'),
       '#type' => 'button',
       '#name' => 'cancel-default-filter',
-      '#limit_validation_errors' => $limit_validation_errors,
+      '#limit_validation_errors' => [['preset_filters_wrapper', 'current_filters']],
       '#ajax' => $ajax_definition,
     ];
 
