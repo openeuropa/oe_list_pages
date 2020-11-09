@@ -56,7 +56,8 @@
             "build/profiles/contrib/{$name}": ["type:drupal-profile"],
             "build/modules/contrib/{$name}": ["type:drupal-module"],
             "build/themes/contrib/{$name}": ["type:drupal-theme"]
-        }
+        },
+        "patches": {}
     },
     "config": {
         "sort-packages": true

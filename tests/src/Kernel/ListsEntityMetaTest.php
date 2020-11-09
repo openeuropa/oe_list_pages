@@ -4,13 +4,12 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\oe_list_pages\Kernel;
 
-use Drupal\KernelTests\Core\Entity\EntityKernelTestBaseTest;
 use Drupal\node\Entity\NodeType;
 
 /**
  * Tests the List Pages.
  */
-class ListsEntityMetaTest extends EntityKernelTestBaseTest {
+class ListsEntityMetaTest extends ListsSourceTestBase {
 
   /**
    * The node storage.
