@@ -10,7 +10,7 @@ use Drupal\oe_list_pages\Plugin\facets\widget\MultiselectWidget;
 /**
  * Test for Multiselect widget.
  */
-class MultiSelectWidgetTest extends ListsSourceBaseTest {
+class MultiSelectWidgetTest extends ListsSourceTestBase {
 
   /**
    * The widget.

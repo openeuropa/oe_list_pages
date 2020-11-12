@@ -50,6 +50,7 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
     $this->clickLink('List Page');
     $actual_entity_types = $this->getSelectOptions('Source entity type');
     $expected_entity_types = [
+      '' => '- Select -',
       'entity_meta_relation' => 'Entity Meta Relation',
       'entity_meta' => 'Entity meta',
       'node' => 'Content',
@@ -66,6 +67,7 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
       'content_type_one' => 'Content type one',
       'content_type_two' => 'Content type two',
       'oe_list_page' => 'List page',
+      '' => '- Select -',
     ];
     $this->assertEquals($expected_bundles, $actual_bundles);
     $page = $this->getSession()->getPage();
@@ -164,7 +166,7 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
     $this->assertFieldChecked('Override default exposed filters');
     $this->assertFieldChecked('Select two');
     $this->assertFieldChecked('Facet for status');
-    // Switch to other ct and check overriden is maintained.
+    // Switch to other ct and check overridden is maintained.
     $page->selectFieldOption('Source bundle', 'Content type one');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->assertSession()->checkboxChecked('Published');
@@ -175,7 +177,7 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
     $page->selectFieldOption('Source bundle', 'Content type two');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->assertFieldChecked('Select two');
-    $this->assertFieldChecked('Facet for status');
+    $this->assertNoFieldChecked('Facet for status');
     $page->uncheckField('Override default exposed filters');
     $page->pressButton('Save');
 

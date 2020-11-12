@@ -70,35 +70,28 @@ class ListExecutionManager implements ListExecutionManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function executeList($entity): ?ListExecutionResults {
-    if (!empty($this->executedLists[$entity->uuid()])) {
-      return $this->executedLists[$entity->uuid()];
+  public function executeList(ListPageConfiguration $configuration): ?ListExecutionResults {
+    if (!empty($this->executedLists[$configuration->getId()])) {
+      return $this->executedLists[$configuration->getId()];
     }
 
-    /** @var \Drupal\emr\Entity\EntityMetaInterface $entity_meta */
-    $entity_meta = $entity->get('emr_entity_metas')->getEntityMeta('oe_list_page');
-    /** @var \Drupal\oe_list_pages\ListPageWrapper $wrapper */
-    $wrapper = $entity_meta->getWrapper();
-
-    // The number of items to show on the page.
-    $limit = $wrapper->getConfiguration()['items_per_page'] ?? 10;
-
-    $list_source = $this->listSourceFactory->get($wrapper->getSourceEntityType(), $wrapper->getSourceEntityBundle());
+    // The number of items to show on a page.
+    $limit = $configuration->getLimit() ?? 10;
+    $list_source = $this->listSourceFactory->get($configuration->getEntityType(), $configuration->getBundle());
     if (!$list_source) {
-      $this->executedLists[$entity->uuid()] = NULL;
+      $this->executedLists[$configuration->getId()] = NULL;
       return NULL;
     }
 
     // Determine the query options and execute it.
-    $bundle_entity_type = $this->entityTypeManager->getDefinition($wrapper->getSourceEntityType())->getBundleEntityType();
+    $bundle_entity_type = $this->entityTypeManager->getDefinition($configuration->getEntityType())->getBundleEntityType();
     $storage = $this->entityTypeManager->getStorage($bundle_entity_type);
-    $bundle = $storage->load($wrapper->getSourceEntityBundle());
+    $bundle = $storage->load($configuration->getBundle());
     $sort = $bundle->getThirdPartySetting('oe_list_pages', 'default_sort', []);
     $current_page = (int) $this->requestStack->getCurrentRequest()->get('page', 0);
     $sort = $sort ? [$sort['name'] => $sort['direction']] : [];
     $language = $this->languageManager->getCurrentLanguage()->getId();
-    $configuration = $wrapper->getConfiguration();
-    $preset_filters = isset($configuration['preset_filters']) ? $configuration['preset_filters'] : [];
+    $preset_filters = $configuration->getDefaultFilters();
     $default_filters = [];
     foreach ($preset_filters as $id => $filter) {
       $default_filters[$filter['facet_id']] = $filter['values'];
@@ -113,9 +106,9 @@ class ListExecutionManager implements ListExecutionManagerInterface {
     ];
     $query = $list_source->getQuery($options);
     $result = $query->execute();
-    $list_execution = new ListExecutionResults($query, $result, $list_source, $wrapper);
+    $list_execution = new ListExecutionResults($query, $result, $list_source, $configuration);
 
-    $this->executedLists[$entity->uuid()] = $list_execution;
+    $this->executedLists[$configuration->getBundle()] = $list_execution;
 
     return $list_execution;
   }

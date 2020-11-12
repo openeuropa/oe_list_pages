@@ -388,6 +388,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
 
     // By default we show only 10 results.
     $this->assertCount(10, $this->getSession()->getPage()->findAll('css', '.node--type-content-type-one'));
+
     $this->assertSession()->pageTextContains('Showing results 1 to 10');
     $this->getSession()->getPage()->clickLink('Next');
     $this->assertSession()->pageTextContains('Showing results 10 to 20');

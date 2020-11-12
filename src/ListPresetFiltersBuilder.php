@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages;
 
+use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\SubformState;
@@ -49,14 +50,15 @@ class ListPresetFiltersBuilder {
    * @return array
    *   The form element.
    */
-  public function editDefaultValue(array &$form, FormStateInterface $form_state): array {
-    $key = $form_state->getValue('oe_list_pages_form_key');
-    $form[$key]['preset_filters_wrapper']['#open'] = TRUE;
-    return $form[$key];
+  public function addDefaultValue(array &$form, FormStateInterface $form_state): array {
+    $triggering_element = $form_state->getTriggeringElement();
+    $element = NestedArray::getValue($form, array_slice($triggering_element['#array_parents'], 0, -3));
+    $element['preset_filters_wrapper']['#open'] = TRUE;
+    return $element;
   }
 
   /**
-   * Ajax request handler for updating default value for a filter.
+   * Ajax request handler for editing/deleting existing values for filters.
    *
    * @param array $form
    *   The form.
@@ -66,10 +68,11 @@ class ListPresetFiltersBuilder {
    * @return array
    *   The form element.
    */
-  public function setDefaultValues(array &$form, FormStateInterface $form_state): array {
-    $key = $form_state->getValue('oe_list_pages_form_key');
-    $form[$key]['preset_filters_wrapper']['#open'] = TRUE;
-    return $form[$key];
+  public function refreshDefaultValue(array &$form, FormStateInterface $form_state): array {
+    $triggering_element = $form_state->getTriggeringElement();
+    $element = NestedArray::getValue($form, array_slice($triggering_element['#array_parents'], 0, -4));
+    $element['preset_filters_wrapper']['#open'] = TRUE;
+    return $element;
   }
 
   /**
@@ -77,7 +80,9 @@ class ListPresetFiltersBuilder {
    *
    * @SuppressWarnings(PHPMD.CyclomaticComplexity)
    */
-  public function buildDefaultFilters(array &$form, FormStateInterface &$form_state, string $form_key, ListSourceInterface $list_source = NULL, array $available_filters = [], array $preset_filters = []) {
+  public function buildDefaultFilters(array &$form, FormStateInterface &$form_state, ListSourceInterface $list_source = NULL, array $available_filters = [], array $preset_filters = []) {
+
+    $form_key = 'wrapper';
 
     // List source doesn't exist yet.
     if (empty($list_source)) {
@@ -104,17 +109,17 @@ class ListPresetFiltersBuilder {
       '#type' => 'label',
     ];
 
-    $current_filters = $form_state->getValue('preset_filters_wrapper')['current_filters'] ?? $preset_filters;
+    $current_filters = $form_state->getValue('wrapper')['preset_filters_wrapper']['current_filters'] ?? $preset_filters;
     $triggering_element = $form_state->getTriggeringElement();
 
     // Adding default filter value.
     if (!empty($triggering_element) && $triggering_element['#name'] == 'set-default-filter') {
-      $filter_key = $form_state->getValue('preset_filters_wrapper')['edit']['filter_key'];
-      $filter_id = $form_state->getValue('preset_filters_wrapper')['edit']['filter_id'];
+      $filter_key = $form_state->getValue('wrapper')['preset_filters_wrapper']['edit']['filter_key'];
+      $filter_id = $form_state->getValue('wrapper')['preset_filters_wrapper']['edit']['filter_id'];
       // Replace correct labels.
       $facet = $this->getFacetById($list_source, $filter_key);
-      $submitted_form = $form_state->getCompleteForm();
-      $subform_state = SubformState::createForSubform($submitted_form['emr_plugins_oe_list_page']['preset_filters_wrapper']['edit'][$filter_id], $submitted_form, $form_state);
+      $subform = $form_state->getCompleteForm();
+      $subform_state = SubformState::createForSubform($subform['emr_plugins_oe_list_page']['wrapper']['preset_filters_wrapper']['edit'][$filter_id], $subform, $form_state->getCompleteFormState());
       if (!empty($facet)) {
         $widget = $facet->getWidgetInstance();
         if ($widget instanceof ListPagesWidgetInterface) {
@@ -123,6 +128,7 @@ class ListPresetFiltersBuilder {
             'values' => $widget->prepareDefaultValueFilter($facet, $form, $subform_state),
           ];
         }
+
       }
     }
     // Removing default filter value.
@@ -136,7 +142,7 @@ class ListPresetFiltersBuilder {
       '#value' => $current_filters,
     ];
 
-    $filter_key = !empty($triggering_element['#filter_facet_id']) ? $triggering_element['#filter_facet_id'] : $form_state->getValue('preset_filters_wrapper')['summary']['add_new'];
+    $filter_key = !empty($triggering_element['#filter_facet_id']) ? $triggering_element['#filter_facet_id'] : $form_state->getValue('wrapper')['preset_filters_wrapper']['summary']['add_new'];
 
     if (empty($filter_key)) {
       $form = $this->buildSummaryPresetFilters($form, $form_state, $form_key, $list_source, $available_filters, $current_filters);
@@ -189,7 +195,7 @@ class ListPresetFiltersBuilder {
     ];
 
     $rows = [];
-
+    $ajax_wrapper_id = 'list-page-configuration-' . ($form['#parents'] ? '-' . implode('-', $form['#parents']) : '');
     foreach ($current_filters as $filter_key => $filter) {
       $facet = $this->getFacetById($list_source, $filter['facet_id']);
       $widget = $facet->getWidgetInstance();
@@ -210,8 +216,18 @@ class ListPresetFiltersBuilder {
       $limit_validation_errors = [
         ['bundle'],
         ['preset_filters_wrapper', 'edit'],
-        ['preset_filters_wrapper', 'buttons'],
-        ['preset_filters_wrapper', 'current_filters'],
+        [
+          'emr_plugins_oe_list_page',
+          'wrapper',
+          'preset_filters_wrapper',
+          'buttons',
+        ],
+        [
+          'emr_plugins_oe_list_page',
+          'wrapper',
+          'preset_filters_wrapper',
+          'current_filters',
+        ],
       ];
 
       $form[$form_key]['preset_filters_wrapper']['buttons'][$filter_key]['edit-' . $filter_key] = [
@@ -222,8 +238,8 @@ class ListPresetFiltersBuilder {
         '#filter_facet_id' => $filter['facet_id'],
         '#limit_validation_errors' => $limit_validation_errors,
         '#ajax' => [
-          'callback' => [$this, 'editDefaultValue'],
-          'wrapper' => $form[$form_key]['#id'],
+          'callback' => [$this, 'refreshDefaultValue'],
+          'wrapper' => $ajax_wrapper_id,
         ],
       ];
 
@@ -235,8 +251,8 @@ class ListPresetFiltersBuilder {
         '#op' => 'remove-default-filter',
         '#limit_validation_errors' => $limit_validation_errors,
         '#ajax' => [
-          'callback' => [$this, 'editDefaultValue'],
-          'wrapper' => $form[$form_key]['#id'],
+          'callback' => [$this, 'refreshDefaultValue'],
+          'wrapper' => $ajax_wrapper_id,
         ],
       ];
     }
@@ -260,8 +276,8 @@ class ListPresetFiltersBuilder {
       '#title' => $this->t('Add default value for:'),
       '#options' => ['' => $this->t('- None -')] + $available_filters,
       '#ajax' => [
-        'callback' => [$this, 'editDefaultValue'],
-        'wrapper' => $form[$form_key]['#id'],
+        'callback' => [$this, 'addDefaultValue'],
+        'wrapper' => $ajax_wrapper_id,
       ],
     ];
 
@@ -334,6 +350,8 @@ class ListPresetFiltersBuilder {
       }
 
       $form[$form_key]['preset_filters_wrapper']['edit'][$filter_id] = $widget->buildDefaultValuesWidget($facet, $list_source, [
+        'emr_plugins_oe_list_page',
+        'wrapper',
         'preset_filters_wrapper',
         'edit',
         $filter_id,
@@ -351,17 +369,23 @@ class ListPresetFiltersBuilder {
       '#type' => 'value',
     ];
 
+    $ajax_wrapper_id = 'list-page-configuration-' . ($form['#parents'] ? '-' . implode('-', $form['#parents']) : '');
     $ajax_definition = [
-      'callback' => [$this, 'setDefaultValues'],
-      'wrapper' => $form[$form_key]['#id'],
+      'callback' => [$this, 'addDefaultValue'],
+      'wrapper' => $ajax_wrapper_id,
     ];
 
     $facet_widget_keys = $this->getWidgetKeys($form[$form_key]['preset_filters_wrapper']['edit'][$filter_id]);
     $limit_validation_errors = array_merge($facet_widget_keys, [
       ['bundle'],
       ['oe_list_pages_form_key'],
-      ['preset_filters_wrapper', 'edit'],
-      ['preset_filters_wrapper', 'current_filters'],
+      ['emr_plugins_oe_list_page', 'wrapper', 'preset_filters_wrapper', 'edit'],
+      [
+        'emr_plugins_oe_list_page',
+        'wrapper',
+        'preset_filters_wrapper',
+        'current_filters',
+      ],
     ]);
 
     $form[$form_key]['preset_filters_wrapper']['edit']['set_value'] = [
@@ -376,7 +400,14 @@ class ListPresetFiltersBuilder {
       '#value' => $this->t('Cancel'),
       '#type' => 'button',
       '#name' => 'cancel-default-filter',
-      '#limit_validation_errors' => [['preset_filters_wrapper', 'current_filters']],
+      '#limit_validation_errors' => [
+        [
+          'emr_plugins_oe_list_page',
+          'wrapper',
+          'preset_filters_wrapper',
+          'current_filters',
+        ],
+      ],
       '#ajax' => $ajax_definition,
     ];
 

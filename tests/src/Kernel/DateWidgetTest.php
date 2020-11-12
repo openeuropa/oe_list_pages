@@ -11,7 +11,7 @@ use Drupal\oe_list_pages\Plugin\facets\widget\DateWidget;
 /**
  * Test for Multiselect widget.
  */
-class DateWidgetTest extends ListsSourceBaseTest {
+class DateWidgetTest extends ListsSourceTestBase {
 
   /**
    * {@inheritdoc}
