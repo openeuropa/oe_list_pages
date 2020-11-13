@@ -172,7 +172,6 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
 
       // Try to get the list source for the selected entity type and bundle.
       $list_source = $this->listSourceFactory->get($selected_entity_type, $selected_bundle);
-      $available_filters = [];
 
       // Get available filters.
       if ($list_source && $available_filters = $list_source->getAvailableFilters()) {
@@ -214,15 +213,8 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
         ];
 
         $form_state->set('oe_list_pages_available_filters', $available_filters);
-        /** @var \Drupal\Core\Entity\EntityInterface $entity */
-        $entity = $form_state->getFormObject()->getEntity();
-        $bundle_entity_type = $entity->getEntityType()->getBundleEntityType();
-        $storage = $this->entityTypeManager->getStorage($bundle_entity_type);
-        $bundle = $storage->load($entity->bundle());
-        $default_values_allowed = $bundle->getThirdPartySetting('oe_list_pages', 'default_values_allowed', FALSE);
-
-        if ($default_values_allowed) {
-          $preset_filters = $this->configuration->getDefaultFilters();
+        if ($this->getConfiguration()->areDefaultFilterValuesAllowed()) {
+          $preset_filters = $this->configuration->getDefaultFiltersValues();
           $this->presetFiltersBuilder->buildDefaultFilters($form, $form_state, $list_source, $available_filters, $preset_filters);
         }
       }
@@ -250,7 +242,7 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
     $this->configuration->setEntityType($entity_type);
     $this->configuration->setBundle($entity_bundle);
     $this->configuration->setExposedFiltersOverridden($exposed_filters_overridden);
-    $this->configuration->setDefaultFilters($preset_filters);
+    $this->configuration->setDefaultFilterValues($preset_filters);
     if (!$exposed_filters_overridden) {
       $exposed_filters = [];
     }

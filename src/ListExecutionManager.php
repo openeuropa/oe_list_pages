@@ -91,7 +91,7 @@ class ListExecutionManager implements ListExecutionManagerInterface {
     $current_page = (int) $this->requestStack->getCurrentRequest()->get('page', 0);
     $sort = $sort ? [$sort['name'] => $sort['direction']] : [];
     $language = $this->languageManager->getCurrentLanguage()->getId();
-    $preset_filters = $configuration->getDefaultFilters();
+    $preset_filters = $configuration->getDefaultFiltersValues();
     $default_filters = [];
     foreach ($preset_filters as $id => $filter) {
       $default_filters[$filter['facet_id']] = $filter['values'];

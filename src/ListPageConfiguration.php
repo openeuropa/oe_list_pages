@@ -36,18 +36,28 @@ class ListPageConfiguration {
   protected $exposed_filters = [];
 
   /**
-   * The default filters.
-   *
-   * @var array
-   */
-  protected $default_filters = [];
-
-  /**
    * Whether the exposed filters are overridden.
    *
    * @var bool
    */
   protected $exposed_filters_overridden = FALSE;
+
+  /**
+   * Whether this configuration supports default filter values.
+   *
+   * Default filter values are preset values on the query which cannot be
+   * removed.
+   *
+   * @var bool
+   */
+  protected $default_filter_values_allowed = FALSE;
+
+  /**
+   * The default filter values.
+   *
+   * @var array
+   */
+  protected $default_filter_values = [];
 
   /**
    * The limit for the query.
@@ -90,7 +100,7 @@ class ListPageConfiguration {
       'entity_type' => $wrapper->getSourceEntityType(),
       'bundle' => $wrapper->getSourceEntityBundle(),
       'exposed_filters' => $wrapper_configuration['exposed_filters'] ?? [],
-      'default_filters' => $wrapper_configuration['preset_filters'] ?? [],
+      'default_filter_values' => $wrapper_configuration['preset_filters'] ?? [],
       'exposed_filters_overridden' => isset($wrapper_configuration['override_exposed_filters']) ? (bool) $wrapper_configuration['override_exposed_filters'] : FALSE,
       'limit' => $wrapper_configuration['limit'] ?? NULL,
     ];
@@ -179,6 +189,46 @@ class ListPageConfiguration {
   }
 
   /**
+   * Returns whether default filter values are allowed.
+   *
+   * @return bool
+   *   Whether default filter values are allowed.
+   */
+  public function areDefaultFilterValuesAllowed(): bool {
+    return $this->default_filter_values_allowed;
+  }
+
+  /**
+   * Sets whether default filter values are allowed.
+   *
+   * @param bool $allowed
+   *   Whether default filter values are allowed.
+   */
+  public function setDefaultFilterValuesAllowed(bool $allowed): void {
+    $this->default_filter_values_allowed = $allowed;
+  }
+
+  /**
+   * Returns the default filter values.
+   *
+   * @return array
+   *   The default filter values.
+   */
+  public function getDefaultFiltersValues(): array {
+    return $this->default_filter_values;
+  }
+
+  /**
+   * Sets the default filter values.
+   *
+   * @param array $default_filter_values
+   *   The default filter values.
+   */
+  public function setDefaultFilterValues(array $default_filter_values): void {
+    $this->default_filter_values = $default_filter_values;
+  }
+
+  /**
    * Returns the limit.
    *
    * @return int
@@ -223,28 +273,8 @@ class ListPageConfiguration {
       'bundle' => $this->getBundle(),
       'exposed_filters_overridden' => $this->isExposedFiltersOverridden(),
       'exposed_filters' => $this->getExposedFilters(),
-      'default_filters' => $this->getDefaultFilters(),
+      'default_filter_values' => $this->getDefaultFiltersValues(),
     ];
-  }
-
-  /**
-   * Returns the default filters.
-   *
-   * @return array
-   *   The default filters.
-   */
-  public function getDefaultFilters(): array {
-    return $this->default_filters;
-  }
-
-  /**
-   * Sets the default filters.
-   *
-   * @param array $default_filters
-   *   The default filters.
-   */
-  public function setDefaultFilters(array $default_filters): void {
-    $this->default_filters = $default_filters;
   }
 
 }

@@ -5,7 +5,7 @@ dependencies:
     - emr
 third_party_settings:
   oe_list_pages:
-    default_values_allowed: true
+    default_filter_values_allowed: true
   emr:
     entity_meta_bundles:
       - oe_list_page

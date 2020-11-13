@@ -43,6 +43,6 @@ oe_list_pages.bundle_third_party_settings:
       sequence:
         type: string
         label: 'Exposed filter (saved as facet id)'
-    default_values_allowed:
+    default_filter_values_allowed:
       type: boolean
-      label: 'Allow this content type to define default values for its items filters'
+      label: 'Allow this content type to define default values for its filters'
