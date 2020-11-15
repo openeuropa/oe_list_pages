@@ -110,9 +110,9 @@ class ListPagesTestSubscriber implements EventSubscriberInterface {
     $entity = $event->getEntity();
     $creation_date = $entity->get('changed')->value;
     $build['#item_elements'][] = [
-      'key' => 'creationDate',
-      'attributes' => '',
-      'value' => date('d/m/Y', (int) $creation_date),
+      '#type' => 'html_tag',
+      '#tag' => 'creationDate',
+      '#value' => date('d/m/Y', (int) $creation_date),
     ];
     $event->setBuild($build);
   }
