@@ -4,11 +4,11 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages;
 
-use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
- * Event thrown in order to alter an RSS item build before its rendered.
+ * Event thrown in order to alter an RSS item build before it's rendered.
  */
 class ListPageRssItemAlterEvent extends Event {
 
@@ -22,7 +22,7 @@ class ListPageRssItemAlterEvent extends Event {
   /**
    * The entity being rendered as an RSS item.
    *
-   * @var \Drupal\Core\Entity\EntityInterface
+   * @var \Drupal\Core\Entity\ContentEntityInterface
    */
   protected $entity;
 
@@ -31,10 +31,10 @@ class ListPageRssItemAlterEvent extends Event {
    *
    * @param array $build
    *   The render array for the list page RSS list.
-   * @param \Drupal\Core\Entity\EntityInterface $entity
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
    *   The entity being rendered.
    */
-  public function __construct(array $build, EntityInterface $entity) {
+  public function __construct(array $build, ContentEntityInterface $entity) {
     $this->build = $build;
     $this->entity = $entity;
   }
@@ -62,10 +62,10 @@ class ListPageRssItemAlterEvent extends Event {
   /**
    * Returns the entity item.
    *
-   * @return \Drupal\Core\Entity\EntityInterface
+   * @return \Drupal\Core\Entity\ContentEntityInterface
    *   The entity being processed.
    */
-  public function getEntity(): EntityInterface {
+  public function getEntity(): ContentEntityInterface {
     return $this->entity;
   }
 

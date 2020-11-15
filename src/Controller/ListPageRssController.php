@@ -205,7 +205,7 @@ class ListPageRssController extends ControllerBase {
     $cache_metadata->addCacheTags(['search_api_list:' . $query->getIndex()->id()]);
     $result_items = [];
     foreach ($results->getResultItems() as $item) {
-      /** @var \Drupal\Core\Entity\EntityInterface $entity */
+      /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
       $entity = $item->getOriginalObject()->getEntity();
       $cache_metadata->addCacheableDependency($entity);
       $creation_date = $entity->get('changed')->value;
