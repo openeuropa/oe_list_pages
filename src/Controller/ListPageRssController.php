@@ -217,9 +217,9 @@ class ListPageRssController extends ControllerBase {
         '#description' => '',
         '#item_elements' => [
           [
-            'key' => 'pubDate',
-            'value' => $this->dateFormatter->format($creation_date, 'custom', DateTimeInterface::RFC822),
-            'attributes' => '',
+            '#type' => 'html_tag',
+            '#tag' => 'pubDate',
+            '#value' => $this->dateFormatter->format($creation_date, 'custom', DateTimeInterface::RFC822),
           ],
         ],
       ];
