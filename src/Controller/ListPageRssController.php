@@ -161,7 +161,6 @@ class ListPageRssController extends ControllerBase {
       '#image' => $this->getChannelImage($cache_metadata),
       '#channel_elements' => [],
       '#items' => $this->getItemList($node, $cache_metadata),
-      '#list_page' => $node,
     ];
     $cache_metadata->addCacheableDependency($default_link);
     $cache_metadata->applyTo($build);
@@ -199,7 +198,11 @@ class ListPageRssController extends ControllerBase {
    */
   protected function getItemList(NodeInterface $node, CacheableMetadata $cache_metadata): array {
     $execution_result = $this->listExecutionManager->executeList($node);
+    $query = $execution_result->getQuery();
     $results = $execution_result->getResults();
+    $cache_metadata->addCacheableDependency($query);
+    $cache_metadata->addCacheableDependency($results);
+    $cache_metadata->addCacheTags(['search_api_list:' . $query->getIndex()->id()]);
     $result_items = [];
     foreach ($results->getResultItems() as $item) {
       /** @var \Drupal\Core\Entity\EntityInterface $entity */
@@ -219,7 +222,6 @@ class ListPageRssController extends ControllerBase {
             'attributes' => '',
           ],
         ],
-        '#entity' => $entity,
       ];
 
       // Dispatch event to allow to alter the item build before being rendered.
