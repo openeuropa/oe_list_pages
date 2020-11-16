@@ -234,6 +234,9 @@ class ListPageRssController extends ControllerBase {
   /**
    * Get the channel description.
    *
+   * The default channel description shows a complete list of selected
+   * filter labels and values.
+   *
    * @param \Drupal\node\NodeInterface $node
    *   The node being rendered.
    * @param \Drupal\Core\Cache\CacheableMetadata $cache_metadata
