@@ -30,7 +30,7 @@ class ListPagesWidgetBase extends WidgetPluginBase implements ListPagesWidgetInt
   /**
    * {@inheritdoc}
    */
-  public function prepareDefaultValueFilter(FacetInterface $facet, array &$form, FormStateInterface $form_state): array {
+  public function prepareDefaultFilterValue(FacetInterface $facet, array &$form, FormStateInterface $form_state): array {
     return $this->prepareValueForUrl($facet, $form, $form_state);
   }
 
@@ -38,11 +38,11 @@ class ListPagesWidgetBase extends WidgetPluginBase implements ListPagesWidgetInt
    * {@inheritdoc}
    */
   public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source = NULL, array $filter_value = []): string {
+    // Keep track of the original active items so we can reset them.
     $active_items = $facet->getActiveItems();
     $facet->setActiveItems($filter_value);
-    foreach ($facet->getProcessorsByStage(ProcessorInterface::STAGE_BUILD) as $processor) {
-      $results = $processor->build($facet, []);
-    }
+    $results = $this->processFacetResults($facet);
+
     $filter_label = [];
     foreach ($filter_value as $value) {
       $filter_label[$value] = $value;
@@ -61,7 +61,7 @@ class ListPagesWidgetBase extends WidgetPluginBase implements ListPagesWidgetInt
   /**
    * {@inheritdoc}
    */
-  public function buildDefaultValuesWidget(FacetInterface $facet, ListSourceInterface $list_source = NULL, array $parents = []): ?array {
+  public function buildDefaultValueForm(array $form, FormStateInterface $form_state, FacetInterface $facet): array {
     return $this->build($facet);
   }
 
@@ -71,6 +71,24 @@ class ListPagesWidgetBase extends WidgetPluginBase implements ListPagesWidgetInt
   public function getValueFromActiveFilters(FacetInterface $facet, string $key): ?string {
     $active_filters = $facet->getActiveItems();
     return $active_filters[$key] ?? NULL;
+  }
+
+  /**
+   * Processes and returns the results of a given facet.
+   *
+   * @param \Drupal\facets\FacetInterface $facet
+   *   The facet.
+   *
+   * @return array
+   *   The results.
+   */
+  protected function processFacetResults(FacetInterface $facet): array {
+    $results = $facet->getResults();
+    foreach ($facet->getProcessorsByStage(ProcessorInterface::STAGE_BUILD) as $processor) {
+      $results = $processor->build($facet, $results);
+    }
+
+    return $results;
   }
 
 }

@@ -11,6 +11,7 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\facets\FacetInterface;
+use Drupal\facets\Result\Result;
 use Drupal\facets\Result\ResultInterface;
 use Drupal\oe_list_pages\ListSourceInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -65,50 +66,13 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
   /**
    * {@inheritdoc}
    */
-  public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source = NULL, array $filter_value = []): string {
-    $field_definition = $this->getFieldDefinition($facet, $list_source);
-    $field_type = !empty($field_definition) ? $field_definition->getType() : NULL;
-    if (in_array(EntityReferenceFieldItemListInterface::class, class_implements($field_definition->getClass()))) {
-      $entity_storage = $this->entityTypeManager->getStorage($field_definition->getSetting('target_type'));
-      $referenced_entities = $entity_storage->loadMultiple($filter_value);
-      return implode(', ', array_map(function ($referenced_entity) {
-        return $referenced_entity->label();
-      }, $referenced_entities));
-    }
-    elseif (in_array($field_type, ['list_integer', 'list_float', 'list_string'])) {
-      return implode(', ', array_map(function ($value) use ($field_definition) {
-        return $field_definition->getSetting('allowed_values')[$value];
-      }, $filter_value));
-    }
-    else {
-      return parent::getDefaultValuesLabel($facet, $list_source, $filter_value);
-    }
-  }
-
-  /**
-   * Gets field definition for the field used in the facet.
-   *
-   * @param \Drupal\facets\FacetInterface $facet
-   *   The facet.
-   * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
-   *   The list source.
-   *
-   * @return \Drupal\Core\Field\FieldDefinitionInterface
-   *   The field definition.
-   */
-  protected function getFieldDefinition(FacetInterface $facet, ListSourceInterface $list_source): FieldDefinitionInterface {
-    $field_id = $list_source->getIndex()->getField($facet->getFieldIdentifier())->getOriginalFieldIdentifier();
-    $field_definitions = $this->entityFieldManager->getFieldDefinitions($list_source->getEntityType(), $list_source->getBundle());
-    return $field_definitions[$field_id];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function buildDefaultValuesWidget(FacetInterface $facet, ListSourceInterface $list_source = NULL, array $parents = []): ?array {
+  public function buildDefaultValueForm(array $form, FormStateInterface $form_state, FacetInterface $facet): array {
+    /** @var \Drupal\oe_list_pages\ListSourceInterface $list_source */
+    $list_source = $form_state->get('list_source');
     $field_definition = $this->getFieldDefinition($facet, $list_source);
     $field_type = !empty($field_definition) ? $field_definition->getType() : NULL;
 
+    // @todo replace with multivalue form element.
     if (in_array(EntityReferenceFieldItemListInterface::class, class_implements($field_definition->getClass()))) {
       for ($i = 0; $i < count($facet->getActiveItems()) + 1; $i++) {
         $entity_storage = $this->entityTypeManager->getStorage($field_definition->getSetting('target_type'));
@@ -142,9 +106,66 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
 
       return $form;
     }
-    else {
-      return $this->build($facet);
+    elseif ($field_type === 'boolean' && !$facet->getResults()) {
+      // Create some dummy results for each boolean type (on/off) then process
+      // the results to ensure we have display labels.
+      $results = [
+        new Result($facet, 1, 1, 1),
+        new Result($facet, 0, 0, 1),
+      ];
+
+      $facet->setResults($results);
+      $results = $this->processFacetResults($facet);
+      $facet->setResults($results);
     }
+
+    return $this->build($facet);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source = NULL, array $filter_value = []): string {
+    $field_definition = $this->getFieldDefinition($facet, $list_source);
+    $field_type = !empty($field_definition) ? $field_definition->getType() : NULL;
+    if (in_array(EntityReferenceFieldItemListInterface::class, class_implements($field_definition->getClass()))) {
+      $entity_storage = $this->entityTypeManager->getStorage($field_definition->getSetting('target_type'));
+      $referenced_entities = $entity_storage->loadMultiple($filter_value);
+      return implode(', ', array_map(function ($referenced_entity) {
+        return $referenced_entity->label();
+      }, $referenced_entities));
+    }
+    elseif (in_array($field_type, ['list_integer', 'list_float', 'list_string'])) {
+      return implode(', ', array_map(function ($value) use ($field_definition) {
+        return $field_definition->getSetting('allowed_values')[$value];
+      }, $filter_value));
+    }
+    elseif ($field_type === 'boolean' && !$facet->getResults()) {
+      $results = [
+        new Result($facet, 1, $this->t('Yes'), 1),
+        new Result($facet, 0, $this->t('No'), 1),
+      ];
+      $facet->setResults($results);
+    }
+
+    return parent::getDefaultValuesLabel($facet, $list_source, $filter_value);
+  }
+
+  /**
+   * Gets field definition for the field used in the facet.
+   *
+   * @param \Drupal\facets\FacetInterface $facet
+   *   The facet.
+   * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
+   *   The list source.
+   *
+   * @return \Drupal\Core\Field\FieldDefinitionInterface
+   *   The field definition.
+   */
+  protected function getFieldDefinition(FacetInterface $facet, ListSourceInterface $list_source): FieldDefinitionInterface {
+    $field_id = $list_source->getIndex()->getField($facet->getFieldIdentifier())->getOriginalFieldIdentifier();
+    $field_definitions = $this->entityFieldManager->getFieldDefinitions($list_source->getEntityType(), $list_source->getBundle());
+    return $field_definitions[$field_id];
   }
 
   /**
@@ -179,7 +200,7 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
   /**
    * {@inheritdoc}
    */
-  public function prepareDefaultValueFilter(FacetInterface $facet, array &$form, FormStateInterface $form_state): array {
+  public function prepareDefaultFilterValue(FacetInterface $facet, array &$form, FormStateInterface $form_state): array {
     $count = $form_state->getValue('input_count', 0);
     $values = [];
     // Used for multi inputs.

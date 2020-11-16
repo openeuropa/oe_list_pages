@@ -10,6 +10,7 @@ use Drupal\Core\Entity\ContentEntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Form\SubformState;
 use Drupal\Core\Render\Element\Checkboxes;
 use Drupal\Core\Render\Element\Select;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -212,10 +213,15 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
           ],
         ];
 
-        $form_state->set('oe_list_pages_available_filters', $available_filters);
         if ($this->getConfiguration()->areDefaultFilterValuesAllowed()) {
-          $preset_filters = $this->configuration->getDefaultFiltersValues();
-          $this->presetFiltersBuilder->buildDefaultFilters($form, $form_state, $list_source, $available_filters, $preset_filters);
+          $parents = $form['#parents'] ?? [];
+          $form['wrapper']['default_filter_values'] = [
+            '#parents' => array_merge($parents, ['wrapper', 'default_filter_values']),
+            '#tree' => TRUE,
+          ];
+
+          $subform_state = SubformState::createForSubform($form['wrapper']['default_filter_values'], $form, $form_state);
+          $form['wrapper']['default_filter_values'] = $this->presetFiltersBuilder->buildDefaultFilters($form['wrapper']['default_filter_values'], $subform_state, $list_source, $this->getConfiguration());
         }
       }
     }
@@ -234,18 +240,19 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
       'wrapper',
       'exposed_filters',
     ], []));
-    $preset_filters = array_filter($form_state->getValue([
+    $default_filter_values = array_filter($form_state->getValue([
       'wrapper',
-      'preset_filters_wrapper',
+      'default_filter_values',
       'current_filters',
     ], []));
     $this->configuration->setEntityType($entity_type);
     $this->configuration->setBundle($entity_bundle);
     $this->configuration->setExposedFiltersOverridden($exposed_filters_overridden);
-    $this->configuration->setDefaultFilterValues($preset_filters);
+    $this->configuration->setDefaultFilterValues($default_filter_values);
     if (!$exposed_filters_overridden) {
       $exposed_filters = [];
     }
+
     $this->configuration->setExposedFilters($exposed_filters);
   }
 

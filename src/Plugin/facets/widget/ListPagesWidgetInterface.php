@@ -14,19 +14,19 @@ use Drupal\oe_list_pages\ListSourceInterface;
 interface ListPagesWidgetInterface {
 
   /**
-   * Builds the widget selection for default values.
+   * Builds the form elements for setting a default value for this widget.
    *
+   * @param array $form
+   *   The form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
    * @param \Drupal\facets\FacetInterface $facet
    *   The facet.
-   * @param \Drupal\oe_list_pages\ListSourceInterface|null $list_source
-   *   The list source.
-   * @param array $parents
-   *   The list of parents.
    *
-   * @return mixed
+   * @return array
    *   The rendered widget.
    */
-  public function buildDefaultValuesWidget(FacetInterface $facet, ListSourceInterface $list_source = NULL, array $parents = []): ?array;
+  public function buildDefaultValueForm(array $form, FormStateInterface $form_state, FacetInterface $facet);
 
   /**
    * Renders the label for the filter values set as default values.
@@ -71,7 +71,7 @@ interface ListPagesWidgetInterface {
    * @return array
    *   The active filters to be saved.
    */
-  public function prepareDefaultValueFilter(FacetInterface $facet, array &$form, FormStateInterface $form_state): array;
+  public function prepareDefaultFilterValue(FacetInterface $facet, array &$form, FormStateInterface $form_state): array;
 
   /**
    * Get the active filters for the facet.

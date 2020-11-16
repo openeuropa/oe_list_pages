@@ -7,7 +7,6 @@ namespace Drupal\oe_list_pages\Plugin\facets\widget;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\facets\FacetInterface;
-use Drupal\oe_list_pages\ListSourceInterface;
 use Drupal\oe_list_pages\Plugin\facets\query_type\Date;
 
 /**
@@ -20,6 +19,13 @@ use Drupal\oe_list_pages\Plugin\facets\query_type\Date;
  * )
  */
 class DateWidget extends ListPagesWidgetBase {
+
+  /**
+   * The ID of the facet.
+   *
+   * @var string
+   */
+  protected $facetId;
 
   /**
    * {@inheritdoc}
@@ -51,16 +57,70 @@ class DateWidget extends ListPagesWidgetBase {
   /**
    * {@inheritdoc}
    */
-  public function build(FacetInterface $facet, array $parents = []) {
-    $build = $this->buildDefaultValuesWidget($facet, NULL, []);
-    $build[$facet->id() . '_op']['#required'] = FALSE;
+  public function buildDefaultValueForm(array $form, FormStateInterface $form_state, FacetInterface $facet): array {
+    $build = $this->doBuildDateWidgetElements($facet, $form, $form_state);
+    $build[$facet->id() . '_op']['#required'] = TRUE;
+    $build[$facet->id() . '_first_date_wrapper'][$facet->id() . '_first_date']['#required'] = TRUE;
+    $build['#element_validate'] = [[$this, 'validateDefaultValueForm']];
+    $this->facetId = $facet->id();
     return $build;
+  }
+
+  /**
+   * Validation handler for the date form elements.
+   *
+   * @param array $element
+   *   The form element.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   */
+  public function validateDefaultValueForm(array $element, FormStateInterface $form_state): void {
+    $triggering_element = $form_state->getTriggeringElement();
+    if (!$triggering_element) {
+      return;
+    }
+
+    $facet_id = $this->facetId;
+    $parents = array_slice($triggering_element['#parents'], 0, -1);
+    $values = $form_state->getValue($parents);
+    if ($values[$facet_id . '_op'] !== 'bt') {
+      return;
+    }
+
+    // Check that if we select BETWEEN, we have two dates.
+    $second_date = $values[$facet_id . '_second_date_wrapper'][$facet_id . '_second_date'];
+    if (!$second_date) {
+      $form_state->setError($element[$facet_id . '_second_date_wrapper'][$facet_id . '_second_date'], $this->t('The second date is required.'));
+    }
+
+    // Check that if we select BETWEEN, the second date is after the first one.
+    $first_date = $values[$facet_id . '_first_date_wrapper'][$facet_id . '_first_date'];
+    if ($second_date < $first_date) {
+      $form_state->setError($element[$facet_id . '_second_date_wrapper'][$facet_id . '_second_date'], $this->t('The second date cannot be before the first date.'));
+    }
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildDefaultValuesWidget(FacetInterface $facet, ListSourceInterface $list_source = NULL, array $parents = []): ?array {
+  public function build(FacetInterface $facet) {
+    return $this->doBuildDateWidgetElements($facet);
+  }
+
+  /**
+   * Builds the elements for the Date widget.
+   *
+   * @param \Drupal\facets\FacetInterface $facet
+   *   The facet.
+   * @param array $form
+   *   A form if the widget is built inside a form.
+   * @param \Drupal\Core\Form\FormStateInterface|null $form_state
+   *   A form state if the widget is built inside a form.
+   *
+   * @return array
+   *   The widget elements.
+   */
+  protected function doBuildDateWidgetElements(FacetInterface $facet, array $form = [], FormStateInterface $form_state = NULL): array {
     $date_type = $facet->getWidgetInstance()->getConfiguration()['date_type'];
 
     $operators = [
@@ -73,18 +133,15 @@ class DateWidget extends ListPagesWidgetBase {
       '#type' => 'select',
       '#title' => $facet->getName(),
       '#options' => $operators,
-      '#required' => TRUE,
       '#default_value' => $this->getOperatorFromActiveFilters($facet),
       '#empty_option' => $this->t('Select'),
     ];
 
-    $operator_id = $facet->id() . '_op';
-    if (!empty($parents)) {
-      $name = array_shift($parents);
-      if (count($parents)) {
-        $name .= '[' . implode('][', $parents) . ']';
-      }
-      $operator_id = $name . '[' . $operator_id . ']';
+    $parents = $form['#parents'] ?? [];
+    $name = $facet->id() . '_op';
+    if ($parents) {
+      $first_parent = array_shift($parents);
+      $name = $first_parent . '[' . implode('][', array_merge($parents, [$name])) . ']';
     }
 
     $build[$facet->id() . '_first_date_wrapper'] = [
@@ -93,17 +150,17 @@ class DateWidget extends ListPagesWidgetBase {
       '#states' => [
         'visible' => [
           [
-            ':input[name="' . $operator_id . '"]' => [
+            ':input[name="' . $name . '"]' => [
               'value' => 'lt',
             ],
           ],
           [
-            ':input[name="' . $operator_id . '" ]' => [
+            ':input[name="' . $name . '" ]' => [
               'value' => 'gt',
             ],
           ],
           [
-            ':input[name="' . $operator_id . '"]' => [
+            ':input[name="' . $name . '"]' => [
               'value' => 'bt',
             ],
           ],
@@ -133,7 +190,7 @@ class DateWidget extends ListPagesWidgetBase {
       // We only show the second date if the operator is "bt".
       '#states' => [
         'visible' => [
-          ':input[name="' . $operator_id . '"]' => [
+          ':input[name="' . $name . '"]' => [
             'value' => 'bt',
           ],
         ],
@@ -193,6 +250,12 @@ class DateWidget extends ListPagesWidgetBase {
 
     if (count($values) === 1) {
       // If we only have the operator, it means no dates have been specified.
+      return [];
+    }
+
+    if ($operator === 'bt' && count($values) === 2) {
+      // If we are missing one of the date values, we cannot do a BETWEEN
+      // filter.
       return [];
     }
 
