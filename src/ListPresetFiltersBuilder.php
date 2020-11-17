@@ -184,10 +184,8 @@ class ListPresetFiltersBuilder {
     }
 
     if ($op === 'set-default-value') {
-      $current_filters[$filter_id] = [
-        'facet_id' => $facet_id,
-        'values' => $widget->prepareDefaultFilterValue($facet, $current_filters[$filter_id], $subform_state),
-      ];
+      $preset_filter = $widget->prepareDefaultFilterValue($facet, $current_filters[$filter_id], $subform_state);
+      $current_filters[$filter_id] = new ListPresetFilter($facet_id, $preset_filter['operator'], $preset_filter['values']);
     }
 
     // Set the current filters on the form state so they can be used elsewhere.
@@ -221,17 +219,18 @@ class ListPresetFiltersBuilder {
     ];
 
     $rows = [];
+    /** @var \Drupal\oe_list_pages\ListPresetFilter $filter */
     foreach ($current_filters as $filter_id => $filter) {
-      $facet = $this->getFacetById($list_source, $filter['facet_id']);
+      $facet = $this->getFacetById($list_source, $filter->getFacetId());
       $widget = $facet->getWidgetInstance();
       $filter_value_label = '';
       if ($widget instanceof ListPagesWidgetInterface) {
-        $filter_value_label = $widget->getDefaultValuesLabel($facet, $list_source, $filter['values']);
+        $filter_value_label = $widget->getDefaultValuesLabel($facet, $list_source, $filter);
       }
 
       $rows[] = [
         [
-          'data' => $available_filters[$filter['facet_id']],
+          'data' => $available_filters[$filter->getFacetId()],
           'facet_id' => $filter_id,
         ],
         ['data' => $filter_value_label],
@@ -243,7 +242,7 @@ class ListPresetFiltersBuilder {
         '#value' => $this->t('Edit'),
         '#name' => 'edit-' . $filter_id,
         '#filter_id' => $filter_id,
-        '#facet_id' => $filter['facet_id'],
+        '#facet_id' => $filter->getFacetId(),
         '#limit_validation_errors' => [],
         '#ajax' => [
           'callback' => [$this, 'refreshDefaultValue'],
@@ -256,7 +255,7 @@ class ListPresetFiltersBuilder {
         '#value' => $this->t('Delete'),
         '#name' => 'delete-' . $filter_id,
         '#filter_id' => $filter_id,
-        '#facet_id' => $filter['facet_id'],
+        '#facet_id' => $filter->getFacetId(),
         '#op' => 'remove-default-value',
         '#limit_validation_errors' => [],
         '#ajax' => [
@@ -339,7 +338,15 @@ class ListPresetFiltersBuilder {
       // Set the active items on the facet so that the widget can build the
       // form with default values.
       if (!empty($current_filters[$filter_id])) {
-        $facet->setActiveItems($current_filters[$filter_id]['values']);
+        /** @var \Drupal\oe_list_pages\ListPresetFilter $filter */
+        $filter = $current_filters[$filter_id];
+        $form_state->setValue([
+          'wrapper',
+          'edit',
+          $filter_id,
+          'oe_list_pages_filter_operator',
+        ], $filter->getOperator());
+        $facet->setActiveItems($filter->getValues());
       }
 
       $ajax_definition = [

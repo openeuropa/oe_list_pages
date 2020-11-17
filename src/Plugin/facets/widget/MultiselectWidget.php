@@ -14,6 +14,7 @@ use Drupal\facets\FacetInterface;
 use Drupal\facets\Result\Result;
 use Drupal\facets\Result\ResultInterface;
 use Drupal\multivalue_form_element\Element\MultiValue;
+use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\ListSourceInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -74,6 +75,13 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
     $field_type = !empty($field_definition) ? $field_definition->getType() : NULL;
     $active_items = $facet->getActiveItems();
 
+    $form['oe_list_pages_filter_operator'] = [
+      '#type' => 'select',
+      '#default_value' => $form_state->getValue('oe_list_pages_filter_operator') ?? 'OR',
+      '#options' => ListPresetFilter::getOperators(),
+      '#title' => $this->t('Operator'),
+    ];
+
     $form[$facet->id()] = [
       '#type' => 'multivalue',
       '#title' => $field_definition->getLabel(),
@@ -94,6 +102,7 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
       $form[$facet->id()]['#default_value'] = $default_value;
       $form[$facet->id()]['entity'] = [
         '#type' => 'entity_autocomplete',
+        '#maxlength' => 1024,
         '#target_type' => $field_definition->getSetting('target_type'),
         '#selection_handler' => $field_definition->getSetting('handler'),
         '#selection_settings' => $selection_settings,
@@ -146,10 +155,12 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
   /**
    * {@inheritdoc}
    */
-  public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source = NULL, array $filter_value = []): string {
+  public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source = NULL, ListPresetFilter $filter): string {
     $field_definition = $this->getFieldDefinition($facet, $list_source);
     $field_type = !empty($field_definition) ? $field_definition->getType() : NULL;
 
+    $filter_value = $filter->getValues();
+    $filter_operators = ListPresetFilter::getOperators();
     if (in_array(EntityReferenceFieldItemListInterface::class, class_implements($field_definition->getClass()))) {
       $entity_storage = $this->entityTypeManager->getStorage($field_definition->getSetting('target_type'));
       $values = [];
@@ -162,11 +173,11 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
         $values[] = $entity->label();
       }
 
-      return implode(', ', $values);
+      return $filter_operators[$filter->getOperator()] . ': ' . implode(', ', $values);
     }
 
     if (in_array($field_type, ['list_integer', 'list_float', 'list_string'])) {
-      return implode(', ', array_map(function ($value) use ($field_definition) {
+      return $filter_operators[$filter->getOperator()] . ': ' . implode(', ', array_map(function ($value) use ($field_definition) {
         return $field_definition->getSetting('allowed_values')[$value];
       }, $filter_value));
     }
@@ -178,10 +189,10 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
       ];
 
       $facet->setResults($results);
-      return parent::getDefaultValuesLabel($facet, $list_source, $filter_value);
+      return $filter_operators[$filter->getOperator()] . ': ' . parent::getDefaultValuesLabel($facet, $list_source, $filter_value);
     }
 
-    return parent::getDefaultValuesLabel($facet, $list_source, $filter_value);
+    return $filter_operators[$filter->getOperator()] . ': ' . parent::getDefaultValuesLabel($facet, $list_source, $filter_value);
   }
 
   /**
@@ -251,7 +262,11 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
     $element_state['items_count'] = count($values);
     MultiValue::setElementState($state_parents, $facet->id(), $form_state, $element_state);
 
-    return $values;
+    $operator = $form_state->getValue('oe_list_pages_filter_operator');
+    return [
+      'operator' => $operator,
+      'values' => $values,
+    ];
   }
 
 }

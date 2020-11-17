@@ -8,6 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\facets\FacetInterface;
 use Drupal\facets\Processor\ProcessorInterface;
 use Drupal\facets\Widget\WidgetPluginBase;
+use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\ListSourceInterface;
 
 /**
@@ -31,15 +32,19 @@ class ListPagesWidgetBase extends WidgetPluginBase implements ListPagesWidgetInt
    * {@inheritdoc}
    */
   public function prepareDefaultFilterValue(FacetInterface $facet, array $form, FormStateInterface $form_state): array {
-    return $this->prepareValueForUrl($facet, $form, $form_state);
+    return [
+      'operator' => 'OR',
+      'values' => $this->prepareValueForUrl($facet, $form, $form_state),
+    ];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source = NULL, array $filter_value = []): string {
+  public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source = NULL, ListPresetFilter $filter): string {
     // Keep track of the original active items so we can reset them.
     $active_items = $facet->getActiveItems();
+    $filter_value = $filter->getValues();
     $facet->setActiveItems($filter_value);
     $results = $this->processFacetResults($facet);
 

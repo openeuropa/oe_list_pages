@@ -6,6 +6,7 @@ namespace Drupal\oe_list_pages\Plugin\facets\widget;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\facets\FacetInterface;
+use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\ListSourceInterface;
 
 /**
@@ -35,13 +36,13 @@ interface ListPagesWidgetInterface {
    *   The facet.
    * @param \Drupal\oe_list_pages\ListSourceInterface|null $list_source
    *   The list source.
-   * @param array $filter_value
-   *   The filter value.
+   * @param \Drupal\oe_list_pages\ListPresetFilter $filter
+   *   The filter.
    *
    * @return string
    *   The label.
    */
-  public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source = NULL, array $filter_value = []): string;
+  public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source = NULL, ListPresetFilter $filter): string;
 
   /**
    * Prepares the values to be passed to the URL generator from the submission.
