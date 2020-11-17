@@ -10,13 +10,6 @@ namespace Drupal\Tests\oe_list_pages\Kernel;
 class ListsEntityMetaTest extends ListsEntityMetaTestBase {
 
   /**
-   * {@inheritdoc}
-   */
-  public static $modules = [
-    'user',
-  ];
-
-  /**
    * Tests that node works correctly with entity meta.
    */
   public function testListPagesEntityMeta(): void {

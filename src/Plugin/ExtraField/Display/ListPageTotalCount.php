@@ -7,6 +7,7 @@ namespace Drupal\oe_list_pages\Plugin\ExtraField\Display;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\oe_list_pages\ListBuilderInterface;
 use Drupal\oe_list_pages\ListExecutionManagerInterface;
+use Drupal\oe_list_pages\ListPageConfiguration;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -70,8 +71,9 @@ class ListPageTotalCount extends ListPageExtraFieldBase {
    * {@inheritdoc}
    */
   public function view(ContentEntityInterface $entity) {
-    $execution = $this->listExecutionManager->executeList($entity);
-    $results = $execution->getResults();
+    $configuration = ListPageConfiguration::fromEntity($entity);
+    $list_execution = $this->listExecutionManager->executeList($configuration);
+    $results = $list_execution->getResults();
     return [
       '#markup' => $results->getResultCount(),
     ];

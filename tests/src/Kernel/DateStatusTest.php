@@ -10,7 +10,7 @@ use Drupal\oe_list_pages\Plugin\facets\query_type\DateStatus;
 /**
  * Test for status date processor and query type.
  */
-class DateStatusTest extends ListsSourceBaseTest {
+class DateStatusTest extends ListsSourceTestBase {
 
   /**
    * The facet without processor configuration.

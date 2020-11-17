@@ -40,11 +40,11 @@ interface ListExecutionResultsInterface {
   public function getListSource(): ListSourceInterface;
 
   /**
-   * Gets the list page wrapper.
+   * Returns the list page configuration.
    *
-   * @return \Drupal\oe_list_pages\ListPageWrapper
-   *   The list page wrapper.
+   * @return \Drupal\oe_list_pages\ListPageConfiguration
+   *   The list page configuration.
    */
-  public function getListPluginWrapper(): ListPageWrapper;
+  public function getConfiguration(): ListPageConfiguration;
 
 }

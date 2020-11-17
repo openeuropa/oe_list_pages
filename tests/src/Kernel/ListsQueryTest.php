@@ -13,7 +13,7 @@ use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 /**
  * Tests the List sources querying functionality.
  */
-class ListsQueryTest extends ListsSourceBaseTest {
+class ListsQueryTest extends ListsSourceTestBase {
 
   /**
    * The default list to test.
