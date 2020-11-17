@@ -94,6 +94,7 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
       $form[$facet->id()]['#default_value'] = $default_value;
       $form[$facet->id()]['entity'] = [
         '#type' => 'entity_autocomplete',
+        '#maxlength' => 1024,
         '#target_type' => $field_definition->getSetting('target_type'),
         '#selection_handler' => $field_definition->getSetting('handler'),
         '#selection_settings' => $selection_settings,
