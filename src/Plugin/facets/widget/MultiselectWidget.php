@@ -189,10 +189,10 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
       ];
 
       $facet->setResults($results);
-      return $filter_operators[$filter->getOperator()] . ': ' . parent::getDefaultValuesLabel($facet, $list_source, $filter_value);
+      return $filter_operators[$filter->getOperator()] . ': ' . parent::getDefaultValuesLabel($facet, $list_source, $filter);
     }
 
-    return $filter_operators[$filter->getOperator()] . ': ' . parent::getDefaultValuesLabel($facet, $list_source, $filter_value);
+    return $filter_operators[$filter->getOperator()] . ': ' . parent::getDefaultValuesLabel($facet, $list_source, $filter);
   }
 
   /**

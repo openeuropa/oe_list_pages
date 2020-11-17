@@ -78,9 +78,14 @@ class QuerySubscriber implements EventSubscriberInterface {
     // Add the active filters.
     foreach ($this->facetManager->getFacetsByFacetSourceId($facetsource_id) as $facet) {
       // Handle preset filters. If filter is preset, set as active items.
-      if (empty($facet->getActiveItems()) && in_array($facet->id(), array_keys($preset_filters))) {
-        $active_items = is_array($preset_filters[$facet->id()]) ? $preset_filters[$facet->id()] : [$preset_filters[$facet->id()]];
-        $facet->setActiveItems($active_items);
+      if (empty($facet->getActiveItems())) {
+        /** @var \Drupal\oe_list_pages\ListPresetFilter $filter */
+        foreach ($preset_filters as $filter) {
+          if ($filter->getFacetId() === $facet->id()) {
+            $active_items = is_array($filter->getValues()) ? $filter->getValues() : [$filter->getValues()];
+            $facet->setActiveItems($active_items);
+          }
+        }
       }
 
       // Handle ignored filters. If filter is ignored unset its active items.
