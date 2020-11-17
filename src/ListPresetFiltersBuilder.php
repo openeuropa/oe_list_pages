@@ -85,17 +85,42 @@ class ListPresetFiltersBuilder {
       '#value' => $form_state->get('current_filters'),
     ];
 
-    $filter_key = !empty($triggering_element['#filter_facet_id']) ?
-      $triggering_element['#filter_facet_id'] :
-      $form_state->getValue(['wrapper', 'summary', 'add_new']);
+    // Determine if the triggered operation was one of ours.
+    $relevant_operation = $triggering_element &&
+      isset($triggering_element['#op']) &&
+      in_array($triggering_element['#op'], [
+        'cancel-default-value',
+        'remove-default-value',
+        'set-default-value',
+      ]);
 
-    if (empty($filter_key)) {
-      $form = $this->buildSummaryPresetFilters($form, $form_state, $ajax_wrapper_id);
+    // Now we need to determine which form part to show: either the summary
+    // of selected default values, or the edit form of a given filter. For the
+    // form elements, it can happen that we edit a value or add a new value.
+    // Moreover, we can also have form rebuilds coming from the filter widget
+    // elements in which case we need to keep the form open.
+    // We start with the 'Edit' button of a given filter, which we mark on the
+    // button itself.
+    $facet_id = $triggering_element['#facet_id'] ?? NULL;
+    $filter_id = $triggering_element['#filter_id'] ?? '';
+    // Otherwise, check if we are adding a new filter widget form.
+    if (!$facet_id) {
+      $facet_id = $form_state->getValue(['wrapper', 'summary', 'add_new']);
     }
-    else {
-      $filter_id = !empty($triggering_element['#filter_id']) ? $triggering_element['#filter_id'] : '';
-      $form = $this->buildEditPresetFilter($form, $form_state, $ajax_wrapper_id, $filter_key, $filter_id);
+    // Finally, we may be in the middle of editing a filter value so we need to
+    // keep its form element open.
+    if (!$facet_id) {
+      $facet_id = $form_state->get('facet_id');
+      $filter_id = $form_state->get('filter_id');
     }
+
+    // If we could not determine a filter key, we default to showing the
+    // summary of default values.
+    if (!$facet_id || $relevant_operation) {
+      return $this->buildSummaryPresetFilters($form, $form_state, $ajax_wrapper_id);
+    }
+
+    $form = $this->buildEditPresetFilter($form, $form_state, $ajax_wrapper_id, $facet_id, $filter_id);
 
     return $form;
   }
@@ -126,26 +151,13 @@ class ListPresetFiltersBuilder {
       return;
     }
 
-    // The op can represent a saving of a value or the removal of one.
-    $op = $triggering_element['#op'];
-    if ($op === 'remove-default-filter') {
-      $delete_filter_id = $triggering_element['#filter_id'];
-      unset($current_filters[$delete_filter_id]);
-      $form_state->set('current_filters', $current_filters);
+    $facet_id = $triggering_element['#facet_id'] ?? NULL;
+    $filter_id = $triggering_element['#filter_id'] ?? NULL;
+    if (!$facet_id) {
       return;
     }
 
-    if ($op !== 'set-default-value') {
-      return;
-    }
-
-    $filter_key = $form_state->getValue(['wrapper', 'edit', 'filter_key']);
-    $filter_id = $form_state->getValue(['wrapper', 'edit', 'filter_id']);
-    if (!$filter_key) {
-      return;
-    }
-
-    $facet = $this->getFacetById($list_source, $filter_key);
+    $facet = $this->getFacetById($list_source, $facet_id);
     $current_filters[$filter_id] = [
       '#parents' => array_merge($form['#parents'], [
         'wrapper',
@@ -156,14 +168,26 @@ class ListPresetFiltersBuilder {
     ];
 
     $subform_state = SubformState::createForSubform($current_filters[$filter_id], $form, $form_state);
-    if (!empty($facet)) {
-      $widget = $facet->getWidgetInstance();
-      if ($widget instanceof ListPagesWidgetInterface) {
-        $current_filters[$filter_id] = [
-          'facet_id' => $filter_key,
-          'values' => $widget->prepareDefaultFilterValue($facet, $form, $subform_state),
-        ];
-      }
+    $widget = $facet->getWidgetInstance();
+
+    // The op can represent a saving of a value or the removal of one.
+    $op = $triggering_element['#op'];
+    if ($op === 'remove-default-value') {
+      // Before deleting the values from the current filter store, call the
+      // widget prepare method in case it needs to do any processing on the
+      // form state.
+      $widget->prepareDefaultFilterValue($facet, $current_filters[$filter_id], $subform_state);
+      $delete_filter_id = $triggering_element['#filter_id'];
+      unset($current_filters[$delete_filter_id]);
+      $form_state->set('current_filters', $current_filters);
+      return;
+    }
+
+    if ($op === 'set-default-value') {
+      $current_filters[$filter_id] = [
+        'facet_id' => $facet_id,
+        'values' => $widget->prepareDefaultFilterValue($facet, $current_filters[$filter_id], $subform_state),
+      ];
     }
 
     // Set the current filters on the form state so they can be used elsewhere.
@@ -197,7 +221,7 @@ class ListPresetFiltersBuilder {
     ];
 
     $rows = [];
-    foreach ($current_filters as $filter_key => $filter) {
+    foreach ($current_filters as $filter_id => $filter) {
       $facet = $this->getFacetById($list_source, $filter['facet_id']);
       $widget = $facet->getWidgetInstance();
       $filter_value_label = '';
@@ -208,18 +232,18 @@ class ListPresetFiltersBuilder {
       $rows[] = [
         [
           'data' => $available_filters[$filter['facet_id']],
-          'filter_key' => $filter_key,
+          'facet_id' => $filter_id,
         ],
         ['data' => $filter_value_label],
         ['data' => ''],
       ];
 
-      $form['wrapper']['buttons'][$filter_key]['edit-' . $filter_key] = [
+      $form['wrapper']['buttons'][$filter_id]['edit-' . $filter_id] = [
         '#type' => 'button',
         '#value' => $this->t('Edit'),
-        '#name' => 'edit-' . $filter_key,
-        '#filter_id' => $filter_key,
-        '#filter_facet_id' => $filter['facet_id'],
+        '#name' => 'edit-' . $filter_id,
+        '#filter_id' => $filter_id,
+        '#facet_id' => $filter['facet_id'],
         '#limit_validation_errors' => [],
         '#ajax' => [
           'callback' => [$this, 'refreshDefaultValue'],
@@ -227,12 +251,13 @@ class ListPresetFiltersBuilder {
         ],
       ];
 
-      $form['wrapper']['buttons'][$filter_key]['delete-' . $filter_key] = [
+      $form['wrapper']['buttons'][$filter_id]['delete-' . $filter_id] = [
         '#type' => 'button',
         '#value' => $this->t('Delete'),
-        '#name' => 'delete-' . $filter_key,
-        '#filter_id' => $filter_key,
-        '#op' => 'remove-default-filter',
+        '#name' => 'delete-' . $filter_id,
+        '#filter_id' => $filter_id,
+        '#facet_id' => $filter['facet_id'],
+        '#op' => 'remove-default-value',
         '#limit_validation_errors' => [],
         '#ajax' => [
           'callback' => [$this, 'refreshDefaultValue'],
@@ -281,40 +306,35 @@ class ListPresetFiltersBuilder {
    *   The form state.
    * @param string $ajax_wrapper_id
    *   The AJAX wrapper ID.
-   * @param string $filter_key
-   *   The filter key.
+   * @param string $facet_id
+   *   The facet ID.
    * @param string $filter_id
    *   The filter id.
    *
    * @return array
    *   The built form.
    */
-  protected function buildEditPresetFilter(array $form, FormStateInterface $form_state, string $ajax_wrapper_id, string $filter_key, string $filter_id = '') {
+  protected function buildEditPresetFilter(array $form, FormStateInterface $form_state, string $ajax_wrapper_id, string $facet_id, string $filter_id = '') {
     /** @var \Drupal\oe_list_pages\ListSourceInterface $list_source */
     $list_source = $form_state->get('list_source');
     $current_filters = $form_state->get('current_filters');
     $available_filters = $list_source->getAvailableFilters();
 
     if (empty($filter_id)) {
-      $filter_id = self::generateFilterId($filter_key);
+      $filter_id = self::generateFilterId($facet_id);
     }
 
     $form['wrapper']['edit'] = [
       '#type' => 'fieldset',
-      '#title' => $this->t('Set default value for :filter', [':filter' => $available_filters[$filter_key]]),
+      '#title' => $this->t('Set default value for :filter', [':filter' => $available_filters[$facet_id]]),
     ];
 
-    $form['wrapper']['edit']['filter_id'] = [
-      '#value' => $filter_id,
-      '#type' => 'hidden',
-    ];
+    // Store the facet and filter IDs on the form state in case we need to
+    // rebuild the form.
+    $form_state->set('facet_id', $facet_id);
+    $form_state->set('filter_id', $filter_id);
 
-    $form['wrapper']['edit']['filter_key'] = [
-      '#value' => $filter_key,
-      '#type' => 'value',
-    ];
-
-    $facet = $this->getFacetById($list_source, $filter_key);
+    $facet = $this->getFacetById($list_source, $facet_id);
     if (!empty($facet) && ($widget = $facet->getWidgetInstance()) && ($widget instanceof ListPagesWidgetInterface)) {
       // Set the active items on the facet so that the widget can build the
       // form with default values.
@@ -347,6 +367,8 @@ class ListPresetFiltersBuilder {
           array_merge($form['#parents'], ['wrapper', 'edit']),
         ],
         '#ajax' => $ajax_definition,
+        '#filter_id' => $filter_id,
+        '#facet_id' => $facet_id,
       ];
 
       $form['wrapper']['edit'][$filter_id]['cancel_value'] = [
@@ -375,10 +397,10 @@ class ListPresetFiltersBuilder {
   public static function preRenderOperationButtons(array $form) {
     $rows =& $form['summary']['table']['#rows'];
     for ($i = 0; $i < count($rows); $i++) {
-      $filter_key = $rows[$i][0]['filter_key'];
+      $facet_id = $rows[$i][0]['facet_id'];
       $rows[$i][2]['data'] = [
-        'edit-' . $filter_key => $form['buttons'][$filter_key]['edit-' . $filter_key],
-        'delete-' . $filter_key => $form['buttons'][$filter_key]['delete-' . $filter_key],
+        'edit-' . $facet_id => $form['buttons'][$facet_id]['edit-' . $facet_id],
+        'delete-' . $facet_id => $form['buttons'][$facet_id]['delete-' . $facet_id],
       ];
     }
     unset($form['buttons']);

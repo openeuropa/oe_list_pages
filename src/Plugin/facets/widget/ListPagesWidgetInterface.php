@@ -71,7 +71,7 @@ interface ListPagesWidgetInterface {
    * @return array
    *   The active filters to be saved.
    */
-  public function prepareDefaultFilterValue(FacetInterface $facet, array &$form, FormStateInterface $form_state): array;
+  public function prepareDefaultFilterValue(FacetInterface $facet, array $form, FormStateInterface $form_state): array;
 
   /**
    * Get the active filters for the facet.

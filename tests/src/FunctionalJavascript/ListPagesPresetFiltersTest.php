@@ -8,6 +8,7 @@ use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
+use Drupal\oe_list_pages\ListPresetFiltersBuilder;
 use Drupal\search_api\Entity\Index;
 
 /**
@@ -32,6 +33,7 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     'emr_node',
     'search_api',
     'search_api_db',
+    'multivalue_form_element',
   ];
 
   /**
@@ -144,7 +146,7 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
 
     $assert->pageTextContains('Set default value for Body');
-    $body_filter_id = $this->getSession()->getPage()->find('css', 'input[name="emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][filter_id]"]')->getValue();
+    $body_filter_id = ListPresetFiltersBuilder::generateFilterId('body');
     $page = $this->getSession()->getPage();
     $filter_selector = 'emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $body_filter_id . '][body]';
     $page->fillField($filter_selector, 'cherry');
@@ -159,7 +161,7 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert = $this->assertSession();
     $assert->pageTextContains('Set default value for Body');
-    $body_filter_id = $this->getSession()->getPage()->find('css', 'input[name="emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][filter_id]"]')->getValue();
+    $body_filter_id = ListPresetFiltersBuilder::generateFilterId('body');
     $page = $this->getSession()->getPage();
     $filter_selector = 'emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $body_filter_id . '][body]';
     $page->fillField($filter_selector, 'cherry');
@@ -175,7 +177,7 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert = $this->assertSession();
     $assert->pageTextContains('Set default value for Created');
-    $created_filter_id = $this->getSession()->getPage()->find('css', 'input[name="emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][filter_id]"]')->getValue();
+    $created_filter_id = ListPresetFiltersBuilder::generateFilterId('created');
     $filter_selector = 'emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $created_filter_id . ']';
     // Assert validations.
     $page->pressButton('Set default value');
@@ -205,9 +207,10 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert = $this->assertSession();
     $assert->pageTextContains('Set default value for Published');
-    $published_filter_id = $this->getSession()->getPage()->find('css', 'input[name="emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][filter_id]"]')->getValue();
+    $published_filter_id = ListPresetFiltersBuilder::generateFilterId('list_facet_source_node_content_type_onestatus');
     $filter_selector = 'emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $published_filter_id . ']';
-    $this->getSession()->getPage()->selectFieldOption($filter_selector . '[list_facet_source_node_content_type_onestatus][]', '1', TRUE);
+
+    $this->getSession()->getPage()->selectFieldOption($filter_selector . '[list_facet_source_node_content_type_onestatus][0][boolean]', '1', TRUE);
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $expected_set_filters['Published'] = 'Yes';
@@ -218,9 +221,9 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert = $this->assertSession();
     $assert->pageTextContains('Set default value for Reference');
-    $reference_filter_id = $this->getSession()->getPage()->find('css', 'input[name="emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][filter_id]"]')->getValue();
+    $reference_filter_id = ListPresetFiltersBuilder::generateFilterId('reference');
     $filter_selector = 'emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $reference_filter_id . ']';
-    $this->getSession()->getPage()->fillField($filter_selector . '[reference_0]', 'that red animal (1)');
+    $this->getSession()->getPage()->fillField($filter_selector . '[reference][0][entity]', 'that red animal (1)');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $expected_set_filters['Reference'] = 'that red animal';
@@ -232,9 +235,8 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $assert = $this->assertSession();
     $assert->pageTextContains('Set default value for Reference');
     $filter_selector = 'emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $reference_filter_id . ']';
-    $this->assertSession()->fieldValueEquals($filter_selector . '[reference_0]', 'that red animal (1)');
-    $this->assertSession()->fieldValueEquals($filter_selector . '[reference_1]', '');
-    $this->getSession()->getPage()->fillField($filter_selector . '[reference_1]', 'that yellow animal (2)');
+    $this->assertSession()->fieldValueEquals($filter_selector . '[reference][0][entity]', 'that red animal (1)');
+    $this->getSession()->getPage()->fillField($filter_selector . '[reference][1][entity]', 'that yellow animal (2)');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $expected_set_filters['Reference'] = 'that red animal, that yellow animal';
@@ -245,9 +247,9 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert = $this->assertSession();
     $assert->pageTextContains('Set default value for Reference');
-    $this->assertSession()->fieldValueEquals($filter_selector . '[reference_0]', 'that red animal (1)');
-    $this->assertSession()->fieldValueEquals($filter_selector . '[reference_1]', 'that yellow animal (2)');
-    $this->getSession()->getPage()->fillField($filter_selector . '[reference_1]', '');
+    $this->assertSession()->fieldValueEquals($filter_selector . '[reference][0][entity]', 'that red animal (1)');
+    $this->assertSession()->fieldValueEquals($filter_selector . '[reference][1][entity]', 'that yellow animal (2)');
+    $this->getSession()->getPage()->fillField($filter_selector . '[reference][1][entity]', '');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $expected_set_filters['Reference'] = 'that red animal';
@@ -259,10 +261,12 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $assert = $this->assertSession();
     $assert->pageTextContains('Set default value for Select one');
 
-    $select_one_filter_id = $this->getSession()->getPage()->find('css', 'input[name="emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][filter_id]"]')->getValue();
+    $select_one_filter_id = ListPresetFiltersBuilder::generateFilterId('select_one');
     $filter_selector = 'emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $select_one_filter_id . ']';
-    $this->getSession()->getPage()->selectFieldOption($filter_selector . '[select_one][]', 'test2', TRUE);
-    $this->getSession()->getPage()->selectFieldOption($filter_selector . '[select_one][]', 'test3', TRUE);
+    $this->getSession()->getPage()->selectFieldOption($filter_selector . '[select_one][0][list]', 'test2');
+    $page->pressButton('Add another item');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->selectFieldOption($filter_selector . '[select_one][1][list]', 'test3');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $expected_set_filters['Select one'] = 'Test2, Test3';
@@ -413,14 +417,15 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $assert->pageTextContains('that yellow fruit');
     $assert->pageTextNotContains('that red fruit');
 
-    // Set preset filter for Reference for yellow animal.
+    // Set preset for Reference for yellow animal.
     $this->drupalGet($node->toUrl('edit-form'));
     $this->clickLink('List Page');
     $page->selectFieldOption('Add default value for', 'Reference');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert = $this->assertSession();
+
     $assert->pageTextContains('Set default value for Reference');
-    $this->getSession()->getPage()->fillField('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $reference_filter_id . '][reference_0]', 'that yellow animal (2)');
+    $this->getSession()->getPage()->fillField('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $reference_filter_id . '][reference][0][entity]', 'that yellow animal (2)');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $expected_set_filters['Reference'] = 'that yellow animal';
@@ -430,14 +435,14 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $assert->pageTextContains('that yellow fruit');
     $assert->pageTextNotContains('that red fruit');
 
-    // Set again for red animal.
+    // Change the preset of Reference to the red animal.
     $this->drupalGet($node->toUrl('edit-form'));
     $this->clickLink('List Page');
     $page->pressButton('edit-' . $reference_filter_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert = $this->assertSession();
     $assert->pageTextContains('Set default value for Reference');
-    $this->getSession()->getPage()->fillField('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $reference_filter_id . '][reference_0]', 'that red animal (1)');
+    $this->getSession()->getPage()->fillField('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $reference_filter_id . '][reference][0][entity]', 'that red animal (1)');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $expected_set_filters['Reference'] = 'that red animal';

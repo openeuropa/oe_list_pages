@@ -30,7 +30,7 @@ class ListPagesWidgetBase extends WidgetPluginBase implements ListPagesWidgetInt
   /**
    * {@inheritdoc}
    */
-  public function prepareDefaultFilterValue(FacetInterface $facet, array &$form, FormStateInterface $form_state): array {
+  public function prepareDefaultFilterValue(FacetInterface $facet, array $form, FormStateInterface $form_state): array {
     return $this->prepareValueForUrl($facet, $form, $form_state);
   }
 
