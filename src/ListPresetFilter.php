@@ -37,12 +37,12 @@ class ListPresetFilter {
    *
    * @param string $facet_id
    *   The facet id.
-   * @param string $operator
-   *   The operator.
    * @param array $values
    *   The operator.
+   * @param string $operator
+   *   The operator.
    */
-  public function __construct(string $facet_id, string $operator, array $values) {
+  public function __construct(string $facet_id, array $values, string $operator = 'OR') {
     $this->facetId = $facet_id;
     $this->operator = $operator;
     $this->values = $values;

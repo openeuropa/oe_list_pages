@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\oe_list_pages\Kernel;
 
+use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\ListSourceFactory;
 use Drupal\oe_list_pages\Plugin\facets\widget\MultiselectWidget;
 
@@ -53,14 +54,16 @@ class MultiSelectWidgetTest extends ListsSourceTestBase {
 
     // Search for categories.
     $list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
+    $filter = new ListPresetFilter($facet_categories->id(), ['cat1']);
     /** @var \Drupal\search_api\Query\QueryInterface $default_query */
-    $query = $list->getQuery(['preset_filters' => [$facet_categories->id() => 'cat1']]);
+    $query = $list->getQuery(['preset_filters' => [$facet_categories->id() => $filter]]);
     $query->execute();
     $results = $query->getResults();
     $this->assertCount(3, $results->getResultItems());
 
     $this->container->get('kernel')->rebuildContainer();
-    $query = $list->getQuery(['preset_filters' => [$facet_categories->id() => 'cat2']]);
+    $filter = new ListPresetFilter($facet_categories->id(), ['cat2']);
+    $query = $list->getQuery(['preset_filters' => [$facet_categories->id() => $filter]]);
     $query->execute();
     $results = $query->getResults();
     $this->assertCount(1, $results->getResultItems());

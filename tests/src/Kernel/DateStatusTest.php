@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\oe_list_pages\Kernel;
 
+use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\ListSourceFactory;
 use Drupal\oe_list_pages\Plugin\facets\query_type\DateStatus;
 
@@ -108,7 +109,8 @@ class DateStatusTest extends ListsSourceTestBase {
     // We have no facet configuration so we get all results.
     $this->assertCount(4, $results->getResultItems());
 
-    $query = $list->getQuery(['preset_filters' => [$this->facet->id() => [DateStatus::PAST]]]);
+    $filter = new ListPresetFilter($this->facet->id(), [DateStatus::PAST]);
+    $query = $list->getQuery(['preset_filters' => [$this->facet->id() => $filter]]);
     $query->execute();
     $results = $query->getResults();
     $this->assertCount(2, $results->getResultItems());
@@ -118,7 +120,8 @@ class DateStatusTest extends ListsSourceTestBase {
     ]);
 
     $this->container->get('kernel')->rebuildContainer();
-    $query = $list->getQuery(['preset_filters' => [$this->facet->id() => [DateStatus::UPCOMING]]]);
+    $filter = new ListPresetFilter($this->facet->id(), [DateStatus::UPCOMING]);
+    $query = $list->getQuery(['preset_filters' => [$this->facet->id() => $filter]]);
     $query->execute();
     $results = $query->getResults();
     $this->assertCount(2, $results->getResultItems());
@@ -128,12 +131,14 @@ class DateStatusTest extends ListsSourceTestBase {
     ]);
 
     $this->container->get('kernel')->rebuildContainer();
+    $filter = new ListPresetFilter($this->facet->id(), [
+      DateStatus::PAST,
+      DateStatus::UPCOMING,
+    ]);
+
     $query = $list->getQuery([
       'preset_filters' => [
-        $this->facet->id() => [
-          DateStatus::PAST,
-          DateStatus::UPCOMING,
-        ],
+        $this->facet->id() => $filter,
       ],
     ]);
     $query->execute();

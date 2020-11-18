@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\oe_list_pages\Kernel;
 
+use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\ListSourceFactory;
 use Drupal\oe_list_pages\Plugin\facets\query_type\Date;
 use Drupal\oe_list_pages\Plugin\facets\widget\DateWidget;
@@ -153,7 +154,8 @@ class DateWidgetTest extends ListsSourceTestBase {
     foreach ($this->getTestFilterDateData() as $message => $data) {
       /** @var \Drupal\search_api\Query\QueryInterface $query */
       $this->container->get('kernel')->rebuildContainer();
-      $query = $list->getQuery(['preset_filters' => [$facet_date->id() => [implode('|', $data['filters'])]]]);
+      $filter = new ListPresetFilter($facet_date->id(), [implode('|', $data['filters'])]);
+      $query = $list->getQuery(['preset_filters' => [$facet_date->id() => $filter]]);
       $query->execute();
       $results = $query->getResults();
       $this->assertCount($data['expected_count'], $results->getResultItems(), $message);

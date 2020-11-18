@@ -185,7 +185,7 @@ class ListPresetFiltersBuilder {
 
     if ($op === 'set-default-value') {
       $preset_filter = $widget->prepareDefaultFilterValue($facet, $current_filters[$filter_id], $subform_state);
-      $current_filters[$filter_id] = new ListPresetFilter($facet_id, $preset_filter['operator'], $preset_filter['values']);
+      $current_filters[$filter_id] = new ListPresetFilter($facet_id, $preset_filter['values'], $preset_filter['operator']);
     }
 
     // Set the current filters on the form state so they can be used elsewhere.

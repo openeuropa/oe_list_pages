@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\Tests\oe_list_pages\Kernel;
 
 use Drupal\language\Entity\ConfigurableLanguage;
+use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\ListSourceFactory;
 use Drupal\search_api\Item\Field;
 use Symfony\Component\HttpFoundation\Request;
@@ -301,10 +302,11 @@ class ListsQueryTest extends ListsSourceTestBase {
   public function testPresetFilters(): void {
     $search_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
     $facet_id = $this->generateFacetId('category', $search_id);
+    $filter = new ListPresetFilter($facet_id, ['third class']);
     /** @var \Drupal\search_api\Query\QueryInterface $default_query */
     $query = $this->list->getQuery([
       'limit' => 2,
-      'preset_filters' => [$facet_id => ['third class']],
+      'preset_filters' => [$facet_id => $filter],
     ]);
     $query->execute();
     /** @var \Drupal\search_api\Query\ResultSetInterface $results */
