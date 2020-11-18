@@ -230,7 +230,7 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $this->assertDefaultValueForFilters($expected_set_filters);
 
     // Set additional value for reference.
-    $page->selectFieldOption('Add default value for', 'Reference');
+    $page->pressButton('edit-' . $reference_filter_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert = $this->assertSession();
     $assert->pageTextContains('Set default value for Reference');
@@ -345,7 +345,7 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     // Edit again, change preset filter, expose filter and save.
     $this->drupalGet($node->toUrl('edit-form'));
     $this->clickLink('List Page');
-    $page->selectFieldOption('Add default value for', 'Body');
+    $page->pressButton('edit-' . $body_filter_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert = $this->assertSession();
     $assert->pageTextContains(' Set default value for Body');

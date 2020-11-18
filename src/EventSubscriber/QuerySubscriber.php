@@ -6,6 +6,7 @@ namespace Drupal\oe_list_pages\EventSubscriber;
 
 use Drupal\facets\FacetManager\DefaultFacetManager;
 use Drupal\facets\QueryType\QueryTypePluginManager;
+use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\search_api\Event\QueryPreExecuteEvent;
 use Drupal\search_api\Event\SearchApiEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -59,7 +60,6 @@ class QuerySubscriber implements EventSubscriberInterface {
    */
   public function queryAlter(QueryPreExecuteEvent $event) {
     $query = $event->getQuery();
-
     $ignored_filters = $preset_filters = [];
 
     if (!$query->getIndex()->getServerInstance()->supportsFeature('search_api_facets')) {
@@ -77,17 +77,11 @@ class QuerySubscriber implements EventSubscriberInterface {
 
     // Add the active filters.
     foreach ($this->facetManager->getFacetsByFacetSourceId($facetsource_id) as $facet) {
-      // Handle preset filters. If filter is preset, set as active items.
-      if (empty($facet->getActiveItems())) {
-        /** @var \Drupal\oe_list_pages\ListPresetFilter $filter */
-        foreach ($preset_filters as $filter) {
-          if ($filter->getFacetId() === $facet->id()) {
-            $active_items = is_array($filter->getValues()) ? $filter->getValues() : [$filter->getValues()];
-            $facet->setActiveItems($active_items);
-          }
-        }
-      }
+      $facets[$facet->id()] = $facet;
+    }
 
+    $processed_facets = array_merge($facets, $this->processDefaultFilters($facets, $preset_filters));
+    foreach ($processed_facets as $facet) {
       // Handle ignored filters. If filter is ignored unset its active items.
       if (in_array($facet->id(), $ignored_filters)) {
         $facet->setActiveItems([]);
@@ -100,6 +94,66 @@ class QuerySubscriber implements EventSubscriberInterface {
       ]);
       $query_type_plugin->execute();
     }
+  }
+
+  /**
+   * Processes the default filters.
+   *
+   * @param array $facets
+   *   The facets.
+   * @param array $preset_filters
+   *   The preset filters.
+   *
+   * @return array
+   *   The processed facets.
+   */
+  protected function processDefaultFilters(array $facets, array $preset_filters): array {
+    $ignored_filters = $processed_facets = [];
+
+    // Some facets might have original values already set (by url processor).
+    foreach ($preset_filters as $filter) {
+      /** @var \Drupal\facets\Entity\Facet $facet */
+      $facet = $facets[$filter->getFacetId()];
+      if (!empty($facet->getActiveItems())) {
+        $ignored_filters[] = $facet->id();
+      }
+    }
+
+    /** @var \Drupal\oe_list_pages\ListPresetFilter $filter */
+    foreach ($preset_filters as $filter) {
+      // We need to clone the facet to use to guarantee we can execute it
+      // several times if needed.
+      /** @var \Drupal\facets\Entity\Facet $original_facet */
+      $original_facet = $facets[$filter->getFacetId()];
+      $facet = clone $original_facet;
+
+      // If we have already active items skip default values.
+      if (in_array($facet->id(), $ignored_filters)) {
+        continue;
+      }
+      if ($filter->getOperator() === ListPresetFilter::NOT_OPERATOR) {
+        $facet->setQueryOperator(ListPresetFilter::AND_OPERATOR);
+        $facet->setExclude(TRUE);
+      }
+      else {
+        $facet->setQueryOperator($filter->getOperator());
+      }
+
+      $active_items = is_array($filter->getValues()) ? $filter->getValues() : [$filter->getValues()];
+      // For the query.
+      $facet->setActiveItems($active_items);
+      // For the form.
+      $original_facet->setActiveItems($active_items);
+
+      $facet_id = $facet->id();
+      $inc = 1;
+      while (isset($processed_facets[$facet_id])) {
+        $facet_id .= $inc;
+      }
+      $processed_facets[$facet_id] = $facet;
+    }
+
+    return $processed_facets;
   }
 
 }

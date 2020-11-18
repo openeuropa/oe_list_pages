@@ -321,6 +321,11 @@ class ListPresetFiltersBuilder {
 
     if (empty($filter_id)) {
       $filter_id = self::generateFilterId($facet_id);
+      $inc = 1;
+      while (isset($current_filters[$filter_id])) {
+        $filter_id = self::generateFilterId($facet_id . $inc);
+        $inc++;
+      }
     }
 
     $form['wrapper']['edit'] = [

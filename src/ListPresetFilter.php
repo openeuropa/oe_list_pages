@@ -11,6 +11,10 @@ namespace Drupal\oe_list_pages;
  */
 class ListPresetFilter {
 
+  const AND_OPERATOR = 'and';
+  const OR_OPERATOR = 'or';
+  const NOT_OPERATOR = 'not';
+
   /**
    * The facet id.
    *
@@ -116,9 +120,9 @@ class ListPresetFilter {
    */
   public static function getOperators(): array {
     return [
-      'AND' => t('All of'),
-      'OR' => t('Any of'),
-      'NONE' => t('None of'),
+      self::AND_OPERATOR => t('All of'),
+      self::OR_OPERATOR => t('Any of'),
+      self::NOT_OPERATOR => t('None of'),
     ];
   }
 
