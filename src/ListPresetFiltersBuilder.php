@@ -53,8 +53,7 @@ class ListPresetFiltersBuilder {
    * @return array
    *   The form elements.
    */
-  public function buildDefaultFilters(array $form, FormStateInterface $form_state, ListSourceInterface $list_source, ListPageConfiguration $configuration) {
-    $preset_filters = $configuration->getDefaultFiltersValues();
+  public function buildDefaultFilters(array $form, FormStateInterface $form_state, ListSourceInterface $list_source, ListPageConfiguration $configuration): array {
     $form_state->set('list_source', $list_source);
 
     $ajax_wrapper_id = 'list-page-default_filter_values-' . ($form['#parents'] ? '-' . implode('-', $form['#parents']) : '');
@@ -73,8 +72,7 @@ class ListPresetFiltersBuilder {
       '#type' => 'label',
     ];
 
-    $current_filters = $form_state->get('current_filters') ?? $preset_filters;
-    $form_state->set('current_filters', $current_filters);
+    $this->initializeCurrentFilterValues($form_state, $configuration);
 
     $triggering_element = $form_state->getTriggeringElement();
     $this->handleDefaultValueSubmit($form, $form_state);
@@ -82,7 +80,7 @@ class ListPresetFiltersBuilder {
     // Set the current filters on the form so they can be used in the submit.
     $form['current_filters'] = [
       '#type' => 'value',
-      '#value' => $form_state->get('current_filters'),
+      '#value' => static::getListSourceCurrentFilterValues($form_state, $list_source),
     ];
 
     // Determine if the triggered operation was one of ours.
@@ -138,9 +136,9 @@ class ListPresetFiltersBuilder {
    * @see self::buildDefaultFilters()
    */
   protected function handleDefaultValueSubmit(array $form, FormStateInterface $form_state): void {
-    $current_filters = $form_state->get('current_filters');
     /** @var \Drupal\oe_list_pages\ListSourceInterface $list_source */
     $list_source = $form_state->get('list_source');
+    $current_filters = static::getListSourceCurrentFilterValues($form_state, $list_source);
     $triggering_element = $form_state->getTriggeringElement();
     if (!$triggering_element) {
       return;
@@ -179,7 +177,7 @@ class ListPresetFiltersBuilder {
       $widget->prepareDefaultFilterValue($facet, $current_filters[$filter_id], $subform_state);
       $delete_filter_id = $triggering_element['#filter_id'];
       unset($current_filters[$delete_filter_id]);
-      $form_state->set('current_filters', $current_filters);
+      static::setListSourceCurrentFilterValues($form_state, $list_source, $current_filters);
       return;
     }
 
@@ -191,7 +189,7 @@ class ListPresetFiltersBuilder {
     }
 
     // Set the current filters on the form state so they can be used elsewhere.
-    $form_state->set('current_filters', $current_filters);
+    static::setListSourceCurrentFilterValues($form_state, $list_source, $current_filters);
   }
 
   /**
@@ -210,7 +208,7 @@ class ListPresetFiltersBuilder {
   protected function buildSummaryPresetFilters(array $form, FormStateInterface $form_state, string $ajax_wrapper_id) {
     /** @var \Drupal\oe_list_pages\ListSourceInterface $list_source */
     $list_source = $form_state->get('list_source');
-    $current_filters = $form_state->get('current_filters');
+    $current_filters = static::getListSourceCurrentFilterValues($form_state, $list_source);
 
     $available_filters = $list_source->getAvailableFilters();
 
@@ -317,7 +315,7 @@ class ListPresetFiltersBuilder {
   protected function buildEditPresetFilter(array $form, FormStateInterface $form_state, string $ajax_wrapper_id, string $facet_id, string $filter_id = '') {
     /** @var \Drupal\oe_list_pages\ListSourceInterface $list_source */
     $list_source = $form_state->get('list_source');
-    $current_filters = $form_state->get('current_filters');
+    $current_filters = static::getListSourceCurrentFilterValues($form_state, $list_source);
     $available_filters = $list_source->getAvailableFilters();
 
     if (empty($filter_id)) {
@@ -492,6 +490,68 @@ class ListPresetFiltersBuilder {
    */
   public static function generateFilterId(string $id): string {
     return md5($id);
+  }
+
+  /**
+   * Set the current filter values on the form state.
+   *
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
+   *   The list source the filter values belong to.
+   * @param array $current_filter_values
+   *   The filter values.
+   */
+  protected static function setListSourceCurrentFilterValues(FormStateInterface $form_state, ListSourceInterface $list_source, array $current_filter_values): void {
+    $storage = &$form_state->getStorage();
+    NestedArray::setValue($storage, ['current_filters', $list_source->getSearchId()], $current_filter_values);
+  }
+
+  /**
+   * Gets the current filter values from the form state.
+   *
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
+   *   The list source the filter values belong to.
+   *
+   * @return array
+   *   The filter values.
+   */
+  protected static function getListSourceCurrentFilterValues(FormStateInterface $form_state, ListSourceInterface $list_source): array {
+    $storage = $form_state->getStorage();
+    $current_filter_values = NestedArray::getValue($storage, ['current_filters', $list_source->getSearchId()]);
+    return $current_filter_values ?? [];
+  }
+
+  /**
+   * Initialize the form state with the values of the current list source.
+   *
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   * @param \Drupal\oe_list_pages\ListPageConfiguration $configuration
+   *   The current configuration.
+   */
+  protected function initializeCurrentFilterValues(FormStateInterface $form_state, ListPageConfiguration $configuration): void {
+    /** @var \Drupal\oe_list_pages\ListSourceInterface $list_source */
+    $list_source = $form_state->get('list_source');
+
+    // If we have current filter values for this list source, we can keep them
+    // going forward.
+    $values = static::getListSourceCurrentFilterValues($form_state, $list_source);
+    if ($values) {
+      return;
+    }
+
+    // Otherwise, we need to check if the current list source matches the
+    // passed configuration and set the ones from the configuration if they do.
+    if ($list_source->getEntityType() === $configuration->getEntityType() && $list_source->getBundle() === $configuration->getBundle()) {
+      $values = $configuration->getDefaultFiltersValues();
+      static::setListSourceCurrentFilterValues($form_state, $list_source, $values);
+      return;
+    }
+
+    static::setListSourceCurrentFilterValues($form_state, $list_source, []);
   }
 
 }
