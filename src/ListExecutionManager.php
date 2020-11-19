@@ -104,7 +104,7 @@ class ListExecutionManager implements ListExecutionManagerInterface {
     $result = $query->execute();
     $list_execution = new ListExecutionResults($query, $result, $list_source, $configuration);
 
-    $this->executedLists[$configuration->getBundle()] = $list_execution;
+    $this->executedLists[$configuration->getId()] = $list_execution;
 
     return $list_execution;
   }

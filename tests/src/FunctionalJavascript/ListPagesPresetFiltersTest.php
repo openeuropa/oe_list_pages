@@ -41,7 +41,8 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
    */
   public function testListPageFiltersPresenceInContentForm(): void {
     // Default filters configuration is present in oe_list_page content type.
-    $this->drupalLogin($this->rootUser);
+    $admin = $this->createUser([], NULL, TRUE);
+    $this->drupalLogin($admin);
     $this->drupalGet('/node/add/oe_list_page');
     $this->clickLink('List Page');
     $this->assertSession()->fieldExists('Add default value for');
@@ -70,45 +71,85 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     // Create some test nodes of content type Two.
     $date = new DrupalDateTime('30-10-2020');
     $values = [
-      'title' => 'that red animal',
+      'title' => 'Red',
       'type' => 'content_type_two',
-      'body' => 'this is a fish',
+      'body' => 'red color',
       'field_select_one' => 'test2',
       'status' => NodeInterface::PUBLISHED,
       'created' => $date->getTimestamp(),
     ];
-    $node = Node::create($values);
-    $node->save();
+    $red_node = Node::create($values);
+    $red_node->save();
+
     $values = [
-      'title' => 'that yellow animal',
+      'title' => 'Yellow',
       'type' => 'content_type_two',
-      'body' => 'this is a giraffe',
+      'body' => 'yellow color',
       'field_select_one' => 'test2',
       'status' => NodeInterface::PUBLISHED,
+      'created' => $date->getTimestamp(),
+    ];
+    $yellow_node = Node::create($values);
+    $yellow_node->save();
+
+    $values = [
+      'title' => 'Green',
+      'type' => 'content_type_two',
+      'body' => 'green color',
+      'field_select_one' => 'test2',
+      'status' => NodeInterface::PUBLISHED,
+      'created' => $date->getTimestamp(),
+    ];
+    $green_node = Node::create($values);
+    $green_node->save();
+
+    // Create some test nodes of content type One.
+    $date = new DrupalDateTime('20-10-2020');
+    $values = [
+      'title' => 'Banana title',
+      'type' => 'content_type_one',
+      'body' => 'This is a banana',
+      'status' => NodeInterface::PUBLISHED,
+      'field_select_one' => 'test1',
+      'field_reference' => [$yellow_node->id(), $green_node->id()],
       'created' => $date->getTimestamp(),
     ];
     $node = Node::create($values);
     $node->save();
 
-    // Create some test nodes of content type One.
     $date = new DrupalDateTime('20-10-2020');
     $values = [
-      'title' => 'that yellow fruit',
+      'title' => 'Sun title',
       'type' => 'content_type_one',
-      'body' => 'this is a banana',
+      'body' => 'This is the sun',
       'status' => NodeInterface::PUBLISHED,
       'field_select_one' => 'test1',
-      'field_reference' => $node->id(),
+      'field_reference' => $yellow_node->id(),
       'created' => $date->getTimestamp(),
     ];
     $node = Node::create($values);
     $node->save();
+
+    $date = new DrupalDateTime('20-10-2020');
+    $values = [
+      'title' => 'Grass title',
+      'type' => 'content_type_one',
+      'body' => 'this is the grass',
+      'status' => NodeInterface::PUBLISHED,
+      'field_select_one' => 'test1',
+      'field_reference' => $green_node->id(),
+      'created' => $date->getTimestamp(),
+    ];
+    $node = Node::create($values);
+    $node->save();
+
     $date = new DrupalDateTime('30-10-2020');
     $values = [
-      'title' => 'that red fruit',
+      'title' => 'Cherry title',
       'type' => 'content_type_one',
-      'body' => 'this is a cherry',
+      'body' => 'This is a cherry',
       'field_select_one' => 'test2',
+      'field_reference' => $red_node->id(),
       'status' => NodeInterface::PUBLISHED,
       'created' => $date->getTimestamp(),
     ];
@@ -120,7 +161,14 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     // Index the nodes.
     $index->indexItems();
 
-    $this->drupalLogin($this->rootUser);
+    // Filter ids.
+    $body_filter_id = ListPresetFiltersBuilder::generateFilterId('body');
+    $created_filter_id = ListPresetFiltersBuilder::generateFilterId('created');
+    $published_filter_id = ListPresetFiltersBuilder::generateFilterId('list_facet_source_node_content_type_onestatus');
+    $reference_filter_id = ListPresetFiltersBuilder::generateFilterId('reference');
+
+    $admin = $this->createUser([], NULL, TRUE);
+    $this->drupalLogin($admin);
     $this->drupalGet('/node/add/oe_list_page');
     $this->clickLink('List Page');
     $page = $this->getSession()->getPage();
@@ -146,7 +194,6 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
 
     $assert->pageTextContains('Set default value for Body');
-    $body_filter_id = ListPresetFiltersBuilder::generateFilterId('body');
     $page = $this->getSession()->getPage();
     $filter_selector = 'emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $body_filter_id . '][body]';
     $page->fillField($filter_selector, 'cherry');
@@ -154,22 +201,20 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert->pageTextNotContains('Title field is required.');
     $assert->pageTextNotContains('Body field is required.');
-    $this->assertDefaultValueForFilters(['' => t('No default values set')]);
+    $this->assertDefaultValueForFilters([['key' => '', 'value' => t('No default values set')]]);
 
     // Set preset filter for Body and save.
     $page->selectFieldOption('Add default value for', 'Body');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert = $this->assertSession();
     $assert->pageTextContains('Set default value for Body');
-    $body_filter_id = ListPresetFiltersBuilder::generateFilterId('body');
     $page = $this->getSession()->getPage();
     $filter_selector = 'emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $body_filter_id . '][body]';
     $page->fillField($filter_selector, 'cherry');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_set_filters = [
-      'Body' => 'cherry',
-    ];
+    $expected_set_filters = [];
+    $expected_set_filters['body'] = ['key' => 'Body', 'value' => 'cherry'];
     $this->assertDefaultValueForFilters($expected_set_filters);
 
     // Set preset filter for Created.
@@ -177,7 +222,6 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert = $this->assertSession();
     $assert->pageTextContains('Set default value for Created');
-    $created_filter_id = ListPresetFiltersBuilder::generateFilterId('created');
     $filter_selector = 'emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $created_filter_id . ']';
     // Assert validations.
     $page->pressButton('Set default value');
@@ -199,7 +243,7 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $this->getSession()->getPage()->fillField($filter_selector . '[created_first_date_wrapper][created_first_date][date]', '10/19/2019');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_set_filters['Created'] = 'After 19 October 2019';
+    $expected_set_filters['created'] = ['key' => 'Created', 'value' => 'After 19 October 2019'];
     $this->assertDefaultValueForFilters($expected_set_filters);
 
     // Set preset filter for Published.
@@ -207,13 +251,12 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert = $this->assertSession();
     $assert->pageTextContains('Set default value for Published');
-    $published_filter_id = ListPresetFiltersBuilder::generateFilterId('list_facet_source_node_content_type_onestatus');
     $filter_selector = 'emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $published_filter_id . ']';
 
     $this->getSession()->getPage()->selectFieldOption($filter_selector . '[list_facet_source_node_content_type_onestatus][0][boolean]', '1', TRUE);
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_set_filters['Published'] = 'Yes';
+    $expected_set_filters['published'] = ['key' => 'Published', 'value' => 'Yes'];
     $this->assertDefaultValueForFilters($expected_set_filters);
 
     // Set preset filter for Reference.
@@ -221,12 +264,11 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert = $this->assertSession();
     $assert->pageTextContains('Set default value for Reference');
-    $reference_filter_id = ListPresetFiltersBuilder::generateFilterId('reference');
     $filter_selector = 'emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $reference_filter_id . ']';
-    $this->getSession()->getPage()->fillField($filter_selector . '[reference][0][entity]', 'that red animal (1)');
+    $this->getSession()->getPage()->fillField($filter_selector . '[reference][0][entity]', 'red (1)');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_set_filters['Reference'] = 'that red animal';
+    $expected_set_filters['reference'] = ['key' => 'Reference', 'value' => 'red'];
     $this->assertDefaultValueForFilters($expected_set_filters);
 
     // Set additional value for reference.
@@ -235,11 +277,11 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $assert = $this->assertSession();
     $assert->pageTextContains('Set default value for Reference');
     $filter_selector = 'emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $reference_filter_id . ']';
-    $this->assertSession()->fieldValueEquals($filter_selector . '[reference][0][entity]', 'that red animal (1)');
-    $this->getSession()->getPage()->fillField($filter_selector . '[reference][1][entity]', 'that yellow animal (2)');
+    $this->assertSession()->fieldValueEquals($filter_selector . '[reference][0][entity]', 'red (1)');
+    $this->getSession()->getPage()->fillField($filter_selector . '[reference][1][entity]', 'yellow (2)');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_set_filters['Reference'] = 'that red animal, that yellow animal';
+    $expected_set_filters['reference'] = ['key' => 'Reference', 'value' => 'red, yellow'];
     $this->assertDefaultValueForFilters($expected_set_filters);
 
     // Remove the yellow animal.
@@ -247,12 +289,12 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert = $this->assertSession();
     $assert->pageTextContains('Set default value for Reference');
-    $this->assertSession()->fieldValueEquals($filter_selector . '[reference][0][entity]', 'that red animal (1)');
-    $this->assertSession()->fieldValueEquals($filter_selector . '[reference][1][entity]', 'that yellow animal (2)');
+    $this->assertSession()->fieldValueEquals($filter_selector . '[reference][0][entity]', 'red (1)');
+    $this->assertSession()->fieldValueEquals($filter_selector . '[reference][1][entity]', 'yellow (2)');
     $this->getSession()->getPage()->fillField($filter_selector . '[reference][1][entity]', '');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_set_filters['Reference'] = 'that red animal';
+    $expected_set_filters['reference'] = ['key' => 'Reference', 'value' => 'red'];
     $this->assertDefaultValueForFilters($expected_set_filters);
 
     // Set preset filter for Select one.
@@ -269,14 +311,14 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $this->getSession()->getPage()->selectFieldOption($filter_selector . '[select_one][1][list]', 'test3');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_set_filters['Select one'] = 'Test2, Test3';
+    $expected_set_filters['select_one'] = ['key' => 'Select one', 'value' => 'Test2, Test3'];
     $this->assertDefaultValueForFilters($expected_set_filters);
 
     // Remove preset filter for Published.
     $this->assertSession()->elementTextContains('css', 'table.default-filter-values-table', 'Published');
     $page->pressButton('delete-' . $published_filter_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
-    unset($expected_set_filters['Published']);
+    unset($expected_set_filters['published']);
     $this->assertDefaultValueForFilters($expected_set_filters);
     $this->assertSession()->elementTextNotContains('css', 'table.default-filter-values-table', 'Published');
 
@@ -284,7 +326,7 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $this->assertSession()->elementTextContains('css', 'table.default-filter-values-table', 'Reference');
     $page->pressButton('delete-' . $reference_filter_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
-    unset($expected_set_filters['Reference']);
+    unset($expected_set_filters['reference']);
     $this->assertDefaultValueForFilters($expected_set_filters);
     $this->assertSession()->elementTextNotContains('css', 'table.default-filter-values-table', 'Reference');
 
@@ -292,7 +334,7 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $this->assertSession()->elementTextContains('css', 'table.default-filter-values-table', 'Select one');
     $page->pressButton('delete-' . $select_one_filter_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
-    unset($expected_set_filters['Select one']);
+    unset($expected_set_filters['select_one']);
     $this->assertDefaultValueForFilters($expected_set_filters);
     $this->assertSession()->elementTextNotContains('css', 'table.default-filter-values-table', 'Select one');
 
@@ -317,7 +359,7 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $page->fillField('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $body_filter_id . '][body]', 'banana');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_set_filters['Body'] = 'banana';
+    $expected_set_filters['body'] = ['key' => 'Body', 'value' => 'banana'];
     $this->assertDefaultValueForFilters($expected_set_filters);
 
     // Edit preset filter for Created.
@@ -331,7 +373,7 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $this->getSession()->getPage()->fillField('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $created_filter_id . '][created_first_date_wrapper][created_first_date][date]', '10/31/2020');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_set_filters['Created'] = 'Before 31 October 2020';
+    $expected_set_filters['created'] = ['key' => 'Created', 'value' => 'Before 31 October 2020'];
     $this->assertDefaultValueForFilters($expected_set_filters);
 
     // Save.
@@ -339,8 +381,8 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     // Check results.
     $node = $this->drupalGetNodeByTitle('List page for ct1');
     $this->drupalGet($node->toUrl());
-    $assert->pageTextNotContains('that red fruit');
-    $assert->pageTextContains('that yellow fruit');
+    $assert->pageTextNotContains('Cherry title');
+    $assert->pageTextContains('Banana title');
 
     // Edit again, change preset filter, expose filter and save.
     $this->drupalGet($node->toUrl('edit-form'));
@@ -354,23 +396,23 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $page->fillField('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $body_filter_id . '][body]', 'cherry');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_set_filters['Body'] = 'cherry';
+    $expected_set_filters['body'] = ['key' => 'Body', 'value' => 'cherry'];
     $this->assertDefaultValueForFilters($expected_set_filters);
     $page->checkField('Override default exposed filters');
     $page->checkField('Body');
     $page->checkField('Created');
     $page->pressButton('Save');
     $this->drupalGet($node->toUrl());
-    $assert->pageTextNotContains('that yellow fruit');
-    $assert->pageTextContains('that red fruit');
+    $assert->pageTextNotContains('Banana title');
+    $assert->pageTextContains('Cherry title');
     $assert->fieldValueEquals('Body', 'cherry');
     $assert->fieldValueEquals('Created', 'lt');
 
     // Change directly the value in exposed form.
     $page->fillField('Body', 'banana');
     $this->getSession()->getPage()->pressButton('Search');
-    $assert->pageTextContains('that yellow fruit');
-    $assert->pageTextNotContains('that red fruit');
+    $assert->pageTextContains('Banana title');
+    $assert->pageTextNotContains('Cherry title');
     $assert->fieldValueEquals('Body', 'banana');
 
     // Change also the created date.
@@ -380,22 +422,22 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $assert->fieldValueEquals('Body', 'banana');
     $assert->fieldValueEquals('Created', 'gt');
     $assert->fieldValueEquals('created_first_date_wrapper[created_first_date][date]', '2020-10-30');
-    $assert->pageTextNotContains('that yellow fruit');
-    $assert->pageTextNotContains('that red fruit');
+    $assert->pageTextNotContains('Banana title');
+    $assert->pageTextNotContains('Cherry title');
 
     // Edit again to remove filters and save.
     $this->drupalGet($node->toUrl('edit-form'));
     $this->clickLink('List Page');
     $page->pressButton('delete-' . $body_filter_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
-    unset($expected_set_filters['Body']);
+    unset($expected_set_filters['body']);
     $this->assertDefaultValueForFilters($expected_set_filters);
     $page->pressButton('Save');
 
     $this->drupalGet($node->toUrl());
     $assert->fieldValueEquals('Body', '');
-    $assert->pageTextContains('that yellow fruit');
-    $assert->pageTextContains('that red fruit');
+    $assert->pageTextContains('Banana title');
+    $assert->pageTextContains('Cherry title');
 
     // Change preset filter for Created.
     $this->drupalGet($node->toUrl('edit-form'));
@@ -409,13 +451,13 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $this->getSession()->getPage()->fillField('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $created_filter_id . '][created_first_date_wrapper][created_first_date][date]', '10/30/2020');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_set_filters['Created'] = 'Before 30 October 2020';
+    $expected_set_filters['created'] = ['key' => 'Created', 'value' => 'Before 30 October 2020'];
     $this->assertDefaultValueForFilters($expected_set_filters);
     $page->pressButton('Save');
 
     $assert->fieldValueEquals('Body', '');
-    $assert->pageTextContains('that yellow fruit');
-    $assert->pageTextNotContains('that red fruit');
+    $assert->pageTextContains('Banana title');
+    $assert->pageTextNotContains('Cherry title');
 
     // Set preset for Reference for yellow animal.
     $this->drupalGet($node->toUrl('edit-form'));
@@ -425,32 +467,145 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $assert = $this->assertSession();
 
     $assert->pageTextContains('Set default value for Reference');
-    $this->getSession()->getPage()->fillField('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $reference_filter_id . '][reference][0][entity]', 'that yellow animal (2)');
+    $this->getSession()->getPage()->fillField('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $reference_filter_id . '][reference][0][entity]', 'yellow (2)');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_set_filters['Reference'] = 'that yellow animal';
+    $expected_set_filters['reference'] = ['key' => 'Reference', 'value' => 'yellow'];
     $this->assertDefaultValueForFilters($expected_set_filters);
     $page->pressButton('Save');
     $assert->fieldValueEquals('Body', '');
-    $assert->pageTextContains('that yellow fruit');
-    $assert->pageTextNotContains('that red fruit');
+    $assert->pageTextContains('Banana title');
+    $assert->pageTextNotContains('Cherry title');
 
-    // Change the preset of Reference to the red animal.
+    // Change the preset of Reference to the red fruit.
     $this->drupalGet($node->toUrl('edit-form'));
     $this->clickLink('List Page');
     $page->pressButton('edit-' . $reference_filter_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert = $this->assertSession();
     $assert->pageTextContains('Set default value for Reference');
-    $this->getSession()->getPage()->fillField('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $reference_filter_id . '][reference][0][entity]', 'that red animal (1)');
+    $this->getSession()->getPage()->fillField('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $reference_filter_id . '][reference][0][entity]', 'Red (1)');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_set_filters['Reference'] = 'that red animal';
+    $expected_set_filters['reference'] = ['key' => 'Reference', 'value' => 'Red'];
     $this->assertDefaultValueForFilters($expected_set_filters);
     $page->pressButton('Save');
     $assert->fieldValueEquals('Body', '');
-    $assert->pageTextNotContains('that yellow fruit');
-    $assert->pageTextNotContains('that red fruit');
+    $assert->pageTextNotContains('Banana title');
+    $assert->pageTextNotContains('Cherry title');
+
+    // Remove filters.
+    $this->drupalGet($node->toUrl('edit-form'));
+    $this->clickLink('List Page');
+    $page->pressButton('delete-' . $created_filter_id);
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $page->pressButton('delete-' . $reference_filter_id);
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert = $this->assertSession();
+
+    // Or filter.
+    $page->selectFieldOption('Add default value for', 'Reference');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->fillField('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $reference_filter_id . '][reference][0][entity]', 'Green (3)');
+    $page->pressButton('Add another item');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->fillField('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $reference_filter_id . '][reference][1][entity]', 'Yellow (2)');
+    $page->pressButton('Set default value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $expected_set_filters = [['key' => 'Reference', 'value' => 'Any of: Green, Yellow']];
+    $this->assertDefaultValueForFilters($expected_set_filters);
+    $page->pressButton('Save');
+    $assert->fieldValueEquals('Body', '');
+    $assert->pageTextContains('Banana title');
+    $assert->pageTextContains('Grass title');
+    $assert->pageTextContains('Sun title');
+    $assert->pageTextNotContains('Cherry title');
+
+    // And filter.
+    $node = $this->drupalGetNodeByTitle('List page for ct1');
+    $this->drupalGet($node->toUrl('edit-form'));
+    $this->clickLink('List Page');
+    $page->pressButton('edit-' . $reference_filter_id);
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $page->selectFieldOption('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $reference_filter_id . '][oe_list_pages_filter_operator]', 'All of');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $page->pressButton('Set default value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $expected_set_filters = [['key' => 'Reference', 'value' => 'All of: Green, Yellow']];
+    $this->assertDefaultValueForFilters($expected_set_filters);
+    $page->pressButton('Save');
+    $assert->pageTextContains('Banana title');
+    $assert->pageTextNotContains('Grass title');
+    $assert->pageTextNotContains('Sun title');
+    $assert->pageTextNotContains('Cherry title');
+
+    // None filter.
+    $node = $this->drupalGetNodeByTitle('List page for ct1');
+    $this->drupalGet($node->toUrl('edit-form'));
+    $this->clickLink('List Page');
+    $page->pressButton('edit-' . $reference_filter_id);
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $page->selectFieldOption('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $reference_filter_id . '][oe_list_pages_filter_operator]', 'None of');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $page->pressButton('Set default value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $expected_set_filters = [['key' => 'Reference', 'value' => 'None of: Green, Yellow']];
+    $this->assertDefaultValueForFilters($expected_set_filters);
+    $page->pressButton('Save');
+    $assert->pageTextNotContains('Banana title');
+    $assert->pageTextNotContains('Grass title');
+    $assert->pageTextNotContains('Sun title');
+    $assert->pageTextContains('Cherry title');
+
+    // Filters combined.
+    $this->drupalGet($node->toUrl('edit-form'));
+    $this->clickLink('List Page');
+    $page->pressButton('edit-' . $reference_filter_id);
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->fillField('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $reference_filter_id . '][reference][1][entity]', '');
+    $page->selectFieldOption('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $reference_filter_id . '][oe_list_pages_filter_operator]', 'Any of');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $page->pressButton('Set default value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $expected_set_filters = [['key' => 'Reference', 'value' => 'Any of: Green']];
+    $this->assertDefaultValueForFilters($expected_set_filters);
+    $page->selectFieldOption('Add default value for', 'Reference');
+    $second_reference_filter_id = ListPresetFiltersBuilder::generateFilterId('reference' . '1');
+    sleep(30);
+    $this->getSession()->getPage()->fillField('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $second_reference_filter_id . '][reference][0][entity]', 'Yellow (2)');
+    $page->selectFieldOption('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $second_reference_filter_id . '][oe_list_pages_filter_operator]', 'None of');
+    $page->pressButton('Set default value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $expected_set_filters = [
+      ['key' => 'Reference', 'value' => 'Any of: Green'],
+      ['key' => 'Reference', 'value' => 'None of: Yellow'],
+    ];
+    $this->assertDefaultValueForFilters($expected_set_filters);
+    $page->pressButton('Save');
+    $assert->pageTextNotContains('Banana title');
+    $assert->pageTextContains('Grass title');
+    $assert->pageTextNotContains('Sun title');
+    $assert->pageTextNotContains('Cherry title');
+
+    // Several filters for same field.
+    $this->drupalGet($node->toUrl('edit-form'));
+    $this->clickLink('List Page');
+    $page->pressButton('edit-' . $second_reference_filter_id);
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->fillField('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $second_reference_filter_id . '][reference][0][entity]', 'Yellow (2)');
+    $page->selectFieldOption('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $second_reference_filter_id . '][oe_list_pages_filter_operator]', 'Any of');
+    $page->pressButton('Set default value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $expected_set_filters = [
+      ['key' => 'Reference', 'value' => 'Any of: Green'],
+      ['key' => 'Reference', 'value' => 'Any of: Yellow'],
+    ];
+    $this->assertDefaultValueForFilters($expected_set_filters);
+    $page->pressButton('Save');
+    $assert->pageTextContains('Banana title');
+    $assert->pageTextNotContains('Grass title');
+    $assert->pageTextNotContains('Sun title');
+    $assert->pageTextNotContains('Cherry title');
   }
 
   /**
@@ -462,8 +617,11 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
   protected function assertDefaultValueForFilters(array $default_filters = []): void {
     $assert = $this->assertSession();
     $assert->elementsCount('css', 'table.default-filter-values-table tr', count($default_filters) + 1);
-    foreach ($default_filters as $filter => $default_value) {
-      $assert->elementTextContains('css', 'table.default-filter-values-table', $filter);
+    foreach ($default_filters as $filter) {
+      $key = $filter['key'];
+      $default_value = $filter['value'];
+
+      $assert->elementTextContains('css', 'table.default-filter-values-table', $key);
       $assert->elementTextContains('css', 'table.default-filter-values-table', $default_value);
     }
   }

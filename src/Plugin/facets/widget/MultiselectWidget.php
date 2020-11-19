@@ -77,7 +77,7 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
 
     $form['oe_list_pages_filter_operator'] = [
       '#type' => 'select',
-      '#default_value' => $form_state->getValue('oe_list_pages_filter_operator') ?? 'OR',
+      '#default_value' => $form_state->getValue('oe_list_pages_filter_operator') ?? ListPresetFilter::OR_OPERATOR,
       '#options' => ListPresetFilter::getOperators(),
       '#title' => $this->t('Operator'),
     ];
