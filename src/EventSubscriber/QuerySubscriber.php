@@ -136,6 +136,7 @@ class QuerySubscriber implements EventSubscriberInterface {
         $facet->setExclude(TRUE);
       }
       else {
+        $facet->setExclude(FALSE);
         $facet->setQueryOperator($filter->getOperator());
       }
 

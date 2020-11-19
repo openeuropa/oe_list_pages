@@ -51,22 +51,99 @@ class MultiSelectWidgetTest extends ListsSourceTestBase {
     // Create facets for categories.
     $default_list_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'item');
     $facet_categories = $this->createFacet('category', $default_list_id, '', 'oe_list_pages_multiselect', []);
+    $facet_keywords = $this->createFacet('keywords', $default_list_id, '', 'oe_list_pages_multiselect', []);
 
     // Search for categories.
-    $list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
-    $filter = new ListPresetFilter($facet_categories->id(), ['cat1']);
-    /** @var \Drupal\search_api\Query\QueryInterface $default_query */
-    $query = $list->getQuery(['preset_filters' => [$facet_categories->id() => $filter]]);
-    $query->execute();
-    $results = $query->getResults();
-    $this->assertCount(3, $results->getResultItems());
+    // KEY1.
+    $expected_category_results[] = [
+      'filters' => [
+        $facet_categories->id() => new ListPresetFilter($facet_categories->id(), ['cat1'], ListPresetFilter::OR_OPERATOR),
+      ],
+      'results' => 3,
+    ];
 
-    $this->container->get('kernel')->rebuildContainer();
-    $filter = new ListPresetFilter($facet_categories->id(), ['cat2']);
-    $query = $list->getQuery(['preset_filters' => [$facet_categories->id() => $filter]]);
-    $query->execute();
-    $results = $query->getResults();
-    $this->assertCount(1, $results->getResultItems());
+    // KEY2.
+    $expected_category_results[] = [
+      'filters' => [
+        $facet_categories->id() => new ListPresetFilter($facet_categories->id(), ['cat2'], ListPresetFilter::OR_OPERATOR),
+      ],
+      'results' => 1,
+    ];
+
+    // KEY1 AND KEY2.
+    $expected_category_results[] = [
+      'filters' => [
+        $facet_keywords->id() => new ListPresetFilter($facet_keywords->id(), [
+          'key1',
+          'key2',
+        ], ListPresetFilter::AND_OPERATOR),
+      ],
+      'results' => 1,
+    ];
+    // KEY1 OR KEY2.
+    $expected_category_results[] = [
+      'filters' => [
+        $facet_keywords->id() => new ListPresetFilter($facet_keywords->id(), ['key1', 'key2'], ListPresetFilter::OR_OPERATOR),
+      ],
+      'results' => 4,
+    ];
+    // NOT KEY1.
+    $expected_category_results[] = [
+      'filters' => [
+        $facet_keywords->id() => new ListPresetFilter($facet_keywords->id(), ['key1'], ListPresetFilter::NOT_OPERATOR),
+      ],
+      'results' => 2,
+    ];
+    // KEY1 AND NOT KEY2.
+    $expected_category_results[] = [
+      'filters' => [
+        $facet_keywords->id() => new ListPresetFilter($facet_keywords->id(), ['key1'], ListPresetFilter::OR_OPERATOR),
+        $facet_keywords->id() => new ListPresetFilter($facet_keywords->id(), ['key2'], ListPresetFilter::NOT_OPERATOR),
+      ],
+      'results' => 1,
+    ];
+    // KEY1 AND NOT (KEY2 OR KEY3)
+    $expected_category_results[] = [
+      'filters' => [
+        $facet_keywords->id() => new ListPresetFilter($facet_keywords->id(), ['key1'], ListPresetFilter::AND_OPERATOR),
+        $facet_keywords->id() . "1" => new ListPresetFilter($facet_keywords->id(), [
+          'key2',
+          'key3',
+        ], ListPresetFilter::NOT_OPERATOR),
+      ],
+      'results' => 1,
+    ];
+    // KEY1 AND (KEY2 OR KEY3)
+    $expected_category_results[] = [
+      'filters' => [
+        $facet_keywords->id() => new ListPresetFilter($facet_keywords->id(), ['key1'], ListPresetFilter::OR_OPERATOR),
+        $facet_keywords->id() . "1" => new ListPresetFilter($facet_keywords->id(), [
+          'key2',
+          'key3',
+        ], ListPresetFilter::OR_OPERATOR),
+      ],
+      'results' => 1,
+    ];
+    // KEY2 AND (KEY2 OR KEY3)
+    $expected_category_results[] = [
+      'filters' => [
+        $facet_keywords->id() => new ListPresetFilter($facet_keywords->id(), ['key2'], ListPresetFilter::OR_OPERATOR),
+        $facet_keywords->id() . "1" => new ListPresetFilter($facet_keywords->id(), [
+          'key2',
+          'key3',
+        ], ListPresetFilter::OR_OPERATOR),
+      ],
+      'results' => 3,
+    ];
+
+    $list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
+    foreach ($expected_category_results as $category) {
+      $this->container->get('kernel')->rebuildContainer();
+      $query = $list->getQuery(['preset_filters' => $category['filters']]);
+      $query->execute();
+      $results = $query->getResults();
+      $this->assertCount($category['results'], $results->getResultItems());
+    }
   }
 
 }

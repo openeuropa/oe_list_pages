@@ -135,7 +135,19 @@ abstract class ListsSourceTestBase extends EntityKernelTestBase {
       'With a message',
       'None',
     ];
-    $categories = $values['categories'] ?? ['cat1', 'cat2', 'cat1', 'cat1'];
+
+    $keywords = $values['keywords'] ?? [
+        ['key1'],
+        ['key2'],
+        ['key1', 'key2'],
+        ['key2', 'key3'],
+    ];
+    $categories = $values['categories'] ?? [
+        ['cat1'],
+        ['cat2'],
+        ['cat1'],
+        ['cat1'],
+    ];
     $bodies = $values['bodies'] ?? [
       'Sending message',
       'Receiving a Message ',
@@ -156,6 +168,7 @@ abstract class ListsSourceTestBase extends EntityKernelTestBase {
       $entity_test_storage->create([
         'name' => $titles[$i % $count],
         'body' => $bodies[$i % $count],
+        'keywords' => $keywords[$i % $count],
         'category' => $categories[$i % $count],
         'type' => $bundle,
         'created' => $dates[$i % $count],
