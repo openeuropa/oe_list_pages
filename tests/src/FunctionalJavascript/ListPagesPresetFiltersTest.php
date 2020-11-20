@@ -41,7 +41,8 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
    */
   public function testListPageFiltersPresenceInContentForm(): void {
     // Default filters configuration is present in oe_list_page content type.
-    $this->drupalLogin($this->rootUser);
+    $user = $this->createUser([], NULL, TRUE);
+    $this->drupalLogin($user);
     $this->drupalGet('/node/add/oe_list_page');
     $this->clickLink('List Page');
     $this->assertSession()->fieldExists('Add default value for');
@@ -120,7 +121,8 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     // Index the nodes.
     $index->indexItems();
 
-    $this->drupalLogin($this->rootUser);
+    $user = $this->createUser([], NULL, TRUE);
+    $this->drupalLogin($user);
     $this->drupalGet('/node/add/oe_list_page');
     $this->clickLink('List Page');
     $page = $this->getSession()->getPage();
@@ -170,6 +172,23 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $expected_set_filters = [
       'Body' => 'cherry',
     ];
+    $this->assertDefaultValueForFilters($expected_set_filters);
+
+    // Save the node, reload and assert the values are there and can be removed.
+    $page->pressButton('Save');
+    $node = $this->drupalGetNodeByTitle('List page for ct1');
+    $this->drupalGet($node->toUrl('edit-form'));
+    $this->clickLink('List Page');
+    $this->assertDefaultValueForFilters($expected_set_filters);
+    // Remove the only filter value set (Body).
+    $page->pressButton('delete-' . $body_filter_id);
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->assertDefaultValueForFilters(['' => t('No default values set')]);
+    $this->assertSession()->elementTextNotContains('css', 'table.default-filter-values-table', 'Body');
+
+    // Reload the page and add more values.
+    $this->getSession()->reload();
+    $this->clickLink('List Page');
     $this->assertDefaultValueForFilters($expected_set_filters);
 
     // Set preset filter for Created.
@@ -383,7 +402,7 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $assert->pageTextNotContains('that yellow fruit');
     $assert->pageTextNotContains('that red fruit');
 
-    // Edit again to remove filters and save.
+    // Edit again to remove the Body filter and save.
     $this->drupalGet($node->toUrl('edit-form'));
     $this->clickLink('List Page');
     $page->pressButton('delete-' . $body_filter_id);

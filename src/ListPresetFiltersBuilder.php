@@ -587,6 +587,28 @@ class ListPresetFiltersBuilder {
   }
 
   /**
+   * Checks if the current filter values from the form state were emptied.
+   *
+   * If the form starts with default values from configuration but the user
+   * deletes them all, we need to keep track of that so we can know not to
+   * default to values from the previously saved configuration.
+   *
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
+   *   The list source the filter values belong to.
+   *
+   * @return bool
+   *   Whether the values have been emptied..
+   */
+  protected static function isCurrentFilterValuesEmpty(FormStateInterface $form_state, ListSourceInterface $list_source): bool {
+    $storage = $form_state->getStorage();
+    $values = NestedArray::getValue($storage, ['current_filters', $list_source->getSearchId()]);
+    // If we have an empty array, it means we removed all the values.
+    return is_array($values) && empty($values) ?? FALSE;
+  }
+
+  /**
    * Initialize the form state with the values of the current list source.
    *
    * @param \Drupal\Core\Form\FormStateInterface $form_state
@@ -607,7 +629,9 @@ class ListPresetFiltersBuilder {
 
     // Otherwise, we need to check if the current list source matches the
     // passed configuration and set the ones from the configuration if they do.
-    if ($list_source->getEntityType() === $configuration->getEntityType() && $list_source->getBundle() === $configuration->getBundle()) {
+    // We also check if the values have not been emptied in the current
+    // "session".
+    if ($list_source->getEntityType() === $configuration->getEntityType() && $list_source->getBundle() === $configuration->getBundle() && !static::isCurrentFilterValuesEmpty($form_state, $list_source)) {
       $values = $configuration->getDefaultFiltersValues();
       static::setListSourceCurrentFilterValues($form_state, $list_source, $values);
       return;

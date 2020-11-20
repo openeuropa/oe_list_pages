@@ -238,7 +238,7 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
     $values = [];
     $child = $form_state->get('multivalue_child');
 
-    foreach ($form_state->getValue($facet->id()) as $key => $value) {
+    foreach ($form_state->getValue($facet->id(), []) as $key => $value) {
       if (is_array($value) && isset($value[$child]) && $value[$child] !== "") {
         $values[] = $value[$child];
       }
