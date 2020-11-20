@@ -263,17 +263,9 @@ class ListPresetFiltersBuilder {
 
     $facet = $this->getFacetById($list_source, $facet_id);
     if (!empty($facet) && ($widget = $facet->getWidgetInstance()) && ($widget instanceof ListPagesWidgetInterface)) {
-      // Set the active items on the facet so that the widget can build the
-      // form with default values.
+      $filter = NULL;
       if (!empty($current_filters[$filter_id])) {
         $filter = $current_filters[$filter_id];
-        $form_state->setValue([
-          'wrapper',
-          'edit',
-          $filter_id,
-          'oe_list_pages_filter_operator',
-        ], $filter->getOperator());
-        $facet->setActiveItems($filter->getValues());
       }
 
       $ajax_definition = [
@@ -291,7 +283,7 @@ class ListPresetFiltersBuilder {
       ];
 
       $subform_state = SubformState::createForSubform($form['wrapper']['edit'][$filter_id], $form, $form_state);
-      $form['wrapper']['edit'][$filter_id] = $widget->buildDefaultValueForm($form['wrapper']['edit'][$filter_id], $subform_state, $facet);
+      $form['wrapper']['edit'][$filter_id] = $widget->buildDefaultValueForm($form['wrapper']['edit'][$filter_id], $subform_state, $facet, $filter);
 
       $form['wrapper']['edit'][$filter_id]['set_value'] = [
         '#value' => $this->t('Set default value'),

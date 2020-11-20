@@ -23,11 +23,13 @@ interface ListPagesWidgetInterface {
    *   The form state.
    * @param \Drupal\facets\FacetInterface $facet
    *   The facet.
+   * @param \Drupal\oe_list_pages\ListPresetFilter $preset_filter
+   *   The current preset filters.
    *
    * @return array
    *   The rendered widget.
    */
-  public function buildDefaultValueForm(array $form, FormStateInterface $form_state, FacetInterface $facet);
+  public function buildDefaultValueForm(array $form, FormStateInterface $form_state, FacetInterface $facet, ListPresetFilter $preset_filter = NULL);
 
   /**
    * Renders the label for the filter values set as default values.

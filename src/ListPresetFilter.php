@@ -34,7 +34,7 @@ class ListPresetFilter {
    *
    * @var array
    */
-  protected $values;
+  protected $values = [];
 
   /**
    * ListPresetFilter constructor.

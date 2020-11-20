@@ -68,16 +68,16 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
   /**
    * {@inheritdoc}
    */
-  public function buildDefaultValueForm(array $form, FormStateInterface $form_state, FacetInterface $facet): array {
+  public function buildDefaultValueForm(array $form, FormStateInterface $form_state, FacetInterface $facet, ListPresetFilter $preset_filter = NULL): array {
     /** @var \Drupal\oe_list_pages\ListSourceInterface $list_source */
     $list_source = $form_state->get('list_source');
     $field_definition = $this->getFieldDefinition($facet, $list_source);
     $field_type = !empty($field_definition) ? $field_definition->getType() : NULL;
-    $active_items = $facet->getActiveItems();
+    $active_items = $preset_filter ? $preset_filter->getValues() : [];
 
     $form['oe_list_pages_filter_operator'] = [
       '#type' => 'select',
-      '#default_value' => $form_state->getValue('oe_list_pages_filter_operator') ?? ListPresetFilter::OR_OPERATOR,
+      '#default_value' => $preset_filter ? $preset_filter->getOperator() : ListPresetFilter::OR_OPERATOR,
       '#options' => ListPresetFilter::getOperators(),
       '#title' => $this->t('Operator'),
     ];
