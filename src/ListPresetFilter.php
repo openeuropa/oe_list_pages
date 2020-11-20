@@ -46,7 +46,7 @@ class ListPresetFilter {
    * @param string $operator
    *   The operator.
    */
-  public function __construct(string $facet_id, array $values, string $operator = 'OR') {
+  public function __construct(string $facet_id, array $values, string $operator = self::OR_OPERATOR) {
     $this->facetId = $facet_id;
     $this->operator = $operator;
     $this->values = $values;

@@ -155,7 +155,7 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
   /**
    * {@inheritdoc}
    */
-  public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source = NULL, ListPresetFilter $filter): string {
+  public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source, ListPresetFilter $filter): string {
     $field_definition = $this->getFieldDefinition($facet, $list_source);
     $field_type = !empty($field_definition) ? $field_definition->getType() : NULL;
 

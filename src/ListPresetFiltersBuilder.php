@@ -91,12 +91,7 @@ class ListPresetFiltersBuilder {
 
     $filter_id = $form_state->get('filter_id');
     if (!isset($filter_id)) {
-      $filter_id = self::generateFilterId($facet_id);
-      $inc = 1;
-      while (isset($current_filters[$filter_id])) {
-        $filter_id = self::generateFilterId($facet_id . $inc);
-        $inc++;
-      }
+      $filter_id = self::generateFilterId($facet_id, array_keys($current_filters));
     }
 
     $form = $this->buildEditPresetFilter($form, $form_state, $ajax_wrapper_id, $facet_id, $filter_id);
@@ -564,12 +559,21 @@ class ListPresetFiltersBuilder {
    *
    * @param string $id
    *   The facet id.
+   * @param array $existing_filters
+   *   Existing filters to check for duplicates.
    *
    * @return string
    *   The filter id.
    */
-  public static function generateFilterId(string $id): string {
-    return md5($id);
+  public static function generateFilterId(string $id, array $existing_filters = []): string {
+    $filter_id = md5($id);
+    $inc = 1;
+    while (in_array($filter_id, $existing_filters)) {
+      $filter_id = md5($id . $inc);
+      $inc++;
+    }
+
+    return $filter_id;
   }
 
   /**

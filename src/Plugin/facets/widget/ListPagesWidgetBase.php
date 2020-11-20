@@ -33,7 +33,7 @@ class ListPagesWidgetBase extends WidgetPluginBase implements ListPagesWidgetInt
    */
   public function prepareDefaultFilterValue(FacetInterface $facet, array $form, FormStateInterface $form_state): array {
     return [
-      'operator' => 'OR',
+      'operator' => ListPresetFilter::OR_OPERATOR,
       'values' => $this->prepareValueForUrl($facet, $form, $form_state),
     ];
   }
@@ -41,15 +41,15 @@ class ListPagesWidgetBase extends WidgetPluginBase implements ListPagesWidgetInt
   /**
    * {@inheritdoc}
    */
-  public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source = NULL, ListPresetFilter $filter): string {
+  public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source, ListPresetFilter $filter): string {
     // Keep track of the original active items so we can reset them.
     $active_items = $facet->getActiveItems();
-    $filter_value = $filter->getValues();
-    $facet->setActiveItems($filter_value);
+    $filter_values = $filter->getValues();
+    $facet->setActiveItems($filter_values);
     $results = $this->processFacetResults($facet);
 
     $filter_label = [];
-    foreach ($filter_value as $value) {
+    foreach ($filter_values as $value) {
       $filter_label[$value] = $value;
       foreach ($results as $result) {
         if ($result->getRawValue() == $value) {

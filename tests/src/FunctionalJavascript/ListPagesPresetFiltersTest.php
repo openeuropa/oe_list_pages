@@ -446,22 +446,23 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $assert->fieldValueEquals('Body', 'cherry');
     $assert->fieldValueEquals('Created', 'lt');
 
-    // Change directly the value in exposed form.
+    // Change directly the value in exposed form and assert it doesn't take
+    // effect.
     $page->fillField('Body', 'banana');
     $this->getSession()->getPage()->pressButton('Search');
-    $assert->pageTextContains('Banana title');
-    $assert->pageTextNotContains('Cherry title');
-    $assert->fieldValueEquals('Body', 'banana');
+    $assert->pageTextNotContains('Banana title');
+    $assert->pageTextContains('Cherry title');
+    $assert->fieldValueEquals('Body', 'cherry');
 
-    // Change also the created date.
+    // Change also the created date and assert the date doesn't change.
     $this->getSession()->getPage()->selectFieldOption('Created', 'After');
     $this->getSession()->getPage()->fillField('created_first_date_wrapper[created_first_date][date]', '10/30/2020');
     $this->getSession()->getPage()->pressButton('Search');
-    $assert->fieldValueEquals('Body', 'banana');
-    $assert->fieldValueEquals('Created', 'gt');
-    $assert->fieldValueEquals('created_first_date_wrapper[created_first_date][date]', '2020-10-30');
     $assert->pageTextNotContains('Banana title');
-    $assert->pageTextNotContains('Cherry title');
+    $assert->pageTextContains('Cherry title');
+    $assert->fieldValueEquals('Body', 'cherry');
+    $assert->fieldValueEquals('Created', 'lt');
+    $assert->fieldValueEquals('created_first_date_wrapper[created_first_date][date]', '2020-10-31');
 
     // Edit again to remove the Body filter and save.
     $this->drupalGet($node->toUrl('edit-form'));
@@ -610,7 +611,7 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $this->assertDefaultValueForFilters($expected_set_filters);
     $page->selectFieldOption('Add default value for', 'Reference');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $second_reference_filter_id = ListPresetFiltersBuilder::generateFilterId('reference' . '1');
+    $second_reference_filter_id = ListPresetFiltersBuilder::generateFilterId('reference', [$reference_filter_id]);
     $this->getSession()->getPage()->fillField('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $second_reference_filter_id . '][reference][0][entity]', 'Yellow (2)');
     $page->selectFieldOption('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $second_reference_filter_id . '][oe_list_pages_filter_operator]', 'None of');
     $page->pressButton('Set default value');

@@ -42,7 +42,7 @@ interface ListPagesWidgetInterface {
    * @return string
    *   The label.
    */
-  public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source = NULL, ListPresetFilter $filter): string;
+  public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source, ListPresetFilter $filter): string;
 
   /**
    * Prepares the values to be passed to the URL generator from the submission.
