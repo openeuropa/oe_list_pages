@@ -221,6 +221,27 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $expected_set_filters['Created'] = 'After 19 October 2019';
     $this->assertDefaultValueForFilters($expected_set_filters);
 
+    // Switch content type and assert we can add values for that and come back.
+    $page->selectFieldOption('Source bundle', 'Content type two');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    // We have no preset filters for this content type yet.
+    $this->assertDefaultValueForFilters(['' => t('No default values set')]);
+    // Set a preset filter for Select two.
+    $page->selectFieldOption('Add default value for', 'Select two');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->pageTextContains('Set default value for Select two');
+    $select_two_filter_id = ListPresetFiltersBuilder::generateFilterId('list_facet_source_node_content_type_twofield_select_two');
+    $filter_selector = 'emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $select_two_filter_id . ']';
+    $this->getSession()->getPage()->selectFieldOption($filter_selector . '[list_facet_source_node_content_type_twofield_select_two][0][list]', 'test1');
+    $page->pressButton('Set default value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->assertDefaultValueForFilters(['Select two' => 'test1']);
+    // Switch back to content type one and resume where we left off.
+    $page->selectFieldOption('Source bundle', 'Content type one');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+
+    $this->assertDefaultValueForFilters($expected_set_filters);
+
     // Set preset filter for Published.
     $page->selectFieldOption('Add default value for', 'Published');
     $this->assertSession()->assertWaitOnAjaxRequest();
@@ -229,7 +250,7 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $published_filter_id = ListPresetFiltersBuilder::generateFilterId('list_facet_source_node_content_type_onestatus');
     $filter_selector = 'emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $published_filter_id . ']';
 
-    $this->getSession()->getPage()->selectFieldOption($filter_selector . '[list_facet_source_node_content_type_onestatus][0][boolean]', '1', TRUE);
+    $this->getSession()->getPage()->selectFieldOption($filter_selector . '[list_facet_source_node_content_type_onestatus][0][boolean]', '1');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $expected_set_filters['Published'] = 'Yes';
