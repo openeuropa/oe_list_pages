@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\Tests\oe_list_pages\Kernel;
 
 use Drupal\oe_list_pages\ListPresetFilter;
+use Drupal\oe_list_pages\ListPresetFiltersBuilder;
 use Drupal\oe_list_pages\ListSourceFactory;
 use Drupal\oe_list_pages\Plugin\facets\widget\MultiselectWidget;
 
@@ -55,25 +56,25 @@ class MultiSelectWidgetTest extends ListsSourceTestBase {
 
     // Search for categories.
     // KEY1.
-    $expected_category_results[] = [
+    $expected_key_results[] = [
       'filters' => [
-        $facet_categories->id() => new ListPresetFilter($facet_categories->id(), ['cat1'], ListPresetFilter::OR_OPERATOR),
+        ListPresetFiltersBuilder::generateFilterId($facet_categories->id()) => new ListPresetFilter($facet_categories->id(), ['cat1'], ListPresetFilter::OR_OPERATOR),
       ],
       'results' => 3,
     ];
 
     // KEY2.
-    $expected_category_results[] = [
+    $expected_key_results[] = [
       'filters' => [
-        $facet_categories->id() => new ListPresetFilter($facet_categories->id(), ['cat2'], ListPresetFilter::OR_OPERATOR),
+        ListPresetFiltersBuilder::generateFilterId($facet_categories->id()) => new ListPresetFilter($facet_categories->id(), ['cat2'], ListPresetFilter::OR_OPERATOR),
       ],
       'results' => 1,
     ];
 
     // KEY1 AND KEY2.
-    $expected_category_results[] = [
+    $expected_key_results[] = [
       'filters' => [
-        $facet_keywords->id() => new ListPresetFilter($facet_keywords->id(), [
+        ListPresetFiltersBuilder::generateFilterId($facet_keywords->id()) => new ListPresetFilter($facet_keywords->id(), [
           'key1',
           'key2',
         ], ListPresetFilter::AND_OPERATOR),
@@ -81,63 +82,63 @@ class MultiSelectWidgetTest extends ListsSourceTestBase {
       'results' => 1,
     ];
     // KEY1 OR KEY2.
-    $expected_category_results[] = [
+    $expected_key_results[] = [
       'filters' => [
-        $facet_keywords->id() => new ListPresetFilter($facet_keywords->id(), ['key1', 'key2'], ListPresetFilter::OR_OPERATOR),
+        ListPresetFiltersBuilder::generateFilterId($facet_keywords->id()) => new ListPresetFilter($facet_keywords->id(), ['key1', 'key2'], ListPresetFilter::OR_OPERATOR),
       ],
       'results' => 4,
     ];
     // NOT KEY1.
-    $expected_category_results[] = [
+    $expected_key_results[] = [
       'filters' => [
-        $facet_keywords->id() => new ListPresetFilter($facet_keywords->id(), ['key1'], ListPresetFilter::NOT_OPERATOR),
+        ListPresetFiltersBuilder::generateFilterId($facet_keywords->id()) => new ListPresetFilter($facet_keywords->id(), ['key1'], ListPresetFilter::NOT_OPERATOR),
       ],
       'results' => 2,
     ];
     // KEY1 AND NOT KEY2.
-    $expected_category_results[] = [
+    $expected_key_results[] = [
       'filters' => [
-        $facet_keywords->id() => new ListPresetFilter($facet_keywords->id(), ['key1'], ListPresetFilter::OR_OPERATOR),
-        $facet_keywords->id() => new ListPresetFilter($facet_keywords->id(), ['key2'], ListPresetFilter::NOT_OPERATOR),
+        ListPresetFiltersBuilder::generateFilterId($facet_keywords->id()) => new ListPresetFilter($facet_keywords->id(), ['key1'], ListPresetFilter::OR_OPERATOR),
+        ListPresetFiltersBuilder::generateFilterId($facet_keywords->id()) => new ListPresetFilter($facet_keywords->id(), ['key2'], ListPresetFilter::NOT_OPERATOR),
       ],
       'results' => 1,
     ];
     // KEY1 AND NOT (KEY2 OR KEY3)
-    $expected_category_results[] = [
-      'filters' => [
-        $facet_keywords->id() => new ListPresetFilter($facet_keywords->id(), ['key1'], ListPresetFilter::AND_OPERATOR),
-        $facet_keywords->id() . "1" => new ListPresetFilter($facet_keywords->id(), [
-          'key2',
-          'key3',
-        ], ListPresetFilter::NOT_OPERATOR),
-      ],
+    $filters = [];
+    $filters[ListPresetFiltersBuilder::generateFilterId($facet_keywords->id())] = new ListPresetFilter($facet_keywords->id(), ['key1'], ListPresetFilter::AND_OPERATOR);
+    $filters[ListPresetFiltersBuilder::generateFilterId($facet_keywords->id(), array_keys($filters))] = new ListPresetFilter($facet_keywords->id(), [
+      'key2',
+      'key3',
+    ], ListPresetFilter::NOT_OPERATOR);
+    $expected_key_results[] = [
+      'filters' => $filters,
       'results' => 1,
     ];
     // KEY1 AND (KEY2 OR KEY3)
-    $expected_category_results[] = [
-      'filters' => [
-        $facet_keywords->id() => new ListPresetFilter($facet_keywords->id(), ['key1'], ListPresetFilter::OR_OPERATOR),
-        $facet_keywords->id() . "1" => new ListPresetFilter($facet_keywords->id(), [
-          'key2',
-          'key3',
-        ], ListPresetFilter::OR_OPERATOR),
-      ],
+    $filters = [];
+    $filters[ListPresetFiltersBuilder::generateFilterId($facet_keywords->id())] = new ListPresetFilter($facet_keywords->id(), ['key1'], ListPresetFilter::OR_OPERATOR);
+    $filters[ListPresetFiltersBuilder::generateFilterId($facet_keywords->id(), array_keys($filters))] = new ListPresetFilter($facet_keywords->id(), [
+      'key2',
+      'key3',
+    ], ListPresetFilter::OR_OPERATOR);
+    $expected_key_results[] = [
+      'filters' => $filters,
       'results' => 1,
     ];
     // KEY2 AND (KEY2 OR KEY3)
-    $expected_category_results[] = [
-      'filters' => [
-        $facet_keywords->id() => new ListPresetFilter($facet_keywords->id(), ['key2'], ListPresetFilter::OR_OPERATOR),
-        $facet_keywords->id() . "1" => new ListPresetFilter($facet_keywords->id(), [
-          'key2',
-          'key3',
-        ], ListPresetFilter::OR_OPERATOR),
-      ],
+    $filters = [];
+    $filters[ListPresetFiltersBuilder::generateFilterId($facet_keywords->id())] = new ListPresetFilter($facet_keywords->id(), ['key2'], ListPresetFilter::OR_OPERATOR);
+    $filters[ListPresetFiltersBuilder::generateFilterId($facet_keywords->id(), array_keys($filters))] = new ListPresetFilter($facet_keywords->id(), [
+      'key2',
+      'key3',
+    ], ListPresetFilter::OR_OPERATOR);
+    $expected_key_results[] = [
+      'filters' => $filters,
       'results' => 3,
     ];
 
     $list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
-    foreach ($expected_category_results as $category) {
+    foreach ($expected_key_results as $category) {
       $this->container->get('kernel')->rebuildContainer();
       $query = $list->getQuery(['preset_filters' => $category['filters']]);
       $query->execute();

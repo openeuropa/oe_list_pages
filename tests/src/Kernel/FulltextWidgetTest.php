@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\Tests\oe_list_pages\Kernel;
 
 use Drupal\oe_list_pages\ListPresetFilter;
+use Drupal\oe_list_pages\ListPresetFiltersBuilder;
 use Drupal\oe_list_pages\ListSourceFactory;
 use Drupal\oe_list_pages\Plugin\facets\widget\FulltextWidget;
 
@@ -81,7 +82,7 @@ class FulltextWidgetTest extends ListsSourceTestBase {
     $list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
     /** @var \Drupal\search_api\Query\QueryInterface $default_query */
     $filter = new ListPresetFilter($facet_body->id(), ['message']);
-    $query = $list->getQuery(['preset_filters' => [$facet_body->id() => $filter]]);
+    $query = $list->getQuery(['preset_filters' => [ListPresetFiltersBuilder::generateFilterId($facet_body->id()) => $filter]]);
     $query->execute();
     $results = $query->getResults();
     // Asserts results.
@@ -92,7 +93,7 @@ class FulltextWidgetTest extends ListsSourceTestBase {
     $list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
     /** @var \Drupal\search_api\Query\QueryInterface $default_query */
     $filter = new ListPresetFilter($facet_body->id(), ['Message']);
-    $query = $list->getQuery(['preset_filters' => [$facet_body->id() => $filter]]);
+    $query = $list->getQuery(['preset_filters' => [ListPresetFiltersBuilder::generateFilterId($facet_body->id()) => $filter]]);
     $query->execute();
     $results = $query->getResults();
     // Asserts results.
@@ -102,7 +103,7 @@ class FulltextWidgetTest extends ListsSourceTestBase {
     $this->container->get('kernel')->rebuildContainer();
     /** @var \Drupal\search_api\Query\QueryInterface $default_query */
     $filter = new ListPresetFilter($facet_name->id(), ['message']);
-    $query = $list->getQuery(['preset_filters' => [$facet_name->id() => $filter]]);
+    $query = $list->getQuery(['preset_filters' => [ListPresetFiltersBuilder::generateFilterId($facet_name->id()) => $filter]]);
     $query->execute();
     $results = $query->getResults();
     $this->assertCount(1, $results->getResultItems());
@@ -111,7 +112,7 @@ class FulltextWidgetTest extends ListsSourceTestBase {
     $this->container->get('kernel')->rebuildContainer();
     /** @var \Drupal\search_api\Query\QueryInterface $default_query */
     $filter = new ListPresetFilter($facet_name->id(), ['message']);
-    $query = $list->getQuery(['preset_filters' => [$facet_name->id() => $filter]]);
+    $query = $list->getQuery(['preset_filters' => [ListPresetFiltersBuilder::generateFilterId($facet_name->id()) => $filter]]);
     $query->execute();
     $results = $query->getResults();
     $this->assertCount(1, $results->getResultItems());
@@ -120,7 +121,7 @@ class FulltextWidgetTest extends ListsSourceTestBase {
     $this->container->get('kernel')->rebuildContainer();
     /** @var \Drupal\search_api\Query\QueryInterface $default_query */
     $filter = new ListPresetFilter($facet_name->id(), ['това е банан']);
-    $query = $list->getQuery(['preset_filters' => [$facet_name->id() => $filter]]);
+    $query = $list->getQuery(['preset_filters' => [ListPresetFiltersBuilder::generateFilterId($facet_name->id()) => $filter]]);
     $query->execute();
     $results = $query->getResults();
     $this->assertCount(1, $results->getResultItems());
@@ -129,7 +130,7 @@ class FulltextWidgetTest extends ListsSourceTestBase {
     $this->container->get('kernel')->rebuildContainer();
     /** @var \Drupal\search_api\Query\QueryInterface $default_query */
     $filter = new ListPresetFilter($facet_name->id(), ['not found']);
-    $query = $list->getQuery(['preset_filters' => [$facet_name->id() => $filter]]);
+    $query = $list->getQuery(['preset_filters' => [ListPresetFiltersBuilder::generateFilterId($facet_name->id()) => $filter]]);
     $query->execute();
     $results = $query->getResults();
     $this->assertCount(0, $results->getResultItems());
