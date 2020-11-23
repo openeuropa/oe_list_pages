@@ -421,6 +421,9 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $this->drupalGet($node->toUrl());
     $assert->pageTextNotContains('Cherry title');
     $assert->pageTextContains('Banana title');
+    // Assert the preset filters are not shown as selected filter values.
+    $this->assertSession()->linkNotExistsExact('banana');
+    $this->assertSession()->linkNotExistsExact('Before 31 October 2020');
 
     // Edit again, change preset filter, expose filter and save.
     $this->drupalGet($node->toUrl('edit-form'));
@@ -445,6 +448,8 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $assert->pageTextContains('Cherry title');
     $assert->fieldValueEquals('Body', 'cherry');
     $assert->fieldValueEquals('Created', 'lt');
+    $this->assertSession()->linkNotExistsExact('banana');
+    $this->assertSession()->linkNotExistsExact('Before 31 October 2020');
 
     // Change directly the value in exposed form and assert it doesn't take
     // effect.
@@ -477,6 +482,7 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $assert->fieldValueEquals('Body', '');
     $assert->pageTextContains('Banana title');
     $assert->pageTextContains('Cherry title');
+    $this->assertSession()->linkNotExistsExact('Before 31 October 2020');
 
     // Change preset filter for Created.
     $this->drupalGet($node->toUrl('edit-form'));
@@ -497,6 +503,7 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $assert->fieldValueEquals('Body', '');
     $assert->pageTextContains('Banana title');
     $assert->pageTextNotContains('Cherry title');
+    $this->assertSession()->linkNotExistsExact('Before 30 October 2020');
 
     // Set preset for Reference for yellow animal.
     $this->drupalGet($node->toUrl('edit-form'));
@@ -515,6 +522,7 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $assert->fieldValueEquals('Body', '');
     $assert->pageTextContains('Banana title');
     $assert->pageTextNotContains('Cherry title');
+    $this->assertSession()->linkNotExistsExact('2');
 
     // Change the preset of Reference to the red fruit.
     $this->drupalGet($node->toUrl('edit-form'));
@@ -532,6 +540,9 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $assert->fieldValueEquals('Body', '');
     $assert->pageTextNotContains('Banana title');
     $assert->pageTextNotContains('Cherry title');
+    $this->assertSession()->linkNotExistsExact('1');
+    $this->assertSession()->linkNotExistsExact('2');
+    $this->assertSession()->linkNotExistsExact('3');
 
     // Remove filters.
     $this->drupalGet($node->toUrl('edit-form'));
@@ -542,7 +553,7 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert = $this->assertSession();
 
-    // Or filter.
+    // Test an OR filter.
     $page->selectFieldOption('Add default value for', 'Reference');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->fillField('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $reference_filter_id . '][reference][0][entity]', 'Green (3)');
@@ -553,14 +564,44 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
     $expected_set_filters = [['key' => 'Reference', 'value' => 'Any of: Green, Yellow']];
     $this->assertDefaultValueForFilters($expected_set_filters);
+    // Expose the Reference field.
+    $page->checkField('Reference');
     $page->pressButton('Save');
     $assert->fieldValueEquals('Body', '');
     $assert->pageTextContains('Banana title');
     $assert->pageTextContains('Grass title');
     $assert->pageTextContains('Sun title');
     $assert->pageTextNotContains('Cherry title');
+    $this->assertSession()->linkNotExistsExact('3');
+    $this->assertSession()->linkNotExistsExact('2');
+    $this->assertSession()->linkNotExistsExact('1');
+    // Select the remaining Reference (Red) and assert we can see it as a
+    // selected link.
+    $this->assertEquals('selected', $this->getSession()->getPage()->findField('Reference')->find('css', 'option[value="2"]')->getAttribute('selected'));
+    $this->assertEquals('selected', $this->getSession()->getPage()->findField('Reference')->find('css', 'option[value="3"]')->getAttribute('selected'));
+    $this->assertNull($this->getSession()->getPage()->findField('Reference')->find('css', 'option[value="1"]')->getAttribute('selected'));
+    $this->getSession()->getPage()->selectFieldOption('Reference', '1');
+    $this->getSession()->getPage()->pressButton('Search');
+    // Assert that after selecting the Reference that is not preset, all of
+    // them become selected in the exposed form.
+    $this->assertEquals('selected', $this->getSession()->getPage()->findField('Reference')->find('css', 'option[value="1"]')->getAttribute('selected'));
+    $this->assertEquals('selected', $this->getSession()->getPage()->findField('Reference')->find('css', 'option[value="2"]')->getAttribute('selected'));
+    $this->assertEquals('selected', $this->getSession()->getPage()->findField('Reference')->find('css', 'option[value="3"]')->getAttribute('selected'));
+    // Assert that, however, only the non-preset value is present in the list
+    // of selected filters.
+    $this->assertSession()->linkExistsExact('1');
+    $this->assertSession()->linkNotExistsExact('2');
+    $this->assertSession()->linkNotExistsExact('3');
+    // Press the Reference 1 link and assert the filter gets removed.
+    $this->getSession()->getPage()->clickLink('1');
+    $this->assertEquals('selected', $this->getSession()->getPage()->findField('Reference')->find('css', 'option[value="2"]')->getAttribute('selected'));
+    $this->assertEquals('selected', $this->getSession()->getPage()->findField('Reference')->find('css', 'option[value="3"]')->getAttribute('selected'));
+    $this->assertNull($this->getSession()->getPage()->findField('Reference')->find('css', 'option[value="1"]')->getAttribute('selected'));
+    $this->assertSession()->linkNotExistsExact('1');
+    $this->assertSession()->linkNotExistsExact('2');
+    $this->assertSession()->linkNotExistsExact('3');
 
-    // And filter.
+    // Test an AND filter.
     $node = $this->drupalGetNodeByTitle('List page for ct1');
     $this->drupalGet($node->toUrl('edit-form'));
     $this->clickLink('List Page');
@@ -646,6 +687,21 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $assert->pageTextNotContains('Grass title');
     $assert->pageTextNotContains('Sun title');
     $assert->pageTextNotContains('Cherry title');
+    $this->assertSession()->linkNotExistsExact('1');
+    $this->assertSession()->linkNotExistsExact('2');
+    $this->assertSession()->linkNotExistsExact('3');
+    // Filter on Yellow, which is already preset, so it cannot be removed.
+    $this->getSession()->getPage()->selectFieldOption('Reference', '2');
+    $this->getSession()->getPage()->pressButton('Search');
+    $this->assertSession()->linkNotExistsExact('1');
+    $this->assertSession()->linkNotExistsExact('2');
+    $this->assertSession()->linkNotExistsExact('3');
+    // Filter on Red, which is not already preset, so it can be removed.
+    $this->getSession()->getPage()->selectFieldOption('Reference', '1');
+    $this->getSession()->getPage()->pressButton('Search');
+    $this->assertSession()->linkExistsExact('1');
+    $this->assertSession()->linkNotExistsExact('2');
+    $this->assertSession()->linkNotExistsExact('3');
   }
 
   /**

@@ -22,6 +22,8 @@ use Drupal\oe_list_pages\Plugin\facets\widget\FulltextWidget;
 
 /**
  * Default list builder implementation.
+ *
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
  */
 class ListBuilder implements ListBuilderInterface {
 
@@ -236,6 +238,7 @@ class ListBuilder implements ListBuilderInterface {
     $list_execution = $this->listExecutionManager->executeList($configuration);
     /** @var \Drupal\facets\FacetInterface[] $facets */
     $facets = $this->facetManager->getFacetsByFacetSourceId($list_execution->getListSource()->getSearchId());
+    $excluded_values = $this->mapExcludedValuesFromDefaults($configuration);
     $keyed_facets = [];
     $cache = new CacheableMetadata();
     $cache->addCacheContexts(['url']);
@@ -258,7 +261,7 @@ class ListBuilder implements ListBuilderInterface {
 
       $keyed_facets[$facet->id()] = $facet;
       $cache->addCacheableDependency($facet);
-      $active_filters[$facet->id()] = $facet->getActiveItems();
+      $active_filters[$facet->id()] = $this->getFacetActiveItems($facet, $excluded_values);
     }
 
     if (!$active_filters) {
@@ -457,6 +460,57 @@ class ListBuilder implements ListBuilderInterface {
     }
 
     return FALSE;
+  }
+
+  /**
+   * Creates a map of all the preset values for each facet.
+   *
+   * Groups together the preset values from all the filters by facet ID.
+   *
+   * @param \Drupal\oe_list_pages\ListPageConfiguration $configuration
+   *   The list page configuration.
+   *
+   * @return array
+   *   The array of values to exclude.
+   */
+  protected function mapExcludedValuesFromDefaults(ListPageConfiguration $configuration): array {
+    $preset_filters = $configuration->getDefaultFiltersValues();
+    $map = [];
+    foreach ($preset_filters as $filter_id => $filter) {
+      if (!isset($map[$filter->getFacetId()])) {
+        $map[$filter->getFacetId()] = $filter->getValues();
+        continue;
+      }
+      $map[$filter->getFacetId()] = array_merge($map[$filter->getFacetId()], $filter->getValues());
+    }
+
+    return $map;
+  }
+
+  /**
+   * Determines which facet active items to use (subtracting the excluded ones).
+   *
+   * @param \Drupal\facets\FacetInterface $facet
+   *   The facet.
+   * @param array $excluded_values
+   *   The map of excluded values.
+   *
+   * @return array
+   *   The remaining active items.
+   */
+  protected function getFacetActiveItems(FacetInterface $facet, array $excluded_values): array {
+    if (!isset($excluded_values[$facet->id()])) {
+      return $facet->getActiveItems();
+    }
+
+    $active_items = [];
+    foreach ($facet->getActiveItems() as $key => $value) {
+      if (!in_array($value, $excluded_values[$facet->id()])) {
+        $active_items[] = $value;
+      }
+    }
+
+    return $active_items;
   }
 
 }

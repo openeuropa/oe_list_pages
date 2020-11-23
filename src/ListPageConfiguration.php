@@ -211,7 +211,7 @@ class ListPageConfiguration {
   /**
    * Returns the default filter values.
    *
-   * @return array
+   * @return \Drupal\oe_list_pages\ListPresetFilter[]
    *   The default filter values.
    */
   public function getDefaultFiltersValues(): array {
