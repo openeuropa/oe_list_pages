@@ -90,12 +90,13 @@ class FulltextWidgetTest extends ListsSourceTestBase {
 
     // Search for multi filters.
     $this->container->get('kernel')->rebuildContainer();
+    $multi_filters = [];
     $list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
     /** @var \Drupal\search_api\Query\QueryInterface $default_query */
     $filter_message = new ListPresetFilter($facet_name->id(), ['message']);
     $filter_message_id = ListPresetFiltersBuilder::generateFilterId($facet_name->id());
-    $filter_with = new ListPresetFilter($facet_name->id(), ['with']);
     $multi_filters[$filter_message_id] = $filter_message;
+    $filter_with = new ListPresetFilter($facet_name->id(), ['with']);
     $filter_with_id = ListPresetFiltersBuilder::generateFilterId($facet_name->id(), array_keys($multi_filters));
     $multi_filters[$filter_with_id] = $filter_with;
     $query = $list->getQuery(['preset_filters' => $multi_filters]);
