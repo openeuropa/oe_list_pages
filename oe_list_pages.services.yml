@@ -13,6 +13,9 @@ services:
   oe_list_pages.builder:
     class: Drupal\oe_list_pages\ListBuilder
     arguments: ['@oe_list_pages.execution_manager', '@entity_type.manager', '@pager.manager', '@entity.repository', '@form_builder', '@facets.manager', '@facets.utility.url_generator', '@plugin.manager.facets.processor']
+  oe_list_pages.preset_filters_builder:
+    class: Drupal\oe_list_pages\ListPresetFiltersBuilder
+    arguments: ['@facets.manager']
   oe_list_pages.list_page_configuration_subform_factory:
     class: Drupal\oe_list_pages\Form\ListPageConfigurationSubformFactory
-    arguments: ['@entity_type.manager', '@entity_type.bundle.info', '@event_dispatcher', '@oe_list_pages.list_source.factory']
+    arguments: ['@entity_type.manager', '@entity_type.bundle.info', '@event_dispatcher', '@oe_list_pages.list_source.factory', '@oe_list_pages.preset_filters_builder']

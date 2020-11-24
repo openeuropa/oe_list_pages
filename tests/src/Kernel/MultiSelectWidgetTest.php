@@ -24,7 +24,7 @@ class MultiSelectWidgetTest extends ListsSourceTestBase {
    */
   protected function setUp() {
     parent::setUp();
-    $this->widget = new MultiselectWidget([], 'oe_list_pages_multiselect', []);
+    $this->widget = new MultiselectWidget([], 'oe_list_pages_multiselect', [], $this->entityTypeManager, $this->container->get('entity_field.manager'));
   }
 
   /**
@@ -59,6 +59,7 @@ class MultiSelectWidgetTest extends ListsSourceTestBase {
     $results = $query->getResults();
     $this->assertCount(3, $results->getResultItems());
 
+    $this->container->get('kernel')->rebuildContainer();
     $query = $list->getQuery(['preset_filters' => [$facet_categories->id() => 'cat2']]);
     $query->execute();
     $results = $query->getResults();

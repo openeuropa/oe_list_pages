@@ -78,7 +78,7 @@ class QuerySubscriber implements EventSubscriberInterface {
     // Add the active filters.
     foreach ($this->facetManager->getFacetsByFacetSourceId($facetsource_id) as $facet) {
       // Handle preset filters. If filter is preset, set as active items.
-      if (in_array($facet->id(), array_keys($preset_filters))) {
+      if (empty($facet->getActiveItems()) && in_array($facet->id(), array_keys($preset_filters))) {
         $active_items = is_array($preset_filters[$facet->id()]) ? $preset_filters[$facet->id()] : [$preset_filters[$facet->id()]];
         $facet->setActiveItems($active_items);
       }

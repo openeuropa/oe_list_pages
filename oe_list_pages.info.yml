@@ -9,6 +9,7 @@ dependencies:
   - emr:emr_node
   - facets:facets
   - search_api:search_api
+  - multivalue_form_element:multivalue_form_element
 
 config_devel:
   install:

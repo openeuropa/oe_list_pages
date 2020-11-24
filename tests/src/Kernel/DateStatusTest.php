@@ -117,6 +117,7 @@ class DateStatusTest extends ListsSourceTestBase {
       'oldest',
     ]);
 
+    $this->container->get('kernel')->rebuildContainer();
     $query = $list->getQuery(['preset_filters' => [$this->facet->id() => [DateStatus::UPCOMING]]]);
     $query->execute();
     $results = $query->getResults();
@@ -126,6 +127,7 @@ class DateStatusTest extends ListsSourceTestBase {
       'future',
     ]);
 
+    $this->container->get('kernel')->rebuildContainer();
     $query = $list->getQuery([
       'preset_filters' => [
         $this->facet->id() => [

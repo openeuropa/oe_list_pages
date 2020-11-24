@@ -39,6 +39,15 @@ class FulltextWidget extends ListPagesWidgetBase {
   /**
    * {@inheritdoc}
    */
+  public function buildDefaultValueForm(array $form, FormStateInterface $form_state, FacetInterface $facet): array {
+    $build = $this->build($facet);
+    $build[$facet->id()]['#required'] = TRUE;
+    return $build;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getQueryType() {
     return 'fulltext_comparison';
   }

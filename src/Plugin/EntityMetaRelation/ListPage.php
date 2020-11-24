@@ -100,6 +100,16 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
     $form[$key]['#tree'] = TRUE;
     $subform_state = SubformState::createForSubform($form[$key], $form, $form_state);
     $configuration = ListPageConfiguration::fromEntity($entity);
+
+    // Check if the current entity bundle supports default values for its
+    // filters.
+    /** @var \Drupal\Core\Entity\EntityInterface $entity */
+    $entity = $form_state->getFormObject()->getEntity();
+    $bundle_entity_type = $entity->getEntityType()->getBundleEntityType();
+    $storage = $this->entityTypeManager->getStorage($bundle_entity_type);
+    $bundle = $storage->load($entity->bundle());
+    $configuration->setDefaultFilterValuesAllowed($bundle->getThirdPartySetting('oe_list_pages', 'default_filter_values_allowed', FALSE));
+
     $subform = $this->subformFactory->getForm($configuration);
     $form[$key] = $subform->buildForm($form[$key], $subform_state);
 
@@ -152,6 +162,7 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
     $entity_meta_configuration = [];
     $entity_meta_configuration['override_exposed_filters'] = $configuration->isExposedFiltersOverridden();
     $entity_meta_configuration['exposed_filters'] = $configuration->getExposedFilters();
+    $entity_meta_configuration['preset_filters'] = $configuration->getDefaultFiltersValues();
     $entity_meta_configuration['limit'] = (int) $form_state->getValue([$this->getFormKey(), 'limit']);
     $entity_meta_wrapper->setConfiguration($entity_meta_configuration);
     $host_entity->get('emr_entity_metas')->attach($entity_meta);

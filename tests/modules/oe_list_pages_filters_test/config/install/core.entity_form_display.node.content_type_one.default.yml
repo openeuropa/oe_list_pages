@@ -3,6 +3,7 @@ status: true
 dependencies:
   config:
     - field.field.node.content_type_one.body
+    - field.field.node.content_type_one.field_reference
     - field.field.node.content_type_one.field_select_one
     - node.type.content_type_one
   module:
@@ -28,6 +29,16 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
+  field_reference:
+    weight: 26
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
   field_select_one:
     type: options_select
     weight: 6
