@@ -74,10 +74,11 @@ class ListPresetFiltersBuilder {
 
     $this->initializeCurrentFilterValues($form_state, $configuration);
 
+    $current_filters = static::getListSourceCurrentFilterValues($form_state, $list_source);
     // Set the current filters on the form so they can be used in the submit.
     $form['current_filters'] = [
       '#type' => 'value',
-      '#value' => static::getListSourceCurrentFilterValues($form_state, $list_source),
+      '#value' => $current_filters,
     ];
 
     $facet_id = $form_state->get('facet_id');
@@ -88,7 +89,10 @@ class ListPresetFiltersBuilder {
       return $this->buildSummaryPresetFilters($form, $form_state, $ajax_wrapper_id);
     }
 
-    $filter_id = self::generateFilterId($facet_id);
+    $filter_id = $form_state->get('filter_id');
+    if (!isset($filter_id)) {
+      $filter_id = self::generateFilterId($facet_id, array_keys($current_filters));
+    }
 
     $form = $this->buildEditPresetFilter($form, $form_state, $ajax_wrapper_id, $facet_id, $filter_id);
 
@@ -123,16 +127,16 @@ class ListPresetFiltersBuilder {
 
     $rows = [];
     foreach ($current_filters as $filter_id => $filter) {
-      $facet = $this->getFacetById($list_source, $filter['facet_id']);
+      $facet = $this->getFacetById($list_source, $filter->getFacetId());
       $widget = $facet->getWidgetInstance();
       $filter_value_label = '';
       if ($widget instanceof ListPagesWidgetInterface) {
-        $filter_value_label = $widget->getDefaultValuesLabel($facet, $list_source, $filter['values']);
+        $filter_value_label = $widget->getDefaultValuesLabel($facet, $list_source, $filter);
       }
 
       $rows[] = [
         [
-          'data' => $available_filters[$filter['facet_id']],
+          'data' => $available_filters[$filter->getFacetId()],
           'facet_id' => $filter_id,
         ],
         ['data' => $filter_value_label],
@@ -144,7 +148,7 @@ class ListPresetFiltersBuilder {
         '#value' => $this->t('Edit'),
         '#name' => 'edit-' . $filter_id,
         '#filter_id' => $filter_id,
-        '#facet_id' => $filter['facet_id'],
+        '#facet_id' => $filter->getFacetId(),
         '#limit_validation_errors' => [
           array_merge($form['#parents'], [
             'wrapper',
@@ -166,7 +170,7 @@ class ListPresetFiltersBuilder {
         '#value' => $this->t('Delete'),
         '#name' => 'delete-' . $filter_id,
         '#filter_id' => $filter_id,
-        '#facet_id' => $filter['facet_id'],
+        '#facet_id' => $filter->getFacetId(),
         '#op' => 'remove-default-value',
         '#limit_validation_errors' => [
           array_merge($form['#parents'], [
@@ -259,10 +263,9 @@ class ListPresetFiltersBuilder {
 
     $facet = $this->getFacetById($list_source, $facet_id);
     if (!empty($facet) && ($widget = $facet->getWidgetInstance()) && ($widget instanceof ListPagesWidgetInterface)) {
-      // Set the active items on the facet so that the widget can build the
-      // form with default values.
+      $filter = NULL;
       if (!empty($current_filters[$filter_id])) {
-        $facet->setActiveItems($current_filters[$filter_id]['values']);
+        $filter = $current_filters[$filter_id];
       }
 
       $ajax_definition = [
@@ -280,7 +283,7 @@ class ListPresetFiltersBuilder {
       ];
 
       $subform_state = SubformState::createForSubform($form['wrapper']['edit'][$filter_id], $form, $form_state);
-      $form['wrapper']['edit'][$filter_id] = $widget->buildDefaultValueForm($form['wrapper']['edit'][$filter_id], $subform_state, $facet);
+      $form['wrapper']['edit'][$filter_id] = $widget->buildDefaultValueForm($form['wrapper']['edit'][$filter_id], $subform_state, $facet, $filter);
 
       $form['wrapper']['edit'][$filter_id]['set_value'] = [
         '#value' => $this->t('Set default value'),
@@ -406,10 +409,9 @@ class ListPresetFiltersBuilder {
     $subform_state = SubformState::createForSubform($current_filters[$filter_id], $form, $form_state);
     $widget = $facet->getWidgetInstance();
 
-    $current_filters[$filter_id] = [
-      'facet_id' => $facet_id,
-      'values' => $widget->prepareDefaultFilterValue($facet, $current_filters[$filter_id], $subform_state),
-    ];
+    $preset_filter = $widget->prepareDefaultFilterValue($facet, $current_filters[$filter_id], $subform_state);
+    $current_filters[$filter_id] = new ListPresetFilter($facet_id, $preset_filter['values'], $preset_filter['operator']);
+
     // Set the current filters on the form state so they can be used elsewhere.
     static::setListSourceCurrentFilterValues($form_state, $list_source, $current_filters);
     $form_state->set('facet_id', NULL);
@@ -458,6 +460,7 @@ class ListPresetFiltersBuilder {
   public function editDefaultValueSubmit(array &$form, FormStateInterface $form_state): void {
     $triggering_element = $form_state->getTriggeringElement();
     $form_state->set('facet_id', $triggering_element['#facet_id']);
+    $form_state->set('filter_id', $triggering_element['#filter_id']);
     $form_state->setRebuild(TRUE);
   }
 
@@ -498,6 +501,8 @@ class ListPresetFiltersBuilder {
     $widget->prepareDefaultFilterValue($facet, $current_filters[$filter_id], $subform_state);
     unset($current_filters[$filter_id]);
     static::setListSourceCurrentFilterValues($form_state, $list_source, $current_filters);
+    $form_state->set('filter_id', NULL);
+    $form_state->set('facet_id', NULL);
 
     $form_state->setRebuild(TRUE);
   }
@@ -546,12 +551,21 @@ class ListPresetFiltersBuilder {
    *
    * @param string $id
    *   The facet id.
+   * @param array $existing_filters
+   *   Existing filters to check for duplicates.
    *
    * @return string
    *   The filter id.
    */
-  public static function generateFilterId(string $id): string {
-    return md5($id);
+  public static function generateFilterId(string $id, array $existing_filters = []): string {
+    $filter_id = md5($id);
+    $inc = 1;
+    while (in_array($filter_id, $existing_filters)) {
+      $filter_id = md5($id . $inc);
+      $inc++;
+    }
+
+    return $filter_id;
   }
 
   /**
@@ -577,7 +591,7 @@ class ListPresetFiltersBuilder {
    * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
    *   The list source the filter values belong to.
    *
-   * @return array
+   * @return ListPresetFilter[]
    *   The filter values.
    */
   protected static function getListSourceCurrentFilterValues(FormStateInterface $form_state, ListSourceInterface $list_source): array {

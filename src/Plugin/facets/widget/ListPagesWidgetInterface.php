@@ -6,6 +6,7 @@ namespace Drupal\oe_list_pages\Plugin\facets\widget;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\facets\FacetInterface;
+use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\ListSourceInterface;
 
 /**
@@ -22,11 +23,13 @@ interface ListPagesWidgetInterface {
    *   The form state.
    * @param \Drupal\facets\FacetInterface $facet
    *   The facet.
+   * @param \Drupal\oe_list_pages\ListPresetFilter $preset_filter
+   *   The current preset filters.
    *
    * @return array
    *   The rendered widget.
    */
-  public function buildDefaultValueForm(array $form, FormStateInterface $form_state, FacetInterface $facet);
+  public function buildDefaultValueForm(array $form, FormStateInterface $form_state, FacetInterface $facet, ListPresetFilter $preset_filter = NULL);
 
   /**
    * Renders the label for the filter values set as default values.
@@ -35,13 +38,13 @@ interface ListPagesWidgetInterface {
    *   The facet.
    * @param \Drupal\oe_list_pages\ListSourceInterface|null $list_source
    *   The list source.
-   * @param array $filter_value
-   *   The filter value.
+   * @param \Drupal\oe_list_pages\ListPresetFilter $filter
+   *   The filter.
    *
    * @return string
    *   The label.
    */
-  public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source = NULL, array $filter_value = []): string;
+  public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source, ListPresetFilter $filter): string;
 
   /**
    * Prepares the values to be passed to the URL generator from the submission.

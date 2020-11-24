@@ -8,6 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\facets\FacetInterface;
 use Drupal\facets\Processor\ProcessorInterface;
 use Drupal\facets\Widget\WidgetPluginBase;
+use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\ListSourceInterface;
 
 /**
@@ -31,20 +32,24 @@ class ListPagesWidgetBase extends WidgetPluginBase implements ListPagesWidgetInt
    * {@inheritdoc}
    */
   public function prepareDefaultFilterValue(FacetInterface $facet, array $form, FormStateInterface $form_state): array {
-    return $this->prepareValueForUrl($facet, $form, $form_state);
+    return [
+      'operator' => ListPresetFilter::OR_OPERATOR,
+      'values' => $this->prepareValueForUrl($facet, $form, $form_state),
+    ];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source = NULL, array $filter_value = []): string {
+  public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source, ListPresetFilter $filter): string {
     // Keep track of the original active items so we can reset them.
     $active_items = $facet->getActiveItems();
-    $facet->setActiveItems($filter_value);
+    $filter_values = $filter->getValues();
+    $facet->setActiveItems($filter_values);
     $results = $this->processFacetResults($facet);
 
     $filter_label = [];
-    foreach ($filter_value as $value) {
+    foreach ($filter_values as $value) {
       $filter_label[$value] = $value;
       foreach ($results as $result) {
         if ($result->getRawValue() == $value) {
@@ -61,7 +66,7 @@ class ListPagesWidgetBase extends WidgetPluginBase implements ListPagesWidgetInt
   /**
    * {@inheritdoc}
    */
-  public function buildDefaultValueForm(array $form, FormStateInterface $form_state, FacetInterface $facet): array {
+  public function buildDefaultValueForm(array $form, FormStateInterface $form_state, FacetInterface $facet, ListPresetFilter $preset_filter = NULL): array {
     return $this->build($facet);
   }
 

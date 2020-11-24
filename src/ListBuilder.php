@@ -306,7 +306,7 @@ class ListBuilder implements ListBuilderInterface {
         ];
       }
 
-      if (!$item['items']) {
+      if (empty($item['items'])) {
         continue;
       }
       $item['name'] = $facet->getName();

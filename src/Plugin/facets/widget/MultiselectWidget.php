@@ -14,6 +14,7 @@ use Drupal\facets\FacetInterface;
 use Drupal\facets\Result\Result;
 use Drupal\facets\Result\ResultInterface;
 use Drupal\multivalue_form_element\Element\MultiValue;
+use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\ListSourceInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -67,12 +68,19 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
   /**
    * {@inheritdoc}
    */
-  public function buildDefaultValueForm(array $form, FormStateInterface $form_state, FacetInterface $facet): array {
+  public function buildDefaultValueForm(array $form, FormStateInterface $form_state, FacetInterface $facet, ListPresetFilter $preset_filter = NULL): array {
     /** @var \Drupal\oe_list_pages\ListSourceInterface $list_source */
     $list_source = $form_state->get('list_source');
     $field_definition = $this->getFieldDefinition($facet, $list_source);
     $field_type = !empty($field_definition) ? $field_definition->getType() : NULL;
-    $active_items = $facet->getActiveItems();
+    $active_items = $preset_filter ? $preset_filter->getValues() : [];
+
+    $form['oe_list_pages_filter_operator'] = [
+      '#type' => 'select',
+      '#default_value' => $preset_filter ? $preset_filter->getOperator() : ListPresetFilter::OR_OPERATOR,
+      '#options' => ListPresetFilter::getOperators(),
+      '#title' => $this->t('Operator'),
+    ];
 
     $form[$facet->id()] = [
       '#type' => 'multivalue',
@@ -147,10 +155,12 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
   /**
    * {@inheritdoc}
    */
-  public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source = NULL, array $filter_value = []): string {
+  public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source, ListPresetFilter $filter): string {
     $field_definition = $this->getFieldDefinition($facet, $list_source);
     $field_type = !empty($field_definition) ? $field_definition->getType() : NULL;
 
+    $filter_value = $filter->getValues();
+    $filter_operators = ListPresetFilter::getOperators();
     if (in_array(EntityReferenceFieldItemListInterface::class, class_implements($field_definition->getClass()))) {
       $entity_storage = $this->entityTypeManager->getStorage($field_definition->getSetting('target_type'));
       $values = [];
@@ -163,11 +173,11 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
         $values[] = $entity->label();
       }
 
-      return implode(', ', $values);
+      return $filter_operators[$filter->getOperator()] . ': ' . implode(', ', $values);
     }
 
     if (in_array($field_type, ['list_integer', 'list_float', 'list_string'])) {
-      return implode(', ', array_map(function ($value) use ($field_definition) {
+      return $filter_operators[$filter->getOperator()] . ': ' . implode(', ', array_map(function ($value) use ($field_definition) {
         return $field_definition->getSetting('allowed_values')[$value];
       }, $filter_value));
     }
@@ -179,10 +189,10 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
       ];
 
       $facet->setResults($results);
-      return parent::getDefaultValuesLabel($facet, $list_source, $filter_value);
+      return $filter_operators[$filter->getOperator()] . ': ' . parent::getDefaultValuesLabel($facet, $list_source, $filter);
     }
 
-    return parent::getDefaultValuesLabel($facet, $list_source, $filter_value);
+    return $filter_operators[$filter->getOperator()] . ': ' . parent::getDefaultValuesLabel($facet, $list_source, $filter);
   }
 
   /**
@@ -252,7 +262,11 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
     $element_state['items_count'] = count($values);
     MultiValue::setElementState($state_parents, $facet->id(), $form_state, $element_state);
 
-    return $values;
+    $operator = $form_state->getValue('oe_list_pages_filter_operator');
+    return [
+      'operator' => $operator,
+      'values' => $values,
+    ];
   }
 
 }
