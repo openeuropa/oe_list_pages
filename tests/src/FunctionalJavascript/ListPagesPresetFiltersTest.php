@@ -5,11 +5,15 @@ declare(strict_types = 1);
 namespace Drupal\Tests\oe_list_pages\FunctionalJavascript;
 
 use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
 use Drupal\oe_list_pages\ListPresetFiltersBuilder;
+use Drupal\oe_list_pages\ListSourceFactory;
+use Drupal\oe_list_pages\Plugin\facets\query_type\DateStatus;
 use Drupal\search_api\Entity\Index;
+use Drupal\Tests\oe_list_pages\Traits\FacetsTestTrait;
 
 /**
  * Tests the list page preset filters.
@@ -17,6 +21,8 @@ use Drupal\search_api\Entity\Index;
  * @group oe_list_pages
  */
 class ListPagesPresetFiltersTest extends WebDriverTestBase {
+
+  use FacetsTestTrait;
 
   /**
    * {@inheritdoc}
@@ -702,6 +708,130 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $this->assertSession()->linkExistsExact('1');
     $this->assertSession()->linkNotExistsExact('2');
     $this->assertSession()->linkNotExistsExact('3');
+  }
+
+  /**
+   * Test list page preset filters configuration with a default status facet.
+   *
+   * Default status facets have a processor that sets a default status if
+   * a filter for that facet doesn't exist.
+   */
+  public function testListPageDefaultStatusPresetFilters(): void {
+    // Create the configured facet.
+    $list_id = ListSourceFactory::generateFacetSourcePluginId('node', 'content_type_one');
+
+    $processor_options = [
+      'default_status' => DateStatus::PAST,
+      'upcoming_label' => 'Coming items',
+      'past_label' => 'Past items',
+    ];
+    $facet = $this->createFacet('end_value', $list_id, 'options', 'oe_list_pages_multiselect', []);
+    $facet->addProcessor([
+      'processor_id' => 'oe_list_pages_date_status_processor',
+      'weights' => ['pre_query' => 60, 'build' => 35],
+      'settings' => $processor_options,
+    ]);
+    $facet->save();
+
+    $past_date = new DrupalDateTime();
+    $past_date->modify('-1 month');
+
+    $future_date = new DrupalDateTime();
+    $future_date->modify('+1 month');
+
+    // Past nodes.
+    $values = [
+      'title' => 'Past node 1',
+      'type' => 'content_type_one',
+      'status' => NodeInterface::PUBLISHED,
+      'field_date_range' => [
+        'value' => $past_date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT),
+        'end_value' => $past_date->modify('+1 day')->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT),
+      ],
+    ];
+    $node = Node::create($values);
+    $node->save();
+
+    $values = [
+      'title' => 'Past node 2',
+      'type' => 'content_type_one',
+      'status' => NodeInterface::PUBLISHED,
+      'field_date_range' => [
+        'value' => $past_date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT),
+        'end_value' => $past_date->modify('+1 day')->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT),
+      ],
+    ];
+    $node = Node::create($values);
+    $node->save();
+
+    // Future node.
+    $values = [
+      'title' => 'Future node',
+      'type' => 'content_type_one',
+      'status' => NodeInterface::PUBLISHED,
+      'field_date_range' => [
+        'value' => $future_date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT),
+        'end_value' => $future_date->modify('+1 day')->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT),
+      ],
+    ];
+    $node = Node::create($values);
+    $node->save();
+
+    /** @var \Drupal\search_api\Entity\Index $index */
+    $index = Index::load('node');
+    $index->indexItems();
+
+    $admin = $this->createUser([], NULL, TRUE);
+    $this->drupalLogin($admin);
+    $this->drupalGet('/node/add/oe_list_page');
+    $this->getSession()->getPage()->fillField('Title', 'List page for ct1');
+    $this->clickLink('List Page');
+
+    $this->getSession()->getPage()->selectFieldOption('Source bundle', 'content_type_one');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->pressButton('Save');
+
+    // We should only see the past nodes by default because we have the facet
+    // configured to show the past events.
+    $this->assertSession()->pageTextContains('Past node 1');
+    $this->assertSession()->pageTextContains('Past node 2');
+    $this->assertSession()->pageTextContains('Facet for end_value: Past items');
+    $this->assertSession()->pageTextNotContains('Future node');
+
+    $node = $this->drupalGetNodeByTitle('List page for ct1');
+    $this->drupalGet($node->toUrl('edit-form'));
+    $this->clickLink('List Page');
+
+    // Set preset filter for default date facet.
+    $this->getSession()->getPage()->selectFieldOption('Add default value for', 'Facet for end_value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $filter_id = ListPresetFiltersBuilder::generateFilterId($facet->id());
+    $filter_selector = 'emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $filter_id . ']';
+
+    $this->getSession()->getPage()->selectFieldOption($filter_selector . '[' . $facet->id() . '][0][list]', DateStatus::UPCOMING);
+    $this->getSession()->getPage()->pressButton('Set default value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->pressButton('Save');
+    // The preset filter took over the default status.
+    $this->assertSession()->pageTextNotContains('Past node 1');
+    $this->assertSession()->pageTextNotContains('Past node 2');
+    $this->assertSession()->pageTextNotContains('Facet for end_value');
+    $this->assertSession()->pageTextContains('Future node');
+
+    // Include both upcoming and past.
+    $this->drupalGet($node->toUrl('edit-form'));
+    $this->clickLink('List Page');
+    $this->getSession()->getPage()->pressButton('edit-' . $filter_id);
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->selectFieldOption('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $filter_id . '][oe_list_pages_filter_operator]', 'Any of');
+    $this->getSession()->getPage()->selectFieldOption($filter_selector . '[' . $facet->id() . '][1][list]', DateStatus::PAST);
+    $this->getSession()->getPage()->pressButton('Set default value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->pressButton('Save');
+    $this->assertSession()->pageTextContains('Past node 1');
+    $this->assertSession()->pageTextContains('Past node 2');
+    $this->assertSession()->pageTextContains('Future node');
+    $this->assertSession()->pageTextNotContains('Facet for end_value');
   }
 
   /**

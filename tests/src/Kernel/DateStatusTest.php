@@ -56,6 +56,13 @@ class DateStatusTest extends ListsSourceTestBase {
     ]);
     $facet_with_config->save();
 
+    // Run the query before building the widget as the query subscriber puts
+    // the default values onto the query.
+    $list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
+    /** @var \Drupal\search_api\Query\QueryInterface $default_query */
+    $query = $list->getQuery();
+    $query->execute();
+
     $build = $this->facetManager->build($this->facet);
     $actual = $build[0][$this->facet->id()];
     $this->assertSame('array', gettype($actual));

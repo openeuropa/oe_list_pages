@@ -7,6 +7,7 @@ namespace Drupal\oe_list_pages\Plugin\facets\widget;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\facets\FacetInterface;
 use Drupal\facets\Processor\ProcessorInterface;
+use Drupal\facets\Result\ResultInterface;
 use Drupal\facets\Widget\WidgetPluginBase;
 use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\ListSourceInterface;
@@ -89,11 +90,33 @@ class ListPagesWidgetBase extends WidgetPluginBase implements ListPagesWidgetInt
    */
   protected function processFacetResults(FacetInterface $facet): array {
     $results = $facet->getResults();
+    foreach ($facet->getProcessorsByStage(ProcessorInterface::STAGE_PRE_QUERY) as $processor) {
+      $processor->preQuery($facet);
+    }
+
     foreach ($facet->getProcessorsByStage(ProcessorInterface::STAGE_BUILD) as $processor) {
       $results = $processor->build($facet, $results);
     }
 
     return $results;
+  }
+
+  /**
+   * Transforms a list of Facet results to selectable options.
+   *
+   * @param array $results
+   *   The results.
+   *
+   * @return array
+   *   The options.
+   */
+  protected function transformResultsToOptions(array $results): array {
+    $options = [];
+    array_walk($results, function (ResultInterface &$result) use (&$options) {
+      $options[$result->getRawValue()] = $result->getDisplayValue();
+    });
+
+    return $options;
   }
 
 }

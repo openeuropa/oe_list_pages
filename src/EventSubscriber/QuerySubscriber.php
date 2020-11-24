@@ -86,6 +86,12 @@ class QuerySubscriber implements EventSubscriberInterface {
     $this->processFacetActiveValues($facets, $preset_filter_values);
 
     foreach ($facets as $facet) {
+      // If the facet is using a default status processor and has default
+      // active items, set them if we did not yet have any.
+      if (!$facet->getActiveItems() && $facet->get('default_status_active_items')) {
+        $facet->setActiveItems($facet->get('default_status_active_items'));
+      }
+
       // Handle ignored filters. If filter is ignored unset its active items.
       if (in_array($facet->id(), $ignored_filters)) {
         $facet->setActiveItems([]);
