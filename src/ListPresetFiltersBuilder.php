@@ -429,6 +429,7 @@ class ListPresetFiltersBuilder {
    */
   public function cancelDefaultValueSubmit(array &$form, FormStateInterface $form_state): void {
     $form_state->set('facet_id', NULL);
+    $form_state->set('filter_id', NULL);
     $form_state->setRebuild(TRUE);
   }
 
