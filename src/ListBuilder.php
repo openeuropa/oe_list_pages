@@ -238,7 +238,6 @@ class ListBuilder implements ListBuilderInterface {
     $list_execution = $this->listExecutionManager->executeList($configuration);
     /** @var \Drupal\facets\FacetInterface[] $facets */
     $facets = $this->facetManager->getFacetsByFacetSourceId($list_execution->getListSource()->getSearchId());
-    $excluded_values = $this->mapExcludedValuesFromDefaults($configuration);
     $keyed_facets = [];
     $cache = new CacheableMetadata();
     $cache->addCacheContexts(['url']);
@@ -261,7 +260,7 @@ class ListBuilder implements ListBuilderInterface {
 
       $keyed_facets[$facet->id()] = $facet;
       $cache->addCacheableDependency($facet);
-      $active_filters[$facet->id()] = $this->getFacetActiveItems($facet, $excluded_values);
+      $active_filters[$facet->id()] = $facet->getActiveItems();
     }
 
     if (!$active_filters) {
@@ -485,32 +484,6 @@ class ListBuilder implements ListBuilderInterface {
     }
 
     return $map;
-  }
-
-  /**
-   * Determines which facet active items to use (subtracting the excluded ones).
-   *
-   * @param \Drupal\facets\FacetInterface $facet
-   *   The facet.
-   * @param array $excluded_values
-   *   The map of excluded values.
-   *
-   * @return array
-   *   The remaining active items.
-   */
-  protected function getFacetActiveItems(FacetInterface $facet, array $excluded_values): array {
-    if (!isset($excluded_values[$facet->id()])) {
-      return $facet->getActiveItems();
-    }
-
-    $active_items = [];
-    foreach ($facet->getActiveItems() as $key => $value) {
-      if (!in_array($value, $excluded_values[$facet->id()])) {
-        $active_items[] = $value;
-      }
-    }
-
-    return $active_items;
   }
 
 }

@@ -11,6 +11,8 @@ use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\ListPresetFiltersBuilder;
 use Drupal\search_api\Event\QueryPreExecuteEvent;
 use Drupal\search_api\Event\SearchApiEvents;
+use Drupal\search_api\Query\ConditionGroupInterface;
+use Drupal\search_api\Query\QueryInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -59,6 +61,8 @@ class QuerySubscriber implements EventSubscriberInterface {
    *
    * @param \Drupal\search_api\Event\QueryPreExecuteEvent $event
    *   The query alter event.
+   *
+   * @SuppressWarnings(PHPMD.CyclomaticComplexity)
    */
   public function queryAlter(QueryPreExecuteEvent $event) {
     $query = $event->getQuery();
@@ -79,16 +83,18 @@ class QuerySubscriber implements EventSubscriberInterface {
 
     $facets = [];
     foreach ($this->facetManager->getFacetsByFacetSourceId($source_id) as $facet) {
-      $filter_id = ListPresetFiltersBuilder::generateFilterId($facet->id(), array_keys($facets));
-      $facets[$filter_id] = $facet;
+      $facets[$facet->id()] = $facet;
     }
 
-    $this->processFacetActiveValues($facets, $preset_filter_values);
+    $cloned_facets = [];
+    $facets = $this->processFacetActiveValues($facets, $preset_filter_values, $cloned_facets);
 
     foreach ($facets as $facet) {
       // If the facet is using a default status processor and has default
-      // active items, set them if we did not yet have any.
-      if (!$facet->getActiveItems() && $facet->get('default_status_active_items')) {
+      // active items, set them if we did not yet have any. This unless it
+      // was cloned as preset filters, in which case we need to take over the
+      // defaults completely.
+      if (!$facet->getActiveItems() && $facet->get('default_status_active_items') && !isset($cloned_facets[$facet->id()])) {
         $facet->setActiveItems($facet->get('default_status_active_items'));
       }
 
@@ -103,6 +109,19 @@ class QuerySubscriber implements EventSubscriberInterface {
         'facet' => $facet,
       ]);
       $query_type_plugin->execute();
+
+      if (!isset($cloned_facets[$facet->id()])) {
+        continue;
+      }
+
+      // At this point we run the query type plugin execute method which adds
+      // the query conditions for our preset filters. But we want to ensure that
+      // these conditions are not taken into account when determining the
+      // result count for the main facet which may be exposed. Its values
+      // should only include the options that would limit the result set. So
+      // for this we need to remove the query tag which is used in
+      // Database::getFacets().
+      $this->removeAppliedQueryTag($query, $facet);
     }
   }
 
@@ -120,30 +139,45 @@ class QuerySubscriber implements EventSubscriberInterface {
    *   The facets.
    * @param array $preset_filter_values
    *   The preset values.
+   * @param array $cloned_facets
+   *   Keep track of the facets that we clone.
+   *
+   * @return array
+   *   The processed facets.
    */
-  protected function processFacetActiveValues(array &$facets, array $preset_filter_values): void {
+  protected function processFacetActiveValues(array $facets, array $preset_filter_values, array &$cloned_facets = []): array {
     // Group the preset filter values by the facet ID.
     $grouped_preset_filter_values = [];
     foreach ($preset_filter_values as $filter_id => $value) {
       $grouped_preset_filter_values[$value->getFacetId()][$filter_id] = $value;
     }
 
+    // Group the facets by their default filter IDs.
+    $facets_by_filter = [];
+    foreach ($facets as $facet) {
+      $filter_id = ListPresetFiltersBuilder::generateFilterId($facet->id(), array_keys($facets_by_filter));
+      $facets_by_filter[$filter_id] = $facet;
+    }
+
     foreach ($grouped_preset_filter_values as $facet_id => $values) {
       // For each facet, we need to keep the original with the active values
       // from the context, and clone it for each time it has been set as a
       // preset filters.
-      $original_facet_filter_id = key($values);
       /** @var \Drupal\facets\Entity\Facet $original_facet */
-      $original_facet = $facets[$original_facet_filter_id];
+      $original_facet = $facets[$facet_id];
 
       foreach ($values as $preset_filter_id => $preset_filter) {
         $facet = clone $original_facet;
+        $cloned_facets[$facet->id()] = $facet;
+
         // Generate a new filter ID for each of the clone.
         $this->applyPresetFilterValues($facet, $preset_filter);
-        $clone_filter_id = ListPresetFiltersBuilder::generateFilterId($facet_id, array_keys($facets));
-        $facets[$clone_filter_id] = $facet;
+        $clone_filter_id = ListPresetFiltersBuilder::generateFilterId($facet_id, array_keys($facets_by_filter));
+        $facets_by_filter[$clone_filter_id] = $facet;
       }
     }
+
+    return $facets_by_filter;
   }
 
   /**
@@ -168,6 +202,47 @@ class QuerySubscriber implements EventSubscriberInterface {
 
     $facet->setExclude(FALSE);
     $facet->setQueryOperator($preset_filter->getOperator());
+  }
+
+  /**
+   * Removes the condition groups query tag for a given facet.
+   *
+   * @param \Drupal\search_api\Query\QueryInterface $query
+   *   The query.
+   * @param \Drupal\facets\FacetInterface $facet
+   *   The facet.
+   *
+   * @see self::queryAlter()
+   */
+  protected function removeAppliedQueryTag(QueryInterface $query, FacetInterface $facet): void {
+    $tag = 'facet:' . $facet->getFieldIdentifier();
+    $group = $query->getConditionGroup();
+    if (!$group instanceof ConditionGroupInterface) {
+      return;
+    }
+    $this->removeQueryTagFromConditions($group, $tag);
+  }
+
+  /**
+   * Recursively tries to remove a query tag from a nested condition group.
+   *
+   * @param \Drupal\search_api\Query\ConditionGroupInterface $group
+   *   The condition group.
+   * @param string $tag
+   *   The query tag.
+   */
+  protected function removeQueryTagFromConditions(ConditionGroupInterface $group, string $tag): void {
+    $tags = &$group->getTags();
+    if (isset($tags[$tag])) {
+      unset($tags[$tag]);
+      return;
+    }
+
+    foreach ($group->getConditions() as $condition) {
+      if ($condition instanceof ConditionGroupInterface) {
+        $this->removeQueryTagFromConditions($condition, $tag);
+      }
+    }
   }
 
 }
