@@ -152,7 +152,7 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
       return $form;
     }
 
-    if ($field_type === 'boolean' && !$facet->getResults()) {
+    if ($field_type === 'boolean') {
       // Create some dummy results for each boolean type (on/off) then process
       // the results to ensure we have display labels.
       $results = [
@@ -208,7 +208,7 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
       }, $filter_value));
     }
 
-    if ($field_type === 'boolean' && !$facet->getResults()) {
+    if ($field_type === 'boolean') {
       $results = [
         new Result($facet, 1, 1, 1),
         new Result($facet, 0, 0, 1),
