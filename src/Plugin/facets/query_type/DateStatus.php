@@ -98,7 +98,10 @@ class DateStatus extends QueryTypePluginBase implements ContainerFactoryPluginIn
           $filter->addCondition($this->facet->getFieldIdentifier(), $now->getTimestamp(), "<=");
         }
         elseif ($value === self::UPCOMING) {
-          $filter->addCondition($this->facet->getFieldIdentifier(), $now->getTimestamp(), ">");
+          $condition_group = $query->createConditionGroup('OR');
+          $condition_group->addCondition($this->facet->getFieldIdentifier(), $now->getTimestamp(), ">");
+          $condition_group->addCondition($this->facet->getFieldIdentifier(), NULL);
+          $filter->addConditionGroup($condition_group);
         }
       }
       $query->addConditionGroup($filter);
