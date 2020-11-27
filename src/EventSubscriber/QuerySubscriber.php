@@ -126,14 +126,13 @@ class QuerySubscriber implements EventSubscriberInterface {
   }
 
   /**
-   * Applies the preset filter values onto the facet.
+   * Processes the preset values and creates "fake" facet definitions.
    *
    * Preset values are always going to be in the query and cannot be removed.
-   * Extra values can be included on top of the preset ones.
    *
-   * Since each facet can have multiple filters associated with it due to having
-   * multiple operators, we create a "fake" for each of these filters so we
-   * can
+   * For each facet for which we have preset values, we create a clone and
+   * apply the active values onto it, while keeping the original intact so it
+   * can take active values from the URL (exposed filters).
    *
    * @param array $facets
    *   The facets.

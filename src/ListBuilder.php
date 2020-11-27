@@ -461,29 +461,4 @@ class ListBuilder implements ListBuilderInterface {
     return FALSE;
   }
 
-  /**
-   * Creates a map of all the preset values for each facet.
-   *
-   * Groups together the preset values from all the filters by facet ID.
-   *
-   * @param \Drupal\oe_list_pages\ListPageConfiguration $configuration
-   *   The list page configuration.
-   *
-   * @return array
-   *   The array of values to exclude.
-   */
-  protected function mapExcludedValuesFromDefaults(ListPageConfiguration $configuration): array {
-    $preset_filters = $configuration->getDefaultFiltersValues();
-    $map = [];
-    foreach ($preset_filters as $filter_id => $filter) {
-      if (!isset($map[$filter->getFacetId()])) {
-        $map[$filter->getFacetId()] = $filter->getValues();
-        continue;
-      }
-      $map[$filter->getFacetId()] = array_merge($map[$filter->getFacetId()], $filter->getValues());
-    }
-
-    return $map;
-  }
-
 }
