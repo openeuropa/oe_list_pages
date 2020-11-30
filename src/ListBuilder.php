@@ -22,6 +22,8 @@ use Drupal\oe_list_pages\Plugin\facets\widget\FulltextWidget;
 
 /**
  * Default list builder implementation.
+ *
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
  */
 class ListBuilder implements ListBuilderInterface {
 
@@ -306,7 +308,7 @@ class ListBuilder implements ListBuilderInterface {
         ];
       }
 
-      if (!$item['items']) {
+      if (empty($item['items'])) {
         continue;
       }
       $item['name'] = $facet->getName();

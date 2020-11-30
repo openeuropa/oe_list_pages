@@ -10,6 +10,7 @@ use Drupal\Core\Entity\ContentEntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Form\SubformState;
 use Drupal\Core\Render\Element\Checkboxes;
 use Drupal\Core\Render\Element\Select;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -17,6 +18,7 @@ use Drupal\oe_list_pages\ListPageConfiguration;
 use Drupal\oe_list_pages\ListPageConfigurationSubformInterface;
 use Drupal\oe_list_pages\ListPageEvents;
 use Drupal\oe_list_pages\ListPageSourceAlterEvent;
+use Drupal\oe_list_pages\ListPresetFiltersBuilder;
 use Drupal\oe_list_pages\ListSourceFactoryInterface;
 use Drupal\oe_list_pages\ListSourceInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -65,6 +67,13 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
   protected $listSourceFactory;
 
   /**
+   * The preset filters builder.
+   *
+   * @var \Drupal\oe_list_pages\ListPresetFiltersBuilder
+   */
+  protected $presetFiltersBuilder;
+
+  /**
    * ListPageConfigurationSubformFactory constructor.
    *
    * @param \Drupal\oe_list_pages\ListPageConfiguration $configuration
@@ -77,13 +86,16 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
    *   The event dispatcher.
    * @param \Drupal\oe_list_pages\ListSourceFactoryInterface $listSourceFactory
    *   The list source factory.
+   * @param \Drupal\oe_list_pages\ListPresetFiltersBuilder $preset_filters_builder
+   *   The preset filters builder.
    */
-  public function __construct(ListPageConfiguration $configuration, EntityTypeManagerInterface $entityTypeManager, EntityTypeBundleInfoInterface $entityTypeBundleInfo, EventDispatcherInterface $eventDispatcher, ListSourceFactoryInterface $listSourceFactory) {
+  public function __construct(ListPageConfiguration $configuration, EntityTypeManagerInterface $entityTypeManager, EntityTypeBundleInfoInterface $entityTypeBundleInfo, EventDispatcherInterface $eventDispatcher, ListSourceFactoryInterface $listSourceFactory, ListPresetFiltersBuilder $preset_filters_builder) {
     $this->entityTypeManager = $entityTypeManager;
     $this->entityTypeBundleInfo = $entityTypeBundleInfo;
     $this->eventDispatcher = $eventDispatcher;
     $this->listSourceFactory = $listSourceFactory;
     $this->configuration = $configuration;
+    $this->presetFiltersBuilder = $preset_filters_builder;
   }
 
   /**
@@ -95,6 +107,8 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
 
   /**
    * {@inheritdoc}
+   *
+   * @SuppressWarnings(PHPMD.CyclomaticComplexity)
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
     $input = $form_state->getUserInput();
@@ -198,6 +212,17 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
             ],
           ],
         ];
+
+        if ($this->getConfiguration()->areDefaultFilterValuesAllowed()) {
+          $parents = $form['#parents'] ?? [];
+          $form['wrapper']['default_filter_values'] = [
+            '#parents' => array_merge($parents, ['wrapper', 'default_filter_values']),
+            '#tree' => TRUE,
+          ];
+
+          $subform_state = SubformState::createForSubform($form['wrapper']['default_filter_values'], $form, $form_state);
+          $form['wrapper']['default_filter_values'] = $this->presetFiltersBuilder->buildDefaultFilters($form['wrapper']['default_filter_values'], $subform_state, $list_source, $this->getConfiguration());
+        }
       }
     }
 
@@ -215,12 +240,19 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
       'wrapper',
       'exposed_filters',
     ], []));
+    $default_filter_values = array_filter($form_state->getValue([
+      'wrapper',
+      'default_filter_values',
+      'current_filters',
+    ], []));
     $this->configuration->setEntityType($entity_type);
     $this->configuration->setBundle($entity_bundle);
     $this->configuration->setExposedFiltersOverridden($exposed_filters_overridden);
+    $this->configuration->setDefaultFilterValues($default_filter_values);
     if (!$exposed_filters_overridden) {
       $exposed_filters = [];
     }
+
     $this->configuration->setExposedFilters($exposed_filters);
   }
 

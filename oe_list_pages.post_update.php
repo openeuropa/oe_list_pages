@@ -16,3 +16,12 @@ function oe_list_pages_post_update_0001() {
     'search_api',
   ]);
 }
+
+/**
+ * Installs Multivalue Form Element.
+ */
+function oe_list_pages_post_update_0002() {
+  \Drupal::service('module_installer')->install([
+    'multivalue_form_element',
+  ]);
+}

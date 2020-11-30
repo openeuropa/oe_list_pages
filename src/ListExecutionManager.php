@@ -91,17 +91,20 @@ class ListExecutionManager implements ListExecutionManagerInterface {
     $current_page = (int) $this->requestStack->getCurrentRequest()->get('page', 0);
     $sort = $sort ? [$sort['name'] => $sort['direction']] : [];
     $language = $this->languageManager->getCurrentLanguage()->getId();
+    $preset_filters = $configuration->getDefaultFiltersValues();
+
     $options = [
       'limit' => $limit,
       'page' => $current_page,
       'language' => $language,
       'sort' => $sort,
+      'preset_filters' => $preset_filters,
     ];
     $query = $list_source->getQuery($options);
     $result = $query->execute();
     $list_execution = new ListExecutionResults($query, $result, $list_source, $configuration);
 
-    $this->executedLists[$configuration->getBundle()] = $list_execution;
+    $this->executedLists[$configuration->getId()] = $list_execution;
 
     return $list_execution;
   }

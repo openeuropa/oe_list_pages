@@ -115,13 +115,16 @@ class DateStatusProcessor extends DefaultStatusProcessorBase implements PreQuery
     $supported_types = [
       'field_item:daterange',
       'field_item:datetime',
+      'field_item:created',
       'datetime_iso8601',
       'date',
     ];
+
     $data_definition = $facet->getDataDefinition();
     if (in_array($data_definition->getDataType(), $supported_types)) {
       return TRUE;
     }
+
     if (!($data_definition instanceof ComplexDataDefinitionInterface)) {
       return FALSE;
     }
@@ -132,6 +135,7 @@ class DateStatusProcessor extends DefaultStatusProcessorBase implements PreQuery
         return TRUE;
       }
     }
+
     return FALSE;
   }
 

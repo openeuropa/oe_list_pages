@@ -4,6 +4,8 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\oe_list_pages\Kernel;
 
+use Drupal\oe_list_pages\ListPresetFilter;
+use Drupal\oe_list_pages\ListPresetFiltersBuilder;
 use Drupal\oe_list_pages\ListSourceFactory;
 use Drupal\oe_list_pages\Plugin\facets\widget\MultiselectWidget;
 
@@ -24,7 +26,7 @@ class MultiSelectWidgetTest extends ListsSourceTestBase {
    */
   protected function setUp() {
     parent::setUp();
-    $this->widget = new MultiselectWidget([], 'oe_list_pages_multiselect', []);
+    $this->widget = new MultiselectWidget([], 'oe_list_pages_multiselect', [], $this->entityTypeManager, $this->container->get('entity_field.manager'), $this->container->get('plugin.manager.facets.processor'));
   }
 
   /**
@@ -50,19 +52,99 @@ class MultiSelectWidgetTest extends ListsSourceTestBase {
     // Create facets for categories.
     $default_list_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'item');
     $facet_categories = $this->createFacet('category', $default_list_id, '', 'oe_list_pages_multiselect', []);
+    $facet_keywords = $this->createFacet('keywords', $default_list_id, '', 'oe_list_pages_multiselect', []);
 
     // Search for categories.
-    $list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
-    /** @var \Drupal\search_api\Query\QueryInterface $default_query */
-    $query = $list->getQuery(['preset_filters' => [$facet_categories->id() => 'cat1']]);
-    $query->execute();
-    $results = $query->getResults();
-    $this->assertCount(3, $results->getResultItems());
+    // KEY1.
+    $expected_key_results[] = [
+      'filters' => [
+        ListPresetFiltersBuilder::generateFilterId($facet_categories->id()) => new ListPresetFilter($facet_categories->id(), ['cat1'], ListPresetFilter::OR_OPERATOR),
+      ],
+      'results' => 3,
+    ];
 
-    $query = $list->getQuery(['preset_filters' => [$facet_categories->id() => 'cat2']]);
-    $query->execute();
-    $results = $query->getResults();
-    $this->assertCount(1, $results->getResultItems());
+    // KEY2.
+    $expected_key_results[] = [
+      'filters' => [
+        ListPresetFiltersBuilder::generateFilterId($facet_categories->id()) => new ListPresetFilter($facet_categories->id(), ['cat2'], ListPresetFilter::OR_OPERATOR),
+      ],
+      'results' => 1,
+    ];
+
+    // KEY1 AND KEY2.
+    $expected_key_results[] = [
+      'filters' => [
+        ListPresetFiltersBuilder::generateFilterId($facet_keywords->id()) => new ListPresetFilter($facet_keywords->id(), [
+          'key1',
+          'key2',
+        ], ListPresetFilter::AND_OPERATOR),
+      ],
+      'results' => 1,
+    ];
+    // KEY1 OR KEY2.
+    $expected_key_results[] = [
+      'filters' => [
+        ListPresetFiltersBuilder::generateFilterId($facet_keywords->id()) => new ListPresetFilter($facet_keywords->id(), ['key1', 'key2'], ListPresetFilter::OR_OPERATOR),
+      ],
+      'results' => 4,
+    ];
+    // NOT KEY1.
+    $expected_key_results[] = [
+      'filters' => [
+        ListPresetFiltersBuilder::generateFilterId($facet_keywords->id()) => new ListPresetFilter($facet_keywords->id(), ['key1'], ListPresetFilter::NOT_OPERATOR),
+      ],
+      'results' => 2,
+    ];
+    // KEY1 AND NOT KEY2.
+    $expected_key_results[] = [
+      'filters' => [
+        ListPresetFiltersBuilder::generateFilterId($facet_keywords->id()) => new ListPresetFilter($facet_keywords->id(), ['key1'], ListPresetFilter::OR_OPERATOR),
+        ListPresetFiltersBuilder::generateFilterId($facet_keywords->id()) => new ListPresetFilter($facet_keywords->id(), ['key2'], ListPresetFilter::NOT_OPERATOR),
+      ],
+      'results' => 1,
+    ];
+    // KEY1 AND NOT (KEY2 OR KEY3)
+    $filters = [];
+    $filters[ListPresetFiltersBuilder::generateFilterId($facet_keywords->id())] = new ListPresetFilter($facet_keywords->id(), ['key1'], ListPresetFilter::AND_OPERATOR);
+    $filters[ListPresetFiltersBuilder::generateFilterId($facet_keywords->id(), array_keys($filters))] = new ListPresetFilter($facet_keywords->id(), [
+      'key2',
+      'key3',
+    ], ListPresetFilter::NOT_OPERATOR);
+    $expected_key_results[] = [
+      'filters' => $filters,
+      'results' => 1,
+    ];
+    // KEY1 AND (KEY2 OR KEY3)
+    $filters = [];
+    $filters[ListPresetFiltersBuilder::generateFilterId($facet_keywords->id())] = new ListPresetFilter($facet_keywords->id(), ['key1'], ListPresetFilter::OR_OPERATOR);
+    $filters[ListPresetFiltersBuilder::generateFilterId($facet_keywords->id(), array_keys($filters))] = new ListPresetFilter($facet_keywords->id(), [
+      'key2',
+      'key3',
+    ], ListPresetFilter::OR_OPERATOR);
+    $expected_key_results[] = [
+      'filters' => $filters,
+      'results' => 1,
+    ];
+    // KEY2 AND (KEY2 OR KEY3)
+    $filters = [];
+    $filters[ListPresetFiltersBuilder::generateFilterId($facet_keywords->id())] = new ListPresetFilter($facet_keywords->id(), ['key2'], ListPresetFilter::OR_OPERATOR);
+    $filters[ListPresetFiltersBuilder::generateFilterId($facet_keywords->id(), array_keys($filters))] = new ListPresetFilter($facet_keywords->id(), [
+      'key2',
+      'key3',
+    ], ListPresetFilter::OR_OPERATOR);
+    $expected_key_results[] = [
+      'filters' => $filters,
+      'results' => 3,
+    ];
+
+    $list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
+    foreach ($expected_key_results as $category) {
+      $this->container->get('kernel')->rebuildContainer();
+      $query = $list->getQuery(['preset_filters' => $category['filters']]);
+      $query->execute();
+      $results = $query->getResults();
+      $this->assertCount($category['results'], $results->getResultItems());
+    }
   }
 
 }

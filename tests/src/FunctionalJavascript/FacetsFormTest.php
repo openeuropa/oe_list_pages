@@ -138,38 +138,38 @@ class FacetsFormTest extends WebDriverTestBase {
     // Filter by date.
     $this->getSession()->getPage()->pressButton('Clear filters');
     $this->getSession()->getPage()->selectFieldOption('created_op', 'gt');
-    $this->getSession()->getPage()->fillField('created_first_date[date]', '10/25/2020');
+    $this->getSession()->getPage()->fillField('created_first_date_wrapper[created_first_date][date]', '10/25/2020');
     $this->getSession()->getPage()->pressButton('Search');
     $assert->pageTextNotContains('that yellow fruit');
     $assert->pageTextContains('that red fruit');
-    $this->getSession()->getPage()->fillField('created_first_date[date]', '10/15/2020');
+    $this->getSession()->getPage()->fillField('created_first_date_wrapper[created_first_date][date]', '10/15/2020');
     $this->getSession()->getPage()->pressButton('Search');
     $assert->pageTextContains('that yellow fruit');
     $assert->pageTextContains('that red fruit');
     $this->getSession()->getPage()->selectFieldOption('created_op', 'lt');
-    $this->assertFalse($this->getSession()->getPage()->findField('created_second_date[date]')->isVisible());
-    $this->assertTrue($this->getSession()->getPage()->findField('created_first_date[date]')->isVisible());
+    $this->assertFalse($this->getSession()->getPage()->findField('created_second_date_wrapper[created_second_date][date]')->isVisible());
+    $this->assertTrue($this->getSession()->getPage()->findField('created_first_date_wrapper[created_first_date][date]')->isVisible());
     $this->getSession()->getPage()->pressButton('Search');
     $assert->pageTextNotContains('that yellow fruit');
     $assert->pageTextNotContains('that red fruit');
-    $this->getSession()->getPage()->fillField('created_first_date[date]', '10/25/2020');
+    $this->getSession()->getPage()->fillField('created_first_date_wrapper[created_first_date][date]', '10/25/2020');
     $this->getSession()->getPage()->pressButton('Search');
     $assert->pageTextContains('that yellow fruit');
     $assert->pageTextNotContains('that red fruit');
-    $this->getSession()->getPage()->fillField('created_first_date[date]', '11/25/2020');
+    $this->getSession()->getPage()->fillField('created_first_date_wrapper[created_first_date][date]', '11/25/2020');
     $this->getSession()->getPage()->pressButton('Search');
     $assert->pageTextContains('that yellow fruit');
     $assert->pageTextContains('that red fruit');
     $this->getSession()->getPage()->selectFieldOption('created_op', 'bt');
-    $this->assertTrue($this->getSession()->getPage()->findField('created_second_date[date]')->isVisible());
-    $this->assertTrue($this->getSession()->getPage()->findField('created_first_date[date]')->isVisible());
-    $this->getSession()->getPage()->fillField('created_first_date[date]', '10/15/2020');
-    $this->getSession()->getPage()->fillField('created_second_date[date]', '10/25/2020');
+    $this->assertTrue($this->getSession()->getPage()->findField('created_second_date_wrapper[created_second_date][date]')->isVisible());
+    $this->assertTrue($this->getSession()->getPage()->findField('created_first_date_wrapper[created_first_date][date]')->isVisible());
+    $this->getSession()->getPage()->fillField('created_first_date_wrapper[created_first_date][date]', '10/15/2020');
+    $this->getSession()->getPage()->fillField('created_second_date_wrapper[created_second_date][date]', '10/25/2020');
     $this->getSession()->getPage()->pressButton('Search');
     $assert->pageTextContains('that yellow fruit');
     $assert->pageTextNotContains('that red fruit');
-    $this->getSession()->getPage()->fillField('created_first_date[date]', '11/15/2020');
-    $this->getSession()->getPage()->fillField('created_second_date[date]', '11/25/2020');
+    $this->getSession()->getPage()->fillField('created_first_date_wrapper[created_first_date][date]', '11/15/2020');
+    $this->getSession()->getPage()->fillField('created_second_date_wrapper[created_second_date][date]', '11/25/2020');
     $this->getSession()->getPage()->pressButton('Search');
     $assert->pageTextNotContains('that yellow fruit');
     $assert->pageTextContains('that red fruit');
@@ -183,8 +183,8 @@ class FacetsFormTest extends WebDriverTestBase {
     $this->getSession()->getPage()->pressButton('Search');
     $assert->pageTextNotContains('that yellow fruit');
     $assert->pageTextNotContains('that red fruit');
-    $this->getSession()->getPage()->fillField('created_first_date[date]', '10/15/2020');
-    $this->getSession()->getPage()->fillField('created_second_date[date]', '10/25/2020');
+    $this->getSession()->getPage()->fillField('created_first_date_wrapper[created_first_date][date]', '10/15/2020');
+    $this->getSession()->getPage()->fillField('created_second_date_wrapper[created_second_date][date]', '10/25/2020');
     $this->getSession()->getPage()->pressButton('Search');
     $assert->pageTextContains('that yellow fruit');
     $assert->pageTextNotContains('that red fruit');
@@ -309,8 +309,8 @@ class FacetsFormTest extends WebDriverTestBase {
 
     // Assert the date field elements.
     $assert->fieldExists('created_op');
-    $this->assertFalse($this->getSession()->getPage()->findField('created_first_date[date]')->isVisible());
-    $this->assertFalse($this->getSession()->getPage()->findField('created_second_date[date]')->isVisible());
+    $this->assertFalse($this->getSession()->getPage()->findField('created_first_date_wrapper[created_first_date][date]')->isVisible());
+    $this->assertFalse($this->getSession()->getPage()->findField('created_second_date_wrapper[created_second_date][date]')->isVisible());
 
     // Assert the multiselect has two values.
     $this->assertEquals([

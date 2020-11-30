@@ -4,6 +4,8 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\oe_list_pages\Kernel;
 
+use Drupal\oe_list_pages\ListPresetFilter;
+use Drupal\oe_list_pages\ListPresetFiltersBuilder;
 use Drupal\oe_list_pages\ListSourceFactory;
 use Drupal\oe_list_pages\Plugin\facets\query_type\DateStatus;
 
@@ -53,6 +55,13 @@ class DateStatusTest extends ListsSourceTestBase {
       'settings' => $processor_options,
     ]);
     $facet_with_config->save();
+
+    // Run the query before building the widget as the query subscriber puts
+    // the default values onto the query.
+    $list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
+    /** @var \Drupal\search_api\Query\QueryInterface $default_query */
+    $query = $list->getQuery();
+    $query->execute();
 
     $build = $this->facetManager->build($this->facet);
     $actual = $build[0][$this->facet->id()];
@@ -108,7 +117,8 @@ class DateStatusTest extends ListsSourceTestBase {
     // We have no facet configuration so we get all results.
     $this->assertCount(4, $results->getResultItems());
 
-    $query = $list->getQuery(['preset_filters' => [$this->facet->id() => [DateStatus::PAST]]]);
+    $filter = new ListPresetFilter($this->facet->id(), [DateStatus::PAST]);
+    $query = $list->getQuery(['preset_filters' => [ListPresetFiltersBuilder::generateFilterId($this->facet->id()) => $filter]]);
     $query->execute();
     $results = $query->getResults();
     $this->assertCount(2, $results->getResultItems());
@@ -117,7 +127,9 @@ class DateStatusTest extends ListsSourceTestBase {
       'oldest',
     ]);
 
-    $query = $list->getQuery(['preset_filters' => [$this->facet->id() => [DateStatus::UPCOMING]]]);
+    $this->container->get('kernel')->rebuildContainer();
+    $filter = new ListPresetFilter($this->facet->id(), [DateStatus::UPCOMING]);
+    $query = $list->getQuery(['preset_filters' => [ListPresetFiltersBuilder::generateFilterId($this->facet->id()) => $filter]]);
     $query->execute();
     $results = $query->getResults();
     $this->assertCount(2, $results->getResultItems());
@@ -126,12 +138,15 @@ class DateStatusTest extends ListsSourceTestBase {
       'future',
     ]);
 
+    $this->container->get('kernel')->rebuildContainer();
+    $filter = new ListPresetFilter($this->facet->id(), [
+      DateStatus::PAST,
+      DateStatus::UPCOMING,
+    ]);
+
     $query = $list->getQuery([
       'preset_filters' => [
-        $this->facet->id() => [
-          DateStatus::PAST,
-          DateStatus::UPCOMING,
-        ],
+        ListPresetFiltersBuilder::generateFilterId($this->facet->id()) => $filter,
       ],
     ]);
     $query->execute();

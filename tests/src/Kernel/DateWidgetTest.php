@@ -4,6 +4,8 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\oe_list_pages\Kernel;
 
+use Drupal\oe_list_pages\ListPresetFilter;
+use Drupal\oe_list_pages\ListPresetFiltersBuilder;
 use Drupal\oe_list_pages\ListSourceFactory;
 use Drupal\oe_list_pages\Plugin\facets\query_type\Date;
 use Drupal\oe_list_pages\Plugin\facets\widget\DateWidget;
@@ -152,7 +154,9 @@ class DateWidgetTest extends ListsSourceTestBase {
     $list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
     foreach ($this->getTestFilterDateData() as $message => $data) {
       /** @var \Drupal\search_api\Query\QueryInterface $query */
-      $query = $list->getQuery(['preset_filters' => [$facet_date->id() => [implode('|', $data['filters'])]]]);
+      $this->container->get('kernel')->rebuildContainer();
+      $filter = new ListPresetFilter($facet_date->id(), [implode('|', $data['filters'])]);
+      $query = $list->getQuery(['preset_filters' => [ListPresetFiltersBuilder::generateFilterId($facet_date->id()) => $filter]]);
       $query->execute();
       $results = $query->getResults();
       $this->assertCount($data['expected_count'], $results->getResultItems(), $message);
