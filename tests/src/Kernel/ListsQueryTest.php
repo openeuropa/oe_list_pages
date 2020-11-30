@@ -337,16 +337,6 @@ class ListsQueryTest extends ListsSourceTestBase {
     $facet->setWidget('oe_list_pages_multiselect');
     $facet->save();
 
-    $item_list = $this->listFactory->get('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
-    $ignorecase_processor = \Drupal::getContainer()->get('search_api.plugin_helper')->createProcessorPlugin($item_list->getIndex(), 'ignorecase', ['all_fields' => TRUE]);
-    $item_list->getIndex()->addProcessor($ignorecase_processor);
-    $item_list->getIndex()->save();
-    $item_list->getIndex()->indexItems();
-
-    // Create a new facet for a full text field type.
-    $this->createFacet('body', $search_id, '', 'oe_list_pages_fulltext', ['fulltext_all_fields' => TRUE]);
-    $body_facet_id = $this->generateFacetId('body', $search_id);
-
     // Rebuild the container every time so the facets don't get statically
     // cached in the facets manager.
     $this->container->get('kernel')->rebuildContainer();
@@ -376,26 +366,6 @@ class ListsQueryTest extends ListsSourceTestBase {
     $this->assertCount(3, $results->getResultItems());
     $this->assertQueryConditions(['category' => ['first class', 'second class']], $query);
 
-    // Try to remove one of the preset filters via a mocked exposed filter, the
-    // preset ones should remain.
-    $this->container->get('kernel')->rebuildContainer();
-    $request = $this->container->get('request_stack')->getMasterRequest();
-    $request->query->set('f', [$facet_id . ':first class']);
-
-    $query = $this->list->getQuery([
-      'preset_filters' => [
-        ListPresetFiltersBuilder::generateFilterId($facet_id) => new ListPresetFilter($facet_id, ['first class', 'second class']),
-      ],
-    ]);
-    $query->execute();
-
-    // Nothing has changed, because we have the preset filters.
-    // There are three results that have these two categories.
-    /** @var \Drupal\search_api\Query\ResultSetInterface $results */
-    $results = $query->getResults();
-    $this->assertCount(3, $results->getResultItems());
-    $this->assertQueryConditions(['category' => ['first class', 'second class']], $query);
-
     $this->container->get('kernel')->rebuildContainer();
 
     // If we run the query again, without the preset filters, it should change
@@ -409,61 +379,6 @@ class ListsQueryTest extends ListsSourceTestBase {
     $results = $query->getResults();
     $this->assertCount(1, $results->getResultItems());
     $this->assertQueryConditions(['category' => ['first class']], $query);
-
-    $this->container->get('kernel')->rebuildContainer();
-
-    // If, however, we add more values for the same facet, they should get
-    // merged with the preset ones.
-    $request = $this->container->get('request_stack')->getMasterRequest();
-    $request->query->set('f', [$facet_id . ':third class']);
-    $query = $this->list->getQuery([
-      'preset_filters' => [
-        ListPresetFiltersBuilder::generateFilterId($facet_id) => new ListPresetFilter($facet_id, ['first class', 'second class']),
-      ],
-    ]);
-    $query->execute();
-    // We get all 5 items because we have all the categories selected.
-    $results = $query->getResults();
-    $this->assertCount(5, $results->getResultItems());
-    $this->assertQueryConditions([
-      'category' => [
-        'first class',
-        'second class',
-        'third class',
-      ],
-    ], $query);
-
-    // Run a query using a non-multiselect filter.
-    $this->container->get('kernel')->rebuildContainer();
-    $request = $this->container->get('request_stack')->getMasterRequest();
-    $request->query->set('f', [$body_facet_id . ':Sending message']);
-    $query = $this->list->getQuery();
-    $query->execute();
-    /** @var \Drupal\search_api\Query\ResultSetInterface $results */
-    $results = $query->getResults();
-    // By default, with no preset filters, we get one result from the active
-    // filter.
-    $this->assertCount(1, $results->getResultItems());
-    $this->assertEquals([
-      '#conjunction' => 'AND',
-      0 => 'sending',
-      1 => 'message',
-    ], $query->getKeys());
-
-    // This time, set a preset filter with a different value and assert the
-    // query used the preset, regardless of a different active value.
-    $this->container->get('kernel')->rebuildContainer();
-    $request = $this->container->get('request_stack')->getMasterRequest();
-    $request->query->set('f', [$body_facet_id . ':Receiving a Message']);
-    $query = $this->list->getQuery([
-      'preset_filters' => [ListPresetFiltersBuilder::generateFilterId($body_facet_id) => new ListPresetFilter($body_facet_id, ['None'])],
-    ]);
-    $query->execute();
-    // There are 2 results with the "None" preset value.
-    /** @var \Drupal\search_api\Query\ResultSetInterface $results */
-    $results = $query->getResults();
-    $this->assertCount(2, $results->getResultItems());
-    $this->assertEquals('none', $query->getKeys());
   }
 
   /**

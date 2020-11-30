@@ -22,6 +22,8 @@ use Drupal\oe_list_pages\Plugin\facets\widget\FulltextWidget;
 
 /**
  * Default list builder implementation.
+ *
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
  */
 class ListBuilder implements ListBuilderInterface {
 

@@ -5,11 +5,16 @@ declare(strict_types = 1);
 namespace Drupal\Tests\oe_list_pages\FunctionalJavascript;
 
 use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
+use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\ListPresetFiltersBuilder;
+use Drupal\oe_list_pages\ListSourceFactory;
+use Drupal\oe_list_pages\Plugin\facets\query_type\DateStatus;
 use Drupal\search_api\Entity\Index;
+use Drupal\Tests\oe_list_pages\Traits\FacetsTestTrait;
 
 /**
  * Tests the list page preset filters.
@@ -17,6 +22,8 @@ use Drupal\search_api\Entity\Index;
  * @group oe_list_pages
  */
 class ListPagesPresetFiltersTest extends WebDriverTestBase {
+
+  use FacetsTestTrait;
 
   /**
    * {@inheritdoc}
@@ -62,6 +69,73 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $this->drupalGet('/node/add/list_without_preset_filters');
     $this->clickLink('List Page');
     $this->assertSession()->fieldNotExists('Add default value for');
+  }
+
+  /**
+   * Test list page preset filters form level validations.
+   */
+  public function testListPagePresetFilterValidations(): void {
+    $admin = $this->createUser([], NULL, TRUE);
+    $this->drupalLogin($admin);
+    $this->drupalGet('/node/add/oe_list_page');
+    $this->clickLink('List Page');
+    $page = $this->getSession()->getPage();
+    $assert = $this->assertSession();
+
+    // Filter ids.
+    $body_filter_id = ListPresetFiltersBuilder::generateFilterId('body');
+    $created_filter_id = ListPresetFiltersBuilder::generateFilterId('created');
+
+    // Do not fill in the title and assert the validation limiting works.
+    $page->selectFieldOption('Add default value for', 'Body');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $page->pressButton('Set default value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->pageTextContains('Body field is required.');
+    $assert->pageTextNotContains('Title field is required.');
+
+    // Cancel and start over.
+    $page->pressButton('Cancel');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->pageTextNotContains('Title field is required.');
+    $assert->pageTextNotContains('Body field is required.');
+    $page->fillField('Title', 'List page for ct1');
+
+    // Set preset filter for Body and cancel.
+    $page->selectFieldOption('Add default value for', 'Body');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+
+    $assert->pageTextContains('Set default value for Body');
+    $page = $this->getSession()->getPage();
+    $filter_selector = 'emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $body_filter_id . '][body]';
+    $page->fillField($filter_selector, 'cherry');
+    $page->pressButton('Cancel');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->pageTextNotContains('Title field is required.');
+    $assert->pageTextNotContains('Body field is required.');
+    $this->assertDefaultValueForFilters([['key' => '', 'value' => t('No default values set')]]);
+
+    // Set preset filter for Created.
+    $page->selectFieldOption('Add default value for', 'Created');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert = $this->assertSession();
+    $assert->pageTextContains('Set default value for Created');
+    $filter_selector = 'emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $created_filter_id . ']';
+    // Assert validations.
+    $page->pressButton('Set default value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->pageTextContains('Created field is required.');
+    $assert->pageTextContains('The Date date is required. Please enter a date in the format');
+    $this->getSession()->getPage()->selectFieldOption($filter_selector . '[created_op]', 'In between');
+    $page->pressButton('Set default value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->pageTextContains('The Date date is required. Please enter a date in the format');
+    $assert->pageTextContains('The second date is required.');
+    $this->getSession()->getPage()->fillField($filter_selector . '[created_first_date_wrapper][created_first_date][date]', '10/19/2019');
+    $this->getSession()->getPage()->fillField($filter_selector . '[created_second_date_wrapper][created_second_date][date]', '10/17/2019');
+    $page->pressButton('Set default value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->pageTextContains('The second date cannot be before the first date.');
   }
 
   /**
@@ -172,36 +246,7 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $this->drupalGet('/node/add/oe_list_page');
     $this->clickLink('List Page');
     $page = $this->getSession()->getPage();
-    $assert = $this->assertSession();
-
-    // Do not fill in the title and assert the validation limiting works.
-    $page->selectFieldOption('Add default value for', 'Body');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $page->pressButton('Set default value');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $assert->pageTextContains('Body field is required.');
-    $assert->pageTextNotContains('Title field is required.');
-
-    // Cancel and start over.
-    $page->pressButton('Cancel');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $assert->pageTextNotContains('Title field is required.');
-    $assert->pageTextNotContains('Body field is required.');
     $page->fillField('Title', 'List page for ct1');
-
-    // Set preset filter for Body and cancel.
-    $page->selectFieldOption('Add default value for', 'Body');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-
-    $assert->pageTextContains('Set default value for Body');
-    $page = $this->getSession()->getPage();
-    $filter_selector = 'emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $body_filter_id . '][body]';
-    $page->fillField($filter_selector, 'cherry');
-    $page->pressButton('Cancel');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $assert->pageTextNotContains('Title field is required.');
-    $assert->pageTextNotContains('Body field is required.');
-    $this->assertDefaultValueForFilters([['key' => '', 'value' => t('No default values set')]]);
 
     // Set preset filter for Body and save.
     $page->selectFieldOption('Add default value for', 'Body');
@@ -237,25 +282,8 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     // Set preset filter for Created.
     $page->selectFieldOption('Add default value for', 'Created');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $assert = $this->assertSession();
     $assert->pageTextContains('Set default value for Created');
     $filter_selector = 'emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $created_filter_id . ']';
-    // Assert validations.
-    $page->pressButton('Set default value');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $assert->pageTextContains('Created field is required.');
-    $assert->pageTextContains('The Date date is required. Please enter a date in the format');
-    $this->getSession()->getPage()->selectFieldOption($filter_selector . '[created_op]', 'In between');
-    $page->pressButton('Set default value');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $assert->pageTextContains('The Date date is required. Please enter a date in the format');
-    $assert->pageTextContains('The second date is required.');
-    $this->getSession()->getPage()->fillField($filter_selector . '[created_first_date_wrapper][created_first_date][date]', '10/19/2019');
-    $this->getSession()->getPage()->fillField($filter_selector . '[created_second_date_wrapper][created_second_date][date]', '10/17/2019');
-    $page->pressButton('Set default value');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $assert->pageTextContains('The second date cannot be before the first date.');
-
     $this->getSession()->getPage()->selectFieldOption($filter_selector . '[created_op]', 'After');
     $this->getSession()->getPage()->fillField($filter_selector . '[created_first_date_wrapper][created_first_date][date]', '10/19/2019');
     $page->pressButton('Set default value');
@@ -421,6 +449,9 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $this->drupalGet($node->toUrl());
     $assert->pageTextNotContains('Cherry title');
     $assert->pageTextContains('Banana title');
+    // Assert the preset filters are not shown as selected filter values.
+    $this->assertSession()->linkNotExistsExact('banana');
+    $this->assertSession()->linkNotExistsExact('Before 31 October 2020');
 
     // Edit again, change preset filter, expose filter and save.
     $this->drupalGet($node->toUrl('edit-form'));
@@ -443,26 +474,8 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $this->drupalGet($node->toUrl());
     $assert->pageTextNotContains('Banana title');
     $assert->pageTextContains('Cherry title');
-    $assert->fieldValueEquals('Body', 'cherry');
-    $assert->fieldValueEquals('Created', 'lt');
-
-    // Change directly the value in exposed form and assert it doesn't take
-    // effect.
-    $page->fillField('Body', 'banana');
-    $this->getSession()->getPage()->pressButton('Search');
-    $assert->pageTextNotContains('Banana title');
-    $assert->pageTextContains('Cherry title');
-    $assert->fieldValueEquals('Body', 'cherry');
-
-    // Change also the created date and assert the date doesn't change.
-    $this->getSession()->getPage()->selectFieldOption('Created', 'After');
-    $this->getSession()->getPage()->fillField('created_first_date_wrapper[created_first_date][date]', '10/30/2020');
-    $this->getSession()->getPage()->pressButton('Search');
-    $assert->pageTextNotContains('Banana title');
-    $assert->pageTextContains('Cherry title');
-    $assert->fieldValueEquals('Body', 'cherry');
-    $assert->fieldValueEquals('Created', 'lt');
-    $assert->fieldValueEquals('created_first_date_wrapper[created_first_date][date]', '2020-10-31');
+    $this->assertSession()->linkNotExistsExact('banana');
+    $this->assertSession()->linkNotExistsExact('Before 31 October 2020');
 
     // Edit again to remove the Body filter and save.
     $this->drupalGet($node->toUrl('edit-form'));
@@ -474,9 +487,9 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $page->pressButton('Save');
 
     $this->drupalGet($node->toUrl());
-    $assert->fieldValueEquals('Body', '');
     $assert->pageTextContains('Banana title');
     $assert->pageTextContains('Cherry title');
+    $this->assertSession()->linkNotExistsExact('Before 31 October 2020');
 
     // Change preset filter for Created.
     $this->drupalGet($node->toUrl('edit-form'));
@@ -497,6 +510,7 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $assert->fieldValueEquals('Body', '');
     $assert->pageTextContains('Banana title');
     $assert->pageTextNotContains('Cherry title');
+    $this->assertSession()->linkNotExistsExact('Before 30 October 2020');
 
     // Set preset for Reference for yellow animal.
     $this->drupalGet($node->toUrl('edit-form'));
@@ -515,6 +529,7 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $assert->fieldValueEquals('Body', '');
     $assert->pageTextContains('Banana title');
     $assert->pageTextNotContains('Cherry title');
+    $this->assertSession()->linkNotExistsExact('2');
 
     // Change the preset of Reference to the red fruit.
     $this->drupalGet($node->toUrl('edit-form'));
@@ -532,6 +547,9 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $assert->fieldValueEquals('Body', '');
     $assert->pageTextNotContains('Banana title');
     $assert->pageTextNotContains('Cherry title');
+    $this->assertSession()->linkNotExistsExact('1');
+    $this->assertSession()->linkNotExistsExact('2');
+    $this->assertSession()->linkNotExistsExact('3');
 
     // Remove filters.
     $this->drupalGet($node->toUrl('edit-form'));
@@ -542,7 +560,7 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert = $this->assertSession();
 
-    // Or filter.
+    // Test an OR filter.
     $page->selectFieldOption('Add default value for', 'Reference');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->fillField('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $reference_filter_id . '][reference][0][entity]', 'Green (3)');
@@ -553,14 +571,19 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
     $expected_set_filters = [['key' => 'Reference', 'value' => 'Any of: Green, Yellow']];
     $this->assertDefaultValueForFilters($expected_set_filters);
+    // Expose the Reference field.
+    $page->checkField('Reference');
     $page->pressButton('Save');
     $assert->fieldValueEquals('Body', '');
     $assert->pageTextContains('Banana title');
     $assert->pageTextContains('Grass title');
     $assert->pageTextContains('Sun title');
     $assert->pageTextNotContains('Cherry title');
+    $this->assertSession()->linkNotExistsExact('3');
+    $this->assertSession()->linkNotExistsExact('2');
+    $this->assertSession()->linkNotExistsExact('1');
 
-    // And filter.
+    // Test an AND filter.
     $node = $this->drupalGetNodeByTitle('List page for ct1');
     $this->drupalGet($node->toUrl('edit-form'));
     $this->clickLink('List Page');
@@ -646,6 +669,324 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $assert->pageTextNotContains('Grass title');
     $assert->pageTextNotContains('Sun title');
     $assert->pageTextNotContains('Cherry title');
+    $this->assertSession()->linkNotExistsExact('1');
+    $this->assertSession()->linkNotExistsExact('2');
+    $this->assertSession()->linkNotExistsExact('3');
+  }
+
+  /**
+   * Test list page preset filters configuration with a default status facet.
+   *
+   * Default status facets have a processor that sets a default status if
+   * a filter for that facet doesn't exist.
+   */
+  public function testListPageDefaultStatusPresetFilters(): void {
+    // Create the configured facet.
+    $list_id = ListSourceFactory::generateFacetSourcePluginId('node', 'content_type_one');
+
+    $processor_options = [
+      'default_status' => DateStatus::PAST,
+      'upcoming_label' => 'Coming items',
+      'past_label' => 'Past items',
+    ];
+    $facet = $this->createFacet('end_value', $list_id, 'options', 'oe_list_pages_multiselect', []);
+    $facet->addProcessor([
+      'processor_id' => 'oe_list_pages_date_status_processor',
+      'weights' => ['pre_query' => 60, 'build' => 35],
+      'settings' => $processor_options,
+    ]);
+    $facet->save();
+
+    $past_date = new DrupalDateTime();
+    $past_date->modify('-1 month');
+
+    $future_date = new DrupalDateTime();
+    $future_date->modify('+1 month');
+
+    // Past nodes.
+    $values = [
+      'title' => 'Past node 1',
+      'type' => 'content_type_one',
+      'status' => NodeInterface::PUBLISHED,
+      'field_date_range' => [
+        'value' => $past_date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT),
+        'end_value' => $past_date->modify('+1 day')->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT),
+      ],
+    ];
+    $node = Node::create($values);
+    $node->save();
+
+    $values = [
+      'title' => 'Past node 2',
+      'type' => 'content_type_one',
+      'status' => NodeInterface::PUBLISHED,
+      'field_date_range' => [
+        'value' => $past_date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT),
+        'end_value' => $past_date->modify('+1 day')->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT),
+      ],
+    ];
+    $node = Node::create($values);
+    $node->save();
+
+    // Future node.
+    $values = [
+      'title' => 'Future node',
+      'type' => 'content_type_one',
+      'status' => NodeInterface::PUBLISHED,
+      'field_date_range' => [
+        'value' => $future_date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT),
+        'end_value' => $future_date->modify('+1 day')->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT),
+      ],
+    ];
+    $node = Node::create($values);
+    $node->save();
+
+    /** @var \Drupal\search_api\Entity\Index $index */
+    $index = Index::load('node');
+    $index->indexItems();
+
+    $admin = $this->createUser([], NULL, TRUE);
+    $this->drupalLogin($admin);
+    $this->drupalGet('/node/add/oe_list_page');
+    $this->getSession()->getPage()->fillField('Title', 'List page for ct1');
+    $this->clickLink('List Page');
+
+    $this->getSession()->getPage()->selectFieldOption('Source bundle', 'content_type_one');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->pressButton('Save');
+
+    // We should only see the past nodes by default because we have the facet
+    // configured to show the past events.
+    $this->assertSession()->pageTextContains('Past node 1');
+    $this->assertSession()->pageTextContains('Past node 2');
+    $this->assertSession()->pageTextContains('Facet for end_value: Past items');
+    $this->assertSession()->pageTextNotContains('Future node');
+
+    $node = $this->drupalGetNodeByTitle('List page for ct1');
+    $this->drupalGet($node->toUrl('edit-form'));
+    $this->clickLink('List Page');
+
+    // Set preset filter for default date facet.
+    $this->getSession()->getPage()->selectFieldOption('Add default value for', 'Facet for end_value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $filter_id = ListPresetFiltersBuilder::generateFilterId($facet->id());
+    $filter_selector = 'emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $filter_id . ']';
+
+    $this->getSession()->getPage()->selectFieldOption($filter_selector . '[' . $facet->id() . '][0][list]', DateStatus::UPCOMING);
+    $this->getSession()->getPage()->pressButton('Set default value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->pressButton('Save');
+    // The preset filter took over the default status.
+    $this->assertSession()->pageTextNotContains('Past node 1');
+    $this->assertSession()->pageTextNotContains('Past node 2');
+    $this->assertSession()->pageTextNotContains('Facet for end_value');
+    $this->assertSession()->pageTextContains('Future node');
+
+    // Include both upcoming and past.
+    $this->drupalGet($node->toUrl('edit-form'));
+    $this->clickLink('List Page');
+    $this->getSession()->getPage()->pressButton('edit-' . $filter_id);
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->selectFieldOption('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $filter_id . '][oe_list_pages_filter_operator]', 'Any of');
+    $this->getSession()->getPage()->selectFieldOption($filter_selector . '[' . $facet->id() . '][1][list]', DateStatus::PAST);
+    $this->getSession()->getPage()->pressButton('Set default value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->pressButton('Save');
+    $this->assertSession()->pageTextContains('Past node 1');
+    $this->assertSession()->pageTextContains('Past node 2');
+    $this->assertSession()->pageTextContains('Future node');
+    $this->assertSession()->pageTextNotContains('Facet for end_value');
+  }
+
+  /**
+   * Tests that preset filter-based results can only be narrowed.
+   */
+  public function testPresetFilterResultsNarrowing(): void {
+    $past_date = new DrupalDateTime('30-10-2010');
+    $future_date = new DrupalDateTime('30-10-2030');
+    $middle_date = new DrupalDateTime('30-10-2020');
+
+    $values = [
+      'title' => 'test 1',
+      'type' => 'content_type_one',
+      'body' => 'test 1',
+      'status' => NodeInterface::PUBLISHED,
+      'field_select_one' => ['test1'],
+    ];
+    $node = Node::create($values);
+    $node->save();
+
+    $values = [
+      'title' => 'test 2',
+      'type' => 'content_type_one',
+      'body' => 'test 2',
+      'status' => NodeInterface::PUBLISHED,
+      'field_select_one' => ['test2'],
+    ];
+    $node = Node::create($values);
+    $node->save();
+
+    $values = [
+      'title' => 'test 3',
+      'type' => 'content_type_one',
+      'body' => 'test 3',
+      'status' => NodeInterface::PUBLISHED,
+      'field_select_one' => ['test3'],
+    ];
+    $node = Node::create($values);
+    $node->save();
+
+    $values = [
+      'title' => 'test 1 and 2',
+      'type' => 'content_type_one',
+      'body' => 'test 1 and test 2',
+      'status' => NodeInterface::PUBLISHED,
+      'field_select_one' => ['test1', 'test2'],
+    ];
+    $node = Node::create($values);
+    $node->save();
+
+    $values = [
+      'title' => 'past node',
+      'type' => 'content_type_one',
+      'status' => NodeInterface::PUBLISHED,
+      'created' => $past_date->getTimestamp(),
+    ];
+    $node = Node::create($values);
+    $node->save();
+
+    $values = [
+      'title' => 'future node',
+      'type' => 'content_type_one',
+      'status' => NodeInterface::PUBLISHED,
+      'created' => $future_date->getTimestamp(),
+    ];
+    $node = Node::create($values);
+    $node->save();
+
+    $values = [
+      'title' => 'middle node',
+      'type' => 'content_type_one',
+      'status' => NodeInterface::PUBLISHED,
+      'created' => $middle_date->getTimestamp(),
+    ];
+    $node = Node::create($values);
+    $node->save();
+
+    /** @var \Drupal\search_api\Entity\Index $index */
+    $index = Index::load('node');
+    $index->indexItems();
+
+    $all_nodes = Node::loadMultiple();
+
+    $admin = $this->createUser([], NULL, TRUE);
+    $this->drupalLogin($admin);
+    $this->drupalGet('/node/add/oe_list_page');
+    $this->getSession()->getPage()->fillField('Title', 'List page for ct1');
+    $this->clickLink('List Page');
+
+    $this->getSession()->getPage()->selectFieldOption('Source bundle', 'content_type_one');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->checkField('Override default exposed filters');
+    $this->getSession()->getPage()->checkField('Select one');
+    $this->getSession()->getPage()->checkField('Created');
+    $this->getSession()->getPage()->pressButton('Save');
+
+    foreach ($all_nodes as $node) {
+      $this->assertSession()->pageTextContains($node->label());
+    }
+
+    $node = $this->drupalGetNodeByTitle('List page for ct1');
+    $filters = [
+      ListPresetFiltersBuilder::generateFilterId('select_one') => new ListPresetFilter('select_one', ['test1']),
+    ];
+    $this->setListPageFilters($node, $filters);
+    $this->getSession()->reload();
+    $this->assertResultCount(2);
+    $this->assertSession()->pageTextContains('test 1');
+    $this->assertSession()->pageTextContains('test 1 and 2');
+    // Only the narrowing options should exist in the exposed form of this facet
+    // which has default values.
+    $this->assertSelectOptions('Select one', ['test1', 'test2']);
+    $this->assertSession()->linkNotExistsExact('test1');
+    $this->getSession()->getPage()->selectFieldOption('Select one', 'test1');
+    $this->getSession()->getPage()->pressButton('Search');
+    $this->assertResultCount(2);
+    $this->assertSession()->pageTextContains('test 1');
+    $this->assertSession()->pageTextContains('test 1 and 2');
+    // Now we have an active filter so we show the selected filters.
+    $this->assertSession()->linkExistsExact('test1');
+    $this->getSession()->getPage()->clickLink('test1');
+    $this->getSession()->getPage()->selectFieldOption('Select one', 'test2');
+    $this->getSession()->getPage()->pressButton('Search');
+    $this->assertResultCount(1);
+    // Now the query is test1 AND test2.
+    $this->assertSession()->pageTextContains('test 1 and 2');
+
+    $node = $this->drupalGetNodeByTitle('List page for ct1');
+    $filters = [
+      ListPresetFiltersBuilder::generateFilterId('select_one') => new ListPresetFilter('select_one', ['test1', 'test2']),
+    ];
+    $this->setListPageFilters($node, $filters);
+    $this->getSession()->getPage()->pressButton('Clear filters');
+
+    $this->assertResultCount(3);
+    $this->assertSession()->pageTextContains('test 1');
+    $this->assertSession()->pageTextContains('test 2');
+    $this->assertSession()->pageTextContains('test 1 and 2');
+
+    // Add a date default filter that includes all results.
+    $filters = [
+      ListPresetFiltersBuilder::generateFilterId('created') => new ListPresetFilter('created', ['bt|2009-01-01T15:30:44+01:00|2031-01-01T15:30:44+01:00']),
+    ];
+    $this->setListPageFilters($node, $filters);
+    $this->getSession()->reload();
+    foreach ($all_nodes as $node) {
+      $this->assertSession()->pageTextContains($node->label());
+    }
+    $this->assertSession()->linkNotExists('Between');
+
+    $this->getSession()->getPage()->selectFieldOption('Select one', 'test3');
+    $this->getSession()->getPage()->pressButton('Search');
+    $this->assertResultCount(1);
+    $this->assertSession()->pageTextContains('test 3');
+    $this->assertSession()->linkExistsExact('test3');
+
+    $this->getSession()->getPage()->pressButton('Clear filters');
+    // Narrow down the results by one old record.
+    $this->getSession()->getPage()->selectFieldOption('Created', 'After');
+    $this->getSession()->getPage()->fillField('created_first_date_wrapper[created_first_date][date]', '01/01/2011');
+    $this->getSession()->getPage()->pressButton('Search');
+    $this->assertResultCount(count($all_nodes) - 1);
+    $this->assertSession()->pageTextNotContains('past node');
+  }
+
+  /**
+   * Sets the preset filters on a list page node.
+   *
+   * @param \Drupal\node\NodeInterface $node
+   *   The node.
+   * @param array $filters
+   *   The preset filters.
+   */
+  protected function setListPageFilters(NodeInterface $node, array $filters): void {
+    $meta = $node->get('emr_entity_metas')->getEntityMeta('oe_list_page');
+    $configuration = $meta->getWrapper()->getConfiguration();
+    $configuration['preset_filters'] = $filters;
+    $meta->getWrapper()->setConfiguration($configuration);
+    $node->get('emr_entity_metas')->attach($meta);
+    $node->save();
+  }
+
+  /**
+   * Asserts the number of results on the list page.
+   *
+   * @param int $count
+   *   The expected count.
+   */
+  protected function assertResultCount(int $count): void {
+    $items = $this->getSession()->getPage()->findAll('css', '.node--view-mode-teaser');
+    $this->assertCount($count, $items);
   }
 
   /**
@@ -664,6 +1005,27 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
       $assert->elementTextContains('css', 'table.default-filter-values-table', $key);
       $assert->elementTextContains('css', 'table.default-filter-values-table', $default_value);
     }
+  }
+
+  /**
+   * Asserts the select has certain options.
+   *
+   * @param string $field
+   *   The label, id or name of select box.
+   * @param array $expected
+   *   The expected options.
+   */
+  protected function assertSelectOptions(string $field, array $expected): void {
+    $page = $this->getSession()->getPage();
+    $options = $page->findField($field)->findAll('css', 'option');
+    $actual_options = [];
+    foreach ($options as $option) {
+      $actual_options[] = $option->getValue();
+    }
+
+    sort($actual_options);
+    sort($expected);
+    $this->assertEquals($expected, $actual_options);
   }
 
 }
