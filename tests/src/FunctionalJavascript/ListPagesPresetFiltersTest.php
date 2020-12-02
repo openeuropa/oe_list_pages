@@ -187,6 +187,7 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
       'field_select_one' => 'test1',
       'field_reference' => [$yellow_node->id(), $green_node->id()],
       'created' => $date->getTimestamp(),
+      'field_link' => 'http://banana.com',
     ];
     $node = Node::create($values);
     $node->save();
@@ -200,6 +201,7 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
       'field_select_one' => 'test1',
       'field_reference' => $yellow_node->id(),
       'created' => $date->getTimestamp(),
+      'field_link' => 'http://sun.com',
     ];
     $node = Node::create($values);
     $node->save();
@@ -213,6 +215,8 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
       'field_select_one' => 'test1',
       'field_reference' => $green_node->id(),
       'created' => $date->getTimestamp(),
+      // Sun title.
+      'field_link' => 'entity:node/' . $node->id(),
     ];
     $node = Node::create($values);
     $node->save();
@@ -240,6 +244,7 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $created_filter_id = ListPresetFiltersBuilder::generateFilterId('created');
     $published_filter_id = ListPresetFiltersBuilder::generateFilterId('list_facet_source_node_content_type_onestatus');
     $reference_filter_id = ListPresetFiltersBuilder::generateFilterId('reference');
+    $link_filter_id = ListPresetFiltersBuilder::generateFilterId('link');
 
     $admin = $this->createUser([], NULL, TRUE);
     $this->drupalLogin($admin);
@@ -559,6 +564,43 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     $page->pressButton('delete-' . $reference_filter_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert = $this->assertSession();
+
+    // Add a Link filter.
+    $page->selectFieldOption('Add default value for', 'Link');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->fillField('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $link_filter_id . '][link][0][link]', 'http://banana.com');
+    $page->pressButton('Set default value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $expected_set_filters = [['key' => 'Link', 'value' => 'Any of: http://banana.com']];
+    $this->assertDefaultValueForFilters($expected_set_filters);
+    $page->pressButton('Save');
+    $node = $this->drupalGetNodeByTitle('List page for ct1');
+    $this->drupalGet($node->toUrl());
+    $this->assertSession()->pageTextNotContains('Cherry title');
+    $this->assertSession()->pageTextNotContains('Sun title');
+    $this->assertSession()->pageTextNotContains('Grass title');
+    $this->assertSession()->pageTextContains('Banana title');
+    // Change the link to an internal one.
+    $this->drupalGet($node->toUrl('edit-form'));
+    $this->clickLink('List Page');
+    $page->pressButton('edit-' . $link_filter_id);
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $nodes = \Drupal::entityTypeManager()->getStorage('node')->loadByProperties(['title' => 'Sun title']);
+    $sun_title = reset($nodes);
+    $this->getSession()->getPage()->fillField('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $link_filter_id . '][link][0][link]', sprintf('%s (%s)', $sun_title->label(), $sun_title->id()));
+    $page->pressButton('Set default value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $page->pressButton('Save');
+    $this->assertSession()->pageTextNotContains('Cherry title');
+    $this->assertSession()->pageTextNotContains('Sun title');
+    $this->assertSession()->pageTextContains('Grass title');
+    $this->assertSession()->pageTextNotContains('Banana title');
+
+    // Remove filters.
+    $this->drupalGet($node->toUrl('edit-form'));
+    $this->clickLink('List Page');
+    $page->pressButton('delete-' . $link_filter_id);
+    $this->assertSession()->assertWaitOnAjaxRequest();
 
     // Test an OR filter.
     $page->selectFieldOption('Add default value for', 'Reference');

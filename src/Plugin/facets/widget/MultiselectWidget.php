@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages\Plugin\facets\widget;
 
+use Drupal\Core\Entity\Element\EntityAutocomplete;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\EntityReferenceFieldItemListInterface;
@@ -13,6 +14,8 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\facets\FacetInterface;
 use Drupal\facets\Processor\ProcessorPluginManager;
 use Drupal\facets\Result\Result;
+use Drupal\link\LinkItemInterface;
+use Drupal\link\Plugin\Field\FieldWidget\LinkWidget;
 use Drupal\multivalue_form_element\Element\MultiValue;
 use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\ListSourceInterface;
@@ -80,6 +83,8 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
    *
    * @SuppressWarnings(PHPMD.CyclomaticComplexity)
    * @SuppressWarnings(PHPMD.NPathComplexity)
+   *
+   * @todo create a plugin type for supporting the various field types.
    */
   public function buildDefaultValueForm(array $form, FormStateInterface $form_state, FacetInterface $facet, ListPresetFilter $preset_filter = NULL): array {
     /** @var \Drupal\oe_list_pages\ListSourceInterface $list_source */
@@ -116,7 +121,6 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
       return $form;
     }
 
-    // First, we cover entity references.
     if (in_array(EntityReferenceFieldItemListInterface::class, class_implements($field_definition->getClass()))) {
       $entity_storage = $this->entityTypeManager->getStorage($field_definition->getSetting('target_type'));
       $default_value = [];
@@ -175,6 +179,30 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
       return $form;
     }
 
+    if ($field_type === 'link') {
+      $link_type = $field_definition->getSetting('link_type');
+      $default_value = [];
+      foreach ($active_items as $active_item) {
+        $default_value[] = $this->getUriAsDisplayableString($active_item);
+      }
+      $form[$facet->id()]['#default_value'] = $default_value;
+      $form[$facet->id()]['link'] = [
+        '#type' => 'url',
+        '#element_validate' => [[LinkWidget::class, 'validateUriElement']],
+        '#maxlength' => 2048,
+        '#link_type' => $link_type,
+      ];
+
+      if ($link_type & LinkItemInterface::LINK_INTERNAL) {
+        $form[$facet->id()]['link']['#type'] = 'entity_autocomplete';
+        $form[$facet->id()]['link']['#target_type'] = 'node';
+        $form[$facet->id()]['link']['#process_default_value'] = FALSE;
+      }
+
+      $form_state->set('multivalue_child', 'link');
+      return $form;
+    }
+
     return $this->build($facet);
   }
 
@@ -216,6 +244,15 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
 
       $facet->setResults($results);
       return $filter_operators[$filter->getOperator()] . ': ' . parent::getDefaultValuesLabel($facet, $list_source, $filter);
+    }
+
+    if ($field_type === 'link') {
+      $values = [];
+      foreach ($filter_value as $value) {
+        $values[] = $this->getUriAsDisplayableString($value);
+      }
+
+      return $filter_operators[$filter->getOperator()] . ': ' . implode(', ', $values);
     }
 
     return $filter_operators[$filter->getOperator()] . ': ' . parent::getDefaultValuesLabel($facet, $list_source, $filter);
@@ -325,6 +362,47 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
     }
 
     return FALSE;
+  }
+
+  /**
+   * Gets the URI without the 'internal:' or 'entity:' scheme.
+   *
+   * @param string $uri
+   *   The URI.
+   *
+   * @return string
+   *   The URI.
+   *
+   * @see LinkWidget::getUriAsDisplayableString()
+   */
+  protected function getUriAsDisplayableString(string $uri): string {
+    $scheme = parse_url($uri, PHP_URL_SCHEME);
+
+    // By default, the displayable string is the URI.
+    $displayable_string = $uri;
+
+    // A different displayable string may be chosen in case of the 'internal:'
+    // or 'entity:' built-in schemes.
+    if ($scheme === 'internal') {
+      $uri_reference = explode(':', $uri, 2)[1];
+      $path = parse_url($uri, PHP_URL_PATH);
+      if ($path === '/') {
+        $uri_reference = '<front>' . substr($uri_reference, 1);
+      }
+
+      $displayable_string = $uri_reference;
+    }
+    elseif ($scheme === 'entity') {
+      list($entity_type, $entity_id) = explode('/', substr($uri, 7), 2);
+      if ($entity_type == 'node' && $entity = $this->entityTypeManager->getStorage($entity_type)->load($entity_id)) {
+        $displayable_string = EntityAutocomplete::getEntityLabels([$entity]);
+      }
+    }
+    elseif ($scheme === 'route') {
+      $displayable_string = ltrim($displayable_string, 'route:');
+    }
+
+    return $displayable_string;
   }
 
 }
