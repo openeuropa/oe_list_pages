@@ -6,8 +6,13 @@ package: Testing
 core: 8.x
 
 dependencies:
+  - drupal:entity_reference
+  - drupal:link
   - drupal:options
+  - drupal:datetime
+  - drupal:datetime_range
   - extra_field:extra_field
   - oe_list_pages:oe_list_pages
   - oe_list_pages:oe_list_page_content_type
+  - search_api:search_api_db
   - search_api:search_api_db

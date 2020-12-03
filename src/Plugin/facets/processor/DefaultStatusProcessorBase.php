@@ -72,7 +72,10 @@ abstract class DefaultStatusProcessorBase extends ProcessorPluginBase implements
 
     $default_status = $this->getConfiguration()['default_status'];
     if ($default_status) {
-      $facet->setActiveItems([$default_status]);
+      // Keep the active items in the facet until the last moment when we
+      // subscribe to the query and apply them if needed.
+      // @see \Drupal\oe_list_pages\EventSubscriber\QuerySubscriber
+      $facet->set('default_status_active_items', [$default_status]);
     }
   }
 

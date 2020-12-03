@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\oe_list_pages\Kernel;
 
-use Drupal\KernelTests\Core\Entity\EntityKernelTestBaseTest;
+use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\oe_list_pages\ListSourceFactory;
 use Drupal\search_api\Entity\Index;
 use Drupal\Tests\oe_list_pages\Traits\FacetsTestTrait;
@@ -12,7 +12,7 @@ use Drupal\Tests\oe_list_pages\Traits\FacetsTestTrait;
 /**
  * Tests the List sources and their properties.
  */
-class ListsSourceBaseTest extends EntityKernelTestBaseTest {
+abstract class ListsSourceTestBase extends EntityKernelTestBase {
 
   use FacetsTestTrait;
 
@@ -135,7 +135,19 @@ class ListsSourceBaseTest extends EntityKernelTestBaseTest {
       'With a message',
       'None',
     ];
-    $categories = $values['categories'] ?? ['cat1', 'cat2', 'cat1', 'cat1'];
+
+    $keywords = $values['keywords'] ?? [
+        ['key1'],
+        ['key2'],
+        ['key1', 'key2'],
+        ['key2', 'key3'],
+    ];
+    $categories = $values['categories'] ?? [
+        ['cat1'],
+        ['cat2'],
+        ['cat1'],
+        ['cat1'],
+    ];
     $bodies = $values['bodies'] ?? [
       'Sending message',
       'Receiving a Message ',
@@ -156,6 +168,7 @@ class ListsSourceBaseTest extends EntityKernelTestBaseTest {
       $entity_test_storage->create([
         'name' => $titles[$i % $count],
         'body' => $bodies[$i % $count],
+        'keywords' => $keywords[$i % $count],
         'category' => $categories[$i % $count],
         'type' => $bundle,
         'created' => $dates[$i % $count],

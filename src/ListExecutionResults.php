@@ -34,11 +34,11 @@ class ListExecutionResults implements ListExecutionResultsInterface {
   protected $listSource;
 
   /**
-   * The wrapper for entity meta plugin.
+   * The list page configuration.
    *
-   * @var \Drupal\oe_list_pages\ListPageWrapper
+   * @var \Drupal\oe_list_pages\ListPageConfiguration
    */
-  protected $listPluginWrapper;
+  protected $configuration;
 
   /**
    * ListExecutionResults constructor.
@@ -49,14 +49,14 @@ class ListExecutionResults implements ListExecutionResultsInterface {
    *   The result set.
    * @param \Drupal\oe_list_pages\ListSourceInterface $listSource
    *   The list source.
-   * @param \Drupal\oe_list_pages\ListPageWrapper $listPluginWrapper
-   *   The wrapper for the entity meta plugin.
+   * @param \Drupal\oe_list_pages\ListPageConfiguration $configuration
+   *   The list page configuration.
    */
-  public function __construct(QueryInterface $query, ResultSetInterface $results, ListSourceInterface $listSource, ListPageWrapper $listPluginWrapper) {
+  public function __construct(QueryInterface $query, ResultSetInterface $results, ListSourceInterface $listSource, ListPageConfiguration $configuration) {
     $this->query = $query;
     $this->results = $results;
     $this->listSource = $listSource;
-    $this->listPluginWrapper = $listPluginWrapper;
+    $this->configuration = $configuration;
   }
 
   /**
@@ -83,8 +83,8 @@ class ListExecutionResults implements ListExecutionResultsInterface {
   /**
    * {@inheritdoc}
    */
-  public function getListPluginWrapper(): ListPageWrapper {
-    return $this->listPluginWrapper;
+  public function getConfiguration(): ListPageConfiguration {
+    return $this->configuration;
   }
 
 }

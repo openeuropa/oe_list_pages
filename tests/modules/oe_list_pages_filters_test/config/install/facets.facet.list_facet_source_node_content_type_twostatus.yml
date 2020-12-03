@@ -26,7 +26,20 @@ enable_parent_when_child_gets_disabled: true
 hard_limit: null
 exclude: false
 only_visible_when_facet_source_is_visible: null
-processor_configs: {  }
+processor_configs:
+  boolean_item:
+    processor_id: boolean_item
+    weights:
+      build: 35
+    settings:
+      on_value: 'Yes'
+      off_value: 'No'
+  url_processor_handler:
+    processor_id: url_processor_handler
+    weights:
+      pre_query: 50
+      build: 15
+    settings: {  }
 empty_behavior:
   behavior: none
 show_title: null

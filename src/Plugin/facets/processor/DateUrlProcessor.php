@@ -81,9 +81,10 @@ class DateUrlProcessor extends UrlProcessorHandler {
    */
   public function supportsFacet(FacetInterface $facet) {
     $supported_types = [
-      "field_item:daterange",
-      "field_item:datetime",
-      "datetime_iso8601",
+      'field_item:daterange',
+      'field_item:datetime',
+      'datetime_iso8601',
+      'date',
     ];
     $data_definition = $facet->getDataDefinition();
     if (in_array($data_definition->getDataType(), $supported_types)) {

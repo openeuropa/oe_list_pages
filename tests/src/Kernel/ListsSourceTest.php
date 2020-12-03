@@ -9,7 +9,7 @@ use Drupal\Core\Plugin\PluginBase;
 /**
  * Tests the available List sources and their available filters.
  */
-class ListsSourceTest extends ListsSourceBaseTest {
+class ListsSourceTest extends ListsSourceTestBase {
 
   /**
    * Tests that all indexed bundles have a list.
