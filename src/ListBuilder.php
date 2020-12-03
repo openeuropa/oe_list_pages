@@ -22,6 +22,8 @@ use Drupal\oe_list_pages\Plugin\facets\widget\FulltextWidget;
 
 /**
  * Default list builder implementation.
+ *
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
  */
 class ListBuilder implements ListBuilderInterface {
 
@@ -125,7 +127,8 @@ class ListBuilder implements ListBuilderInterface {
     $cache = new CacheableMetadata();
     $cache->addCacheTags($entity->getEntityType()->getListCacheTags());
 
-    $list_execution = $this->listExecutionManager->executeList($entity);
+    $configuration = ListPageConfiguration::fromEntity($entity);
+    $list_execution = $this->listExecutionManager->executeList($configuration);
     if (empty($list_execution)) {
       $cache->applyTo($build);
       return $build;
@@ -139,12 +142,12 @@ class ListBuilder implements ListBuilderInterface {
 
     $query = $list_execution->getQuery();
     $result = $list_execution->getResults();
-    $wrapper = $list_execution->getListPluginWrapper();
+    $configuration = $list_execution->getConfiguration();
 
     // Determine the view mode to render with and the sorting.
-    $bundle_entity_type = $this->entityTypeManager->getDefinition($wrapper->getSourceEntityType())->getBundleEntityType();
+    $bundle_entity_type = $this->entityTypeManager->getDefinition($configuration->getEntityType())->getBundleEntityType();
     $storage = $this->entityTypeManager->getStorage($bundle_entity_type);
-    $bundle = $storage->load($wrapper->getSourceEntityBundle());
+    $bundle = $storage->load($configuration->getBundle());
     $view_mode = $bundle->getThirdPartySetting('oe_list_pages', 'default_view_mode', 'teaser');
     $cache->addCacheableDependency($query);
     $cache->addCacheableDependency($bundle);
@@ -163,7 +166,7 @@ class ListBuilder implements ListBuilderInterface {
     $items = [];
 
     // Build the entities.
-    $builder = $this->entityTypeManager->getViewBuilder($wrapper->getSourceEntityType());
+    $builder = $this->entityTypeManager->getViewBuilder($configuration->getEntityType());
     foreach ($result->getResultItems() as $item) {
       $entity = $item->getOriginalObject()->getEntity();
       $cache->addCacheableDependency($entity);
@@ -187,24 +190,24 @@ class ListBuilder implements ListBuilderInterface {
   public function buildFiltersForm(ContentEntityInterface $entity): array {
     $build = $ignored_filters = $exposed_filters = [];
 
-    $list_execution = $this->listExecutionManager->executeList($entity);
+    $configuration = ListPageConfiguration::fromEntity($entity);
+    $list_execution = $this->listExecutionManager->executeList($configuration);
     $list_source = $list_execution->getListSource();
 
     if (!$list_source) {
       return $build;
     }
 
-    $plugin_wrapper = $list_execution->getListPluginWrapper();
+    $configuration = $list_execution->getConfiguration();
     $available_filters = $list_source->getAvailableFilters();
-    $list_config = $plugin_wrapper->getConfiguration();
 
-    if (!empty($list_config['override_exposed_filters']) && $list_config['override_exposed_filters']) {
-      $exposed_filters = $list_config['exposed_filters'];
+    if ($configuration->isExposedFiltersOverridden()) {
+      $exposed_filters = $configuration->getExposedFilters();
     }
     else {
-      $bundle_entity_type = $this->entityTypeManager->getDefinition($plugin_wrapper->getSourceEntityType())->getBundleEntityType();
+      $bundle_entity_type = $this->entityTypeManager->getDefinition($configuration->getEntityType())->getBundleEntityType();
       $storage = $this->entityTypeManager->getStorage($bundle_entity_type);
-      $bundle = $storage->load($plugin_wrapper->getSourceEntityBundle());
+      $bundle = $storage->load($configuration->getBundle());
       $exposed_filters = $bundle->getThirdPartySetting('oe_list_pages', 'default_exposed_filters', []);
     }
 
@@ -231,7 +234,8 @@ class ListBuilder implements ListBuilderInterface {
    */
   public function buildSelectedFilters(ContentEntityInterface $entity): array {
     $build = [];
-    $list_execution = $this->listExecutionManager->executeList($entity);
+    $configuration = ListPageConfiguration::fromEntity($entity);
+    $list_execution = $this->listExecutionManager->executeList($configuration);
     /** @var \Drupal\facets\FacetInterface[] $facets */
     $facets = $this->facetManager->getFacetsByFacetSourceId($list_execution->getListSource()->getSearchId());
     $keyed_facets = [];
@@ -304,7 +308,7 @@ class ListBuilder implements ListBuilderInterface {
         ];
       }
 
-      if (!$item['items']) {
+      if (empty($item['items'])) {
         continue;
       }
       $item['name'] = $facet->getName();
@@ -346,7 +350,10 @@ class ListBuilder implements ListBuilderInterface {
   public function buildPagerInfo(ContentEntityInterface $entity): array {
     $cache = new CacheableMetadata();
     $cache->addCacheContexts(['url']);
-    $list_execution = $this->listExecutionManager->executeList($entity);
+    $build = [];
+
+    $configuration = ListPageConfiguration::fromEntity($entity);
+    $list_execution = $this->listExecutionManager->executeList($configuration);
     $results = $list_execution->getResults();
     if (!$results->getResultCount()) {
       $build = [

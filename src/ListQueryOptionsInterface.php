@@ -30,7 +30,7 @@ interface ListQueryOptionsInterface {
   /**
    * Gets the preset filters.
    *
-   * @return array
+   * @return \Drupal\oe_list_pages\ListPresetFilter[]
    *   The preset filters.
    */
   public function getPresetFiltersValues(): array;

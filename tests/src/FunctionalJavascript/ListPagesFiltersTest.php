@@ -268,14 +268,14 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     // Node 1 was created on 20 October 2019.
     // Node 2 was created on 25 October 2019.
     $this->getSession()->getPage()->selectFieldOption('Created', 'After');
-    $this->getSession()->getPage()->fillField('created_first_date[date]', '10/19/2019');
+    $this->getSession()->getPage()->fillField('created_first_date_wrapper[created_first_date][date]', '10/19/2019');
     $this->getSession()->getPage()->pressButton('Search');
     $this->assertSession()->pageTextContains('one yellow fruit');
     $this->assertSession()->pageTextContains('another yellow fruit');
     $this->assertSession()->linkExistsExact('After 19 October 2019');
     $this->assertSession()->linkExistsExact('Past');
 
-    $this->getSession()->getPage()->fillField('created_first_date[date]', '10/22/2019');
+    $this->getSession()->getPage()->fillField('created_first_date_wrapper[created_first_date][date]', '10/22/2019');
     $this->getSession()->getPage()->pressButton('Search');
     $this->assertSession()->pageTextNotContains('one yellow fruit');
     $this->assertSession()->pageTextContains('another yellow fruit');
@@ -288,8 +288,8 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $this->assertSession()->linkExistsExact('Before 22 October 2019');
     $this->assertSession()->linkExistsExact('Past');
     $this->getSession()->getPage()->selectFieldOption('Created', 'In between');
-    $this->getSession()->getPage()->fillField('created_first_date[date]', '10/19/2019');
-    $this->getSession()->getPage()->fillField('created_second_date[date]', '10/26/2019');
+    $this->getSession()->getPage()->fillField('created_first_date_wrapper[created_first_date][date]', '10/19/2019');
+    $this->getSession()->getPage()->fillField('created_second_date_wrapper[created_second_date][date]', '10/26/2019');
     $this->getSession()->getPage()->pressButton('Search');
     $this->assertSession()->pageTextContains('one yellow fruit');
     $this->assertSession()->pageTextContains('another yellow fruit');
@@ -386,9 +386,23 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $page->fillField('Title', 'List page for ct1');
     $page->pressButton('Save');
 
+    // By default we show only 10 results.
+    $this->assertCount(10, $this->getSession()->getPage()->findAll('css', '.node--type-content-type-one'));
+
     $this->assertSession()->pageTextContains('Showing results 1 to 10');
     $this->getSession()->getPage()->clickLink('Next');
     $this->assertSession()->pageTextContains('Showing results 10 to 20');
+    $this->getSession()->getPage()->clickLink('Next');
+    $this->assertSession()->pageTextContains('Showing results 20 to 23');
+
+    // Update the node to show 20 results.
+    $node = $this->drupalGetNodeByTitle('List page for ct1');
+    $this->drupalGet($node->toUrl('edit-form'));
+    $this->clickLink('List Page');
+    $this->getSession()->getPage()->selectFieldOption('The number of items to show per page', '20');
+    $page->pressButton('Save');
+    $this->assertCount(20, $this->getSession()->getPage()->findAll('css', '.node--type-content-type-one'));
+    $this->assertSession()->pageTextContains('Showing results 1 to 20');
     $this->getSession()->getPage()->clickLink('Next');
     $this->assertSession()->pageTextContains('Showing results 20 to 23');
 

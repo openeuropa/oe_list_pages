@@ -4,8 +4,6 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages;
 
-use Drupal\Core\Entity\EntityInterface;
-
 /**
  * Defines an interface for list execution managers.
  *
@@ -19,12 +17,12 @@ interface ListExecutionManagerInterface {
    *
    * Keeps a static cache of the already executed lists.
    *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity.
+   * @param \Drupal\oe_list_pages\ListPageConfiguration $configuration
+   *   The list page configuration.
    *
    * @return \Drupal\oe_list_pages\ListExecutionResults
    *   The list execution.
    */
-  public function executeList(EntityInterface $entity): ?ListExecutionResults;
+  public function executeList(ListPageConfiguration $configuration): ?ListExecutionResults;
 
 }

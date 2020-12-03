@@ -83,6 +83,7 @@ class ListPagesPluginTest extends WebDriverTestBase {
     $actual_entity_types = $this->getSelectOptions('Source entity type');
 
     $expected_entity_types = [
+      '' => '- Select -',
       'entity_meta_relation' => 'Entity Meta Relation',
       'entity_meta' => 'Entity meta',
       'node' => 'Content',
@@ -100,6 +101,7 @@ class ListPagesPluginTest extends WebDriverTestBase {
       'node_type_one' => 'Node Type 1',
       'node_type_two' => 'Node Type 2',
       'node_type_three' => 'Node Type 3',
+      '' => '- Select -',
     ];
     $this->assertEquals($expected_bundles, $actual_bundles);
 
@@ -111,6 +113,7 @@ class ListPagesPluginTest extends WebDriverTestBase {
       'vocab_one' => 'Vocabulary 1',
       'vocab_two' => 'Vocabulary 2',
       'vocab_three' => 'Vocabulary 3',
+      '' => '- Select -',
     ];
     $this->assertEquals($expected_bundles, $actual_bundles);
 
@@ -121,6 +124,7 @@ class ListPagesPluginTest extends WebDriverTestBase {
     $actual_bundles = $this->getSelectOptions('Source bundle');
     $expected_bundles = [
       'user' => 'User',
+      '' => '- Select -',
     ];
     $this->assertEquals($expected_bundles, $actual_bundles);
 
@@ -144,12 +148,14 @@ class ListPagesPluginTest extends WebDriverTestBase {
     $this->assertEquals([
       'node' => 'Content',
       'taxonomy_term' => 'Taxonomy term',
+      '' => '- Select -',
     ], $actual_entity_types);
     $this->assertOptionSelected('Source entity type', 'Content');
     $actual_bundles = $this->getSelectOptions('Source bundle');
     $expected_bundles = [
       'node_type_two' => 'Node Type 2',
       'node_type_three' => 'Node Type 3',
+      '' => '- Select -',
     ];
     $this->assertEquals($expected_bundles, $actual_bundles);
     $this->getSession()->getPage()->selectFieldOption('Source entity type', 'taxonomy_term');
@@ -158,6 +164,7 @@ class ListPagesPluginTest extends WebDriverTestBase {
     $expected_bundles = [
       'vocab_one' => 'Vocabulary 1',
       'vocab_three' => 'Vocabulary 3',
+      '' => '- Select -',
     ];
     $this->assertEquals($expected_bundles, $actual_bundles);
     $this->getSession()->getPage()->selectFieldOption('Source bundle', 'vocab_three');
