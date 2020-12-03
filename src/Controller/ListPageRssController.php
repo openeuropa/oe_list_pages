@@ -22,6 +22,7 @@ use Drupal\emr\Entity\EntityMetaInterface;
 use Drupal\node\NodeInterface;
 use Drupal\oe_list_pages\ListBuilderInterface;
 use Drupal\oe_list_pages\ListExecutionManagerInterface;
+use Drupal\oe_list_pages\ListPageConfiguration;
 use Drupal\oe_list_pages\ListPageRssAlterEvent;
 use Drupal\oe_list_pages\ListPageEvents;
 use Drupal\oe_list_pages\ListPageRssItemAlterEvent;
@@ -197,7 +198,8 @@ class ListPageRssController extends ControllerBase {
    *   Array of items to be rendered.
    */
   protected function getItemList(NodeInterface $node, CacheableMetadata $cache_metadata): array {
-    $execution_result = $this->listExecutionManager->executeList($node);
+    $configuration = ListPageConfiguration::fromEntity($node);
+    $execution_result = $this->listExecutionManager->executeList($configuration);
     $query = $execution_result->getQuery();
     $results = $execution_result->getResults();
     $cache_metadata->addCacheableDependency($query);
