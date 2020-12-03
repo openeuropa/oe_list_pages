@@ -74,7 +74,7 @@ class ListSource implements ListSourceInterface {
    * @param array $filters
    *   The filters.
    */
-  public function __construct(string $search_id, string $entity_type, string $bundle, string $bundle_key, IndexInterface $index, array $filters) {
+  public function __construct(string $search_id, string $entity_type, string $bundle, string $bundle_key, IndexInterface $index, array $filters = []) {
     $this->searchId = $search_id;
     $this->entityType = $entity_type;
     $this->bundle = $bundle;

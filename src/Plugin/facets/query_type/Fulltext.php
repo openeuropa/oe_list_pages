@@ -28,7 +28,14 @@ class Fulltext extends QueryTypePluginBase {
       $active_items = $this->facet->getActiveItems();
       $widget_config = $this->facet->getWidgetInstance()->getConfiguration();
       foreach ($active_items as $value) {
-        $query->keys(mb_strtolower($value));
+        // To guarantee several facets can check for keywords.
+        if (!empty($query->getKeys())) {
+          $query->keys(array_merge($query->getKeys(), [mb_strtolower($value)]));
+        }
+        else {
+          $query->keys(mb_strtolower($value));
+        }
+
         if (isset($widget_config['fulltext_all_fields']) && !$widget_config['fulltext_all_fields']) {
           // Search on specific field.
           $fulltext_fields = $query->getFulltextFields() ?? [];

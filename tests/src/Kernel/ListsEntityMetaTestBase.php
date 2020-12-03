@@ -4,13 +4,12 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\oe_list_pages\Kernel;
 
-use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\node\Entity\NodeType;
 
 /**
  * Base test for testing the List page entity metadata.
  */
-class ListsEntityMetaTestBase extends EntityKernelTestBase {
+class ListsEntityMetaTestBase extends ListsSourceTestBase {
 
   /**
    * The node storage.
@@ -51,11 +50,7 @@ class ListsEntityMetaTestBase extends EntityKernelTestBase {
   protected function setUp() {
     parent::setUp();
 
-    $this->installConfig(['oe_list_pages', 'emr', 'emr_node']);
     $this->installSchema('node', ['node_access']);
-    $this->installEntitySchema('node');
-    $this->installEntitySchema('entity_meta');
-    $this->installEntitySchema('entity_meta_relation');
 
     $values = ['type' => 'list_page', 'name' => 'List page'];
     $this->nodeType = NodeType::create($values);
