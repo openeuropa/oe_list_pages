@@ -10,7 +10,7 @@
         "drupal/core": "^8.9",
         "drupal/emr": "~1.0-beta7",
         "drupal/facets": "~1.6",
-        "drupal/multivalue_form_element": "~1.0.0-beta1",
+        "drupal/multivalue_form_element": "^1.0@beta",
         "drupal/search_api": "~1.17",
         "symfony/options-resolver": "~4.0"
     },
