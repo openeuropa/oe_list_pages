@@ -1,11 +1,28 @@
 # Changelog
 
+## [0.4.0](https://github.com/openeuropa/oe_list_pages/tree/0.4.0) (2020-12-04)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.3.0...0.4.0)
+
+**Merged pull requests:**
+
+- EWPP-482: Support for link fields in the multiselect widget. [\#54](https://github.com/openeuropa/oe_list_pages/pull/54) ([upchuk](https://github.com/upchuk))
+- Rebase epic list pages [\#53](https://github.com/openeuropa/oe_list_pages/pull/53) ([upchuk](https://github.com/upchuk))
+- List pages epic [\#52](https://github.com/openeuropa/oe_list_pages/pull/52) ([upchuk](https://github.com/upchuk))
+- EWPP-446: Account for empty date value [\#51](https://github.com/openeuropa/oe_list_pages/pull/51) ([upchuk](https://github.com/upchuk))
+- EWPP-470: Filter operators [\#50](https://github.com/openeuropa/oe_list_pages/pull/50) ([hernani](https://github.com/hernani))
+- EWPP-306: Preset filter are not included in the selected and exposed filters [\#48](https://github.com/openeuropa/oe_list_pages/pull/48) ([upchuk](https://github.com/upchuk))
+- EWPP-516: Update docker images. [\#46](https://github.com/openeuropa/oe_list_pages/pull/46) ([22Alexandra](https://github.com/22Alexandra))
+- EWPP-491: List pages configuration subform. [\#42](https://github.com/openeuropa/oe_list_pages/pull/42) ([upchuk](https://github.com/upchuk))
+- EWPP-47: List page selection in plugin. [\#28](https://github.com/openeuropa/oe_list_pages/pull/28) ([hernani](https://github.com/hernani))
+
 ## [0.3.0](https://github.com/openeuropa/oe_list_pages/tree/0.3.0) (2020-11-03)
 
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.2.0...0.3.0)
 
 **Merged pull requests:**
 
+- Prepare release 0.3.0 [\#44](https://github.com/openeuropa/oe_list_pages/pull/44) ([imanoleguskiza](https://github.com/imanoleguskiza))
 - EWPP-0: Update facets module. [\#43](https://github.com/openeuropa/oe_list_pages/pull/43) ([imanoleguskiza](https://github.com/imanoleguskiza))
 
 ## [0.2.0](https://github.com/openeuropa/oe_list_pages/tree/0.2.0) (2020-10-07)
