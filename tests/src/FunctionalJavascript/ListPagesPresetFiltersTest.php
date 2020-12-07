@@ -314,8 +314,25 @@ class ListPagesPresetFiltersTest extends WebDriverTestBase {
     // Switch back to content type one and resume where we left off.
     $page->selectFieldOption('Source bundle', 'Content type one');
     $this->assertSession()->assertWaitOnAjaxRequest();
-
     $this->assertDefaultValueForFilters($expected_set_filters);
+
+    // Switch content type again, but this time while on the edit form of a
+    // default filter.
+    $page->pressButton('edit-' . $created_filter_id);
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->pageTextContains('Set default value for Created');
+    $page->selectFieldOption('Source bundle', 'Content type two');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    // We still have the preset filter values we set earlier as they are kept
+    // in form state.
+    $this->assertDefaultValueForFilters([['key' => 'Select two', 'value' => 'test1']]);
+    // Try to edit and make sure that works.
+    $page->pressButton('edit-' . $select_two_filter_id);
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->pageTextContains('Set default value for Select two');
+    // Switch back to content type one.
+    $page->selectFieldOption('Source bundle', 'Content type one');
+    $this->assertSession()->assertWaitOnAjaxRequest();
 
     // Set preset filter for Published.
     $page->selectFieldOption('Add default value for', 'Published');
