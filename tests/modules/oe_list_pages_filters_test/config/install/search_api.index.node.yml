@@ -100,8 +100,10 @@ field_settings:
 datasource_settings:
   'entity:node':
     bundles:
-      default: true
-      selected: {  }
+      default: false
+      selected:
+        - content_type_one
+        - content_type_two
     languages:
       default: true
       selected: {  }

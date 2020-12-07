@@ -11,6 +11,7 @@ dependencies:
   - drupal:options
   - drupal:datetime
   - drupal:datetime_range
+  - drupal:taxonomy
   - extra_field:extra_field
   - oe_list_pages:oe_list_pages
   - oe_list_pages:oe_list_page_content_type

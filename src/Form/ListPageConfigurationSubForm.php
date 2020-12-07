@@ -444,11 +444,11 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
   protected function getEntityTypeOptions(): array {
     $entity_type_options = [];
     $entity_types = $this->entityTypeManager->getDefinitions();
-    foreach ($entity_types as $entity_type_key => $entity_type) {
-      if (!$entity_type instanceof ContentEntityTypeInterface) {
+    foreach ($entity_types as $entity_type_id => $entity_type) {
+      if (!$entity_type instanceof ContentEntityTypeInterface || !$this->listSourceFactory->isEntityTypeSourced($entity_type_id)) {
         continue;
       }
-      $entity_type_options[$entity_type_key] = $entity_type->getLabel();
+      $entity_type_options[$entity_type_id] = $entity_type->getLabel();
     }
 
     $event = new ListPageSourceAlterEvent(array_keys($entity_type_options));
@@ -469,6 +469,11 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
     $bundle_options = [];
     $bundles = $this->entityTypeBundleInfo->getBundleInfo($selected_entity_type);
     foreach ($bundles as $bundle_key => $bundle) {
+      $list_source = $this->listSourceFactory->get($selected_entity_type, $bundle_key);
+      if (!$list_source instanceof ListSourceInterface) {
+        continue;
+      }
+
       $bundle_options[$bundle_key] = $bundle['label'];
     }
 
