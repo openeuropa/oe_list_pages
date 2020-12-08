@@ -4,18 +4,14 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\oe_list_pages\FunctionalJavascript;
 
-use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\node\Entity\Node;
-use Drupal\Tests\taxonomy\Traits\TaxonomyTestTrait;
 
 /**
  * Tests the List pages EMR plugin form.
  *
  * @group oe_list_pages
  */
-class ListPagesPluginTest extends WebDriverTestBase {
-
-  use TaxonomyTestTrait;
+class ListPagesPluginTest extends ListPagePluginFormTestBase {
 
   /**
    * {@inheritdoc}
@@ -44,88 +40,9 @@ class ListPagesPluginTest extends WebDriverTestBase {
     $this->drupalLogin($admin);
     $this->drupalGet('node/add/oe_list_page');
 
-    // Open the list page details element.
-    $this->clickLink('List Page');
+    $this->assertListPageEntityTypeSelection();
 
-    $actual_entity_types = $this->getSelectOptions('Source entity type');
-
-    $expected_entity_types = [
-      '' => '- Select -',
-      'node' => 'Content',
-      'taxonomy_term' => 'Taxonomy term',
-    ];
-    $this->assertEquals($expected_entity_types, $actual_entity_types);
-    // By default, Node is selected if there are no stored values.
-    $this->assertOptionSelected('Source entity type', 'Content');
-
-    $actual_bundles = $this->getSelectOptions('Source bundle');
-    $expected_bundles = [
-      'content_type_one' => 'Content type one',
-      'content_type_two' => 'Content type two',
-      '' => '- Select -',
-    ];
-    $this->assertEquals($expected_bundles, $actual_bundles);
-
-    // Switch to the taxonomy term and assert that we have different bundles.
-    $this->getSession()->getPage()->selectFieldOption('Source entity type', 'taxonomy_term');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $actual_bundles = $this->getSelectOptions('Source bundle');
-    $expected_bundles = [
-      'vocabulary_one' => 'Vocabulary one',
-      'vocabulary_two' => 'Vocabulary two',
-      '' => '- Select -',
-    ];
-    $this->assertEquals($expected_bundles, $actual_bundles);
-
-    // Select a bundle, then change back to Node. Wait for all the Ajax
-    // requests to complete to ensure the callbacks work work.
-    $this->getSession()->getPage()->selectFieldOption('Source bundle', 'vocabulary_one');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->getSession()->getPage()->selectFieldOption('Source entity type', 'node');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->getSession()->getPage()->selectFieldOption('Source bundle', 'content_type_one');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-
-    // Set state values to trigger the test event subscriber and make some
-    // limitations.
-    $allowed = [
-      'node' => [
-        'content_type_one',
-      ],
-      'taxonomy_term' => [
-        'vocabulary_one',
-      ],
-    ];
-    \Drupal::state()->set('oe_list_pages_test.allowed_entity_types_bundles', $allowed);
-
-    $this->drupalGet('node/add/oe_list_page');
-    $this->clickLink('List Page');
-    $actual_entity_types = $this->getSelectOptions('Source entity type');
-    $expected_entity_types = [
-      '' => '- Select -',
-      'node' => 'Content',
-      'taxonomy_term' => 'Taxonomy term',
-    ];
-    $this->assertEquals($expected_entity_types, $actual_entity_types);
-    $this->assertOptionSelected('Source entity type', 'Content');
-    $actual_bundles = $this->getSelectOptions('Source bundle');
-    $expected_bundles = [
-      'content_type_one' => 'Content type one',
-      '' => '- Select -',
-    ];
-    $this->assertEquals($expected_bundles, $actual_bundles);
-    $this->getSession()->getPage()->selectFieldOption('Source entity type', 'taxonomy_term');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $actual_bundles = $this->getSelectOptions('Source bundle');
-    $expected_bundles = [
-      'vocabulary_one' => 'Vocabulary one',
-      '' => '- Select -',
-    ];
-    $this->assertEquals($expected_bundles, $actual_bundles);
-    $this->getSession()->getPage()->selectFieldOption('Source bundle', 'vocabulary_one');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-
-    // Select a bundle and save the node.
+    // Save the node.
     $this->getSession()->getPage()->fillField('Title', 'Node title');
     $this->getSession()->getPage()->pressButton('Save');
 
@@ -186,22 +103,11 @@ class ListPagesPluginTest extends WebDriverTestBase {
   }
 
   /**
-   * Get available options of select box.
-   *
-   * @param string $field
-   *   The label, id or name of select box.
-   *
-   * @return array
-   *   Select box options.
+   * {@inheritdoc}
    */
-  protected function getSelectOptions(string $field): array {
-    $page = $this->getSession()->getPage();
-    $options = $page->findField($field)->findAll('css', 'option');
-    $actual_options = [];
-    foreach ($options as $option) {
-      $actual_options[$option->getValue()] = $option->getText();
-    }
-    return $actual_options;
+  protected function goToListPageConfiguration(): void {
+    $this->drupalGet('node/add/oe_list_page');
+    $this->clickLink('List Page');
   }
 
 }
