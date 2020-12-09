@@ -1,11 +1,20 @@
 # Changelog
 
+## [0.5.0](https://github.com/openeuropa/oe_list_pages/tree/0.5.0) (2020-12-09)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.4.0...0.5.0)
+
+**Merged pull requests:**
+
+- EWPP-593: Ajax fixes on the list page config subform entity type and bundle selection. [\#57](https://github.com/openeuropa/oe_list_pages/pull/57) ([upchuk](https://github.com/upchuk))
+
 ## [0.4.0](https://github.com/openeuropa/oe_list_pages/tree/0.4.0) (2020-12-04)
 
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.3.0...0.4.0)
 
 **Merged pull requests:**
 
+- EWPP-000: Update CHANGELOG.md for 0.4.0 release. [\#58](https://github.com/openeuropa/oe_list_pages/pull/58) ([sergepavle](https://github.com/sergepavle))
 - EWPP-482: Support for link fields in the multiselect widget. [\#54](https://github.com/openeuropa/oe_list_pages/pull/54) ([upchuk](https://github.com/upchuk))
 - Rebase epic list pages [\#53](https://github.com/openeuropa/oe_list_pages/pull/53) ([upchuk](https://github.com/upchuk))
 - List pages epic [\#52](https://github.com/openeuropa/oe_list_pages/pull/52) ([upchuk](https://github.com/upchuk))
