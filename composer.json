@@ -24,6 +24,7 @@
         "drush/drush": "~9.0@stable",
         "guzzlehttp/guzzle": "~6.3",
         "openeuropa/code-review": "^1.5.0",
+        "openeuropa/oe_link_lists": "~0.7.0",
         "openeuropa/drupal-core-require-dev": "~8.9",
         "openeuropa/task-runner": "~1.0.0-beta6",
         "phpunit/phpunit": "~6.5"
@@ -46,7 +47,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Drupal\\Tests\\oe_list_pages\\": "./tests/src"
+            "Drupal\\Tests\\oe_list_pages\\": "./tests/src",
+            "Drupal\\Tests\\oe_link_lists\\": "./build/modules/contrib/oe_link_lists/tests/"
         }
     },
     "extra": {
