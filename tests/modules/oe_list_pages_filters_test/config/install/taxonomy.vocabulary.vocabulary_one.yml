@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+name: 'Vocabulary one'
+vid: vocabulary_one
+description: ''
+weight: 0

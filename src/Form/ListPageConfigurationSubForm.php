@@ -11,7 +11,6 @@ use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\SubformState;
-use Drupal\Core\Render\Element\Checkboxes;
 use Drupal\Core\Render\Element\Select;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\oe_list_pages\ListPageConfiguration;
@@ -109,9 +108,9 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
    * {@inheritdoc}
    *
    * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+   * @SuppressWarnings(PHPMD.NPathComplexity)
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
-    $input = $form_state->getUserInput();
     $entity_type_options = $this->getEntityTypeOptions();
     $entity_type_id = $this->configuration->getEntityType();
     $entity_type_bundle = $this->configuration->getBundle();
@@ -125,8 +124,11 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
       ],
     ];
 
-    $selected_entity_type = NestedArray::getValue($input, array_merge($form['#parents'], ['wrapper', 'entity_type'])) ?? $entity_type_id;
-    $selected_bundle = NestedArray::getValue($input, array_merge($form['#parents'], ['wrapper', 'bundle'])) ?? $entity_type_bundle;
+    $selected_entity_type = $form_state->has('entity_type') ? $form_state->get('entity_type') : $entity_type_id;
+    $selected_bundle = $form_state->has('bundle') ? $form_state->get('bundle') : $entity_type_bundle;
+    if (!$form_state->has('entity_type')) {
+      $form_state->set('entity_type', $selected_entity_type);
+    }
 
     $form['wrapper']['entity_type'] = [
       '#type' => 'select',
@@ -140,8 +142,16 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
       '#required' => TRUE,
       '#op' => 'entity-type',
       '#ajax' => [
-        'callback' => [get_class($this), 'updateEntityBundles'],
+        'callback' => [get_class($this), 'entityTypeSelectAjax'],
         'wrapper' => $ajax_wrapper_id,
+      ],
+      '#executes_submit_callback' => TRUE,
+      '#submit' => [[$this, 'entityTypeSelectSubmit']],
+      '#limit_validation_errors' => [
+        array_merge($form['#parents'], [
+          'wrapper',
+          'entity_type',
+        ]),
       ],
     ];
 
@@ -157,8 +167,16 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
         '#op' => 'bundle',
         '#required' => TRUE,
         '#ajax' => [
-          'callback' => [$this, 'updateExposedFilters'],
+          'callback' => [$this, 'bundleSelectAjax'],
           'wrapper' => $ajax_wrapper_id,
+        ],
+        '#executes_submit_callback' => TRUE,
+        '#submit' => [[$this, 'bundleSelectSubmit']],
+        '#limit_validation_errors' => [
+          array_merge($form['#parents'], [
+            'wrapper',
+            'bundle',
+          ]),
         ],
         '#process' => [
           [Select::class, 'processSelect'],
@@ -202,10 +220,6 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
           '#title' => $this->t('Exposed filters'),
           '#default_value' => $exposed_filters,
           '#options' => $available_filters,
-          '#process' => [
-            [Checkboxes::class, 'processCheckboxes'],
-            [$this, 'processExposedFilters'],
-          ],
           '#states' => [
             'visible' => [
               ':input[name="' . $name . '"]' => ['checked' => TRUE],
@@ -227,6 +241,58 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
     }
 
     return $form;
+  }
+
+  /**
+   * Submit callback when changing the entity type.
+   *
+   * @param array $form
+   *   The form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   */
+  public function entityTypeSelectSubmit(array &$form, FormStateInterface $form_state): void {
+    $triggering_element = $form_state->getTriggeringElement();
+    $form_state->set('entity_type', $triggering_element['#value']);
+    $form_state->set('bundle', NULL);
+
+    // In this form we embed the default filters form as well so if we change
+    // entity types, we need to reset any filter selection.
+    $form_state->set('facet_id', NULL);
+    $form_state->set('filter_id', NULL);
+    $form_state->setRebuild(TRUE);
+  }
+
+  /**
+   * Submit callback when changing the bundle.
+   *
+   * @param array $form
+   *   The form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   */
+  public function bundleSelectSubmit(array &$form, FormStateInterface $form_state): void {
+    $triggering_element = $form_state->getTriggeringElement();
+    $form_state->set('bundle', $triggering_element['#value']);
+    $form_state->setRebuild(TRUE);
+
+    // In this form we embed the default filters form as well so if we change
+    // entity types, we need to reset any filter selection.
+    $form_state->set('facet_id', NULL);
+    $form_state->set('filter_id', NULL);
+
+    // When we change the bundle, we want to set the default exposed filter
+    // values to the user input so that the checkboxes can be checked when the
+    // user changes the bundle.
+    $parents = array_merge(array_slice($triggering_element['#parents'], 0, -1), ['exposed_filters']);
+    $entity_type = $form_state->get('entity_type');
+    $list_source = $this->listSourceFactory->get($entity_type, $triggering_element['#value']);
+    if ($list_source instanceof ListSourceInterface) {
+      $default_exposed_filters = $this->getBundleDefaultExposedFilters($list_source);
+      $input = $form_state->getUserInput();
+      NestedArray::setValue($input, $parents, $default_exposed_filters);
+      $form_state->setUserInput($input);
+    }
   }
 
   /**
@@ -281,42 +347,6 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
   }
 
   /**
-   * Process callback for the exposed filters selection element.
-   *
-   * @param array $element
-   *   The element.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The form state.
-   * @param array $complete_form
-   *   The complete form.
-   *
-   * @return array
-   *   The processed element.
-   */
-  public function processExposedFilters(array &$element, FormStateInterface $form_state, array &$complete_form): array {
-    $triggering_element = $form_state->getTriggeringElement();
-    // If we change the value of the entity type or bundle, we want to reset
-    // the value of the submitted exposed filters checkbox. Moreover, we want
-    // to set the default exposed filter values to the user input so that the
-    // checkboxes can be checked when the user changes the bundle.
-    if ($triggering_element && isset($triggering_element['#op']) && in_array($triggering_element['#op'], ['entity-type', 'bundle'])) {
-      $values = $entity_type = $form_state->getValue(array_slice($element['#parents'], 0, -1));
-      $entity_type = $values['entity_type'];
-      $bundle = $values['bundle'];
-      if ($entity_type && $bundle) {
-        $list_source = $this->listSourceFactory->get($entity_type, $bundle);
-        $default_exposed_filters = $this->getBundleDefaultExposedFilters($list_source);
-        $input = $form_state->getUserInput();
-        NestedArray::setValue($input, $element['#parents'], $default_exposed_filters);
-        $form_state->setUserInput($input);
-      }
-
-      $element['#value'] = [];
-    }
-    return $element;
-  }
-
-  /**
    * Ajax request handler for updating the entity bundles.
    *
    * @param array $form
@@ -327,14 +357,14 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
    * @return array
    *   The form element.
    */
-  public static function updateEntityBundles(array &$form, FormStateInterface $form_state): array {
+  public static function entityTypeSelectAjax(array &$form, FormStateInterface $form_state): array {
     $triggering_element = $form_state->getTriggeringElement();
     $element = NestedArray::getValue($form, array_slice($triggering_element['#array_parents'], 0, -2));
     return $element['wrapper'];
   }
 
   /**
-   * Ajax request handler for updating the exposed filters.
+   * Ajax callback for when the bundle is selected.
    *
    * @param array $form
    *   The form.
@@ -344,7 +374,7 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
    * @return array
    *   The form element.
    */
-  public function updateExposedFilters(array &$form, FormStateInterface $form_state): array {
+  public function bundleSelectAjax(array &$form, FormStateInterface $form_state): array {
     $triggering_element = $form_state->getTriggeringElement();
     $element = NestedArray::getValue($form, array_slice($triggering_element['#array_parents'], 0, -2));
     // We have to clear #value and #checked manually after processing of
@@ -414,11 +444,11 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
   protected function getEntityTypeOptions(): array {
     $entity_type_options = [];
     $entity_types = $this->entityTypeManager->getDefinitions();
-    foreach ($entity_types as $entity_type_key => $entity_type) {
-      if (!$entity_type instanceof ContentEntityTypeInterface) {
+    foreach ($entity_types as $entity_type_id => $entity_type) {
+      if (!$entity_type instanceof ContentEntityTypeInterface || !$this->listSourceFactory->isEntityTypeSourced($entity_type_id)) {
         continue;
       }
-      $entity_type_options[$entity_type_key] = $entity_type->getLabel();
+      $entity_type_options[$entity_type_id] = $entity_type->getLabel();
     }
 
     $event = new ListPageSourceAlterEvent(array_keys($entity_type_options));
@@ -439,6 +469,11 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
     $bundle_options = [];
     $bundles = $this->entityTypeBundleInfo->getBundleInfo($selected_entity_type);
     foreach ($bundles as $bundle_key => $bundle) {
+      $list_source = $this->listSourceFactory->get($selected_entity_type, $bundle_key);
+      if (!$list_source instanceof ListSourceInterface) {
+        continue;
+      }
+
       $bundle_options[$bundle_key] = $bundle['label'];
     }
 
