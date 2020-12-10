@@ -135,6 +135,7 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
       $links[] = $event->getLink();
     }
 
+    $links->addCacheableDependency($cache);
     return $links;
   }
 
