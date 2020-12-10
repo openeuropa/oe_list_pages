@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Drupal\Tests\oe_list_pages_link_list_source\FunctionalJavascrip;
+namespace Drupal\Tests\oe_list_pages_link_list_source\FunctionalJavascript;
 
 use Drupal\oe_list_pages\ListPageConfiguration;
 use Drupal\Tests\oe_link_lists\Traits\LinkListTestTrait;

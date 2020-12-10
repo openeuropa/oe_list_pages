@@ -21,7 +21,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
- * Link source plugin that links to internal entities.
+ * Link source plugin that integrates with List Pages.
  *
  * @LinkSource(
  *   id = "list_pages",

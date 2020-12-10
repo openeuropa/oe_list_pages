@@ -1,5 +1,5 @@
-name: OpenEuropa List Pages source
-description: Provides a source plugin that collect links from a list page source.
+name: OpenEuropa List Pages Link List Source
+description: Provides a link list source plugin that collect links from a list page source.
 package: OpenEuropa
 
 type: module
