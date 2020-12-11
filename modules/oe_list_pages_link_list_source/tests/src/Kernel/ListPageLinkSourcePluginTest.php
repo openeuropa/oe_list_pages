@@ -25,6 +25,7 @@ class ListPageLinkSourcePluginTest extends KernelTestBase {
     'entity_test',
     'oe_link_lists',
     'oe_list_pages_link_list_source',
+    'oe_list_pages_link_list_source_test',
     'oe_list_pages',
     'search_api',
     'search_api_db',
@@ -46,7 +47,9 @@ class ListPageLinkSourcePluginTest extends KernelTestBase {
     $this->installEntitySchema('entity_test_mulrev_changed');
     $this->installEntitySchema('user');
 
-    EntityTestBundle::create(['id' => 'foo'])->save();
+    $foo = EntityTestBundle::create(['id' => 'foo']);
+    $foo->setThirdPartySetting('oe_list_pages', 'default_sort', ['name' => 'name', 'direction' => 'ASC']);
+    $foo->save();
     EntityTestBundle::create(['id' => 'bar'])->save();
 
     $this->container->get('state')->set('search_api_use_tracking_batch', FALSE);
@@ -91,6 +94,18 @@ class ListPageLinkSourcePluginTest extends KernelTestBase {
     $index->removeField('type');
     $field = $this->container->get('search_api.fields_helper')->createField($index, 'type', $field_info);
     $index->addField($field);
+    // Save the index to change the datasource.
+    $index->save();
+
+    // Add the "name" field back.
+    $field_info = [
+      'label' => 'Name',
+      'type' => 'string',
+      'datasource_id' => 'entity:entity_test_with_bundle',
+      'property_path' => 'name',
+    ];
+    $field = $this->container->get('search_api.fields_helper')->createField($index, 'name', $field_info);
+    $index->addField($field);
     $index->save();
   }
 
@@ -117,7 +132,7 @@ class ListPageLinkSourcePluginTest extends KernelTestBase {
     }
 
     $plugin_manager = $this->container->get('plugin.manager.oe_link_lists.link_source');
-    /** @var \Drupal\oe_link_lists_list_pages_source\Plugin\LinkSource\ListPageLinkSource $plugin */
+    /** @var \Drupal\oe_list_pages_link_list_source\Plugin\LinkSource\ListPageLinkSource $plugin */
     $plugin = $plugin_manager->createInstance('list_pages');
 
     // Test a plugin without configuration.
@@ -128,6 +143,7 @@ class ListPageLinkSourcePluginTest extends KernelTestBase {
       'entity_type' => 'entity_test_with_bundle',
       'bundle' => 'foo',
     ]);
+    // By default, without a limit passed all results are returned.
     $this->assertEquals($test_entities_by_bundle['foo'], $this->extractEntityNames($plugin->getLinks()->toArray()));
     $plugin->setConfiguration([
       'entity_type' => 'entity_test_with_bundle',
@@ -181,19 +197,47 @@ class ListPageLinkSourcePluginTest extends KernelTestBase {
         'created' => $two_years_ago,
       ],
       [
-        'name' => 'A' . $this->randomString(),
-        'type' => 'foo',
-      ],
-      [
-        'name' => 'A' . $this->randomString(),
-        'type' => 'foo',
-      ],
-      [
         'name' => 'B' . $this->randomString(),
         'type' => 'foo',
       ],
       [
+        'name' => 'C' . $this->randomString(),
+        'type' => 'foo',
+      ],
+      [
+        'name' => 'D' . $this->randomString(),
+        'type' => 'foo',
+      ],
+      [
+        'name' => 'E' . $this->randomString(),
+        'type' => 'foo',
+      ],
+      [
         'name' => 'F' . $this->randomString(),
+        'type' => 'foo',
+      ],
+      [
+        'name' => 'G' . $this->randomString(),
+        'type' => 'foo',
+      ],
+      [
+        'name' => 'H' . $this->randomString(),
+        'type' => 'foo',
+      ],
+      [
+        'name' => 'I' . $this->randomString(),
+        'type' => 'foo',
+      ],
+      [
+        'name' => 'J' . $this->randomString(),
+        'type' => 'foo',
+      ],
+      [
+        'name' => 'K' . $this->randomString(),
+        'type' => 'foo',
+      ],
+      [
+        'name' => 'L' . $this->randomString(),
         'type' => 'foo',
       ],
       [

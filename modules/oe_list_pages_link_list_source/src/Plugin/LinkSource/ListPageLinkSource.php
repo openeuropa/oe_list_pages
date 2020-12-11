@@ -106,9 +106,8 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
   public function getLinks(int $limit = NULL, int $offset = 0): LinkCollectionInterface {
     $links = new LinkCollection();
     $configuration = new ListPageConfiguration($this->configuration);
-    if ($limit) {
-      $configuration->setLimit($limit);
-    }
+    $limit = is_null($limit) ? 0 : $limit;
+    $configuration->setLimit($limit);
     $cache = new CacheableMetadata();
     $list_execution = $this->listExecutionManager->executeList($configuration);
     if (!$list_execution) {
