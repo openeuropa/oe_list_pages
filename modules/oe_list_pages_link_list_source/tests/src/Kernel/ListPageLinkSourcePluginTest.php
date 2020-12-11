@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\oe_list_pages_link_list_source\Kernel;
 
+use Drupal\Core\Cache\Cache;
 use Drupal\entity_test\Entity\EntityTestBundle;
 use Drupal\entity_test\Entity\EntityTestWithBundle;
 use Drupal\KernelTests\KernelTestBase;
@@ -160,6 +161,65 @@ class ListPageLinkSourcePluginTest extends KernelTestBase {
       array_slice($test_entities_by_bundle['foo'], 0, 2, TRUE),
       $this->extractEntityNames($plugin->getLinks(2)->toArray())
     );
+  }
+
+  /**
+   * Tests that the proper cacheability metadata is returned by the plugin.
+   */
+  public function testCacheabilityMetadata(): void {
+    $plugin_manager = $this->container->get('plugin.manager.oe_link_lists.link_source');
+    /** @var \Drupal\oe_link_lists_internal_source\Plugin\LinkSource\InternalLinkSource $plugin */
+    $plugin = $plugin_manager->createInstance('list_pages');
+
+    $links = $plugin->getLinks();
+    $this->assertEquals([], $links->getCacheTags());
+    $this->assertEquals([], $links->getCacheContexts());
+    $this->assertEquals(Cache::PERMANENT, $links->getCacheMaxAge());
+
+    $plugin->setConfiguration([
+      'entity_type' => 'entity_test_with_bundle',
+      'bundle' => 'foo',
+    ]);
+    $links = $plugin->getLinks();
+    $this->assertCount(0, $links);
+
+    $this->assertEquals([
+      'config:search_api.index.database_search_index',
+      'entity_test_with_bundle_list',
+      'search_api_list:database_search_index',
+    ], $links->getCacheTags());
+    $this->assertEquals([], $links->getCacheContexts());
+    $this->assertEquals(Cache::PERMANENT, $links->getCacheMaxAge());
+
+    // Create a test entity.
+    $entity = EntityTestWithBundle::create([
+      'name' => 'Test entity',
+      'type' => 'foo',
+    ]);
+    $entity->save();
+    $list_source_factory = $this->container->get('oe_list_pages.list_source.factory');
+    $item_list = $list_source_factory->get('entity_test_with_bundle', 'foo');
+    $item_list->getIndex()->indexItems();
+
+    // Kill the container because the list execution manager caches the
+    // execution.
+    $this->container->get('kernel')->rebuildContainer();
+    /** @var \Drupal\oe_link_lists_internal_source\Plugin\LinkSource\InternalLinkSource $plugin */
+    $plugin = $plugin_manager->createInstance('list_pages');
+    $plugin->setConfiguration([
+      'entity_type' => 'entity_test_with_bundle',
+      'bundle' => 'foo',
+    ]);
+    $links = $plugin->getLinks();
+    $this->assertCount(1, $links);
+    $this->assertEquals([
+      'config:search_api.index.database_search_index',
+      'entity_test_with_bundle:' . $entity->id(),
+      'entity_test_with_bundle_list',
+      'search_api_list:database_search_index',
+    ], $links->getCacheTags());
+    $this->assertEquals([], $links->getCacheContexts());
+    $this->assertEquals(Cache::PERMANENT, $links->getCacheMaxAge());
   }
 
   /**

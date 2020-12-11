@@ -131,6 +131,7 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
       /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
       $event = new EntityValueResolverEvent($entity);
       $this->eventDispatcher->dispatch(EntityValueResolverEvent::NAME, $event);
+      $cache->addCacheableDependency($entity);
       $links[] = $event->getLink();
     }
 
