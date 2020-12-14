@@ -6,6 +6,7 @@ namespace Drupal\oe_list_pages_link_list_source\Plugin\LinkSource;
 
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
+use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\SubformState;
@@ -62,15 +63,23 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
   protected $entityTypeManager;
 
   /**
+   * The entity repository.
+   *
+   * @var \Drupal\Core\Entity\EntityRepositoryInterface
+   */
+  protected $entityRepository;
+
+  /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, ListPageConfigurationSubformFactory $configurationSubformFactory, ListExecutionManagerInterface $listExecutionManager, EventDispatcherInterface $eventDispatcher, EntityTypeManagerInterface $entityTypeManager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, ListPageConfigurationSubformFactory $configurationSubformFactory, ListExecutionManagerInterface $listExecutionManager, EventDispatcherInterface $eventDispatcher, EntityTypeManagerInterface $entityTypeManager, EntityRepositoryInterface $entityRepository) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->configurationSubformFactory = $configurationSubformFactory;
     $this->listExecutionManager = $listExecutionManager;
     $this->eventDispatcher = $eventDispatcher;
     $this->entityTypeManager = $entityTypeManager;
+    $this->entityRepository = $entityRepository;
   }
 
   /**
@@ -84,7 +93,8 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
       $container->get('oe_list_pages.list_page_configuration_subform_factory'),
       $container->get('oe_list_pages.execution_manager'),
       $container->get('event_dispatcher'),
-      $container->get('entity_type.manager')
+      $container->get('entity_type.manager'),
+      $container->get('entity.repository')
     );
   }
 
@@ -128,6 +138,8 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
 
     foreach ($results->getResultItems() as $item) {
       $entity = $item->getOriginalObject()->getEntity();
+      /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
+      $entity = $this->entityRepository->getTranslationFromContext($entity);
       /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
       $event = new EntityValueResolverEvent($entity);
       $this->eventDispatcher->dispatch(EntityValueResolverEvent::NAME, $event);
