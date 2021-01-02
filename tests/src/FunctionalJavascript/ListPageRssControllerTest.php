@@ -99,6 +99,7 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     $this->assertEquals(2, $items->count());
     $first_item = $items->eq(0);
     $this->assertEquals('that yellow fruit', $first_item->filterXpath('//title')->text());
+    $this->assertEquals('&lt;p&gt;this is a banana&lt;/p&gt; ', $first_item->filterXpath('//description')->html());
     $this->assertEquals('http://web:8080/build/node/2', $first_item->filterXpath('//link')->text());
     $this->assertEquals('http://web:8080/build/node/2', $first_item->filterXpath('//guid')->text());
     $this->assertEquals('Tue, 20 Oct 20 00:00:00 +1100', $first_item->filterXpath('//pubDate')->text());

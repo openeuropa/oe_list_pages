@@ -6,6 +6,7 @@ namespace Drupal\oe_list_pages\Controller;
 
 use DateTimeInterface;
 use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Cache\CacheableMetadata;
@@ -211,12 +212,21 @@ class ListPageRssController extends ControllerBase {
       $entity = $item->getOriginalObject()->getEntity();
       $cache_metadata->addCacheableDependency($entity);
       $creation_date = $entity->get('changed')->value;
+      if ($entity->hasField('body')) {
+        $description = $entity->body->view([
+          'type' => 'text_default',
+          'label' => 'hidden',
+          'settings' => [],
+        ]);
+        $description = Html::escape($this->renderer->renderPlain($description[0]));
+      }
+      $description = $description ?? '';
       $result_item = [
         '#theme' => 'oe_list_pages_rss_item',
         '#title' => $entity->label(),
         '#link' => $entity->toUrl('canonical', ['absolute' => TRUE]),
         '#guid' => $entity->toUrl('canonical', ['absolute' => TRUE]),
-        '#description' => '',
+        '#description' => $description,
         '#item_elements' => [
           [
             '#type' => 'html_tag',
