@@ -204,37 +204,43 @@ class ListPageRssController extends ControllerBase {
     $query = $execution_result->getQuery();
     $results = $execution_result->getResults();
     $cache_metadata->addCacheableDependency($query);
-    $cache_metadata->addCacheableDependency($results);
     $cache_metadata->addCacheTags(['search_api_list:' . $query->getIndex()->id()]);
     $result_items = [];
     foreach ($results->getResultItems() as $item) {
       /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
       $entity = $item->getOriginalObject()->getEntity();
       $cache_metadata->addCacheableDependency($entity);
-      $creation_date = $entity->get('changed')->value;
+      $description = '';
+      // Add a default description if the body is available.
       if ($entity->hasField('body')) {
-        $description = $entity->body->view([
+        $description = $entity->get('body')->view([
           'type' => 'text_default',
           'label' => 'hidden',
           'settings' => [],
         ]);
+        // We need to escape the results of renderPlain in order to maintain
+        // all tags added by the renderer. If we don't do it, things like p tags
+        // and linebreaks will be lost after they go through the twig template.
         $description = Html::escape($this->renderer->renderPlain($description[0]));
       }
-      $description = $description ?? '';
       $result_item = [
         '#theme' => 'oe_list_pages_rss_item',
         '#title' => $entity->label(),
         '#link' => $entity->toUrl('canonical', ['absolute' => TRUE]),
         '#guid' => $entity->toUrl('canonical', ['absolute' => TRUE]),
         '#description' => $description,
-        '#item_elements' => [
-          [
-            '#type' => 'html_tag',
-            '#tag' => 'pubDate',
-            '#value' => $this->dateFormatter->format($creation_date, 'custom', DateTimeInterface::RFC822),
-          ],
-        ],
+        '#item_elements' => [],
       ];
+
+      // Add the latest update date if available.
+      if ($entity->hasField('changed')) {
+        $creation_date = $entity->get('changed')->value;
+        $result_item['#item_elements']['pubDate'] = [
+          '#type' => 'html_tag',
+          '#tag' => 'pubDate',
+          '#value' => $this->dateFormatter->format($creation_date, 'custom', DateTimeInterface::RFC822),
+        ];
+      }
 
       // Dispatch event to allow to alter the item build before being rendered.
       $event = new ListPageRssItemAlterEvent($result_item, $entity);

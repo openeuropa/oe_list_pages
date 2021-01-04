@@ -100,7 +100,7 @@ class ListPagesTestSubscriber implements EventSubscriberInterface {
   }
 
   /**
-   * Event handler for adding channel information.
+   * Event handler for adding item information.
    *
    * @param \Drupal\oe_list_pages\ListPageRssItemAlterEvent $event
    *   The event object.

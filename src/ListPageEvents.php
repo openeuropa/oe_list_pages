@@ -31,7 +31,7 @@ final class ListPageEvents {
   const ALTER_RSS_BUILD = "oe_list_pages.rss_build_alter";
 
   /**
-   * Event fired after the RSS item is built and before its rendered.
+   * Event fired after the RSS item is built and before it's rendered.
    *
    * @var string
    */
