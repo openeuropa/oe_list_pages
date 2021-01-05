@@ -9,6 +9,7 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\Form\FormBuilderInterface;
+use Drupal\Core\Link;
 use Drupal\Core\Pager\PagerManagerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
@@ -19,6 +20,7 @@ use Drupal\facets\Utility\FacetsUrlGenerator;
 use Drupal\oe_list_pages\Form\ListFacetsForm;
 use Drupal\oe_list_pages\Plugin\facets\processor\DefaultStatusProcessorInterface;
 use Drupal\oe_list_pages\Plugin\facets\widget\FulltextWidget;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Default list builder implementation.
@@ -86,6 +88,13 @@ class ListBuilder implements ListBuilderInterface {
   protected $processorManager;
 
   /**
+   * The request stack.
+   *
+   * @var \Symfony\Component\HttpFoundation\RequestStack
+   */
+  protected $requestStack;
+
+  /**
    * ListBuilder constructor.
    *
    * @param \Drupal\oe_list_pages\ListExecutionManagerInterface $listExecutionManager
@@ -104,8 +113,10 @@ class ListBuilder implements ListBuilderInterface {
    *   The facets URL generator.
    * @param \Drupal\facets\Processor\ProcessorPluginManager $processorManager
    *   The facets processor plugin manager.
+   * @param \Symfony\Component\HttpFoundation\RequestStack $requestStack
+   *   The request stack.
    */
-  public function __construct(ListExecutionManagerInterface $listExecutionManager, EntityTypeManager $entityTypeManager, PagerManagerInterface $pager, EntityRepositoryInterface $entityRepository, FormBuilderInterface $formBuilder, DefaultFacetManager $facetManager, FacetsUrlGenerator $facetsUrlGenerator, ProcessorPluginManager $processorManager) {
+  public function __construct(ListExecutionManagerInterface $listExecutionManager, EntityTypeManager $entityTypeManager, PagerManagerInterface $pager, EntityRepositoryInterface $entityRepository, FormBuilderInterface $formBuilder, DefaultFacetManager $facetManager, FacetsUrlGenerator $facetsUrlGenerator, ProcessorPluginManager $processorManager, RequestStack $requestStack) {
     $this->listExecutionManager = $listExecutionManager;
     $this->entityTypeManager = $entityTypeManager;
     $this->pager = $pager;
@@ -114,6 +125,7 @@ class ListBuilder implements ListBuilderInterface {
     $this->facetManager = $facetManager;
     $this->facetsUrlGenerator = $facetsUrlGenerator;
     $this->processorManager = $processorManager;
+    $this->requestStack = $requestStack;
   }
 
   /**
@@ -381,6 +393,19 @@ class ListBuilder implements ListBuilderInterface {
     ];
     $cache->applyTo($build);
     return $build;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildRssLink(ContentEntityInterface $entity): array {
+    $url = Url::fromRoute('entity.node.list_page_rss', ['node' => $entity->id()]);
+    $url->setOption('query', $this->requestStack->getCurrentRequest()->query->all());
+    $cache = new CacheableMetadata();
+    $cache->addCacheContexts(['url.query_args']);
+    $link = Link::fromTextAndUrl(t('RSS'), $url)->toRenderable();
+    $cache->applyTo($link);
+    return $link;
   }
 
   /**
