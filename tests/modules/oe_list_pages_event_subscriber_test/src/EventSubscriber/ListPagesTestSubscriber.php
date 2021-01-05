@@ -108,7 +108,7 @@ class ListPagesTestSubscriber implements EventSubscriberInterface {
   public function onRssItemBuildAlter(ListPageRssItemAlterEvent $event): void {
     $build = $event->getBuild();
     $entity = $event->getEntity();
-    $creation_date = $entity->get('changed')->value;
+    $creation_date = $entity->get('created')->value;
     $build['#item_elements'][] = [
       '#type' => 'html_tag',
       '#tag' => 'creationDate',

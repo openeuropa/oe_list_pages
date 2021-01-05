@@ -200,6 +200,11 @@ class ListPageRssController extends ControllerBase {
    */
   protected function getItemList(NodeInterface $node, CacheableMetadata $cache_metadata): array {
     $configuration = ListPageConfiguration::fromEntity($node);
+    // Always sort by the updated date descending.
+    $configuration->setSort([
+      'name' => 'changed',
+      'direction' => 'DESC',
+    ]);
     $execution_result = $this->listExecutionManager->executeList($configuration);
     $query = $execution_result->getQuery();
     $results = $execution_result->getResults();
