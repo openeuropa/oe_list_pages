@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages\EventSubscriber;
 
+use Drupal\Core\Field\EntityReferenceFieldItemListInterface;
 use Drupal\facets\FacetInterface;
 use Drupal\facets\FacetManager\DefaultFacetManager;
 use Drupal\facets\QueryType\QueryTypePluginManager;
@@ -180,6 +181,27 @@ class QuerySubscriber implements EventSubscriberInterface {
   }
 
   /**
+   * Get original field name from facet config.
+   *
+   * @param \Drupal\facets\Entity\FacetInterface $facet
+   *   The facet.
+   *
+   * @return string|null
+   *   The field name if found.
+   */
+  protected function getFieldName(FacetInterface $facet) : ?string {
+    $field = $facet->getFacetSource()->getIndex()->getField($facet->getFieldIdentifier());
+    $field_name = $field->getOriginalFieldIdentifier();
+    $property_path = $field->getPropertyPath();
+    $parts = explode(':', $property_path);
+    if (count($parts) > 1) {
+      $field_name = $parts[0];
+    }
+
+    return $field_name;
+  }
+
+  /**
    * Applies the preset filter values onto the facet.
    *
    * Preset values are always going to be in the query and cannot be removed.
@@ -191,7 +213,27 @@ class QuerySubscriber implements EventSubscriberInterface {
    *   The preset values.
    */
   protected function applyPresetFilterValues(FacetInterface $facet, ListPresetFilter $preset_filter): void {
-    $facet->setActiveItems($preset_filter->getValues());
+
+    if ($preset_filter->getType() == 'contextual') {
+      /** @var \Drupal\node\NodeInterface $current_node */
+      $current_node = \Drupal::routeMatch()->getParameter('node');
+      $field_name = $this->getFieldName($facet);
+      $field = $current_node->get($field_name);
+      $field_definition = $field->getFieldDefinition();
+      $values = [];
+      /* @todo create a plugin type MultiSelectFilterFieldPlugin */
+      if (in_array(EntityReferenceFieldItemListInterface::class, class_implements($field_definition->getClass()))) {
+        $field_value = $current_node->get($field_name)->getValue();
+        $values = array_map(function ($value) {
+          return $value['target_id'];
+        }, $field_value);
+      }
+    }
+    else {
+      $values = $preset_filter->getValues();
+    }
+
+    $facet->setActiveItems($values);
     if ($preset_filter->getOperator() === ListPresetFilter::NOT_OPERATOR) {
       $facet->setQueryOperator(ListPresetFilter::AND_OPERATOR);
       $facet->setExclude(TRUE);

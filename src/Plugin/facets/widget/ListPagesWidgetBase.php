@@ -34,6 +34,7 @@ class ListPagesWidgetBase extends WidgetPluginBase implements ListPagesWidgetInt
    */
   public function prepareDefaultFilterValue(FacetInterface $facet, array $form, FormStateInterface $form_state): array {
     return [
+      'type' => 'static',
       'operator' => ListPresetFilter::OR_OPERATOR,
       'values' => $this->prepareValueForUrl($facet, $form, $form_state),
     ];
