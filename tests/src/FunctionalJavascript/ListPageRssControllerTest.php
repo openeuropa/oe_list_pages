@@ -95,6 +95,16 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     });
     $this->assertEquals($items, $expected_default_ordered_items);
 
+    // Assert presence or RSS link.
+    $rss_link_selector = 'div.field--name-extra-field-oe-list-page-rss-linknodeoe-list-page a';
+    $rss_link = $page->find('css', $rss_link_selector);
+    $url = $rss_link->getAttribute('href');
+    $this->assertEqual($url, Url::fromRoute('entity.node.list_page_rss', ['node' => $node->id()])->toString());
+    $this->drupalGet(Url::fromRoute('entity.node.canonical', ['node' => $node->id()], ['query' => ['random_arg' => 'value']]));
+    $rss_link = $page->find('css', $rss_link_selector);
+    $url = $rss_link->getAttribute('href');
+    $this->assertEqual($url, Url::fromRoute('entity.node.list_page_rss', ['node' => $node->id()], ['query' => ['random_arg' => 'value']])->toString());
+
     $this->drupalGet(Url::fromRoute('entity.node.list_page_rss', ['node' => $node->id()]));
     $response = $this->getTextContent();
     $crawler = new Crawler($response);
