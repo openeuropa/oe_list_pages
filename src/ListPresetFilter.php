@@ -37,6 +37,13 @@ class ListPresetFilter {
   protected $values = [];
 
   /**
+   * The type.
+   *
+   * @var string
+   */
+  protected $type;
+
+  /**
    * ListPresetFilter constructor.
    *
    * @param string $facet_id
@@ -45,11 +52,14 @@ class ListPresetFilter {
    *   The operator.
    * @param string $operator
    *   The operator.
+   * @param string $type
+   *   The type.
    */
-  public function __construct(string $facet_id, array $values, string $operator = self::OR_OPERATOR) {
+  public function __construct(string $facet_id, array $values, string $operator = self::OR_OPERATOR, string $type = 'static') {
     $this->facetId = $facet_id;
     $this->operator = $operator;
     $this->values = $values;
+    $this->type = $type;
   }
 
   /**
@@ -124,6 +134,26 @@ class ListPresetFilter {
       self::OR_OPERATOR => t('Any of'),
       self::NOT_OPERATOR => t('None of'),
     ];
+  }
+
+  /**
+   * Gets the type.
+   *
+   * @return string
+   *   The type.
+   */
+  public function getType(): string {
+    return $this->type;
+  }
+
+  /**
+   * Sets the type.
+   *
+   * @param string $type
+   *   The type.
+   */
+  public function setType(string $type): void {
+    $this->type = $type;
   }
 
 }

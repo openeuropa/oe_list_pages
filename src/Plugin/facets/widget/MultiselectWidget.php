@@ -100,6 +100,19 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
       '#title' => $this->t('Operator'),
     ];
 
+    $filter_type_options = [
+      'static' => $this->t('Static'),
+      'contextual' => $this->t('Contextual'),
+    ];
+
+    $form['oe_list_pages_filter_type'] = [
+      '#type' => 'radios',
+      '#weight' => -10,
+      '#options' => $filter_type_options,
+      '#default_value' => !empty($preset_filter) && !empty($preset_filter->getType()) ? $preset_filter->getType() : 'static',
+      '#title' => $this->t('Filter type'),
+    ];
+
     $form[$facet->id()] = [
       '#type' => 'multivalue',
       '#title' => $facet->getName(),
@@ -208,6 +221,8 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
 
   /**
    * {@inheritdoc}
+   *
+   * @SuppressWarnings(PHPMD.CyclomaticComplexity)
    */
   public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source, ListPresetFilter $filter): string {
     $field_definition = $this->getFieldDefinition($facet, $list_source);
@@ -215,6 +230,11 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
 
     $filter_value = $filter->getValues();
     $filter_operators = ListPresetFilter::getOperators();
+    $filter_type = $filter->getType();
+    if ($filter_type === 'contextual') {
+      return $filter_operators[$filter->getOperator()] . ': ' . $this->t('Contextual value');
+    }
+
     if (in_array(EntityReferenceFieldItemListInterface::class, class_implements($field_definition->getClass()))) {
       $entity_storage = $this->entityTypeManager->getStorage($field_definition->getSetting('target_type'));
       $values = [];
@@ -330,6 +350,7 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
 
     $operator = $form_state->getValue('oe_list_pages_filter_operator');
     return [
+      'type' => $form_state->getValue('oe_list_pages_filter_type'),
       'operator' => $operator,
       'values' => $values,
     ];
