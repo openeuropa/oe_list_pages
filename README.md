@@ -1,7 +1,22 @@
 # OpenEuropa List Pages
 
-The OpenEuropa List Pages component allows creation and management of list pages with configurable options. 
+The OpenEuropa List Pages component allows creation and management of list pages with configurable options.
 List pages use Search api queries allowing to configure different query options like facet filtering for all the indexed content bundles.
+
+## Submodules
+
+### OpenEuropa List Page Content Type
+
+Provides a starter content type that can be used as a list page. [More info](modules/oe_list_page_content_type/README.md).
+
+### OpenEuropa List Pages Link List Source
+
+Integrates with OpenEuropa Link Lists. [More info](modules/oe_list_pages_link_list_source/README.md).
+
+### OpenEuropa List Pages Address
+
+Provides a Facets processors for dealing with addresses. [More info](modules/oe_list_pages_address/README.md).
+
 
 ## Development setup
 

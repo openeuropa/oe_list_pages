@@ -133,7 +133,7 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
     $form['wrapper']['entity_type'] = [
       '#type' => 'select',
       '#title' => $this->t('Source entity type'),
-      '#description' => $this->t('Select the entity type that will be used as the source for this list page.'),
+      '#description' => $this->t('Select the entity type that will be used as the source for this list.'),
       '#options' => $entity_type_options,
       // If there is no selection, the default entity type will be Node, due to
       // self::fillDefaultEntityMetaValues().

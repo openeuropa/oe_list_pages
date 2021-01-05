@@ -16,8 +16,8 @@
     },
     "require-dev": {
         "composer/installers": "~1.5",
-        "drupal/address": "^1.8",
         "drupal-composer/drupal-scaffold": "~2.2",
+        "drupal/address": "^1.8",
         "drupal/config_devel": "~1.2",
         "drupal/drupal-extension": "~4.0",
         "drupal/extra_field": "^1.1",
@@ -25,6 +25,8 @@
         "guzzlehttp/guzzle": "~6.3",
         "openeuropa/code-review": "^1.5.0",
         "openeuropa/drupal-core-require-dev": "~8.9",
+        "openeuropa/oe_link_lists": "dev-master",
+        "openeuropa/oe_multilingual": "^1.5",
         "openeuropa/task-runner": "~1.0.0-beta6",
         "phpunit/phpunit": "~6.5"
     },
@@ -46,7 +48,9 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Drupal\\Tests\\oe_list_pages\\": "./tests/src"
+            "Drupal\\Tests\\oe_list_pages\\": "./tests/src",
+            "Drupal\\Tests\\oe_link_lists\\": "./build/modules/contrib/oe_link_lists/tests",
+            "Drupal\\Tests\\oe_list_pages_link_list_source\\": "./modules/oe_list_pages_link_list_source/tests/src"
         }
     },
     "extra": {
