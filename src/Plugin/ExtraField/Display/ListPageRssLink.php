@@ -7,7 +7,7 @@ namespace Drupal\oe_list_pages\Plugin\ExtraField\Display;
 use Drupal\Core\Entity\ContentEntityInterface;
 
 /**
- * Extra field displaying the list page pager.
+ * Extra field displaying the link to the RSS feed.
  *
  * @ExtraFieldDisplay(
  *   id = "oe_list_page_rss_link",

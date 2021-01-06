@@ -7,11 +7,6 @@
 
 declare(strict_types = 1);
 
-use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Link;
-use Drupal\Core\Url;
-
 /**
  * Implements hook_facets_search_api_query_type_mapping_alter().
  */
