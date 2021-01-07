@@ -6,7 +6,6 @@ namespace Drupal\oe_list_pages\Controller;
 
 use DateTimeInterface;
 use Drupal\Component\Render\FormattableMarkup;
-use Drupal\Component\Utility\Html;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Cache\CacheableMetadata;
@@ -157,7 +156,7 @@ class ListPageRssController extends ControllerBase {
       '#theme' => 'oe_list_pages_rss',
       '#title' => $default_title,
       '#link' => $default_link->getGeneratedUrl(),
-      '#description' => $this->getChannelDescription($node, $cache_metadata),
+      '#channel_description' => $this->getChannelDescription($node, $cache_metadata),
       '#language' => $node->language()->getId(),
       '#copyright' => $this->getChannelCopyright(),
       '#image' => $this->getChannelImage($cache_metadata),
@@ -226,14 +225,14 @@ class ListPageRssController extends ControllerBase {
         // We need to escape the results of renderPlain in order to maintain
         // all tags added by the renderer. If we don't do it, things like p tags
         // and linebreaks will be lost after they go through the twig template.
-        $description = Html::escape($this->renderer->renderPlain($description[0]));
+        $description = $this->renderer->renderPlain($description[0]);
       }
       $result_item = [
         '#theme' => 'oe_list_pages_rss_item',
         '#title' => $entity->label(),
         '#link' => $entity->toUrl('canonical', ['absolute' => TRUE]),
         '#guid' => $entity->toUrl('canonical', ['absolute' => TRUE]),
-        '#description' => $description,
+        '#item_description' => (string) $description,
         '#item_elements' => [],
       ];
 
