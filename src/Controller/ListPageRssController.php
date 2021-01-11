@@ -204,6 +204,8 @@ class ListPageRssController extends ControllerBase {
       'name' => 'changed',
       'direction' => 'DESC',
     ]);
+    // Always limit the rss to the last 25 results.
+    $configuration->setLimit(25);
     $execution_result = $this->listExecutionManager->executeList($configuration);
     $query = $execution_result->getQuery();
     $results = $execution_result->getResults();

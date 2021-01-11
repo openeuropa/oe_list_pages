@@ -74,6 +74,21 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     ];
     $node = Node::create($values);
     $node->save();
+
+    for ($i = 1; $i <= 25; $i++) {
+      $earlier_date->modify('-1 day');
+      $values = [
+        'title' => 'test node ' . $i,
+        'type' => 'content_type_one',
+        'body' => 'test node ' . $i,
+        'field_select_one' => 'test2',
+        'status' => NodeInterface::PUBLISHED,
+        'created' => $earlier_date->getTimestamp(),
+        'changed' => $earlier_date->getTimestamp(),
+      ];
+      $node = Node::create($values);
+      $node->save();
+    }
     /** @var \Drupal\search_api\Entity\Index $index */
     $index = Index::load('node');
     $index->indexItems();
@@ -81,8 +96,9 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     $node = $this->drupalGetNodeByTitle('List page test');
     $this->drupalLogout();
 
-    // Assert the default sorting order of the list is
-    // by creation date, descending.
+    // Assert the default sorting order on the canonical page
+    // is by creation date, descending, as a baseline for
+    // comparison.
     $this->drupalGet(Url::fromRoute('entity.node.canonical', ['node' => $node->id()]));
     $page = $this->getSession()->getPage();
     $items = $page->findAll('css', 'div.item-list ul li h2');
@@ -93,6 +109,8 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     array_walk($items, function (NodeElement &$item, $key) {
       $item = $item->getText();
     });
+    // We check just the first to items for simplicity's sake.
+    $items = array_slice($items, 0, 2);
     $this->assertEquals($items, $expected_default_ordered_items);
 
     $this->drupalGet(Url::fromRoute('entity.node.list_page_rss', ['node' => $node->id()]));
@@ -114,7 +132,8 @@ class ListPageRssControllerTest extends WebDriverTestBase {
 
     // Assert contents of items.
     $items = $channel->filterXPath('//item');
-    $this->assertEquals(2, $items->count());
+    // Assert only the first 25 items are shown.
+    $this->assertEquals(25, $items->count());
     $first_item = $items->eq(0);
     $this->assertEquals('that yellow fruit', $first_item->filterXpath('//title')->text());
     $this->assertEquals('&lt;p&gt;this is a banana&lt;/p&gt; ', $first_item->filterXpath('//description')->html());
@@ -134,6 +153,11 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     // Assert modules subscribing to the ListPageRssItemAlterEvent can
     // alter the item build.
     $this->assertEquals('20/10/2021', $second_item->filterXpath('//creationDate')->text());
+
+    // Assert the last item title to make sure we order
+    // and limit the list correctly.
+    $last_item = $items->eq(24);
+    $this->assertEquals('test node 23', $last_item->filterXpath('//title')->text());
 
     // Change the node title and assert the response has changed.
     $node->set('title', 'List page test updated');
