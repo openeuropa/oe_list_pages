@@ -33,12 +33,21 @@ function oe_list_pages_theme($existing, $type, $theme, $path) {
       'variables' => [
         'title' => '',
         'link' => '',
-        'description' => '',
+        'channel_description' => '',
         'language' => '',
         'copyright' => '',
         'image' => [],
         'channel_elements' => [],
         'items' => [],
+      ],
+    ],
+    'oe_list_pages_rss_item' => [
+      'variables' => [
+        'title' => '',
+        'link' => '',
+        'guid' => '',
+        'item_description' => '',
+        'item_elements' => [],
       ],
     ],
   ];

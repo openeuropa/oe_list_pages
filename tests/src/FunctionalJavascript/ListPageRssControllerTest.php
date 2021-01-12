@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\oe_list_pages\FunctionalJavascript;
 
+use Behat\Mink\Element\NodeElement;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Url;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
@@ -48,39 +49,74 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     $page->pressButton('Save');
 
     // Create some test nodes to index and search in.
-    $date = new DrupalDateTime('20-10-2020');
+    $earlier_date = new DrupalDateTime('20-10-2020');
+    $later_date = new DrupalDateTime('20-10-2021');
     $values = [
       'title' => 'that yellow fruit',
       'type' => 'content_type_one',
       'body' => 'this is a banana',
       'status' => NodeInterface::PUBLISHED,
       'field_select_one' => 'test1',
-      'created' => $date->getTimestamp(),
+      'created' => $earlier_date->getTimestamp(),
+      'changed' => $later_date->getTimestamp(),
     ];
     $node = Node::create($values);
     $node->save();
+
     $values = [
       'title' => 'that red fruit',
       'type' => 'content_type_one',
       'body' => 'this is a cherry',
       'field_select_one' => 'test2',
       'status' => NodeInterface::PUBLISHED,
-      'created' => $date->getTimestamp(),
+      'created' => $later_date->getTimestamp(),
+      'changed' => $earlier_date->getTimestamp(),
     ];
     $node = Node::create($values);
     $node->save();
+
+    for ($i = 1; $i <= 25; $i++) {
+      $earlier_date->modify('-1 day');
+      $values = [
+        'title' => 'test node ' . $i,
+        'type' => 'content_type_one',
+        'body' => 'test node ' . $i,
+        'field_select_one' => 'test2',
+        'status' => NodeInterface::PUBLISHED,
+        'created' => $earlier_date->getTimestamp(),
+        'changed' => $earlier_date->getTimestamp(),
+      ];
+      $node = Node::create($values);
+      $node->save();
+    }
     /** @var \Drupal\search_api\Entity\Index $index */
     $index = Index::load('node');
-    // Index the nodes.
     $index->indexItems();
 
     $node = $this->drupalGetNodeByTitle('List page test');
     $this->drupalLogout();
 
-    // Assert contents of channel elements.
+    // Assert the default sorting order on the canonical page
+    // is by creation date, descending, as a baseline for
+    // comparison.
+    $this->drupalGet(Url::fromRoute('entity.node.canonical', ['node' => $node->id()]));
+    $page = $this->getSession()->getPage();
+    $items = $page->findAll('css', 'div.item-list ul li h2');
+    $expected_default_ordered_items = [
+      'that red fruit',
+      'that yellow fruit',
+    ];
+    array_walk($items, function (NodeElement &$item, $key) {
+      $item = $item->getText();
+    });
+    // We check just the first to items for simplicity's sake.
+    $items = array_slice($items, 0, 2);
+    $this->assertEquals($items, $expected_default_ordered_items);
+
     $this->drupalGet(Url::fromRoute('entity.node.list_page_rss', ['node' => $node->id()]));
     $response = $this->getTextContent();
     $crawler = new Crawler($response);
+    // Assert contents of channel elements.
     $channel = $crawler->filterXPath('//rss[@version=2.0]/channel');
     $this->assertEquals('Drupal | List page test', $channel->filterXPath('//title')->text());
     $this->assertEquals('http://web:8080/build/node/1', $channel->filterXPath('//link')->text());
@@ -90,9 +126,38 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     $this->assertEquals('http://web:8080/build/core/themes/classy/logo.svg', $channel->filterXPath('//image/url')->text());
     $this->assertEquals('European Commission logo', $channel->filterXPath('//image/title')->text());
     $this->assertEquals('http://web:8080/build/', $channel->filterXPath('//image/link')->text());
-    // Assert modules subscribing to the ListPageRssBuildAlterEvent can
+    // Assert modules subscribing to the ListPageRssAlterEvent can
     // alter the build.
     $this->assertEquals('custom_value', $channel->filterXPath('//custom_tag')->text());
+
+    // Assert contents of items.
+    $items = $channel->filterXPath('//item');
+    // Assert only the first 25 items are shown.
+    $this->assertEquals(25, $items->count());
+    $first_item = $items->eq(0);
+    $this->assertEquals('that yellow fruit', $first_item->filterXpath('//title')->text());
+    $this->assertEquals('&lt;p&gt;this is a banana&lt;/p&gt; ', $first_item->filterXpath('//description')->html());
+    $this->assertEquals('http://web:8080/build/node/2', $first_item->filterXpath('//link')->text());
+    $this->assertEquals('http://web:8080/build/node/2', $first_item->filterXpath('//guid')->text());
+    $this->assertEquals('Wed, 20 Oct 21 00:00:00 +1100', $first_item->filterXpath('//pubDate')->text());
+    // Assert modules subscribing to the ListPageRssItemAlterEvent can
+    // alter the item build.
+    $this->assertEquals('20/10/2020', $first_item->filterXpath('//creationDate')->text());
+
+    $second_item = $items->eq(1);
+    $this->assertEquals('that red fruit', $second_item->filterXpath('//title')->text());
+    $this->assertEquals('&lt;p&gt;this is a cherry&lt;/p&gt; ', $second_item->filterXpath('//description')->html());
+    $this->assertEquals('http://web:8080/build/node/3', $second_item->filterXpath('//link')->text());
+    $this->assertEquals('http://web:8080/build/node/3', $second_item->filterXpath('//guid')->text());
+    $this->assertEquals('Tue, 20 Oct 20 00:00:00 +1100', $second_item->filterXpath('//pubDate')->text());
+    // Assert modules subscribing to the ListPageRssItemAlterEvent can
+    // alter the item build.
+    $this->assertEquals('20/10/2021', $second_item->filterXpath('//creationDate')->text());
+
+    // Assert the last item title to make sure we order
+    // and limit the list correctly.
+    $last_item = $items->eq(24);
+    $this->assertEquals('test node 23', $last_item->filterXpath('//title')->text());
 
     // Change the node title and assert the response has changed.
     $node->set('title', 'List page test updated');
