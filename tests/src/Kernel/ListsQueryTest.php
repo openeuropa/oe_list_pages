@@ -7,7 +7,7 @@ namespace Drupal\Tests\oe_list_pages\Kernel;
 use Drupal\facets\Entity\Facet;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\oe_list_pages\ListPresetFilter;
-use Drupal\oe_list_pages\ListPresetFiltersBuilder;
+use Drupal\oe_list_pages\DefaultFilterConfigurationBuilder;
 use Drupal\oe_list_pages\ListSourceFactory;
 use Drupal\search_api\Item\Field;
 use Drupal\search_api\Query\ConditionGroup;
@@ -355,7 +355,7 @@ class ListsQueryTest extends ListsSourceTestBase {
 
     $query = $this->list->getQuery([
       'preset_filters' => [
-        ListPresetFiltersBuilder::generateFilterId($facet_id) => new ListPresetFilter($facet_id, ['first class', 'second class']),
+        DefaultFilterConfigurationBuilder::generateFilterId($facet_id) => new ListPresetFilter($facet_id, ['first class', 'second class']),
       ],
     ]);
     $query->execute();

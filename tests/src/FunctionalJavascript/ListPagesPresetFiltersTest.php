@@ -9,7 +9,7 @@ use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
 use Drupal\oe_list_pages\ListPresetFilter;
-use Drupal\oe_list_pages\ListPresetFiltersBuilder;
+use Drupal\oe_list_pages\DefaultFilterConfigurationBuilder;
 use Drupal\oe_list_pages\ListSourceFactory;
 use Drupal\oe_list_pages\Plugin\facets\query_type\DateStatus;
 use Drupal\search_api\Entity\Index;
@@ -189,7 +189,7 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
     // Set preset filter for default date facet.
     $this->getSession()->getPage()->selectFieldOption('Add default value for', 'Facet for end_value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $filter_id = ListPresetFiltersBuilder::generateFilterId($facet->id());
+    $filter_id = DefaultFilterConfigurationBuilder::generateFilterId($facet->id());
     $filter_selector = 'emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $filter_id . ']';
 
     $this->getSession()->getPage()->selectFieldOption($filter_selector . '[' . $facet->id() . '][0][list]', DateStatus::UPCOMING);
@@ -318,7 +318,7 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
 
     $node = $this->drupalGetNodeByTitle('List page for ct1');
     $filters = [
-      ListPresetFiltersBuilder::generateFilterId('select_one') => new ListPresetFilter('select_one', ['test1']),
+      DefaultFilterConfigurationBuilder::generateFilterId('select_one') => new ListPresetFilter('select_one', ['test1']),
     ];
     $this->setListPageFilters($node, $filters);
     $this->getSession()->reload();
@@ -345,7 +345,7 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
 
     $node = $this->drupalGetNodeByTitle('List page for ct1');
     $filters = [
-      ListPresetFiltersBuilder::generateFilterId('select_one') => new ListPresetFilter('select_one', ['test1', 'test2']),
+      DefaultFilterConfigurationBuilder::generateFilterId('select_one') => new ListPresetFilter('select_one', ['test1', 'test2']),
     ];
     $this->setListPageFilters($node, $filters);
     $this->getSession()->getPage()->pressButton('Clear filters');
@@ -357,7 +357,7 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
 
     // Add a date default filter that includes all results.
     $filters = [
-      ListPresetFiltersBuilder::generateFilterId('created') => new ListPresetFilter('created', ['bt|2009-01-01T15:30:44+01:00|2031-01-01T15:30:44+01:00']),
+      DefaultFilterConfigurationBuilder::generateFilterId('created') => new ListPresetFilter('created', ['bt|2009-01-01T15:30:44+01:00|2031-01-01T15:30:44+01:00']),
     ];
     $this->setListPageFilters($node, $filters);
     $this->getSession()->reload();

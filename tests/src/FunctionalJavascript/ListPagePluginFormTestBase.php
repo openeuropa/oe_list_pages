@@ -9,7 +9,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
-use Drupal\oe_list_pages\ListPresetFiltersBuilder;
+use Drupal\oe_list_pages\DefaultFilterConfigurationBuilder;
 use Drupal\search_api\Entity\Index;
 
 /**
@@ -34,8 +34,8 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $assert = $this->assertSession();
 
     // Filter ids.
-    $body_filter_id = ListPresetFiltersBuilder::generateFilterId('body');
-    $created_filter_id = ListPresetFiltersBuilder::generateFilterId('created');
+    $body_filter_id = DefaultFilterConfigurationBuilder::generateFilterId('body');
+    $created_filter_id = DefaultFilterConfigurationBuilder::generateFilterId('created');
 
     // Do not fill in the title and assert the validation limiting works.
     $page->selectFieldOption('Add default value for', 'Body');
@@ -285,11 +285,11 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $index->indexItems();
 
     // Filter ids.
-    $body_filter_id = ListPresetFiltersBuilder::generateFilterId('body');
-    $created_filter_id = ListPresetFiltersBuilder::generateFilterId('created');
-    $published_filter_id = ListPresetFiltersBuilder::generateFilterId('list_facet_source_node_content_type_onestatus');
-    $reference_filter_id = ListPresetFiltersBuilder::generateFilterId('reference');
-    $link_filter_id = ListPresetFiltersBuilder::generateFilterId('link');
+    $body_filter_id = DefaultFilterConfigurationBuilder::generateFilterId('body');
+    $created_filter_id = DefaultFilterConfigurationBuilder::generateFilterId('created');
+    $published_filter_id = DefaultFilterConfigurationBuilder::generateFilterId('list_facet_source_node_content_type_onestatus');
+    $reference_filter_id = DefaultFilterConfigurationBuilder::generateFilterId('reference');
+    $link_filter_id = DefaultFilterConfigurationBuilder::generateFilterId('link');
 
     $page = $this->getSession()->getPage();
     $assert = $this->assertSession();
@@ -335,7 +335,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $page->selectFieldOption('Add default value for', 'Select two');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert->pageTextContains('Set default value for Select two');
-    $select_two_filter_id = ListPresetFiltersBuilder::generateFilterId('list_facet_source_node_content_type_twofield_select_two');
+    $select_two_filter_id = DefaultFilterConfigurationBuilder::generateFilterId('list_facet_source_node_content_type_twofield_select_two');
     $filter_selector = $default_value_name_prefix . '[wrapper][edit][' . $select_two_filter_id . ']';
     $this->getSession()->getPage()->selectFieldOption($filter_selector . '[list_facet_source_node_content_type_twofield_select_two][0][list]', 'test1');
     $page->pressButton('Set default value');
@@ -421,7 +421,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $assert = $this->assertSession();
     $assert->pageTextContains('Set default value for Select one');
 
-    $select_one_filter_id = ListPresetFiltersBuilder::generateFilterId('select_one');
+    $select_one_filter_id = DefaultFilterConfigurationBuilder::generateFilterId('select_one');
     $filter_selector = $default_value_name_prefix . '[wrapper][edit][' . $select_one_filter_id . ']';
     $this->getSession()->getPage()->selectFieldOption($filter_selector . '[select_one][0][list]', 'test2');
     $page->pressButton('Add another item');
@@ -433,28 +433,28 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->assertDefaultValueForFilters($expected_set_filters);
 
     // Remove preset filter for Published.
-    $this->assertSession()->elementTextContains('css', 'table.default-filter-values-table', 'Published');
+    $this->assertSession()->elementTextContains('css', 'table.default-filters-table', 'Published');
     $page->pressButton('delete-' . $published_filter_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     unset($expected_set_filters['published']);
     $this->assertDefaultValueForFilters($expected_set_filters);
-    $this->assertSession()->elementTextNotContains('css', 'table.default-filter-values-table', 'Published');
+    $this->assertSession()->elementTextNotContains('css', 'table.default-filters-table', 'Published');
 
     // Remove preset filter for Reference.
-    $this->assertSession()->elementTextContains('css', 'table.default-filter-values-table', 'Reference');
+    $this->assertSession()->elementTextContains('css', 'table.default-filters-table', 'Reference');
     $page->pressButton('delete-' . $reference_filter_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     unset($expected_set_filters['reference']);
     $this->assertDefaultValueForFilters($expected_set_filters);
-    $this->assertSession()->elementTextNotContains('css', 'table.default-filter-values-table', 'Reference');
+    $this->assertSession()->elementTextNotContains('css', 'table.default-filters-table', 'Reference');
 
     // Remove preset filter for select one.
-    $this->assertSession()->elementTextContains('css', 'table.default-filter-values-table', 'Select one');
+    $this->assertSession()->elementTextContains('css', 'table.default-filters-table', 'Select one');
     $page->pressButton('delete-' . $select_one_filter_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     unset($expected_set_filters['select_one']);
     $this->assertDefaultValueForFilters($expected_set_filters);
-    $this->assertSession()->elementTextNotContains('css', 'table.default-filter-values-table', 'Select one');
+    $this->assertSession()->elementTextNotContains('css', 'table.default-filters-table', 'Select one');
 
     // Edit preset filter for Body and cancel.
     $page->pressButton('edit-' . $body_filter_id);
@@ -737,7 +737,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->assertDefaultValueForFilters($expected_set_filters);
     $page->selectFieldOption('Add default value for', 'Reference');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $second_reference_filter_id = ListPresetFiltersBuilder::generateFilterId('reference', [$reference_filter_id]);
+    $second_reference_filter_id = DefaultFilterConfigurationBuilder::generateFilterId('reference', [$reference_filter_id]);
     $this->getSession()->getPage()->fillField($default_value_name_prefix . '[wrapper][edit][' . $second_reference_filter_id . '][reference][0][entity]', 'Yellow (2)');
     $page->selectFieldOption($default_value_name_prefix . '[wrapper][edit][' . $second_reference_filter_id . '][oe_list_pages_filter_operator]', 'None of');
     $page->pressButton('Set default value');
@@ -807,13 +807,13 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
    */
   protected function assertDefaultValueForFilters(array $default_filters = []): void {
     $assert = $this->assertSession();
-    $assert->elementsCount('css', 'table.default-filter-values-table tr', count($default_filters) + 1);
+    $assert->elementsCount('css', 'table.default-filters-table tr', count($default_filters) + 1);
     foreach ($default_filters as $filter) {
       $key = $filter['key'];
       $default_value = $filter['value'];
 
-      $assert->elementTextContains('css', 'table.default-filter-values-table', $key);
-      $assert->elementTextContains('css', 'table.default-filter-values-table', $default_value);
+      $assert->elementTextContains('css', 'table.default-filters-table', $key);
+      $assert->elementTextContains('css', 'table.default-filters-table', $default_value);
     }
   }
 
