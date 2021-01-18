@@ -19,3 +19,6 @@ services:
   oe_list_pages.list_page_configuration_subform_factory:
     class: Drupal\oe_list_pages\Form\ListPageConfigurationSubformFactory
     arguments: ['@entity_type.manager', '@entity_type.bundle.info', '@event_dispatcher', '@oe_list_pages.list_source.factory', '@oe_list_pages.preset_filters_builder']
+  plugin.manager.multiselect_filter_field:
+    class: Drupal\oe_list_pages\MultiselectFilterFieldPluginManager
+    parent: default_plugin_manager
