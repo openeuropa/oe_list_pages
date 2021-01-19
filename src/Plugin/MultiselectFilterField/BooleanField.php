@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\oe_list_pages\Plugin\MultiselectFilterField;
 
 use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\facets\FacetInterface;
 use Drupal\facets\Result\Result;
 use Drupal\oe_list_pages\MultiSelectFilterFieldPluginBase;
@@ -10,13 +13,15 @@ use Drupal\oe_list_pages\MultiSelectFilterFieldPluginBase;
 /**
  * Defines the boolean field type multiselect filter plugin.
  *
- * @PageHeaderMetadata(
+ * @MultiselectFieldFilter(
  *   id = "boolean",
  *   label = @Translation("Boolean field"),
  *   weight = 100
  * )
  */
 class BooleanField extends MultiSelectFilterFieldPluginBase {
+
+  use StringTranslationTrait;
 
   /**
    * {@inheritdoc}

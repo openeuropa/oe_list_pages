@@ -1,7 +1,0 @@
-langcode: en
-status: true
-dependencies: {  }
-name: 'Vocabulary two'
-vid: vocabulary_two
-description: ''
-weight: 0

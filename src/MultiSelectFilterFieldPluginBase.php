@@ -7,14 +7,21 @@ namespace Drupal\oe_list_pages;
 use Drupal\Component\Plugin\ConfigurableInterface;
 use Drupal\Component\Plugin\PluginBase;
 use Drupal\Component\Utility\NestedArray;
-use Drupal\facets\FacetInterface;
-use Drupal\facets\Processor\ProcessorInterface;
-use Drupal\facets\Result\ResultInterface;
 
 /**
  * Base implementation of a multiselect filter field plugin.
  */
 abstract class MultiSelectFilterFieldPluginBase extends PluginBase implements ConfigurableInterface, MultiselectFilterFieldPluginInterface {
+
+  use FacetManipulationTrait;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->setConfiguration($this->configuration);
+  }
 
   /**
    * {@inheritdoc}
@@ -50,46 +57,6 @@ abstract class MultiSelectFilterFieldPluginBase extends PluginBase implements Co
    */
   public function getDefaultValues(): array {
     return $this->configuration['active_items'];
-  }
-
-  /**
-   * Processes and returns the results of a given facet.
-   *
-   * @param \Drupal\facets\FacetInterface $facet
-   *   The facet.
-   *
-   * @return array
-   *   The results.
-   */
-  protected function processFacetResults(FacetInterface $facet): array {
-    $results = $facet->getResults();
-    foreach ($facet->getProcessorsByStage(ProcessorInterface::STAGE_PRE_QUERY) as $processor) {
-      $processor->preQuery($facet);
-    }
-
-    foreach ($facet->getProcessorsByStage(ProcessorInterface::STAGE_BUILD) as $processor) {
-      $results = $processor->build($facet, $results);
-    }
-
-    return $results;
-  }
-
-  /**
-   * Transforms a list of Facet results to selectable options.
-   *
-   * @param array $results
-   *   The results.
-   *
-   * @return array
-   *   The options.
-   */
-  protected function transformResultsToOptions(array $results): array {
-    $options = [];
-    array_walk($results, function (ResultInterface &$result) use (&$options) {
-      $options[$result->getRawValue()] = $result->getDisplayValue();
-    });
-
-    return $options;
   }
 
 }

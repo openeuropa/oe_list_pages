@@ -1,20 +1,25 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\oe_list_pages\Plugin\MultiselectFilterField;
 
 use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\oe_list_pages\MultiSelectFilterFieldPluginBase;
 
 /**
  * Defines the list field type multiselect filter plugin.
  *
- * @PageHeaderMetadata(
+ * @MultiselectFieldFilter(
  *   id = "list",
  *   label = @Translation("List field"),
  *   weight = 100
  * )
  */
 class ListField extends MultiSelectFilterFieldPluginBase {
+
+  use StringTranslationTrait;
 
   /**
    * {@inheritdoc}

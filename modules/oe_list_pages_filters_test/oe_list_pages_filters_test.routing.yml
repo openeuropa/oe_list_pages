@@ -1,7 +1,0 @@
-oe_list_pages_filters_test.test_facets_form:
-  path: '/facets-form-test'
-  defaults:
-    _title: 'Facets form test'
-    _controller: \Drupal\oe_list_pages_filters_test\Controller\FacetsFormTestController::build
-  requirements:
-    _permission: 'access content'

@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\oe_list_pages\Plugin\MultiselectFilterField;
 
 use Drupal\Core\Entity\Element\EntityAutocomplete;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Field\EntityReferenceFieldItemListInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\link\LinkItemInterface;
@@ -15,7 +16,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Defines the link field type multiselect filter plugin.
  *
- * @PageHeaderMetadata(
+ * @MultiselectFieldFilter(
  *   id = "link",
  *   label = @Translation("Link field"),
  *   weight = 100
@@ -58,7 +59,7 @@ class LinkField extends MultiSelectFilterFieldPluginBase implements ContainerFac
     if (!$field_definition instanceof FieldDefinitionInterface) {
       return FALSE;
     }
-    if (in_array(EntityReferenceFieldItemListInterface::class, class_implements($field_definition->getClass()))) {
+    if ($field_definition->getType() === 'link') {
       return TRUE;
     }
     return FALSE;
@@ -91,7 +92,7 @@ class LinkField extends MultiSelectFilterFieldPluginBase implements ContainerFac
       '#link_type' => $link_type,
     ];
 
-    if ($link_type & LinkItemInterface::LINK_INTERNAL) {
+    if ($link_type == LinkItemInterface::LINK_INTERNAL) {
       $form['#type'] = 'entity_autocomplete';
       $form['#target_type'] = 'node';
       $form['#process_default_value'] = FALSE;

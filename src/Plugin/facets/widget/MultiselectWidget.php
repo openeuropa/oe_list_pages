@@ -70,8 +70,8 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
       $plugin_definition,
       $container->get('entity_type.manager'),
       $container->get('entity_field.manager'),
-      $container->get('plugin.manager.facets.processor'),
-      $container->get('plugin.manager.multiselect_filter_field')
+      $container->get('plugin.manager.multiselect_filter_field'),
+      $container->get('plugin.manager.facets.processor')
     );
   }
 

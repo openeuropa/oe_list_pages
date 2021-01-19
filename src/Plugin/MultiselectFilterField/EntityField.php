@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\oe_list_pages\Plugin\MultiselectFilterField;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -12,7 +14,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Defines the entity field type multiselect filter plugin.
  *
- * @PageHeaderMetadata(
+ * @MultiselectFieldFilter(
  *   id = "entity",
  *   label = @Translation("Entity field"),
  *   weight = 100
