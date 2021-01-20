@@ -36,6 +36,7 @@ class MultiSelectFieldFilterPluginTest extends EntityKernelTestBase {
   public static $modules = [
     'facets',
     'link',
+    'node',
     'options',
     'oe_list_pages',
   ];
@@ -45,6 +46,9 @@ class MultiSelectFieldFilterPluginTest extends EntityKernelTestBase {
    */
   protected function setup() {
     parent::setUp();
+    $this->installSchema('user', 'users_data');
+    $this->installSchema('node', ['node_access']);
+    $this->installEntitySchema('node');
     $this->pluginManager = \Drupal::service('plugin.manager.multiselect_filter_field');
     $this->entityTypeManager = \Drupal::service('entity_type.manager');
   }
@@ -217,10 +221,26 @@ class MultiSelectFieldFilterPluginTest extends EntityKernelTestBase {
 
     $filter = new ListPresetFilter('facetid', ['route:custom-route']);
     $this->assertEquals('custom-route', $plugin->getDefaultValuesLabel($filter));
+    $filter = new ListPresetFilter('facetid', ['internal:/path']);
+    $this->assertEquals('/path', $plugin->getDefaultValuesLabel($filter));
+    $this->entityTypeManager->getStorage('node_type')->create([
+      'type' => 'test_bundle',
+      'name' => 'Test bundle',
+    ])->save();
+    $node = $this->entityTypeManager->getStorage('node')->create([
+      'type' => 'test_bundle',
+      'title' => 'Test node',
+      'publicshed' => 1,
+    ]);
+    $node->save();
+    $user = $this->drupalCreateUser(['access content']);
+    $this->drupalSetCurrentUser($user);
+    $filter = new ListPresetFilter('facetid', ['entity:node/1']);
+    $this->assertEquals('Test node (1)', $plugin->getDefaultValuesLabel($filter));
   }
 
   /**
-   * Tests the link fields plugin.
+   * Tests the boolean fields plugin.
    */
   public function testBooleanFieldPlugin(): void {
     $facet = new Facet([], 'facets_facet');
