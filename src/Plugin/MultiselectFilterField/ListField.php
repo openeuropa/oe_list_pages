@@ -14,27 +14,17 @@ use Drupal\oe_list_pages\MultiSelectFilterFieldPluginBase;
  * @MultiselectFieldFilter(
  *   id = "list",
  *   label = @Translation("List field"),
+ *   field_types = {
+ *     "list_integer",
+ *     "list_float",
+ *     "list_string",
+ *   },
  *   weight = 100
  * )
  */
 class ListField extends MultiSelectFilterFieldPluginBase {
 
   use StringTranslationTrait;
-
-  /**
-   * {@inheritdoc}
-   */
-  public function applies(): bool {
-    $field_definition = $this->configuration['field_definition'];
-    if (!$field_definition instanceof FieldDefinitionInterface) {
-      return FALSE;
-    }
-    $supported_types = ['list_integer', 'list_float', 'list_string'];
-    if (in_array($field_definition->getType(), $supported_types)) {
-      return TRUE;
-    }
-    return FALSE;
-  }
 
   /**
    * {@inheritdoc}

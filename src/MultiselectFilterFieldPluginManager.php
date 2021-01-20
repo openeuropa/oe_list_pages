@@ -43,4 +43,23 @@ class MultiselectFilterFieldPluginManager extends DefaultPluginManager {
     return $definitions;
   }
 
+  /**
+   * Returns the plugin ID supported by a field type.
+   *
+   * @param string $field_type
+   *   The field type we need to check the plugin for.
+   *
+   * @return string|null
+   *   The applicable plugin id.
+   */
+  public function getPluginIdByFieldType(string $field_type): ?string {
+    $definitions = $this->getDefinitions();
+    foreach ($definitions as $id => $definition) {
+      if (in_array($field_type, $definition['field_types'])) {
+        return $id;
+      }
+    }
+    return NULL;
+  }
+
 }

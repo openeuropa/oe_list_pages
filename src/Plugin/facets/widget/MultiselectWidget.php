@@ -133,17 +133,15 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
       'active_items' => $active_items,
       'field_definition' => $field_definition,
     ];
-    foreach ($this->multiselectFilterFieldPluginManager->getDefinitions() as $id => $definition) {
-      /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
-      $plugin = $this->multiselectFilterFieldPluginManager->createInstance($id, $config);
-      if ($plugin->applies()) {
-        $form[$facet->id()]['#default_value'] = $plugin->getDefaultValues();
-        $form[$facet->id()][$id] = $plugin->buildDefaultValueForm();
-        $form_state->set('multivalue_child', $id);
 
-        return $form;
-      }
+    if ($id = $this->multiselectFilterFieldPluginManager->getPluginIdByFieldType($field_definition->getType())) {
+      $plugin = $this->multiselectFilterFieldPluginManager->createInstance($id, $config);
+      $form[$facet->id()]['#default_value'] = $plugin->getDefaultValues();
+      $form[$facet->id()][$id] = $plugin->buildDefaultValueForm();
+      $form_state->set('multivalue_child', $id);
+      return $form;
     }
+
     return $this->build($facet);
   }
 

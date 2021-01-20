@@ -5,7 +5,6 @@ declare(strict_types = 1);
 namespace Drupal\oe_list_pages\Plugin\MultiselectFilterField;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Field\EntityReferenceFieldItemListInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\oe_list_pages\MultiSelectFilterFieldPluginBase;
@@ -17,6 +16,10 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @MultiselectFieldFilter(
  *   id = "entity",
  *   label = @Translation("Entity field"),
+ *   field_types = {
+ *     "entity_reference",
+ *     "entity_reference_revisions",
+ *   },
  *   weight = 100
  * )
  */
@@ -47,20 +50,6 @@ class EntityField extends MultiSelectFilterFieldPluginBase implements ContainerF
       $plugin_definition,
       $container->get('entity_type.manager')
     );
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function applies(): bool {
-    $field_definition = $this->configuration['field_definition'];
-    if (!$field_definition instanceof FieldDefinitionInterface) {
-      return FALSE;
-    }
-    if (in_array(EntityReferenceFieldItemListInterface::class, class_implements($field_definition->getClass()))) {
-      return TRUE;
-    }
-    return FALSE;
   }
 
   /**

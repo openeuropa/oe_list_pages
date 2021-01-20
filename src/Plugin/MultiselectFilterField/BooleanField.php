@@ -16,26 +16,15 @@ use Drupal\oe_list_pages\MultiSelectFilterFieldPluginBase;
  * @MultiselectFieldFilter(
  *   id = "boolean",
  *   label = @Translation("Boolean field"),
+ *   field_types = {
+ *     "boolean",
+ *   },
  *   weight = 100
  * )
  */
 class BooleanField extends MultiSelectFilterFieldPluginBase {
 
   use StringTranslationTrait;
-
-  /**
-   * {@inheritdoc}
-   */
-  public function applies(): bool {
-    $field_definition = $this->configuration['field_definition'];
-    if (!$field_definition instanceof FieldDefinitionInterface) {
-      return FALSE;
-    }
-    if ($field_definition->getType() === 'boolean') {
-      return TRUE;
-    }
-    return FALSE;
-  }
 
   /**
    * {@inheritdoc}

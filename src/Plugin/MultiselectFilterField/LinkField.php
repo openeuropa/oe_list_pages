@@ -19,6 +19,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @MultiselectFieldFilter(
  *   id = "link",
  *   label = @Translation("Link field"),
+ *   field_types = {
+ *     "link",
+ *   },
  *   weight = 100
  * )
  */
@@ -49,20 +52,6 @@ class LinkField extends MultiSelectFilterFieldPluginBase implements ContainerFac
       $plugin_definition,
       $container->get('entity_type.manager')
     );
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function applies(): bool {
-    $field_definition = $this->configuration['field_definition'];
-    if (!$field_definition instanceof FieldDefinitionInterface) {
-      return FALSE;
-    }
-    if ($field_definition->getType() === 'link') {
-      return TRUE;
-    }
-    return FALSE;
   }
 
   /**

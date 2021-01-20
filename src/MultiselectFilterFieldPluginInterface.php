@@ -10,16 +10,6 @@ namespace Drupal\oe_list_pages;
 interface MultiselectFilterFieldPluginInterface {
 
   /**
-   * Determines if the plugin applies to a certain field.
-   *
-   * For example, a plugin might apply only to entity reference fields.
-   *
-   * @return bool
-   *   True if the plugin applies, false otherwise.
-   */
-  public function applies(): bool;
-
-  /**
    * Gets the default values for the field.
    *
    * Only invoked upon a positive result of the self::applies() method.

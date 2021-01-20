@@ -55,7 +55,6 @@ class MultiSelectFieldFilterPluginTest extends EntityKernelTestBase {
     foreach ($this->pluginManager->getDefinitions() as $id => $definition) {
       /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
       $plugin = $this->pluginManager->createInstance($id, []);
-      $this->assertFalse($plugin->applies(), 'Plugin applies even though no field definition was configured.');
       $this->assertEmpty($plugin->getDefaultValues(), 'Plugin returned default values even though no active items where configured');
       $this->assertEmpty($plugin->buildDefaultValueForm(), 'Plugin returned a form even though no field definition was configured.');
     }
@@ -85,8 +84,9 @@ class MultiSelectFieldFilterPluginTest extends EntityKernelTestBase {
       'bundle' => 'entity_test',
     ]);
 
+    $plugin_id = $this->pluginManager->getPluginIdByFieldType($field_config->getType());
     /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
-    $plugin = $this->pluginManager->createInstance('list', [
+    $plugin = $this->pluginManager->createInstance($plugin_id, [
       'field_definition' => $field_config,
       'active_items' => [1],
     ]);
@@ -100,7 +100,6 @@ class MultiSelectFieldFilterPluginTest extends EntityKernelTestBase {
       ],
       '#empty_option' => 'Select',
     ];
-    $this->assertTrue($plugin->applies(), 'Plugin does not apply even though the field is a list.');
     $this->assertEquals($expected_default_values, $plugin->getDefaultValues());
     $this->assertEquals($expected_form, $plugin->buildDefaultValueForm());
   }
@@ -140,8 +139,9 @@ class MultiSelectFieldFilterPluginTest extends EntityKernelTestBase {
     $entity->save();
     $entity = $this->entityTypeManager->getStorage('entity_test')->load($entity->id());
 
+    $plugin_id = $this->pluginManager->getPluginIdByFieldType($field_config->getType());
     /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
-    $plugin = $this->pluginManager->createInstance('entity', [
+    $plugin = $this->pluginManager->createInstance($plugin_id, [
       'field_definition' => $field_config,
       'active_items' => [$entity->id()],
     ]);
@@ -160,7 +160,6 @@ class MultiSelectFieldFilterPluginTest extends EntityKernelTestBase {
         ],
       ],
     ];;
-    $this->assertTrue($plugin->applies(), 'Plugin does not apply even though the field is a entity reference.');
     $this->assertEquals($expected_values, $plugin->getDefaultValues());
     $this->assertEquals($expected_form, $plugin->buildDefaultValueForm());
   }
@@ -190,8 +189,9 @@ class MultiSelectFieldFilterPluginTest extends EntityKernelTestBase {
     ]);
     $entity->save();
 
+    $plugin_id = $this->pluginManager->getPluginIdByFieldType($field_config->getType());
     /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
-    $plugin = $this->pluginManager->createInstance('link', [
+    $plugin = $this->pluginManager->createInstance($plugin_id, [
       'field_definition' => $field_config,
       'active_items' => ['route:custom-route'],
     ]);
@@ -203,7 +203,6 @@ class MultiSelectFieldFilterPluginTest extends EntityKernelTestBase {
       '#maxlength' => 2048,
       '#link_type' => LinkItemInterface::LINK_GENERIC,
     ];
-    $this->assertTrue($plugin->applies(), 'Plugin does not apply even though the field is a link.');
     $this->assertEquals($expected_values, $plugin->getDefaultValues());
     $this->assertEquals($expected_form, $plugin->buildDefaultValueForm());
   }
@@ -229,8 +228,9 @@ class MultiSelectFieldFilterPluginTest extends EntityKernelTestBase {
       'bundle' => 'entity_test',
     ]);
 
+    $plugin_id = $this->pluginManager->getPluginIdByFieldType($field_config->getType());
     /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
-    $plugin = $this->pluginManager->createInstance('boolean', [
+    $plugin = $this->pluginManager->createInstance($plugin_id, [
       'field_definition' => $field_config,
       'active_items' => [1],
       'facet' => $facet,
@@ -242,7 +242,6 @@ class MultiSelectFieldFilterPluginTest extends EntityKernelTestBase {
       '#options' => [0 => 0, 1 => 1],
       '#empty_option' => 'Select',
     ];
-    $this->assertTrue($plugin->applies(), 'Plugin does not apply even though the field is a boolean.');
     $this->assertEquals($expected_values, $plugin->getDefaultValues());
     $this->assertEquals($expected_form, $plugin->buildDefaultValueForm());
   }

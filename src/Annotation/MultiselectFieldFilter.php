@@ -14,6 +14,9 @@ use Drupal\Component\Annotation\Plugin;
  * @MultiselectFieldFilter(
  *   id = "multiselect_filter_example",
  *   label = @Translation("Multiselect filter example"),
+ *   field_types = {
+ *     "example_type",
+ *   },
  *   weight = 0
  * )
  * @endcode
@@ -29,6 +32,13 @@ class MultiselectFieldFilter extends Plugin {
    * @var string
    */
   public $id;
+
+  /**
+   * The field types this plugin applies to.
+   *
+   * @var array
+   */
+  public $fieldTypes;
 
   /**
    * The human-readable name of the plugin.
