@@ -304,6 +304,7 @@ class ListPageConfiguration {
       'exposed_filters_overridden' => $this->isExposedFiltersOverridden(),
       'exposed_filters' => $this->getExposedFilters(),
       'default_filter_values' => $this->getDefaultFiltersValues(),
+      'limit' => $this->getLimit(),
       'sort' => $this->getSort(),
     ];
   }

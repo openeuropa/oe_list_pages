@@ -7,6 +7,7 @@ namespace Drupal\oe_list_pages;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\facets\FacetManager\DefaultFacetManager;
+use Drupal\search_api\Datasource\DatasourceInterface;
 use Drupal\search_api\IndexInterface;
 
 /**
@@ -31,7 +32,7 @@ class ListSourceFactory implements ListSourceFactoryInterface {
   /**
    * The list sources.
    *
-   * @var array
+   * @var \Drupal\oe_list_pages\ListSourceInterface[]
    */
   protected $listsSources;
 
@@ -52,13 +53,29 @@ class ListSourceFactory implements ListSourceFactoryInterface {
    * {@inheritdoc}
    */
   public function get(string $entity_type, string $bundle): ?ListSourceInterface {
-
     if (empty($this->listsSources)) {
       $this->instantiateLists();
     }
 
     $id = self::generateFacetSourcePluginId($entity_type, $bundle);
     return !empty($this->listsSources[$id]) ? $this->listsSources[$id] : NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isEntityTypeSourced(string $entity_type): bool {
+    if (empty($this->listsSources)) {
+      $this->instantiateLists();
+    }
+
+    foreach ($this->listsSources as $lists_source) {
+      if ($lists_source->getEntityType() === $entity_type) {
+        return TRUE;
+      }
+    }
+
+    return FALSE;
   }
 
   /**
@@ -72,7 +89,6 @@ class ListSourceFactory implements ListSourceFactoryInterface {
    * Instantiate the list sources from the indexed content bundles.
    */
   protected function instantiateLists(): void {
-
     if (!empty($this->listsSources)) {
       return;
     }
@@ -93,7 +109,7 @@ class ListSourceFactory implements ListSourceFactoryInterface {
         $bundles = $datasource->getBundles();
         foreach ($bundles as $bundle => $label) {
           // In case not all bundles are indexed.
-          if (!empty($datasource->getConfiguration()['bundles']['selected']) && !in_array($bundle, $datasource->getConfiguration()['bundles']['selected'])) {
+          if (!$this->isBundleIndexed($datasource, $bundle)) {
             continue;
           }
 
@@ -136,6 +152,38 @@ class ListSourceFactory implements ListSourceFactoryInterface {
 
     $bundle_field_id = $this->entityTypeManager->getDefinition($entity_type)->getKey('bundle');
     return new ListSource($id, $entity_type, $bundle, $bundle_field_id, $index, $filters);
+  }
+
+  /**
+   * Checks if a given bundle is indexed on a data source.
+   *
+   * @param \Drupal\search_api\Datasource\DatasourceInterface $datasource
+   *   The datasource.
+   * @param string $bundle
+   *   The bundle.
+   *
+   * @return bool
+   *   Whether the bundle is indexed.
+   */
+  protected function isBundleIndexed(DatasourceInterface $datasource, string $bundle): bool {
+    $configuration = $datasource->getConfiguration();
+    $selected = $configuration['bundles']['selected'];
+    if ($configuration['bundles']['default'] === TRUE && empty($selected)) {
+      // All bundles are indexed.
+      return TRUE;
+    }
+
+    if ($configuration['bundles']['default'] === TRUE && !empty($selected) && !in_array($bundle, $selected)) {
+      // All bundles are indexed, except a few that are selected.
+      return TRUE;
+    }
+
+    if ($configuration['bundles']['default'] === FALSE && in_array($bundle, $selected)) {
+      // Only specific bundles are indexed.
+      return TRUE;
+    }
+
+    return FALSE;
   }
 
 }

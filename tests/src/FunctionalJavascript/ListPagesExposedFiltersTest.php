@@ -45,18 +45,15 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
    * Test exposed filters configuration.
    */
   public function testListPagePluginFiltersFormConfiguration(): void {
-    $this->drupalLogin($this->rootUser);
+    $admin = $this->createUser([], NULL, TRUE);
+    $this->drupalLogin($admin);
     $this->drupalGet('/node/add/oe_list_page');
     $this->clickLink('List Page');
     $actual_entity_types = $this->getSelectOptions('Source entity type');
     $expected_entity_types = [
       '' => '- Select -',
-      'entity_meta_relation' => 'Entity Meta Relation',
-      'entity_meta' => 'Entity meta',
       'node' => 'Content',
-      'path_alias' => 'URL alias',
-      'search_api_task' => 'Search task',
-      'user' => 'User',
+      'taxonomy_term' => 'Taxonomy term',
     ];
     $this->assertEquals($expected_entity_types, $actual_entity_types);
     // By default, Node is selected if there are no stored values.
@@ -66,7 +63,6 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
     $expected_bundles = [
       'content_type_one' => 'Content type one',
       'content_type_two' => 'Content type two',
-      'oe_list_page' => 'List page',
       '' => '- Select -',
     ];
     $this->assertEquals($expected_bundles, $actual_bundles);
