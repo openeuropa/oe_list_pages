@@ -35,4 +35,15 @@ interface ListSourceFactoryInterface {
    */
   public function get(string $entity_type, string $bundle): ?ListSourceInterface;
 
+  /**
+   * Checks whether a given entity type has a list source.
+   *
+   * @param string $entity_type
+   *   The entity type ID.
+   *
+   * @return bool
+   *   Whether the entity type is used in any list sources.
+   */
+  public function isEntityTypeSourced(string $entity_type): bool;
+
 }

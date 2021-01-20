@@ -1,0 +1,3 @@
+entity_test.entity_test_bundle.*.third_party.oe_list_pages:
+  type: oe_list_pages.bundle_third_party_settings
+  label: 'List page settings for entity_test'

@@ -87,7 +87,12 @@ class DateWidget extends ListPagesWidgetBase {
     $facet_id = $this->facetId;
     $parents = array_slice($triggering_element['#parents'], 0, -1);
     $values = $form_state->getValue($parents);
-    if ($values[$facet_id . '_op'] !== 'bt') {
+    $operator = $values[$facet_id . '_op'] ?? NULL;
+    if (!$operator) {
+      return;
+    }
+
+    if ($operator !== 'bt') {
       return;
     }
 

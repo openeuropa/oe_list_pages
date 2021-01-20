@@ -1,0 +1,10 @@
+name: OpenEuropa List Pages Link List Source
+description: Provides a link list source plugin that collect links from a list page source.
+package: OpenEuropa
+
+type: module
+core: 8.x
+
+dependencies:
+  - oe_link_lists:oe_link_lists
+  - oe_list_pages:oe_list_pages
