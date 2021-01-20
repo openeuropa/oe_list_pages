@@ -43,26 +43,8 @@ class ListPagesWidgetBase extends WidgetPluginBase implements ListPagesWidgetInt
   /**
    * {@inheritdoc}
    */
-  public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source, ListPresetFilter $filter): string {
-    // Keep track of the original active items so we can reset them.
-    $active_items = $facet->getActiveItems();
-    $filter_values = $filter->getValues();
-    $facet->setActiveItems($filter_values);
-    $results = $this->processFacetResults($facet);
-
-    $filter_label = [];
-    foreach ($filter_values as $value) {
-      $filter_label[$value] = $value;
-      foreach ($results as $result) {
-        if ($result->getRawValue() == $value) {
-          $filter_label[$value] = $result->getDisplayValue();
-        }
-      }
-    }
-
-    // Reset active items.
-    $facet->setActiveItems($active_items);
-    return implode(', ', $filter_label);
+  public function getDefaultValuesLabel(FacetInterface $facet, ListPresetFilter $filter, ListSourceInterface $list_source = NULL): string {
+    return $this->getDefaultFilterValuesLabel($facet, $filter);
   }
 
   /**

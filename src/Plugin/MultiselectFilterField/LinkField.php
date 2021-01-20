@@ -10,6 +10,7 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\link\LinkItemInterface;
 use Drupal\link\Plugin\Field\FieldWidget\LinkWidget;
+use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\MultiSelectFilterFieldPluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -87,6 +88,18 @@ class LinkField extends MultiSelectFilterFieldPluginBase implements ContainerFac
       $form['#process_default_value'] = FALSE;
     }
     return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDefaultValuesLabel(ListPresetFilter $filter): string {
+    $filter_value = $filter->getValues();
+    $values = [];
+    foreach ($filter_value as $value) {
+      $values[] = $this->getUriAsDisplayableString($value);
+    }
+    return implode(', ', $values);
   }
 
   /**

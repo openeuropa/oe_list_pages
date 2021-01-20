@@ -7,6 +7,7 @@ namespace Drupal\oe_list_pages\Plugin\MultiselectFilterField;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\MultiSelectFilterFieldPluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -87,6 +88,29 @@ class EntityField extends MultiSelectFilterFieldPluginBase implements ContainerF
       '#selection_handler' => $field_definition->getSetting('handler'),
       '#selection_settings' => $selection_settings,
     ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDefaultValuesLabel(ListPresetFilter $filter): string {
+    $filter_value = $filter->getValues();
+    $field_definition = $this->configuration['field_definition'];
+    if (!$field_definition instanceof FieldDefinitionInterface) {
+      return '';
+    }
+
+    $entity_storage = $this->entityTypeManager->getStorage($field_definition->getSetting('target_type'));
+    $values = [];
+    foreach ($filter_value as $value) {
+      $entity = $entity_storage->load($value);
+      if (!$entity) {
+        continue;
+      }
+
+      $values[] = $entity->label();
+    }
+    return implode(', ', $values);
   }
 
 }

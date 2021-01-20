@@ -6,6 +6,7 @@ namespace Drupal\oe_list_pages\Plugin\MultiselectFilterField;
 
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\MultiSelectFilterFieldPluginBase;
 
 /**
@@ -40,6 +41,20 @@ class ListField extends MultiSelectFilterFieldPluginBase {
       '#options' => $field_definition->getSetting('allowed_values'),
       '#empty_option' => $this->t('Select'),
     ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDefaultValuesLabel(ListPresetFilter $filter): string {
+    $field_definition = $this->configuration['field_definition'];
+    if (!$field_definition instanceof FieldDefinitionInterface) {
+      return '';
+    }
+    $filter_value = $filter->getValues();
+    return implode(', ', array_map(function ($value) use ($field_definition) {
+      return $field_definition->getSetting('allowed_values')[$value];
+    }, $filter_value));
   }
 
 }

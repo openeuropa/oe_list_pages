@@ -51,4 +51,37 @@ trait FacetManipulationTrait {
     return $options;
   }
 
+  /**
+   * Generates the label for the filter values set as default values.
+   *
+   * @param \Drupal\facets\FacetInterface $facet
+   *   The facet.
+   * @param \Drupal\oe_list_pages\ListPresetFilter $filter
+   *   The filter.
+   *
+   * @return string
+   *   The label.
+   */
+  protected function getDefaultFilterValuesLabel(FacetInterface $facet, ListPresetFilter $filter): string {
+    // Keep track of the original active items so we can reset them.
+    $active_items = $facet->getActiveItems();
+    $filter_values = $filter->getValues();
+    $facet->setActiveItems($filter_values);
+    $results = $this->processFacetResults($facet);
+
+    $filter_label = [];
+    foreach ($filter_values as $value) {
+      $filter_label[$value] = $value;
+      foreach ($results as $result) {
+        if ($result->getRawValue() == $value) {
+          $filter_label[$value] = $result->getDisplayValue();
+        }
+      }
+    }
+
+    // Reset active items.
+    $facet->setActiveItems($active_items);
+    return implode(', ', $filter_label);
+  }
+
 }

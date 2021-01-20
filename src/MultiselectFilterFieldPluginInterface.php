@@ -29,4 +29,15 @@ interface MultiselectFilterFieldPluginInterface {
    */
   public function buildDefaultValueForm(): array;
 
+  /**
+   * Returns the label for the filter values set as default values.
+   *
+   * @param \Drupal\oe_list_pages\ListPresetFilter $filter
+   *   The filter.
+   *
+   * @return string
+   *   The label.
+   */
+  public function getDefaultValuesLabel(ListPresetFilter $filter): string;
+
 }

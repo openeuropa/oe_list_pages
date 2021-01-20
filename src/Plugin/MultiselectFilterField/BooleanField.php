@@ -4,10 +4,10 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages\Plugin\MultiselectFilterField;
 
-use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\facets\FacetInterface;
 use Drupal\facets\Result\Result;
+use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\MultiSelectFilterFieldPluginBase;
 
 /**
@@ -30,10 +30,6 @@ class BooleanField extends MultiSelectFilterFieldPluginBase {
    * {@inheritdoc}
    */
   public function buildDefaultValueForm(): array {
-    $field_definition = $this->configuration['field_definition'];
-    if (!$field_definition instanceof FieldDefinitionInterface) {
-      return [];
-    }
     $facet = $this->configuration['facet'];
     if (!$facet instanceof FacetInterface) {
       return [];
@@ -55,6 +51,23 @@ class BooleanField extends MultiSelectFilterFieldPluginBase {
       '#options' => $options,
       '#empty_option' => $this->t('Select'),
     ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDefaultValuesLabel(ListPresetFilter $filter): string {
+    $facet = $this->configuration['facet'];
+    if (!$facet instanceof FacetInterface) {
+      return '';
+    }
+    $results = [
+      new Result($facet, 1, 1, 1),
+      new Result($facet, 0, 0, 1),
+    ];
+
+    $facet->setResults($results);
+    return $this->getDefaultFilterValuesLabel($facet, $filter);
   }
 
 }

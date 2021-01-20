@@ -9,6 +9,7 @@ use Drupal\facets\Entity\Facet;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\link\LinkItemInterface;
 use Drupal\link\Plugin\Field\FieldWidget\LinkWidget;
+use Drupal\oe_list_pages\ListPresetFilter;
 
 /**
  * Tests for MultiSelectFieldFilter plugins.
@@ -102,6 +103,11 @@ class MultiSelectFieldFilterPluginTest extends EntityKernelTestBase {
     ];
     $this->assertEquals($expected_default_values, $plugin->getDefaultValues());
     $this->assertEquals($expected_form, $plugin->buildDefaultValueForm());
+
+    $filter = new ListPresetFilter('facetid', [0]);
+    $this->assertEquals('Zero', $plugin->getDefaultValuesLabel($filter));
+    $filter = new ListPresetFilter('facetid', [0, 1]);
+    $this->assertEquals('Zero, One', $plugin->getDefaultValuesLabel($filter));
   }
 
   /**
@@ -162,6 +168,9 @@ class MultiSelectFieldFilterPluginTest extends EntityKernelTestBase {
     ];;
     $this->assertEquals($expected_values, $plugin->getDefaultValues());
     $this->assertEquals($expected_form, $plugin->buildDefaultValueForm());
+
+    $filter = new ListPresetFilter('facetid', [$entity->id()]);
+    $this->assertEquals('test_entity', $plugin->getDefaultValuesLabel($filter));
   }
 
   /**
@@ -205,6 +214,9 @@ class MultiSelectFieldFilterPluginTest extends EntityKernelTestBase {
     ];
     $this->assertEquals($expected_values, $plugin->getDefaultValues());
     $this->assertEquals($expected_form, $plugin->buildDefaultValueForm());
+
+    $filter = new ListPresetFilter('facetid', ['route:custom-route']);
+    $this->assertEquals('custom-route', $plugin->getDefaultValuesLabel($filter));
   }
 
   /**
@@ -244,6 +256,11 @@ class MultiSelectFieldFilterPluginTest extends EntityKernelTestBase {
     ];
     $this->assertEquals($expected_values, $plugin->getDefaultValues());
     $this->assertEquals($expected_form, $plugin->buildDefaultValueForm());
+
+    $filter = new ListPresetFilter('facetid', [0]);
+    $this->assertEquals('0', $plugin->getDefaultValuesLabel($filter));
+    $filter = new ListPresetFilter('facetid', [1]);
+    $this->assertEquals('1', $plugin->getDefaultValuesLabel($filter));
   }
 
 }

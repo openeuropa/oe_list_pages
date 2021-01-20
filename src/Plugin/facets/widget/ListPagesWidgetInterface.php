@@ -36,15 +36,15 @@ interface ListPagesWidgetInterface {
    *
    * @param \Drupal\facets\FacetInterface $facet
    *   The facet.
-   * @param \Drupal\oe_list_pages\ListSourceInterface|null $list_source
-   *   The list source.
    * @param \Drupal\oe_list_pages\ListPresetFilter $filter
    *   The filter.
+   * @param \Drupal\oe_list_pages\ListSourceInterface|null $list_source
+   *   The list source.
    *
    * @return string
    *   The label.
    */
-  public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source, ListPresetFilter $filter): string;
+  public function getDefaultValuesLabel(FacetInterface $facet, ListPresetFilter $filter, ListSourceInterface $list_source = NULL): string;
 
   /**
    * Prepares the values to be passed to the URL generator from the submission.
