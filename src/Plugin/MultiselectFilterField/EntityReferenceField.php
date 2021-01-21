@@ -20,11 +20,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   field_types = {
  *     "entity_reference",
  *     "entity_reference_revisions",
+ *     "skos_concept_entity_reference",
  *   },
  *   weight = 100
  * )
  */
-class EntityField extends MultiSelectFilterFieldPluginBase implements ContainerFactoryPluginInterface {
+class EntityReferenceField extends MultiSelectFilterFieldPluginBase implements ContainerFactoryPluginInterface {
 
   /**
    * The entity type manager.

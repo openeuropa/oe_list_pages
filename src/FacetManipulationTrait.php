@@ -52,7 +52,7 @@ trait FacetManipulationTrait {
   }
 
   /**
-   * Generates the label for the filter values set as default values.
+   * Generates default filter value labels from a facet.
    *
    * @param \Drupal\facets\FacetInterface $facet
    *   The facet.
@@ -63,7 +63,8 @@ trait FacetManipulationTrait {
    *   The label.
    */
   protected function getDefaultFilterValuesLabel(FacetInterface $facet, ListPresetFilter $filter): string {
-    // Keep track of the original active items so we can reset them.
+    // Back up the original active items so we can set them back after
+    // we used the facet to generate the display values from the filter.
     $active_items = $facet->getActiveItems();
     $filter_values = $filter->getValues();
     $facet->setActiveItems($filter_values);

@@ -48,7 +48,7 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
    *
    * @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginManager
    */
-  protected $multiselectFilterFieldPluginManager;
+  protected $multiselectPluginManager;
 
   /**
    * The facets processor manager.
@@ -75,11 +75,11 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, EntityFieldManagerInterface $entity_field_manager, MultiselectFilterFieldPluginManager $multiselect_filter_field_plugin_manager, ProcessorPluginManager $processorManager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, EntityFieldManagerInterface $entity_field_manager, MultiselectFilterFieldPluginManager $multiselect_plugin_manager, ProcessorPluginManager $processorManager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->entityTypeManager = $entity_type_manager;
     $this->entityFieldManager = $entity_field_manager;
-    $this->multiselectFilterFieldPluginManager = $multiselect_filter_field_plugin_manager;
+    $this->multiselectPluginManager = $multiselect_plugin_manager;
     $this->processorManager = $processorManager;
   }
 
@@ -124,14 +124,14 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
       return $form;
     }
 
-    if ($id = $this->multiselectFilterFieldPluginManager->getPluginIdByFieldType($field_type)) {
+    if ($id = $this->multiselectPluginManager->getPluginIdByFieldType($field_type)) {
       $config = [
         'facet' => $facet,
         'active_items' => $active_items,
         'field_definition' => $field_definition,
       ];
       /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
-      $plugin = $this->multiselectFilterFieldPluginManager->createInstance($id, $config);
+      $plugin = $this->multiselectPluginManager->createInstance($id, $config);
       $form[$facet->id()]['#default_value'] = $plugin->getDefaultValues();
       $form[$facet->id()][$id] = $plugin->buildDefaultValueForm();
       $form_state->set('multivalue_child', $id);
@@ -150,13 +150,13 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
     $field_definition = $this->getFieldDefinition($facet, $list_source);
     $field_type = !empty($field_definition) ? $field_definition->getType() : NULL;
 
-    if ($id = $this->multiselectFilterFieldPluginManager->getPluginIdByFieldType($field_type)) {
+    if ($id = $this->multiselectPluginManager->getPluginIdByFieldType($field_type)) {
       $config = [
         'facet' => $facet,
         'field_definition' => $field_definition,
       ];
       /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
-      $plugin = $this->multiselectFilterFieldPluginManager->createInstance($id, $config);
+      $plugin = $this->multiselectPluginManager->createInstance($id, $config);
       return $filter_operators[$filter->getOperator()] . ': ' . $plugin->getDefaultValuesLabel($filter);
 
     }

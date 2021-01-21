@@ -12,8 +12,6 @@ interface MultiselectFilterFieldPluginInterface {
   /**
    * Gets the default values for the field.
    *
-   * Only invoked upon a positive result of the self::applies() method.
-   *
    * @return array
    *   The default values array.
    */
@@ -21,8 +19,6 @@ interface MultiselectFilterFieldPluginInterface {
 
   /**
    * Builds and returns the default value form for this plugin.
-   *
-   * Only invoked upon a positive result of the self::applies() method.
    *
    * @return array
    *   The default value form array.
