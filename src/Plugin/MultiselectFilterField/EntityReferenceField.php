@@ -4,10 +4,8 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages\Plugin\MultiselectFilterField;
 
+use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Field\FieldDefinitionInterface;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\MultiSelectFilterFieldPluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -25,7 +23,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   weight = 100
  * )
  */
-class EntityReferenceField extends MultiSelectFilterFieldPluginBase implements ContainerFactoryPluginInterface {
+class EntityReferenceField extends MultiSelectFilterFieldPluginBase {
 
   /**
    * The entity type manager.
@@ -37,8 +35,8 @@ class EntityReferenceField extends MultiSelectFilterFieldPluginBase implements C
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition);
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityFieldManagerInterface $entity_field_manager, EntityTypeManagerInterface $entity_type_manager) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_field_manager);
     $this->entityTypeManager = $entity_type_manager;
   }
 
@@ -50,6 +48,7 @@ class EntityReferenceField extends MultiSelectFilterFieldPluginBase implements C
       $configuration,
       $plugin_id,
       $plugin_definition,
+      $container->get('entity_field.manager'),
       $container->get('entity_type.manager')
     );
   }
@@ -58,14 +57,15 @@ class EntityReferenceField extends MultiSelectFilterFieldPluginBase implements C
    * {@inheritdoc}
    */
   public function getDefaultValues(): array {
-    $field_definition = $this->configuration['field_definition'];
-    if (!$field_definition instanceof FieldDefinitionInterface) {
+    $field_definition = $this->getFieldDefinition($this->configuration['facet'], $this->configuration['list_source']);
+    if (empty($field_definition)) {
       return [];
     }
     $entity_storage = $this->entityTypeManager->getStorage($field_definition->getSetting('target_type'));
     $default_value = [];
-    foreach ($this->configuration['active_items'] as $active_item) {
-      $default_value[] = $entity_storage->load($active_item);
+    $filter_values = parent::getDefaultValues();
+    foreach ($filter_values as $filter_value) {
+      $default_value[] = $entity_storage->load($filter_value);
     }
     return $default_value;
   }
@@ -74,8 +74,8 @@ class EntityReferenceField extends MultiSelectFilterFieldPluginBase implements C
    * {@inheritdoc}
    */
   public function buildDefaultValueForm(): array {
-    $field_definition = $this->configuration['field_definition'];
-    if (!$field_definition instanceof FieldDefinitionInterface) {
+    $field_definition = $this->getFieldDefinition($this->configuration['facet'], $this->configuration['list_source']);
+    if (empty($field_definition)) {
       return [];
     }
     $selection_settings = [
@@ -94,17 +94,16 @@ class EntityReferenceField extends MultiSelectFilterFieldPluginBase implements C
   /**
    * {@inheritdoc}
    */
-  public function getDefaultValuesLabel(ListPresetFilter $filter): string {
-    $filter_value = $filter->getValues();
-    $field_definition = $this->configuration['field_definition'];
-    if (!$field_definition instanceof FieldDefinitionInterface) {
+  public function getDefaultValuesLabel(): string {
+    $field_definition = $this->getFieldDefinition($this->configuration['facet'], $this->configuration['list_source']);
+    if (empty($field_definition)) {
       return '';
     }
-
+    $filter_values = parent::getDefaultValues();
     $entity_storage = $this->entityTypeManager->getStorage($field_definition->getSetting('target_type'));
     $values = [];
-    foreach ($filter_value as $value) {
-      $entity = $entity_storage->load($value);
+    foreach ($filter_values as $filter_value) {
+      $entity = $entity_storage->load($filter_value);
       if (!$entity) {
         continue;
       }

@@ -2,6 +2,9 @@
 
 namespace Drupal\oe_list_pages;
 
+use DeepCopy\Exception\PropertyException;
+use Drupal\Core\Entity\EntityFieldManagerInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\facets\FacetInterface;
 use Drupal\facets\Processor\ProcessorInterface;
 use Drupal\facets\Result\ResultInterface;
@@ -83,6 +86,32 @@ trait FacetManipulationTrait {
     // Reset active items.
     $facet->setActiveItems($active_items);
     return implode(', ', $filter_label);
+  }
+
+  /**
+   * Gets field definition for the field used in the facet.
+   *
+   * @param \Drupal\facets\FacetInterface $facet
+   *   The facet.
+   * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
+   *   The list source.
+   *
+   * @return \Drupal\Core\Field\FieldDefinitionInterface
+   *   The field definition.
+   */
+  protected function getFieldDefinition(FacetInterface $facet, ListSourceInterface $list_source): ?FieldDefinitionInterface {
+    if (!$this->entityFieldManager || !$this->entityFieldManager instanceof EntityFieldManagerInterface) {
+      throw new PropertyException('Entity type manager variable is not set.');
+    }
+    $field = $list_source->getIndex()->getField($facet->getFieldIdentifier());
+    $field_name = $field->getOriginalFieldIdentifier();
+    $property_path = $field->getPropertyPath();
+    $parts = explode(':', $property_path);
+    if (count($parts) > 1) {
+      $field_name = $parts[0];
+    }
+    $field_definitions = $this->entityFieldManager->getFieldDefinitions($list_source->getEntityType(), $list_source->getBundle());
+    return $field_definitions[$field_name] ?? NULL;
   }
 
 }

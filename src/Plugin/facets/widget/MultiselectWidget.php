@@ -6,12 +6,12 @@ namespace Drupal\oe_list_pages\Plugin\facets\widget;
 
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\facets\FacetInterface;
 use Drupal\facets\Processor\ProcessorPluginManager;
 use Drupal\multivalue_form_element\Element\MultiValue;
+use Drupal\oe_list_pages\FacetManipulationTrait;
 use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\ListSourceInterface;
 use Drupal\oe_list_pages\MultiselectFilterFieldPluginManager;
@@ -28,6 +28,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * )
  */
 class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryPluginInterface {
+
+  use FacetManipulationTrait;
 
   /**
    * The entity type manager.
@@ -94,7 +96,7 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
     $list_source = $form_state->get('list_source');
     $field_definition = $this->getFieldDefinition($facet, $list_source);
     $field_type = !empty($field_definition) ? $field_definition->getType() : NULL;
-    $active_items = $preset_filter ? $preset_filter->getValues() : [];
+    $filter_values = $preset_filter ? $preset_filter->getValues() : [];
 
     $form['oe_list_pages_filter_operator'] = [
       '#type' => 'select',
@@ -113,7 +115,7 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
       $results = $this->processFacetResults($facet);
       $options = $this->transformResultsToOptions($results);
 
-      $form[$facet->id()]['#default_value'] = $active_items;
+      $form[$facet->id()]['#default_value'] = $filter_values;
       $form[$facet->id()]['list'] = [
         '#type' => 'select',
         '#options' => $options,
@@ -127,8 +129,8 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
     if ($id = $this->multiselectPluginManager->getPluginIdByFieldType($field_type)) {
       $config = [
         'facet' => $facet,
-        'active_items' => $active_items,
-        'field_definition' => $field_definition,
+        'preset_filter' => $preset_filter,
+        'list_source' => $list_source,
       ];
       /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
       $plugin = $this->multiselectPluginManager->createInstance($id, $config);
@@ -146,45 +148,22 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
    */
   public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source, ListPresetFilter $filter): string {
     $filter_operators = ListPresetFilter::getOperators();
-
     $field_definition = $this->getFieldDefinition($facet, $list_source);
     $field_type = !empty($field_definition) ? $field_definition->getType() : NULL;
 
     if ($id = $this->multiselectPluginManager->getPluginIdByFieldType($field_type)) {
       $config = [
         'facet' => $facet,
-        'field_definition' => $field_definition,
+        'preset_filter' => $filter,
+        'list_source' => $list_source,
       ];
       /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
       $plugin = $this->multiselectPluginManager->createInstance($id, $config);
-      return $filter_operators[$filter->getOperator()] . ': ' . $plugin->getDefaultValuesLabel($filter);
+      return $filter_operators[$filter->getOperator()] . ': ' . $plugin->getDefaultValuesLabel();
 
     }
 
     return $filter_operators[$filter->getOperator()] . ': ' . parent::getDefaultValuesLabel($facet, $list_source, $filter);
-  }
-
-  /**
-   * Gets field definition for the field used in the facet.
-   *
-   * @param \Drupal\facets\FacetInterface $facet
-   *   The facet.
-   * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
-   *   The list source.
-   *
-   * @return \Drupal\Core\Field\FieldDefinitionInterface
-   *   The field definition.
-   */
-  protected function getFieldDefinition(FacetInterface $facet, ListSourceInterface $list_source): ?FieldDefinitionInterface {
-    $field = $list_source->getIndex()->getField($facet->getFieldIdentifier());
-    $field_name = $field->getOriginalFieldIdentifier();
-    $property_path = $field->getPropertyPath();
-    $parts = explode(':', $property_path);
-    if (count($parts) > 1) {
-      $field_name = $parts[0];
-    }
-    $field_definitions = $this->entityFieldManager->getFieldDefinitions($list_source->getEntityType(), $list_source->getBundle());
-    return $field_definitions[$field_name] ?? NULL;
   }
 
   /**

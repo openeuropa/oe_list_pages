@@ -5,16 +5,17 @@ declare(strict_types = 1);
 namespace Drupal\Tests\oe_list_pages\Kernel;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\facets\Entity\Facet;
-use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
+use Drupal\facets\FacetInterface;
 use Drupal\link\LinkItemInterface;
 use Drupal\link\Plugin\Field\FieldWidget\LinkWidget;
 use Drupal\oe_list_pages\ListPresetFilter;
+use Drupal\oe_list_pages\ListSourceFactory;
+use Drupal\search_api\Item\Field;
 
 /**
  * Tests for MultiSelectFieldFilter plugins.
  */
-class MultiSelectFieldFilterPluginTest extends EntityKernelTestBase {
+class MultiSelectFieldFilterPluginTest extends ListsSourceTestBase {
 
   /**
    * The entity type manager.
@@ -31,14 +32,18 @@ class MultiSelectFieldFilterPluginTest extends EntityKernelTestBase {
   protected $pluginManager;
 
   /**
+   * The test facet using the multiselect widget.
+   *
+   * @var \Drupal\facets\FacetInterface
+   */
+  protected $facet;
+
+  /**
    * {@inheritdoc}
    */
   public static $modules = [
-    'facets',
     'link',
-    'node',
     'options',
-    'oe_list_pages',
   ];
 
   /**
@@ -46,23 +51,8 @@ class MultiSelectFieldFilterPluginTest extends EntityKernelTestBase {
    */
   protected function setup() {
     parent::setUp();
-    $this->installSchema('user', 'users_data');
-    $this->installSchema('node', ['node_access']);
-    $this->installEntitySchema('node');
     $this->pluginManager = \Drupal::service('plugin.manager.multiselect_filter_field');
     $this->entityTypeManager = \Drupal::service('entity_type.manager');
-  }
-
-  /**
-   * Assert return values when plugin is not configured.
-   */
-  public function testEmptyPlugins(): void {
-    foreach ($this->pluginManager->getDefinitions() as $id => $definition) {
-      /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
-      $plugin = $this->pluginManager->createInstance($id, []);
-      $this->assertEmpty($plugin->getDefaultValues(), 'Plugin returned default values even though no active items where configured');
-      $this->assertEmpty($plugin->buildDefaultValueForm(), 'Plugin returned a form even though no field definition was configured.');
-    }
   }
 
   /**
@@ -70,7 +60,7 @@ class MultiSelectFieldFilterPluginTest extends EntityKernelTestBase {
    */
   public function testListFieldPlugin(): void {
     $this->entityTypeManager->getStorage('field_storage_config')->create([
-      'entity_type' => 'entity_test',
+      'entity_type' => 'entity_test_mulrev_changed',
       'field_name' => 'list_field',
       'type' => 'list_integer',
       'settings' => [
@@ -85,18 +75,23 @@ class MultiSelectFieldFilterPluginTest extends EntityKernelTestBase {
       'label' => 'List field',
       'required' => FALSE,
       'field_name' => 'list_field',
-      'entity_type' => 'entity_test',
-      'bundle' => 'entity_test',
+      'entity_type' => 'entity_test_mulrev_changed',
+      'bundle' => 'item',
     ]);
+    $field_config->save();
 
+    $this->addFieldToIndex('list_field', 'List field', 'string');
+    $facet = $this->createFieldFacet('list_field');
+
+    $item_list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
     $plugin_id = $this->pluginManager->getPluginIdByFieldType($field_config->getType());
     /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
     $plugin = $this->pluginManager->createInstance($plugin_id, [
-      'field_definition' => $field_config,
-      'active_items' => [1],
+      'facet' => $facet,
+      'preset_filter' => new ListPresetFilter($facet->id(), [1]),
+      'list_source' => $item_list,
     ]);
 
-    $expected_default_values = [1];
     $expected_form = [
       '#type' => 'select',
       '#options' => [
@@ -105,13 +100,16 @@ class MultiSelectFieldFilterPluginTest extends EntityKernelTestBase {
       ],
       '#empty_option' => 'Select',
     ];
-    $this->assertEquals($expected_default_values, $plugin->getDefaultValues());
+    $this->assertEquals([1], $plugin->getDefaultValues());
     $this->assertEquals($expected_form, $plugin->buildDefaultValueForm());
 
-    $filter = new ListPresetFilter('facetid', [0]);
-    $this->assertEquals('Zero', $plugin->getDefaultValuesLabel($filter));
-    $filter = new ListPresetFilter('facetid', [0, 1]);
-    $this->assertEquals('Zero, One', $plugin->getDefaultValuesLabel($filter));
+    $this->assertEquals('One', $plugin->getDefaultValuesLabel());
+    $plugin->setConfiguration([
+      'facet' => $facet,
+      'preset_filter' => new ListPresetFilter($facet->id(), [0, 1]),
+      'list_source' => $item_list,
+    ]);
+    $this->assertEquals('Zero, One', $plugin->getDefaultValuesLabel());
   }
 
   /**
@@ -119,12 +117,12 @@ class MultiSelectFieldFilterPluginTest extends EntityKernelTestBase {
    */
   public function testEntityFieldPlugin(): void {
     $this->entityTypeManager->getStorage('field_storage_config')->create([
-      'entity_type' => 'entity_test',
+      'entity_type' => 'entity_test_mulrev_changed',
       'field_name' => 'entity_field',
       'type' => 'entity_reference',
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
       'settings' => [
-        'target_type' => 'entity_test',
+        'target_type' => 'entity_test_mulrev_changed',
       ],
     ])->save();
 
@@ -132,49 +130,53 @@ class MultiSelectFieldFilterPluginTest extends EntityKernelTestBase {
       'label' => 'Entity field',
       'required' => FALSE,
       'field_name' => 'entity_field',
-      'entity_type' => 'entity_test',
-      'bundle' => 'entity_test',
+      'entity_type' => 'entity_test_mulrev_changed',
+      'bundle' => 'item',
       'settings' => [
         'handler' => 'default',
         'handler_settings' => [
           'target_bundles' => [
-            'entity_test' => 'entity_test',
+            'item' => 'item',
           ],
         ],
       ],
     ]);
-    $entity = $this->entityTypeManager->getStorage('entity_test')->create([
+    $field_config->save();
+    $entity = $this->entityTypeManager->getStorage('entity_test_mulrev_changed')->create([
       'name' => 'test_entity',
+      'type' => 'item',
     ]);
     $entity->save();
-    $entity = $this->entityTypeManager->getStorage('entity_test')->load($entity->id());
+    $entity = $this->entityTypeManager->getStorage('entity_test_mulrev_changed')->load($entity->id());
 
+    $this->addFieldToIndex('entity_field', 'Entity field', 'string');
+    $facet = $this->createFieldFacet('entity_field');
+
+    $item_list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
     $plugin_id = $this->pluginManager->getPluginIdByFieldType($field_config->getType());
     /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
     $plugin = $this->pluginManager->createInstance($plugin_id, [
-      'field_definition' => $field_config,
-      'active_items' => [$entity->id()],
+      'facet' => $facet,
+      'preset_filter' => new ListPresetFilter($facet->id(), [$entity->id()]),
+      'list_source' => $item_list,
     ]);
 
-    $expected_values = [$entity];
     $expected_form = [
       '#type' => 'entity_autocomplete',
       '#maxlength' => 1024,
-      '#target_type' => 'entity_test',
-      '#selection_handler' => 'default',
+      '#target_type' => 'entity_test_mulrev_changed',
+      '#selection_handler' => 'default:entity_test_mulrev_changed',
       '#selection_settings' => [
         'match_operator' => 'CONTAINS',
         'match_limit' => 10,
         'target_bundles' => [
-          'entity_test' => 'entity_test',
+          'item' => 'item',
         ],
       ],
     ];;
-    $this->assertEquals($expected_values, $plugin->getDefaultValues());
+    $this->assertEquals([$entity], $plugin->getDefaultValues());
     $this->assertEquals($expected_form, $plugin->buildDefaultValueForm());
-
-    $filter = new ListPresetFilter('facetid', [$entity->id()]);
-    $this->assertEquals('test_entity', $plugin->getDefaultValuesLabel($filter));
+    $this->assertEquals('test_entity', $plugin->getDefaultValuesLabel());
   }
 
   /**
@@ -183,71 +185,80 @@ class MultiSelectFieldFilterPluginTest extends EntityKernelTestBase {
   public function testLinkFieldPlugin(): void {
     $this->entityTypeManager->getStorage('field_storage_config')->create([
       'field_name' => 'link_field',
-      'entity_type' => 'entity_test',
+      'entity_type' => 'entity_test_mulrev_changed',
       'type' => 'link',
     ])->save();
 
     $field_config = $this->entityTypeManager->getStorage('field_config')->create([
-      'bundle' => 'entity_test',
+      'bundle' => 'item',
       'field_name' => 'link_field',
-      'entity_type' => 'entity_test',
+      'entity_type' => 'entity_test_mulrev_changed',
       'label' => 'Read more about this entity',
       'settings' => [
         'title' => DRUPAL_OPTIONAL,
         'link_type' => LinkItemInterface::LINK_GENERIC,
       ],
     ]);
-    $entity = $this->entityTypeManager->getStorage('entity_test')->create([
-      'name' => 'test_entity label',
-    ]);
-    $entity->save();
+    $field_config->save();
 
+    $this->addFieldToIndex('link_field', 'Link field', 'string');
+    $facet = $this->createFieldFacet('link_field');
+
+    $item_list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
     $plugin_id = $this->pluginManager->getPluginIdByFieldType($field_config->getType());
     /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
     $plugin = $this->pluginManager->createInstance($plugin_id, [
-      'field_definition' => $field_config,
-      'active_items' => ['route:custom-route'],
+      'facet' => $facet,
+      'preset_filter' => new ListPresetFilter($facet->id(), ['route:custom-route']),
+      'list_source' => $item_list,
     ]);
 
-    $expected_values = ['custom-route'];
     $expected_form = [
       '#type' => 'url',
       '#element_validate' => [[LinkWidget::class, 'validateUriElement']],
       '#maxlength' => 2048,
       '#link_type' => LinkItemInterface::LINK_GENERIC,
     ];
-    $this->assertEquals($expected_values, $plugin->getDefaultValues());
+    $this->assertEquals(['custom-route'], $plugin->getDefaultValues());
     $this->assertEquals($expected_form, $plugin->buildDefaultValueForm());
-
-    $filter = new ListPresetFilter('facetid', ['route:custom-route']);
-    $this->assertEquals('custom-route', $plugin->getDefaultValuesLabel($filter));
-    $filter = new ListPresetFilter('facetid', ['internal:/path']);
-    $this->assertEquals('/path', $plugin->getDefaultValuesLabel($filter));
+    $this->assertEquals('custom-route', $plugin->getDefaultValuesLabel());
+    $plugin->setConfiguration([
+      'facet' => $facet,
+      'preset_filter' => new ListPresetFilter($facet->id(), ['internal:/path']),
+      'list_source' => $item_list,
+    ]);
+    $this->assertEquals('/path', $plugin->getDefaultValuesLabel());
     $this->entityTypeManager->getStorage('node_type')->create([
       'type' => 'test_bundle',
       'name' => 'Test bundle',
     ])->save();
+    /** @var \Drupal\emr\EntityMetaRelationInstaller $installer */
+    $installer = \Drupal::service('emr.installer');
+    $installer->installEntityMetaTypeOnContentEntityType('oe_list_page', 'node', [
+      'test_bundle',
+    ]);
     $node = $this->entityTypeManager->getStorage('node')->create([
       'type' => 'test_bundle',
       'title' => 'Test node',
-      'publicshed' => 1,
+      'published' => 1,
     ]);
     $node->save();
     $user = $this->drupalCreateUser(['access content']);
     $this->drupalSetCurrentUser($user);
-    $filter = new ListPresetFilter('facetid', ['entity:node/1']);
-    $this->assertEquals('Test node (1)', $plugin->getDefaultValuesLabel($filter));
+    $plugin->setConfiguration([
+      'facet' => $facet,
+      'preset_filter' => new ListPresetFilter($facet->id(), ['entity:node/1']),
+      'list_source' => $item_list,
+    ]);
+    $this->assertEquals('Test node (1)', $plugin->getDefaultValuesLabel());
   }
 
   /**
    * Tests the boolean fields plugin.
    */
   public function testBooleanFieldPlugin(): void {
-    $facet = new Facet([], 'facets_facet');
-    $facet->setWidget('oe_list_pages_multiselect');
-
     $this->entityTypeManager->getStorage('field_storage_config')->create([
-      'entity_type' => 'entity_test',
+      'entity_type' => 'entity_test_mulrev_changed',
       'field_name' => 'boolean_field',
       'type' => 'boolean',
     ])->save();
@@ -256,31 +267,74 @@ class MultiSelectFieldFilterPluginTest extends EntityKernelTestBase {
       'label' => 'Boolean field',
       'required' => FALSE,
       'field_name' => 'boolean_field',
-      'entity_type' => 'entity_test',
-      'bundle' => 'entity_test',
+      'entity_type' => 'entity_test_mulrev_changed',
+      'bundle' => 'item',
     ]);
+    $field_config->save();
 
+    $this->addFieldToIndex('boolean_field', 'Boolean field', 'string');
+    $facet = $this->createFieldFacet('boolean_field');
+
+    $item_list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
     $plugin_id = $this->pluginManager->getPluginIdByFieldType($field_config->getType());
     /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
     $plugin = $this->pluginManager->createInstance($plugin_id, [
-      'field_definition' => $field_config,
-      'active_items' => [1],
       'facet' => $facet,
+      'preset_filter' => new ListPresetFilter($facet->id(), [0]),
+      'list_source' => $item_list,
     ]);
 
-    $expected_values = [1];
     $expected_form = [
       '#type' => 'select',
       '#options' => [0 => 0, 1 => 1],
       '#empty_option' => 'Select',
     ];
-    $this->assertEquals($expected_values, $plugin->getDefaultValues());
+    $this->assertEquals([0], $plugin->getDefaultValues());
     $this->assertEquals($expected_form, $plugin->buildDefaultValueForm());
+    $this->assertEquals('0', $plugin->getDefaultValuesLabel());
+    $plugin->setConfiguration([
+      'facet' => $facet,
+      'preset_filter' => new ListPresetFilter($facet->id(), [1]),
+      'list_source' => $item_list,
+    ]);
+    $this->assertEquals('1', $plugin->getDefaultValuesLabel());
+  }
 
-    $filter = new ListPresetFilter('facetid', [0]);
-    $this->assertEquals('0', $plugin->getDefaultValuesLabel($filter));
-    $filter = new ListPresetFilter('facetid', [1]);
-    $this->assertEquals('1', $plugin->getDefaultValuesLabel($filter));
+  /**
+   * Adds a field to the entity test index.
+   *
+   * @param string $id
+   *   The id for the field.
+   * @param string $label
+   *   The label for the field.
+   * @param string $type
+   *   The type for the field.
+   */
+  protected function addFieldToIndex(string $id, string $label, string $type): void {
+    $item_list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
+    $index = $item_list->getIndex();
+    $field = new Field($index, $id);
+    $field->setType($type);
+    $field->setPropertyPath($id);
+    $field->setLabel($label);
+    $index->addField($field);
+  }
+
+  /**
+   * Creates a facet for the given entity test field.
+   *
+   * @param string $field_id
+   *   The id of the field.
+   *
+   * @return \Drupal\facets\FacetInterface
+   *   The created facet.
+   */
+  protected function createFieldFacet(string $field_id): FacetInterface {
+    $default_list_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
+    $facet = $this->createFacet($field_id, $default_list_id);
+    $facet->setWidget('oe_list_pages_multiselect');
+    $facet->save();
+    return $facet;
   }
 
 }

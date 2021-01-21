@@ -5,9 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\oe_list_pages\Plugin\MultiselectFilterField;
 
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\facets\FacetInterface;
 use Drupal\facets\Result\Result;
-use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\MultiSelectFilterFieldPluginBase;
 
 /**
@@ -31,17 +29,12 @@ class BooleanField extends MultiSelectFilterFieldPluginBase {
    */
   public function buildDefaultValueForm(): array {
     $facet = $this->configuration['facet'];
-    if (!$facet instanceof FacetInterface) {
-      return [];
-    }
-
     // Create some dummy results for each boolean type (on/off) then process
     // the results to ensure we have display labels.
     $results = [
       new Result($facet, 1, 1, 1),
       new Result($facet, 0, 0, 1),
     ];
-
     $facet->setResults($results);
     $results = $this->processFacetResults($facet);
     $options = $this->transformResultsToOptions($results);
@@ -56,18 +49,18 @@ class BooleanField extends MultiSelectFilterFieldPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function getDefaultValuesLabel(ListPresetFilter $filter): string {
+  public function getDefaultValuesLabel(): string {
     $facet = $this->configuration['facet'];
-    if (!$facet instanceof FacetInterface) {
-      return '';
-    }
+    $reset_filter = $this->configuration['preset_filter'];
+    // Create some dummy results for each boolean type (on/off) then process
+    // the results to ensure we have display labels.
     $results = [
       new Result($facet, 1, 1, 1),
       new Result($facet, 0, 0, 1),
     ];
-
     $facet->setResults($results);
-    return $this->getDefaultFilterValuesLabel($facet, $filter);
+
+    return $this->getDefaultFilterValuesLabel($facet, $reset_filter);
   }
 
 }

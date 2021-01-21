@@ -5,12 +5,10 @@ declare(strict_types = 1);
 namespace Drupal\oe_list_pages\Plugin\MultiselectFilterField;
 
 use Drupal\Core\Entity\Element\EntityAutocomplete;
+use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Field\FieldDefinitionInterface;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\link\LinkItemInterface;
 use Drupal\link\Plugin\Field\FieldWidget\LinkWidget;
-use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\MultiSelectFilterFieldPluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -26,7 +24,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   weight = 100
  * )
  */
-class LinkField extends MultiSelectFilterFieldPluginBase implements ContainerFactoryPluginInterface {
+class LinkField extends MultiSelectFilterFieldPluginBase {
 
   /**
    * The entity type manager.
@@ -38,8 +36,8 @@ class LinkField extends MultiSelectFilterFieldPluginBase implements ContainerFac
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition);
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityFieldManagerInterface $entity_field_manager, EntityTypeManagerInterface $entity_type_manager) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_field_manager);
     $this->entityTypeManager = $entity_type_manager;
   }
 
@@ -51,6 +49,7 @@ class LinkField extends MultiSelectFilterFieldPluginBase implements ContainerFac
       $configuration,
       $plugin_id,
       $plugin_definition,
+      $container->get('entity_field.manager'),
       $container->get('entity_type.manager')
     );
   }
@@ -59,19 +58,19 @@ class LinkField extends MultiSelectFilterFieldPluginBase implements ContainerFac
    * {@inheritdoc}
    */
   public function getDefaultValues(): array {
-    $default_value = [];
-    foreach ($this->configuration['active_items'] as $active_item) {
-      $default_value[] = $this->getUriAsDisplayableString($active_item);
+    $default_values = [];
+    foreach (parent::getDefaultValues() as $default_value) {
+      $default_values[] = $this->getUriAsDisplayableString($default_value);
     }
-    return $default_value;
+    return $default_values;
   }
 
   /**
    * {@inheritdoc}
    */
   public function buildDefaultValueForm(): array {
-    $field_definition = $this->configuration['field_definition'];
-    if (!$field_definition instanceof FieldDefinitionInterface) {
+    $field_definition = $this->getFieldDefinition($this->configuration['facet'], $this->configuration['list_source']);
+    if (empty($field_definition)) {
       return [];
     }
     $link_type = $field_definition->getSetting('link_type');
@@ -93,8 +92,8 @@ class LinkField extends MultiSelectFilterFieldPluginBase implements ContainerFac
   /**
    * {@inheritdoc}
    */
-  public function getDefaultValuesLabel(ListPresetFilter $filter): string {
-    $filter_value = $filter->getValues();
+  public function getDefaultValuesLabel(): string {
+    $filter_value = parent::getDefaultValues();
     $values = [];
     foreach ($filter_value as $value) {
       $values[] = $this->getUriAsDisplayableString($value);
