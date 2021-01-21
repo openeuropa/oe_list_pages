@@ -43,7 +43,7 @@ class ListPagesWidgetBase extends WidgetPluginBase implements ListPagesWidgetInt
   /**
    * {@inheritdoc}
    */
-  public function getDefaultValuesLabel(FacetInterface $facet, ListPresetFilter $filter, ListSourceInterface $list_source = NULL): string {
+  public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source, ListPresetFilter $filter): string {
     return $this->getDefaultFilterValuesLabel($facet, $filter);
   }
 

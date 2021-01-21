@@ -131,7 +131,7 @@ class ListPresetFiltersBuilder {
       $widget = $facet->getWidgetInstance();
       $filter_value_label = '';
       if ($widget instanceof ListPagesWidgetInterface) {
-        $filter_value_label = $widget->getDefaultValuesLabel($facet, $filter, $list_source);
+        $filter_value_label = $widget->getDefaultValuesLabel($facet, $list_source, $filter);
       }
 
       $rows[] = [
