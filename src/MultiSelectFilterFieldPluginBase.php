@@ -4,8 +4,8 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages;
 
-use DeepCopy\Exception\PropertyException;
 use Drupal\Component\Plugin\ConfigurableInterface;
+use Drupal\Component\Plugin\Exception\PluginException;
 use Drupal\Component\Plugin\PluginBase;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
@@ -32,10 +32,10 @@ abstract class MultiSelectFilterFieldPluginBase extends PluginBase implements Co
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityFieldManagerInterface $entity_field_manager) {
     if (!isset($configuration['facet']) || !$configuration['facet'] instanceof FacetInterface) {
-      throw new PropertyException('The plugin requires a facet object.');
+      throw new PluginException('The plugin requires a facet object.');
     }
     if (!isset($configuration['list_source']) || !$configuration['list_source'] instanceof ListSourceInterface) {
-      throw new PropertyException('The plugin requires a list source object.');
+      throw new PluginException('The plugin requires a list source object.');
     }
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->entityFieldManager = $entity_field_manager;
@@ -86,9 +86,10 @@ abstract class MultiSelectFilterFieldPluginBase extends PluginBase implements Co
    * {@inheritdoc}
    */
   public function getDefaultValues(): array {
-    if (!isset($this->configuration['preset_filter']) || !$this->configuration['preset_filter'] instanceof ListPresetFilter) {
+    if (!$this->configuration['preset_filter'] instanceof ListPresetFilter) {
       return [];
     }
+
     return $this->configuration['preset_filter']->getValues();
   }
 

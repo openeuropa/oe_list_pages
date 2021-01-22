@@ -2,7 +2,6 @@
 
 namespace Drupal\oe_list_pages;
 
-use DeepCopy\Exception\PropertyException;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\facets\FacetInterface;
@@ -85,6 +84,7 @@ trait FacetManipulationTrait {
 
     // Reset active items.
     $facet->setActiveItems($active_items);
+
     return implode(', ', $filter_label);
   }
 
@@ -99,10 +99,11 @@ trait FacetManipulationTrait {
    * @return \Drupal\Core\Field\FieldDefinitionInterface
    *   The field definition.
    */
-  protected function getFieldDefinition(FacetInterface $facet, ListSourceInterface $list_source): ?FieldDefinitionInterface {
+  protected function getFacetFieldDefinition(FacetInterface $facet, ListSourceInterface $list_source): ?FieldDefinitionInterface {
     if (!$this->entityFieldManager || !$this->entityFieldManager instanceof EntityFieldManagerInterface) {
-      throw new PropertyException('Entity type manager variable is not set.');
+      $this->entityFieldManager = \Drupal::service('entity_field.manager');
     }
+
     $field = $list_source->getIndex()->getField($facet->getFieldIdentifier());
     $field_name = $field->getOriginalFieldIdentifier();
     $property_path = $field->getPropertyPath();
@@ -110,7 +111,9 @@ trait FacetManipulationTrait {
     if (count($parts) > 1) {
       $field_name = $parts[0];
     }
+
     $field_definitions = $this->entityFieldManager->getFieldDefinitions($list_source->getEntityType(), $list_source->getBundle());
+
     return $field_definitions[$field_name] ?? NULL;
   }
 

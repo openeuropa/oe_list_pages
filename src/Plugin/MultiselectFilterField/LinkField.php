@@ -62,6 +62,7 @@ class LinkField extends MultiSelectFilterFieldPluginBase {
     foreach (parent::getDefaultValues() as $default_value) {
       $default_values[] = $this->getUriAsDisplayableString($default_value);
     }
+
     return $default_values;
   }
 
@@ -69,10 +70,11 @@ class LinkField extends MultiSelectFilterFieldPluginBase {
    * {@inheritdoc}
    */
   public function buildDefaultValueForm(): array {
-    $field_definition = $this->getFieldDefinition($this->configuration['facet'], $this->configuration['list_source']);
+    $field_definition = $this->getFacetFieldDefinition($this->configuration['facet'], $this->configuration['list_source']);
     if (empty($field_definition)) {
       return [];
     }
+
     $link_type = $field_definition->getSetting('link_type');
     $form = [
       '#type' => 'url',
@@ -86,6 +88,7 @@ class LinkField extends MultiSelectFilterFieldPluginBase {
       $form['#target_type'] = 'node';
       $form['#process_default_value'] = FALSE;
     }
+
     return $form;
   }
 
@@ -98,6 +101,7 @@ class LinkField extends MultiSelectFilterFieldPluginBase {
     foreach ($filter_value as $value) {
       $values[] = $this->getUriAsDisplayableString($value);
     }
+
     return implode(', ', $values);
   }
 

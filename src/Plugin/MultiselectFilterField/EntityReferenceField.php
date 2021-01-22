@@ -57,16 +57,18 @@ class EntityReferenceField extends MultiSelectFilterFieldPluginBase {
    * {@inheritdoc}
    */
   public function getDefaultValues(): array {
-    $field_definition = $this->getFieldDefinition($this->configuration['facet'], $this->configuration['list_source']);
+    $field_definition = $this->getFacetFieldDefinition($this->configuration['facet'], $this->configuration['list_source']);
     if (empty($field_definition)) {
       return [];
     }
+
     $entity_storage = $this->entityTypeManager->getStorage($field_definition->getSetting('target_type'));
     $default_value = [];
     $filter_values = parent::getDefaultValues();
     foreach ($filter_values as $filter_value) {
       $default_value[] = $entity_storage->load($filter_value);
     }
+
     return $default_value;
   }
 
@@ -74,14 +76,16 @@ class EntityReferenceField extends MultiSelectFilterFieldPluginBase {
    * {@inheritdoc}
    */
   public function buildDefaultValueForm(): array {
-    $field_definition = $this->getFieldDefinition($this->configuration['facet'], $this->configuration['list_source']);
+    $field_definition = $this->getFacetFieldDefinition($this->configuration['facet'], $this->configuration['list_source']);
     if (empty($field_definition)) {
       return [];
     }
+
     $selection_settings = [
       'match_operator' => 'CONTAINS',
       'match_limit' => 10,
     ] + $field_definition->getSettings()['handler_settings'];
+
     return [
       '#type' => 'entity_autocomplete',
       '#maxlength' => 1024,
@@ -95,10 +99,11 @@ class EntityReferenceField extends MultiSelectFilterFieldPluginBase {
    * {@inheritdoc}
    */
   public function getDefaultValuesLabel(): string {
-    $field_definition = $this->getFieldDefinition($this->configuration['facet'], $this->configuration['list_source']);
+    $field_definition = $this->getFacetFieldDefinition($this->configuration['facet'], $this->configuration['list_source']);
     if (empty($field_definition)) {
       return '';
     }
+
     $filter_values = parent::getDefaultValues();
     $entity_storage = $this->entityTypeManager->getStorage($field_definition->getSetting('target_type'));
     $values = [];
@@ -110,6 +115,7 @@ class EntityReferenceField extends MultiSelectFilterFieldPluginBase {
 
       $values[] = $entity->label();
     }
+
     return implode(', ', $values);
   }
 

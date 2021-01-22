@@ -94,7 +94,7 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
   public function buildDefaultValueForm(array $form, FormStateInterface $form_state, FacetInterface $facet, ListPresetFilter $preset_filter = NULL): array {
     /** @var \Drupal\oe_list_pages\ListSourceInterface $list_source */
     $list_source = $form_state->get('list_source');
-    $field_definition = $this->getFieldDefinition($facet, $list_source);
+    $field_definition = $this->getFacetFieldDefinition($facet, $list_source);
     $field_type = !empty($field_definition) ? $field_definition->getType() : NULL;
     $filter_values = $preset_filter ? $preset_filter->getValues() : [];
 
@@ -149,7 +149,7 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
    */
   public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source, ListPresetFilter $filter): string {
     $filter_operators = ListPresetFilter::getOperators();
-    $field_definition = $this->getFieldDefinition($facet, $list_source);
+    $field_definition = $this->getFacetFieldDefinition($facet, $list_source);
     $field_type = !empty($field_definition) ? $field_definition->getType() : NULL;
 
     $id = $this->multiselectPluginManager->getPluginIdByFieldType($field_type);

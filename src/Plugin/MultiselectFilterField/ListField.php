@@ -29,7 +29,7 @@ class ListField extends MultiSelectFilterFieldPluginBase {
    * {@inheritdoc}
    */
   public function buildDefaultValueForm(): array {
-    $field_definition = $this->getFieldDefinition($this->configuration['facet'], $this->configuration['list_source']);
+    $field_definition = $this->getFacetFieldDefinition($this->configuration['facet'], $this->configuration['list_source']);
     if (empty($field_definition)) {
       return [];
     }
@@ -45,10 +45,11 @@ class ListField extends MultiSelectFilterFieldPluginBase {
    * {@inheritdoc}
    */
   public function getDefaultValuesLabel(): string {
-    $field_definition = $this->getFieldDefinition($this->configuration['facet'], $this->configuration['list_source']);
+    $field_definition = $this->getFacetFieldDefinition($this->configuration['facet'], $this->configuration['list_source']);
     if (empty($field_definition)) {
       return '';
     }
+
     $filter_value = parent::getDefaultValues();
     return implode(', ', array_map(function ($value) use ($field_definition) {
       return $field_definition->getSetting('allowed_values')[$value];
