@@ -119,7 +119,7 @@ class DefaultFilterConfigurationBuilder extends FilterConfigurationFormBuilderBa
 
     // Store the filter IDs on the form state in case we need to rebuild the
     // form.
-    $form_state->set('filter_id', $filter_id);
+    $form_state->set(static::getFilterType() . '_filter_id', $filter_id);
 
     $facet = $this->getFacetById($list_source, $facet_id);
     if (!empty($facet) && ($widget = $facet->getWidgetInstance()) && ($widget instanceof ListPagesWidgetInterface)) {
@@ -148,7 +148,6 @@ class DefaultFilterConfigurationBuilder extends FilterConfigurationFormBuilderBa
       $form['wrapper']['edit'][$filter_id]['set_value'] = [
         '#value' => $this->t('Set default value'),
         '#type' => 'button',
-        '#op' => 'set-default-value',
         '#limit_validation_errors' => [
           array_merge($form['#parents'], ['wrapper', 'edit']),
         ],
@@ -162,7 +161,7 @@ class DefaultFilterConfigurationBuilder extends FilterConfigurationFormBuilderBa
       $form['wrapper']['edit'][$filter_id]['cancel_value'] = [
         '#value' => $this->t('Cancel'),
         '#type' => 'button',
-        '#op' => 'cancel-default-value',
+        '#name' => static::getFilterType() . '-cancel-' . $filter_id,
         '#limit_validation_errors' => [
           array_merge($form['#parents'], [
             'wrapper',

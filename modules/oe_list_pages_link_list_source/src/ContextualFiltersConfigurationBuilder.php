@@ -178,7 +178,8 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
       $form['wrapper']['edit'][$filter_id]['cancel_value'] = [
         '#value' => $this->t('Cancel'),
         '#type' => 'button',
-        '#op' => 'cancel-default-value',
+        '#op' => 'cancel-contextual-filter',
+        '#name' => static::getFilterType() . '-cancel-' . $filter_id,
         '#limit_validation_errors' => [
           array_merge($form['#parents'], [
             'wrapper',

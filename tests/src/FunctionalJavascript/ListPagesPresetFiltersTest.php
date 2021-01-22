@@ -205,7 +205,7 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
     // Include both upcoming and past.
     $this->drupalGet($node->toUrl('edit-form'));
     $this->clickLink('List Page');
-    $this->getSession()->getPage()->pressButton('edit-' . $filter_id);
+    $this->getSession()->getPage()->pressButton('default-edit-' . $filter_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->selectFieldOption('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $filter_id . '][oe_list_pages_filter_operator]', 'Any of');
     $this->getSession()->getPage()->selectFieldOption($filter_selector . '[' . $facet->id() . '][1][list]', DateStatus::PAST);

@@ -116,7 +116,7 @@ abstract class FilterConfigurationFormBuilderBase {
       $form['wrapper']['buttons'][$filter_id]['edit-' . $filter_id] = [
         '#type' => 'button',
         '#value' => $this->t('Edit'),
-        '#name' => 'edit-' . $filter_id,
+        '#name' => static::getFilterType() . '-edit-' . $filter_id,
         '#filter_id' => $filter_id,
         '#facet_id' => $filter->getFacetId(),
         '#limit_validation_errors' => [
@@ -124,7 +124,7 @@ abstract class FilterConfigurationFormBuilderBase {
             'wrapper',
             'edit',
             $filter_id,
-            'edit-' . $filter_id,
+            static::getFilterType() . '-edit-' . $filter_id,
           ]),
         ],
         '#ajax' => [
@@ -138,16 +138,15 @@ abstract class FilterConfigurationFormBuilderBase {
       $form['wrapper']['buttons'][$filter_id]['delete-' . $filter_id] = [
         '#type' => 'button',
         '#value' => $this->t('Delete'),
-        '#name' => 'delete-' . $filter_id,
+        '#name' => static::getFilterType() . '-delete-' . $filter_id,
         '#filter_id' => $filter_id,
         '#facet_id' => $filter->getFacetId(),
-        '#op' => 'remove-default-value',
         '#limit_validation_errors' => [
           array_merge($form['#parents'], [
             'wrapper',
             'edit',
             $filter_id,
-            'delete-' . $filter_id,
+            static::getFilterType() . '-delete-' . $filter_id,
           ]),
         ],
         '#ajax' => [
