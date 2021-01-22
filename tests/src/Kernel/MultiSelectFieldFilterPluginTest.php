@@ -113,12 +113,12 @@ class MultiSelectFieldFilterPluginTest extends ListsSourceTestBase {
   }
 
   /**
-   * Tests the entity fields plugin.
+   * Tests the entity reference fields plugin.
    */
-  public function testEntityFieldPlugin(): void {
+  public function testEntityReferenceFieldPlugin(): void {
     $this->entityTypeManager->getStorage('field_storage_config')->create([
       'entity_type' => 'entity_test_mulrev_changed',
-      'field_name' => 'entity_field',
+      'field_name' => 'entity_reference_field',
       'type' => 'entity_reference',
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
       'settings' => [
@@ -127,9 +127,9 @@ class MultiSelectFieldFilterPluginTest extends ListsSourceTestBase {
     ])->save();
 
     $field_config = $this->entityTypeManager->getStorage('field_config')->create([
-      'label' => 'Entity field',
+      'label' => 'Entity reference field',
       'required' => FALSE,
-      'field_name' => 'entity_field',
+      'field_name' => 'entity_reference_field',
       'entity_type' => 'entity_test_mulrev_changed',
       'bundle' => 'item',
       'settings' => [
@@ -147,10 +147,11 @@ class MultiSelectFieldFilterPluginTest extends ListsSourceTestBase {
       'type' => 'item',
     ]);
     $entity->save();
+    // We need to load the entity so we can fully compare the objects below.
     $entity = $this->entityTypeManager->getStorage('entity_test_mulrev_changed')->load($entity->id());
 
-    $this->addFieldToIndex('entity_field', 'Entity field', 'string');
-    $facet = $this->createFieldFacet('entity_field');
+    $this->addFieldToIndex('entity_reference_field', 'Entity reference field', 'string');
+    $facet = $this->createFieldFacet('entity_reference_field');
 
     $item_list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
     $plugin_id = $this->pluginManager->getPluginIdByFieldType($field_config->getType());

@@ -111,6 +111,9 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
       '#required' => TRUE,
     ];
 
+    // There can be some facets which are configured to have a default status
+    // from a list of available options so in this case we need to prepare
+    // those options and present them in a select.
     if ($this->facetHasDefaultStatus($facet)) {
       $results = $this->processFacetResults($facet);
       $options = $this->transformResultsToOptions($results);
@@ -126,22 +129,30 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
       return $form;
     }
 
-    $id = $this->multiselectPluginManager->getPluginIdByFieldType($field_type);
-    if ($id) {
-      $config = [
-        'facet' => $facet,
-        'preset_filter' => $preset_filter,
-        'list_source' => $list_source,
-      ];
-      /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
-      $plugin = $this->multiselectPluginManager->createInstance($id, $config);
-      $form[$facet->id()]['#default_value'] = $plugin->getDefaultValues();
-      $form[$facet->id()][$id] = $plugin->buildDefaultValueForm();
-      $form_state->set('multivalue_child', $id);
-      return $form;
+    if (!$field_type) {
+      // If by chance we don't have a field type determined, there is nothing
+      // more we can do.
+      return $this->build($facet);
     }
 
-    return $this->build($facet);
+    // Try to determine the multiselect plugin for this field type.
+    $id = $this->multiselectPluginManager->getPluginIdByFieldType($field_type);
+    if (!$id) {
+      return $this->build($facet);
+    }
+
+    $config = [
+      'facet' => $facet,
+      'preset_filter' => $preset_filter,
+      'list_source' => $list_source,
+    ];
+    /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
+    $plugin = $this->multiselectPluginManager->createInstance($id, $config);
+    $form[$facet->id()]['#default_value'] = $plugin->getDefaultValues();
+    $form[$facet->id()][$id] = $plugin->buildDefaultValueForm();
+    $form_state->set('multivalue_child', $id);
+
+    return $form;
   }
 
   /**
@@ -153,19 +164,19 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
     $field_type = !empty($field_definition) ? $field_definition->getType() : NULL;
 
     $id = $this->multiselectPluginManager->getPluginIdByFieldType($field_type);
-    if ($id) {
-      $config = [
-        'facet' => $facet,
-        'preset_filter' => $filter,
-        'list_source' => $list_source,
-      ];
-      /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
-      $plugin = $this->multiselectPluginManager->createInstance($id, $config);
-      return $filter_operators[$filter->getOperator()] . ': ' . $plugin->getDefaultValuesLabel();
-
+    if (!$id) {
+      return $filter_operators[$filter->getOperator()] . ': ' . parent::getDefaultValuesLabel($facet, $list_source, $filter);
     }
 
-    return $filter_operators[$filter->getOperator()] . ': ' . parent::getDefaultValuesLabel($facet, $list_source, $filter);
+    $config = [
+      'facet' => $facet,
+      'preset_filter' => $filter,
+      'list_source' => $list_source,
+    ];
+    /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
+    $plugin = $this->multiselectPluginManager->createInstance($id, $config);
+
+    return $filter_operators[$filter->getOperator()] . ': ' . $plugin->getDefaultValuesLabel();
   }
 
   /**
