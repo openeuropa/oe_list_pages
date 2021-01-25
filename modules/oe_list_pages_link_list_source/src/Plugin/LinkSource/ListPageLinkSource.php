@@ -6,19 +6,26 @@ namespace Drupal\oe_list_pages_link_list_source\Plugin\LinkSource;
 
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\SubformState;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\facets\FacetInterface;
 use Drupal\oe_link_lists\Event\EntityValueResolverEvent;
 use Drupal\oe_link_lists\LinkCollection;
 use Drupal\oe_link_lists\LinkCollectionInterface;
 use Drupal\oe_link_lists\LinkSourcePluginBase;
+use Drupal\oe_list_pages\FacetManipulationTrait;
 use Drupal\oe_list_pages\Form\ListPageConfigurationSubformFactory;
 use Drupal\oe_list_pages\ListExecutionManagerInterface;
 use Drupal\oe_list_pages\ListPageConfiguration;
+use Drupal\oe_list_pages\ListSourceFactoryInterface;
 use Drupal\oe_list_pages\ListSourceInterface;
+use Drupal\oe_list_pages\MultiselectFilterFieldPluginManager;
 use Drupal\oe_list_pages_link_list_source\ContextualFiltersConfigurationBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -35,6 +42,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactoryPluginInterface {
 
   use DependencySerializationTrait;
+  use FacetManipulationTrait;
 
   /**
    * The list page subform configuration factory.
@@ -79,9 +87,32 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
   protected $contextualFiltersBuilder;
 
   /**
-   * {@inheritdoc}
+   * The current route match.
+   *
+   * @var \Drupal\Core\Routing\RouteMatchInterface
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, ListPageConfigurationSubformFactory $configurationSubformFactory, ListExecutionManagerInterface $listExecutionManager, EventDispatcherInterface $eventDispatcher, EntityTypeManagerInterface $entityTypeManager, EntityRepositoryInterface $entityRepository, ContextualFiltersConfigurationBuilder $contextualFiltersBuilder) {
+  protected $routeMatch;
+
+  /**
+   * The list source factory.
+   *
+   * @var \Drupal\oe_list_pages\ListSourceFactoryInterface
+   */
+  protected $listSourceFactory;
+
+  /**
+   * Plugin manager for the multiselect filter fields.
+   *
+   * @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginManager
+   */
+  protected $multiselectPluginManager;
+
+  /**
+   * {@inheritdoc}
+   *
+   * @SuppressWarnings(PHPMD.ExcessiveParameterList)
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, ListPageConfigurationSubformFactory $configurationSubformFactory, ListExecutionManagerInterface $listExecutionManager, EventDispatcherInterface $eventDispatcher, EntityTypeManagerInterface $entityTypeManager, EntityRepositoryInterface $entityRepository, ContextualFiltersConfigurationBuilder $contextualFiltersBuilder, RouteMatchInterface $routeMatch, ListSourceFactoryInterface $listSourceFactory, MultiselectFilterFieldPluginManager $multiselectPluginManager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->configurationSubformFactory = $configurationSubformFactory;
@@ -90,6 +121,9 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
     $this->entityTypeManager = $entityTypeManager;
     $this->entityRepository = $entityRepository;
     $this->contextualFiltersBuilder = $contextualFiltersBuilder;
+    $this->routeMatch = $routeMatch;
+    $this->listSourceFactory = $listSourceFactory;
+    $this->multiselectPluginManager = $multiselectPluginManager;
   }
 
   /**
@@ -105,7 +139,10 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
       $container->get('event_dispatcher'),
       $container->get('entity_type.manager'),
       $container->get('entity.repository'),
-      $container->get('oe_list_pages_link_list_source.contextual_filters_builder')
+      $container->get('oe_list_pages_link_list_source.contextual_filters_builder'),
+      $container->get('current_route_match'),
+      $container->get('oe_list_pages.list_source.factory'),
+      $container->get('plugin.manager.multiselect_filter_field')
     );
   }
 
@@ -127,10 +164,10 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
    */
   public function getLinks(int $limit = NULL, int $offset = 0): LinkCollectionInterface {
     $links = new LinkCollection();
-    $configuration = new ListPageConfiguration($this->configuration);
+    $cache = new CacheableMetadata();
+    $configuration = $this->initializeConfiguration($cache);
     $limit = is_null($limit) ? 0 : $limit;
     $configuration->setLimit($limit);
-    $cache = new CacheableMetadata();
     $list_execution = $this->listExecutionManager->executeList($configuration);
     if (!$list_execution) {
       $links->addCacheableDependency($cache);
@@ -224,7 +261,107 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
       'contextual_filters',
       'current_filters',
     ], []));
+
     $this->configuration['contextual_filters'] = $contextual_filters;
+  }
+
+  /**
+   * Prepares the configuration object for this link list.
+   *
+   * @param \Drupal\Core\Cache\CacheableMetadata $cache
+   *   The cacheable metadata.
+   *
+   * @return \Drupal\oe_list_pages\ListPageConfiguration
+   *   The configuration.
+   */
+  protected function initializeConfiguration(CacheableMetadata $cache): ListPageConfiguration {
+    $configuration = new ListPageConfiguration($this->configuration);
+    $cache->addCacheContexts(['route']);
+
+    // Add the contextual filters.
+    $entity = $this->getCurrentEntityFromRoute();
+    if (!$entity instanceof ContentEntityInterface) {
+      return $configuration;
+    }
+
+    $contextual_filters = $this->configuration['contextual_filters'];
+    $default_filter_values = $configuration->getDefaultFiltersValues();
+    $list_source = $this->listSourceFactory->get($configuration->getEntityType(), $configuration->getBundle());
+
+    foreach ($contextual_filters as $contextual_filter) {
+      $facet = $this->contextualFiltersBuilder->getFacetById($list_source, $contextual_filter->getFacetId());
+      $definition = $this->getFacetFieldDefinition($facet, $list_source);
+      $field_name = $definition->getName();
+      // We only support contextual filters for fields that exist with the
+      // same name both on the current entity and on the listed entity type.
+      if (!$entity->hasField($field_name)) {
+        continue;
+      }
+
+      $field = $entity->get($field_name);
+      $values = $this->extractValuesFromField($field, $facet, $list_source);
+
+      if (!empty($values)) {
+        $contextual_filter->setValues($values);
+        $default_filter_values[ContextualFiltersConfigurationBuilder::generateFilterId($contextual_filter->getFacetId(), array_keys($default_filter_values))] = $contextual_filter;
+      }
+    }
+
+    $configuration->setDefaultFilterValues($default_filter_values);
+
+    return $configuration;
+  }
+
+  /**
+   * Get content entity from route.
+   *
+   * @return \Drupal\Core\Entity\ContentEntityInterface|null
+   *   The content entity.
+   */
+  protected function getCurrentEntityFromRoute() :?ContentEntityInterface {
+    $route_name = $this->routeMatch->getRouteName();
+    $parts = explode('.', $route_name);
+    if (count($parts) !== 3 || $parts[0] !== 'entity' || $parts[2] !== 'canonical') {
+      return NULL;
+    }
+
+    $entity_type = $parts[1];
+    return $this->routeMatch->getParameter($entity_type);
+  }
+
+  /**
+   * Extracts the field values.
+   *
+   * Determines what type of field we are dealing with and delegates to the
+   * correct multiselect filter field plugin to handle the value extraction.
+   *
+   * @param \Drupal\Core\Field\FieldItemListInterface $items
+   *   The field items list.
+   * @param \Drupal\facets\FacetInterface $facet
+   *   The facet.
+   * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
+   *   The list source.
+   *
+   * @return array
+   *   The values.
+   */
+  protected function extractValuesFromField(FieldItemListInterface $items, FacetInterface $facet, ListSourceInterface $list_source) {
+    $field_definition = $items->getFieldDefinition();
+    $id = $this->multiselectPluginManager->getPluginIdByFieldType($field_definition->getType());
+    if (!$id) {
+      return [];
+    }
+
+    $config = [
+      'facet' => $facet,
+      'preset_filter' => [],
+      'list_source' => $list_source,
+    ];
+
+    /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
+    $plugin = $this->multiselectPluginManager->createInstance($id, $config);
+
+    return $plugin->getFieldValues($items);
   }
 
 }

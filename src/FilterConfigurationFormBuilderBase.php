@@ -67,6 +67,28 @@ abstract class FilterConfigurationFormBuilderBase {
   abstract public function deleteFilterValueSubmit(array &$form, FormStateInterface $form_state): void;
 
   /**
+   * Get a facet by id.
+   *
+   * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
+   *   The list source.
+   * @param string $id
+   *   The facet id.
+   *
+   * @return \Drupal\facets\FacetInterface|null
+   *   The facet if found.
+   */
+  public function getFacetById(ListSourceInterface $list_source, string $id): ?FacetInterface {
+    $facets = $this->facetsManager->getFacetsByFacetSourceId($list_source->getSearchId());
+    foreach ($facets as $facet) {
+      if ($id === $facet->id()) {
+        return $facet;
+      }
+    }
+
+    return NULL;
+  }
+
+  /**
    * Builds the summary for the filters.
    *
    * The summary lists which of the facets have been configured to be used as
@@ -377,28 +399,6 @@ abstract class FilterConfigurationFormBuilderBase {
     $values = NestedArray::getValue($storage, [$key, $list_source->getSearchId()]);
     // If we have an empty array, it means we removed all the values.
     return is_array($values) && empty($values) ?? FALSE;
-  }
-
-  /**
-   * Get a facet by id.
-   *
-   * @param \Drupal\oe_list_pages\ListSourceInterface $listSource
-   *   The list source.
-   * @param string $id
-   *   The facet id.
-   *
-   * @return \Drupal\facets\FacetInterface|null
-   *   The facet if found.
-   */
-  protected function getFacetById(ListSourceInterface $listSource, string $id): ?FacetInterface {
-    $facets = $this->facetsManager->getFacetsByFacetSourceId($listSource->getSearchId());
-    foreach ($facets as $facet) {
-      if ($id === $facet->id()) {
-        return $facet;
-      }
-    }
-
-    return NULL;
   }
 
 }

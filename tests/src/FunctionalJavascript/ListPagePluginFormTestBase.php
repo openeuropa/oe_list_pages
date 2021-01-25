@@ -383,7 +383,8 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $assert = $this->assertSession();
     $assert->pageTextContains('Set default value for Reference');
     $filter_selector = $default_value_name_prefix . '[wrapper][edit][' . $reference_filter_id . ']';
-    $this->getSession()->getPage()->fillField($filter_selector . '[reference][0][entity]', 'red (1)');
+
+    $this->getSession()->getPage()->fillField($filter_selector . '[reference][0][entity_reference]', 'red (1)');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $expected_set_filters['reference'] = ['key' => 'Reference', 'value' => 'red'];
@@ -395,8 +396,8 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $assert = $this->assertSession();
     $assert->pageTextContains('Set default value for Reference');
     $filter_selector = $default_value_name_prefix . '[wrapper][edit][' . $reference_filter_id . ']';
-    $this->assertSession()->fieldValueEquals($filter_selector . '[reference][0][entity]', 'red (1)');
-    $this->getSession()->getPage()->fillField($filter_selector . '[reference][1][entity]', 'yellow (2)');
+    $this->assertSession()->fieldValueEquals($filter_selector . '[reference][0][entity_reference]', 'red (1)');
+    $this->getSession()->getPage()->fillField($filter_selector . '[reference][1][entity_reference]', 'yellow (2)');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $expected_set_filters['reference'] = ['key' => 'Reference', 'value' => 'red, yellow'];
@@ -407,9 +408,9 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert = $this->assertSession();
     $assert->pageTextContains('Set default value for Reference');
-    $this->assertSession()->fieldValueEquals($filter_selector . '[reference][0][entity]', 'red (1)');
-    $this->assertSession()->fieldValueEquals($filter_selector . '[reference][1][entity]', 'yellow (2)');
-    $this->getSession()->getPage()->fillField($filter_selector . '[reference][1][entity]', '');
+    $this->assertSession()->fieldValueEquals($filter_selector . '[reference][0][entity_reference]', 'red (1)');
+    $this->assertSession()->fieldValueEquals($filter_selector . '[reference][1][entity_reference]', 'yellow (2)');
+    $this->getSession()->getPage()->fillField($filter_selector . '[reference][1][entity_reference]', '');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $expected_set_filters['reference'] = ['key' => 'Reference', 'value' => 'red'];
@@ -576,7 +577,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
 
     $assert->pageTextContains('Set default value for Reference');
-    $this->getSession()->getPage()->fillField($default_value_name_prefix . '[wrapper][edit][' . $reference_filter_id . '][reference][0][entity]', 'yellow (2)');
+    $this->getSession()->getPage()->fillField($default_value_name_prefix . '[wrapper][edit][' . $reference_filter_id . '][reference][0][entity_reference]', 'yellow (2)');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $expected_set_filters['reference'] = ['key' => 'Reference', 'value' => 'yellow'];
@@ -595,7 +596,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $page->pressButton('default-edit-' . $reference_filter_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert->pageTextContains('Set default value for Reference');
-    $this->getSession()->getPage()->fillField($default_value_name_prefix . '[wrapper][edit][' . $reference_filter_id . '][reference][0][entity]', 'Red (1)');
+    $this->getSession()->getPage()->fillField($default_value_name_prefix . '[wrapper][edit][' . $reference_filter_id . '][reference][0][entity_reference]', 'Red (1)');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $expected_set_filters['reference'] = ['key' => 'Reference', 'value' => 'Red'];
@@ -662,10 +663,10 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     // Test an OR filter.
     $page->selectFieldOption('Add default value for', 'Reference');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->getSession()->getPage()->fillField($default_value_name_prefix . '[wrapper][edit][' . $reference_filter_id . '][reference][0][entity]', 'Green (3)');
+    $this->getSession()->getPage()->fillField($default_value_name_prefix . '[wrapper][edit][' . $reference_filter_id . '][reference][0][entity_reference]', 'Green (3)');
     $page->pressButton('Add another item');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->getSession()->getPage()->fillField($default_value_name_prefix . '[wrapper][edit][' . $reference_filter_id . '][reference][1][entity]', 'Yellow (2)');
+    $this->getSession()->getPage()->fillField($default_value_name_prefix . '[wrapper][edit][' . $reference_filter_id . '][reference][1][entity_reference]', 'Yellow (2)');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $expected_set_filters = [['key' => 'Reference', 'value' => 'Any of: Green, Yellow']];
@@ -728,7 +729,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     }
     $page->pressButton('default-edit-' . $reference_filter_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->getSession()->getPage()->fillField($default_value_name_prefix . '[wrapper][edit][' . $reference_filter_id . '][reference][1][entity]', '');
+    $this->getSession()->getPage()->fillField($default_value_name_prefix . '[wrapper][edit][' . $reference_filter_id . '][reference][1][entity_reference]', '');
     $page->selectFieldOption($default_value_name_prefix . '[wrapper][edit][' . $reference_filter_id . '][oe_list_pages_filter_operator]', 'Any of');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $page->pressButton('Set default value');
@@ -738,7 +739,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $page->selectFieldOption('Add default value for', 'Reference');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $second_reference_filter_id = DefaultFilterConfigurationBuilder::generateFilterId('reference', [$reference_filter_id]);
-    $this->getSession()->getPage()->fillField($default_value_name_prefix . '[wrapper][edit][' . $second_reference_filter_id . '][reference][0][entity]', 'Yellow (2)');
+    $this->getSession()->getPage()->fillField($default_value_name_prefix . '[wrapper][edit][' . $second_reference_filter_id . '][reference][0][entity_reference]', 'Yellow (2)');
     $page->selectFieldOption($default_value_name_prefix . '[wrapper][edit][' . $second_reference_filter_id . '][oe_list_pages_filter_operator]', 'None of');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
@@ -761,7 +762,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     }
     $page->pressButton('default-edit-' . $second_reference_filter_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->getSession()->getPage()->fillField($default_value_name_prefix . '[wrapper][edit][' . $second_reference_filter_id . '][reference][0][entity]', 'Yellow (2)');
+    $this->getSession()->getPage()->fillField($default_value_name_prefix . '[wrapper][edit][' . $second_reference_filter_id . '][reference][0][entity_reference]', 'Yellow (2)');
     $page->selectFieldOption($default_value_name_prefix . '[wrapper][edit][' . $second_reference_filter_id . '][oe_list_pages_filter_operator]', 'Any of');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
