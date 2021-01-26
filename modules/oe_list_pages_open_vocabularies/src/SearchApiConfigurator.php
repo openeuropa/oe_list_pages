@@ -61,7 +61,7 @@ class SearchApiConfigurator {
     $index = $list_source->getIndex();
 
     // Generates the field and facet id.
-    $id = 'open_vocabularies_' . str_replace('.', '_', $association_config_id);
+    $id = 'open_vocabularies_' . str_replace('.', '_', $association_config_id . '_' . $field_id);
 
     // Creates the field.
     /** @var \Drupal\search_api\Field $index_field */
@@ -74,13 +74,15 @@ class SearchApiConfigurator {
 
     // Creates the facet.
     /** @var \Drupal\facets\FacetInterface $facet */
-    $facet = $this->getFacet($id, $association_config_label);
+    $facet = $this->getFacet($id);
     $facet->setUrlAlias($id);
+    $facet->set('name', $association_config_label);
     $facet->addProcessor([
       'processor_id' => 'url_processor_handler',
       'weights' => [],
       'settings' => [],
     ]);
+    $facet->setEmptyBehavior([]);
     $facet->setFacetSourceId($list_source->getSearchId());
     $facet->setWidget('oe_list_pages_multiselect', []);
     $facet->setFieldIdentifier($id);
@@ -107,7 +109,7 @@ class SearchApiConfigurator {
     $index = $list_source->getIndex();
 
     // Remove field.
-    $id = 'open_vocabularies_' . str_replace('.', '_', $association_config_id);
+    $id = 'open_vocabularies_' . str_replace('.', '_', $association_config_id . '_' . $field_id);
     $index->removeField($id);
     $index->save();
 
@@ -121,15 +123,13 @@ class SearchApiConfigurator {
    *
    * @param string $facet_id
    *   The facet id.
-   * @param string $label
-   *   The label.
    *
    * @return \Drupal\facets\FacetInterface
    *   The facet.
    */
-  protected function getFacet(string $facet_id, string $label = ''): FacetInterface {
+  protected function getFacet(string $facet_id): FacetInterface {
     $facet_storage = $this->entityTypeManager->getStorage('facets_facet');
-    return $facet_storage->load($facet_id) ?? new Facet(['name' => $label, 'id' => $facet_id], 'facets_facet');
+    return $facet_storage->load($facet_id) ?? new Facet(['id' => $facet_id], 'facets_facet');
   }
 
   /**

@@ -34,14 +34,21 @@ class OpenVocabulariesConfigSubscriber implements EventSubscriberInterface {
    */
   public function onSave(ConfigCrudEvent $event) {
     $config = $event->getConfig();
-    if (strpos($config->getName(), 'open_vocabularies') !== 0) {
+    if (strpos($config->getName(), 'open_vocabularies.open_vocabulary_association') !== 0) {
       return;
     }
 
-    $fields = $config->getRawData()['fields'];
+    $fields = $config->get('fields');
     foreach ($fields as $field) {
-      // @TODO: Missing deleting old associations if it is needed.
-      $this->configurator->updateConfig($config->getRawData()['id'], $config->getRawData()['label'], $field);
+      $this->configurator->updateConfig($config->get('id'), $config->get('label'), $field);
+    }
+
+    // Handle fields that could be removed from the association.
+    if ($old_fields = $config->getOriginal('fields')) {
+      $fields_to_remove = array_diff($old_fields, $fields);
+      foreach ($fields_to_remove as $field) {
+        $this->configurator->removeConfig($config->getOriginal('id'), $field);
+      }
     }
   }
 
@@ -59,7 +66,7 @@ class OpenVocabulariesConfigSubscriber implements EventSubscriberInterface {
 
     $fields = $config->getOriginal()['fields'];
     foreach ($fields as $field) {
-      $this->configurator->removeConfig($config->getOriginal()['id'], $field);
+      $this->configurator->removeConfig($config->getOriginal('id'), $field);
     }
   }
 
