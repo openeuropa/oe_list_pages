@@ -8,7 +8,7 @@ use Drupal\Component\Utility\SortArray;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
-use Drupal\oe_list_pages\Annotation\MultiselectFieldFilter;
+use Drupal\oe_list_pages\Annotation\MultiselectFilterField;
 
 /**
  * Plugin manager for multiselect filter field plugins.
@@ -27,7 +27,7 @@ class MultiselectFilterFieldPluginManager extends DefaultPluginManager {
    *   The module handler to invoke the alter hook with.
    */
   public function __construct(\Traversable $namespaces, CacheBackendInterface $cache_backend, ModuleHandlerInterface $module_handler) {
-    parent::__construct('Plugin/MultiselectFilterField', $namespaces, $module_handler, MultiselectFilterFieldPluginInterface::class, MultiselectFieldFilter::class);
+    parent::__construct('Plugin/MultiselectFilterField', $namespaces, $module_handler, MultiselectFilterFieldPluginInterface::class, MultiselectFilterField::class);
 
     $this->alterInfo('multiselect_filter_field_info');
     $this->setCacheBackend($cache_backend, 'multiselect_filter_field_plugins');

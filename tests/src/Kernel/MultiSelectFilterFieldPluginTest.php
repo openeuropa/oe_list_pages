@@ -13,9 +13,9 @@ use Drupal\oe_list_pages\ListSourceFactory;
 use Drupal\search_api\Item\Field;
 
 /**
- * Tests for MultiSelectFieldFilter plugins.
+ * Tests for MultiSelectFilterField plugins.
  */
-class MultiSelectFieldFilterPluginTest extends ListsSourceTestBase {
+class MultiSelectFilterFieldPluginTest extends ListsSourceTestBase {
 
   /**
    * The entity type manager.

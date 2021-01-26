@@ -12,7 +12,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Defines the entity field type multiselect filter plugin.
  *
- * @MultiselectFieldFilter(
+ * @MultiselectFilterField(
  *   id = "entity",
  *   label = @Translation("Entity field"),
  *   field_types = {

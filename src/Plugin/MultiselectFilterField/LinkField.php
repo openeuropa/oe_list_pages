@@ -15,7 +15,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Defines the link field type multiselect filter plugin.
  *
- * @MultiselectFieldFilter(
+ * @MultiselectFilterField(
  *   id = "link",
  *   label = @Translation("Link field"),
  *   field_types = {

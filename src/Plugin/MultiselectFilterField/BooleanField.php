@@ -11,7 +11,7 @@ use Drupal\oe_list_pages\MultiSelectFilterFieldPluginBase;
 /**
  * Defines the boolean field type multiselect filter plugin.
  *
- * @MultiselectFieldFilter(
+ * @MultiselectFilterField(
  *   id = "boolean",
  *   label = @Translation("Boolean field"),
  *   field_types = {

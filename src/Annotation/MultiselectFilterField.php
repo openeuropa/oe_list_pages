@@ -11,7 +11,7 @@ use Drupal\Component\Annotation\Plugin;
  *
  * Example definition:
  * @code
- * @MultiselectFieldFilter(
+ * @MultiselectFilterField(
  *   id = "multiselect_filter_example",
  *   label = @Translation("Multiselect filter example"),
  *   field_types = {
@@ -24,7 +24,7 @@ use Drupal\Component\Annotation\Plugin;
  * @Annotation
  * @SuppressWarnings(PHPMD.ShortVariable)
  */
-class MultiselectFieldFilter extends Plugin {
+class MultiselectFilterField extends Plugin {
 
   /**
    * The plugin ID.

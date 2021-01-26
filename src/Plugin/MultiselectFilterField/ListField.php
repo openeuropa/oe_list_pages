@@ -10,7 +10,7 @@ use Drupal\oe_list_pages\MultiSelectFilterFieldPluginBase;
 /**
  * Defines the list field type multiselect filter plugin.
  *
- * @MultiselectFieldFilter(
+ * @MultiselectFilterField(
  *   id = "list",
  *   label = @Translation("List field"),
  *   field_types = {
