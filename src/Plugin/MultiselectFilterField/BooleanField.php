@@ -51,7 +51,7 @@ class BooleanField extends MultiSelectFilterFieldPluginBase {
    */
   public function getDefaultValuesLabel(): string {
     $facet = $this->configuration['facet'];
-    $reset_filter = $this->configuration['preset_filter'];
+    $preset_filter = $this->configuration['preset_filter'];
     // Create some dummy results for each boolean type (on/off) then process
     // the results to ensure we have display labels.
     $results = [
@@ -60,7 +60,7 @@ class BooleanField extends MultiSelectFilterFieldPluginBase {
     ];
     $facet->setResults($results);
 
-    return $this->getDefaultFilterValuesLabel($facet, $reset_filter);
+    return $this->getDefaultFilterValuesLabel($facet, $preset_filter);
   }
 
 }
