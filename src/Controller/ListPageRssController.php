@@ -13,7 +13,7 @@ use Drupal\Core\Cache\CacheableResponse;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Datetime\DateFormatterInterface;
-use Drupal\Core\Entity\EntityRepositoryInterface;
+use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Theme\ThemeManagerInterface;
@@ -37,25 +37,11 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class ListPageRssController extends ControllerBase {
 
   /**
-   * The config factory.
-   *
-   * @var \Drupal\Core\Config\ConfigFactoryInterface
-   */
-  protected $configFactory;
-
-  /**
    * The date formatter.
    *
    * @var \Drupal\Core\Datetime\DateFormatterInterface
    */
   protected $dateFormatter;
-
-  /**
-   * The entity repository.
-   *
-   * @var \Drupal\Core\Entity\EntityRepositoryInterface
-   */
-  protected $entityRepository;
 
   /**
    * The event dispatcher.
@@ -106,10 +92,10 @@ class ListPageRssController extends ControllerBase {
    *   The configuration factory.
    * @param \Drupal\Core\Datetime\DateFormatterInterface $date_formatter
    *   The date formatter.
-   * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
-   *   The entity repository.
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
    *   The event dispatcher.
+   * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
+   *   The language manager.
    * @param \Drupal\oe_list_pages\ListBuilderInterface $list_builder
    *   The list builder.
    * @param \Drupal\oe_list_pages\ListExecutionManagerInterface $list_execution_manager
@@ -121,11 +107,11 @@ class ListPageRssController extends ControllerBase {
    * @param \Drupal\Core\Theme\ThemeManagerInterface $theme_manager
    *   The theme manager.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, DateFormatterInterface $date_formatter, EntityRepositoryInterface $entity_repository, EventDispatcherInterface $event_dispatcher, ListBuilderInterface $list_builder, ListExecutionManagerInterface $list_execution_manager, RendererInterface $renderer, RequestStack $request, ThemeManagerInterface $theme_manager) {
+  public function __construct(ConfigFactoryInterface $config_factory, DateFormatterInterface $date_formatter, EventDispatcherInterface $event_dispatcher, LanguageManagerInterface $language_manager, ListBuilderInterface $list_builder, ListExecutionManagerInterface $list_execution_manager, RendererInterface $renderer, RequestStack $request, ThemeManagerInterface $theme_manager) {
     $this->configFactory = $config_factory;
     $this->dateFormatter = $date_formatter;
-    $this->entityRepository = $entity_repository;
     $this->eventDispatcher = $event_dispatcher;
+    $this->languageManager = $language_manager;
     $this->listExecutionManager = $list_execution_manager;
     $this->listBuilder = $list_builder;
     $this->renderer = $renderer;
@@ -140,8 +126,8 @@ class ListPageRssController extends ControllerBase {
     return new static(
       $container->get('config.factory'),
       $container->get('date.formatter'),
-      $container->get('entity.repository'),
       $container->get('event_dispatcher'),
+      $container->get('language_manager'),
       $container->get('oe_list_pages.builder'),
       $container->get('oe_list_pages.execution_manager'),
       $container->get('renderer'),
@@ -160,7 +146,10 @@ class ListPageRssController extends ControllerBase {
    *   The RSS feed response.
    */
   public function build(NodeInterface $node): CacheableResponse {
-    $node = $this->entityRepository->getTranslationFromContext($node);
+    $language = $this->languageManager->getCurrentLanguage();
+    if ($node->hasTranslation($language->getId())) {
+      $node = $node->getTranslation($language->getId());
+    }
     // Build the render array for the RSS feed.
     $cache_metadata = CacheableMetadata::createFromObject($node);
     $default_title = $this->getChannelTitle($node, $cache_metadata);
@@ -168,6 +157,7 @@ class ListPageRssController extends ControllerBase {
     $default_link = $node->toUrl('canonical', [
       'absolute' => TRUE,
       'query' => $query,
+      'language' => $language,
     ])->toString(TRUE);
     $cache_metadata->addCacheableDependency($default_link);
     $build = [
@@ -175,7 +165,7 @@ class ListPageRssController extends ControllerBase {
       '#title' => $default_title,
       '#link' => $default_link->getGeneratedUrl(),
       '#channel_description' => $this->getChannelDescription($node, $cache_metadata),
-      '#language' => $node->language()->getId(),
+      '#language' => $language->getId(),
       '#copyright' => $this->getChannelCopyright(),
       '#image' => $this->getChannelImage($cache_metadata),
       '#channel_elements' => [],
