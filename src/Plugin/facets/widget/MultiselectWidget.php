@@ -4,21 +4,17 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages\Plugin\facets\widget;
 
-use Drupal\Core\Entity\Element\EntityAutocomplete;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Field\EntityReferenceFieldItemListInterface;
-use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\facets\FacetInterface;
 use Drupal\facets\Processor\ProcessorPluginManager;
-use Drupal\facets\Result\Result;
-use Drupal\link\LinkItemInterface;
-use Drupal\link\Plugin\Field\FieldWidget\LinkWidget;
 use Drupal\multivalue_form_element\Element\MultiValue;
+use Drupal\oe_list_pages\FacetManipulationTrait;
 use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\ListSourceInterface;
+use Drupal\oe_list_pages\MultiselectFilterFieldPluginManager;
 use Drupal\oe_list_pages\Plugin\facets\processor\DefaultStatusProcessorInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -33,6 +29,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryPluginInterface {
 
+  use FacetManipulationTrait;
+
   /**
    * The entity type manager.
    *
@@ -46,6 +44,13 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
    * @var \Drupal\Core\Entity\EntityFieldManagerInterface
    */
   protected $entityFieldManager;
+
+  /**
+   * The multiselect filter field plugin manager.
+   *
+   * @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginManager
+   */
+  protected $multiselectPluginManager;
 
   /**
    * The facets processor manager.
@@ -64,6 +69,7 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
       $plugin_definition,
       $container->get('entity_type.manager'),
       $container->get('entity_field.manager'),
+      $container->get('plugin.manager.multiselect_filter_field'),
       $container->get('plugin.manager.facets.processor')
     );
   }
@@ -71,10 +77,11 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, EntityFieldManagerInterface $entity_field_manager, ProcessorPluginManager $processorManager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, EntityFieldManagerInterface $entity_field_manager, MultiselectFilterFieldPluginManager $multiselect_plugin_manager, ProcessorPluginManager $processorManager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->entityTypeManager = $entity_type_manager;
     $this->entityFieldManager = $entity_field_manager;
+    $this->multiselectPluginManager = $multiselect_plugin_manager;
     $this->processorManager = $processorManager;
   }
 
@@ -83,15 +90,13 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
    *
    * @SuppressWarnings(PHPMD.CyclomaticComplexity)
    * @SuppressWarnings(PHPMD.NPathComplexity)
-   *
-   * @todo create a plugin type for supporting the various field types.
    */
   public function buildDefaultValueForm(array $form, FormStateInterface $form_state, FacetInterface $facet, ListPresetFilter $preset_filter = NULL): array {
     /** @var \Drupal\oe_list_pages\ListSourceInterface $list_source */
     $list_source = $form_state->get('list_source');
-    $field_definition = $this->getFieldDefinition($facet, $list_source);
+    $field_definition = $this->getFacetFieldDefinition($facet, $list_source);
     $field_type = !empty($field_definition) ? $field_definition->getType() : NULL;
-    $active_items = $preset_filter ? $preset_filter->getValues() : [];
+    $filter_values = $preset_filter ? $preset_filter->getValues() : [];
 
     $form['oe_list_pages_filter_operator'] = [
       '#type' => 'select',
@@ -106,11 +111,14 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
       '#required' => TRUE,
     ];
 
+    // There can be some facets which are configured to have a default status
+    // from a list of available options so in this case we need to prepare
+    // those options and present them in a select.
     if ($this->facetHasDefaultStatus($facet)) {
       $results = $this->processFacetResults($facet);
       $options = $this->transformResultsToOptions($results);
 
-      $form[$facet->id()]['#default_value'] = $active_items;
+      $form[$facet->id()]['#default_value'] = $filter_values;
       $form[$facet->id()]['list'] = [
         '#type' => 'select',
         '#options' => $options,
@@ -121,164 +129,54 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
       return $form;
     }
 
-    if (in_array(EntityReferenceFieldItemListInterface::class, class_implements($field_definition->getClass()))) {
-      $entity_storage = $this->entityTypeManager->getStorage($field_definition->getSetting('target_type'));
-      $default_value = [];
-      foreach ($active_items as $active_item) {
-        $default_value[] = $entity_storage->load($active_item);
-      }
-      $selection_settings = [
-        'match_operator' => 'CONTAINS',
-        'match_limit' => 10,
-      ] + $field_definition->getSettings()['handler_settings'];
-      $form[$facet->id()]['#default_value'] = $default_value;
-      $form[$facet->id()]['entity'] = [
-        '#type' => 'entity_autocomplete',
-        '#maxlength' => 1024,
-        '#target_type' => $field_definition->getSetting('target_type'),
-        '#selection_handler' => $field_definition->getSetting('handler'),
-        '#selection_settings' => $selection_settings,
-      ];
-
-      $form_state->set('multivalue_child', 'entity');
-      return $form;
+    if (!$field_type) {
+      // If by chance we don't have a field type determined, there is nothing
+      // more we can do.
+      return $this->build($facet);
     }
 
-    if (in_array($field_type, ['list_integer', 'list_float', 'list_string'])) {
-      $form[$facet->id()]['#default_value'] = $active_items;
-      $form[$facet->id()]['list'] = [
-        '#type' => 'select',
-        '#options' => $field_definition->getSetting('allowed_values'),
-        '#empty_option' => $this->t('Select'),
-      ];
-      $form_state->set('multivalue_child', 'list');
-
-      return $form;
+    // Try to determine the multiselect plugin for this field type.
+    $id = $this->multiselectPluginManager->getPluginIdByFieldType($field_type);
+    if (!$id) {
+      return $this->build($facet);
     }
 
-    if ($field_type === 'boolean') {
-      // Create some dummy results for each boolean type (on/off) then process
-      // the results to ensure we have display labels.
-      $results = [
-        new Result($facet, 1, 1, 1),
-        new Result($facet, 0, 0, 1),
-      ];
+    $config = [
+      'facet' => $facet,
+      'preset_filter' => $preset_filter,
+      'list_source' => $list_source,
+    ];
+    /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
+    $plugin = $this->multiselectPluginManager->createInstance($id, $config);
+    $form[$facet->id()]['#default_value'] = $plugin->getDefaultValues();
+    $form[$facet->id()][$id] = $plugin->buildDefaultValueForm();
+    $form_state->set('multivalue_child', $id);
 
-      $facet->setResults($results);
-      $results = $this->processFacetResults($facet);
-      $options = $this->transformResultsToOptions($results);
-
-      $form[$facet->id()]['#default_value'] = $active_items;
-      $form[$facet->id()]['boolean'] = [
-        '#type' => 'select',
-        '#options' => $options,
-        '#empty_option' => $this->t('Select'),
-      ];
-
-      $form_state->set('multivalue_child', 'boolean');
-      return $form;
-    }
-
-    if ($field_type === 'link') {
-      $link_type = $field_definition->getSetting('link_type');
-      $default_value = [];
-      foreach ($active_items as $active_item) {
-        $default_value[] = $this->getUriAsDisplayableString($active_item);
-      }
-      $form[$facet->id()]['#default_value'] = $default_value;
-      $form[$facet->id()]['link'] = [
-        '#type' => 'url',
-        '#element_validate' => [[LinkWidget::class, 'validateUriElement']],
-        '#maxlength' => 2048,
-        '#link_type' => $link_type,
-      ];
-
-      if ($link_type & LinkItemInterface::LINK_INTERNAL) {
-        $form[$facet->id()]['link']['#type'] = 'entity_autocomplete';
-        $form[$facet->id()]['link']['#target_type'] = 'node';
-        $form[$facet->id()]['link']['#process_default_value'] = FALSE;
-      }
-
-      $form_state->set('multivalue_child', 'link');
-      return $form;
-    }
-
-    return $this->build($facet);
+    return $form;
   }
 
   /**
    * {@inheritdoc}
    */
   public function getDefaultValuesLabel(FacetInterface $facet, ListSourceInterface $list_source, ListPresetFilter $filter): string {
-    $field_definition = $this->getFieldDefinition($facet, $list_source);
+    $filter_operators = ListPresetFilter::getOperators();
+    $field_definition = $this->getFacetFieldDefinition($facet, $list_source);
     $field_type = !empty($field_definition) ? $field_definition->getType() : NULL;
 
-    $filter_value = $filter->getValues();
-    $filter_operators = ListPresetFilter::getOperators();
-    if (in_array(EntityReferenceFieldItemListInterface::class, class_implements($field_definition->getClass()))) {
-      $entity_storage = $this->entityTypeManager->getStorage($field_definition->getSetting('target_type'));
-      $values = [];
-      foreach ($filter_value as $value) {
-        $entity = $entity_storage->load($value);
-        if (!$entity) {
-          continue;
-        }
-
-        $values[] = $entity->label();
-      }
-
-      return $filter_operators[$filter->getOperator()] . ': ' . implode(', ', $values);
-    }
-
-    if (in_array($field_type, ['list_integer', 'list_float', 'list_string'])) {
-      return $filter_operators[$filter->getOperator()] . ': ' . implode(', ', array_map(function ($value) use ($field_definition) {
-        return $field_definition->getSetting('allowed_values')[$value];
-      }, $filter_value));
-    }
-
-    if ($field_type === 'boolean') {
-      $results = [
-        new Result($facet, 1, 1, 1),
-        new Result($facet, 0, 0, 1),
-      ];
-
-      $facet->setResults($results);
+    $id = $this->multiselectPluginManager->getPluginIdByFieldType($field_type);
+    if (!$id) {
       return $filter_operators[$filter->getOperator()] . ': ' . parent::getDefaultValuesLabel($facet, $list_source, $filter);
     }
 
-    if ($field_type === 'link') {
-      $values = [];
-      foreach ($filter_value as $value) {
-        $values[] = $this->getUriAsDisplayableString($value);
-      }
+    $config = [
+      'facet' => $facet,
+      'preset_filter' => $filter,
+      'list_source' => $list_source,
+    ];
+    /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
+    $plugin = $this->multiselectPluginManager->createInstance($id, $config);
 
-      return $filter_operators[$filter->getOperator()] . ': ' . implode(', ', $values);
-    }
-
-    return $filter_operators[$filter->getOperator()] . ': ' . parent::getDefaultValuesLabel($facet, $list_source, $filter);
-  }
-
-  /**
-   * Gets field definition for the field used in the facet.
-   *
-   * @param \Drupal\facets\FacetInterface $facet
-   *   The facet.
-   * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
-   *   The list source.
-   *
-   * @return \Drupal\Core\Field\FieldDefinitionInterface
-   *   The field definition.
-   */
-  protected function getFieldDefinition(FacetInterface $facet, ListSourceInterface $list_source): ?FieldDefinitionInterface {
-    $field = $list_source->getIndex()->getField($facet->getFieldIdentifier());
-    $field_name = $field->getOriginalFieldIdentifier();
-    $property_path = $field->getPropertyPath();
-    $parts = explode(':', $property_path);
-    if (count($parts) > 1) {
-      $field_name = $parts[0];
-    }
-    $field_definitions = $this->entityFieldManager->getFieldDefinitions($list_source->getEntityType(), $list_source->getBundle());
-    return $field_definitions[$field_name] ?? NULL;
+    return $filter_operators[$filter->getOperator()] . ': ' . $plugin->getDefaultValuesLabel();
   }
 
   /**
@@ -362,47 +260,6 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
     }
 
     return FALSE;
-  }
-
-  /**
-   * Gets the URI without the 'internal:' or 'entity:' scheme.
-   *
-   * @param string $uri
-   *   The URI.
-   *
-   * @return string
-   *   The URI.
-   *
-   * @see LinkWidget::getUriAsDisplayableString()
-   */
-  protected function getUriAsDisplayableString(string $uri): string {
-    $scheme = parse_url($uri, PHP_URL_SCHEME);
-
-    // By default, the displayable string is the URI.
-    $displayable_string = $uri;
-
-    // A different displayable string may be chosen in case of the 'internal:'
-    // or 'entity:' built-in schemes.
-    if ($scheme === 'internal') {
-      $uri_reference = explode(':', $uri, 2)[1];
-      $path = parse_url($uri, PHP_URL_PATH);
-      if ($path === '/') {
-        $uri_reference = '<front>' . substr($uri_reference, 1);
-      }
-
-      $displayable_string = $uri_reference;
-    }
-    elseif ($scheme === 'entity') {
-      list($entity_type, $entity_id) = explode('/', substr($uri, 7), 2);
-      if ($entity_type == 'node' && $entity = $this->entityTypeManager->getStorage($entity_type)->load($entity_id)) {
-        $displayable_string = EntityAutocomplete::getEntityLabels([$entity]);
-      }
-    }
-    elseif ($scheme === 'route') {
-      $displayable_string = ltrim($displayable_string, 'route:');
-    }
-
-    return $displayable_string;
   }
 
 }
