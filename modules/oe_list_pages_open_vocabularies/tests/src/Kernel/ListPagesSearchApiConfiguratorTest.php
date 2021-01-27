@@ -5,8 +5,6 @@ declare(strict_types = 1);
 namespace Drupal\Tests\oe_list_pages_open_vocabularies\Kernel;
 
 use Drupal\facets\Entity\Facet;
-use Drupal\field\Entity\FieldConfig;
-use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\open_vocabularies\Entity\OpenVocabulary;
 use Drupal\open_vocabularies\Entity\OpenVocabularyAssociation;
@@ -35,6 +33,7 @@ class ListPagesSearchApiConfiguratorTest extends EntityKernelTestBase {
     'oe_list_pages_filters_test',
     'oe_list_page_content_type',
     'oe_list_pages_open_vocabularies',
+    'oe_list_pages_open_vocabularies_test',
     'open_vocabularies',
     'open_vocabularies_test',
     'options',
@@ -66,27 +65,10 @@ class ListPagesSearchApiConfiguratorTest extends EntityKernelTestBase {
       'oe_list_pages',
       'oe_list_page_content_type',
       'oe_list_pages_filters_test',
+      'oe_list_pages_open_vocabularies_test',
       'emr',
       'emr_node',
     ]);
-
-    $storage = FieldStorageConfig::create([
-      'field_name' => 'open_vocs',
-      'entity_type' => 'node',
-      'type' => 'open_vocabulary_reference',
-    ]);
-    $storage->save();
-
-    // Add the OpenVocabularies fields to the content types.
-    foreach (['content_type_one', 'content_type_two'] as $bundle) {
-
-      $instance = FieldConfig::create([
-        'field_storage' => $storage,
-        'bundle' => $bundle,
-        'label' => t('Open vocabularies'),
-      ]);
-      $instance->save();
-    }
 
     // Create OpenVocabularies vocabularies.
     $values = [
@@ -110,8 +92,8 @@ class ListPagesSearchApiConfiguratorTest extends EntityKernelTestBase {
    * Tests SearchApiConfigurator reaction to vocabulary associations changes.
    */
   public function testVocabularyAssociationChanges(): void {
-    $id_1 = 'open_vocabularies_custom_vocabulary_open_vocabulary_node_content_type_one_open_vocs';
-    $id_2 = 'open_vocabularies_custom_vocabulary_open_vocabulary_node_content_type_two_open_vocs';
+    $id_1 = 'open_vocabularies_custom_vocabulary_open_vocabulary_node_content_type_one_field_open_vocabularies';
+    $id_2 = 'open_vocabularies_custom_vocabulary_open_vocabulary_node_content_type_two_field_open_vocabularies';
 
     /** @var \Drupal\search_api\Entity\Index $node_index */
     $node_index = Index::load('node');
@@ -126,7 +108,7 @@ class ListPagesSearchApiConfiguratorTest extends EntityKernelTestBase {
 
     // Create association for content types.
     $fields = [
-      'node.content_type_one.open_vocs',
+      'node.content_type_one.field_open_vocabularies',
     ];
     $values = [
       'label' => $this->randomString(),
@@ -151,7 +133,7 @@ class ListPagesSearchApiConfiguratorTest extends EntityKernelTestBase {
     $this->assertEquals('list_facet_source:node:content_type_one', $facet_1->getFacetSourceId());
     // Check values were correctly saved.
     $this->assertEquals($values['label'], $facet_1->label());
-    $this->assertEquals('open_vocabularies_custom_vocabulary_open_vocabulary_node_content_type_one_open_vocs', $facet_1->getFieldIdentifier());
+    $this->assertEquals($id_1, $facet_1->getFieldIdentifier());
     $facet_2 = Facet::load($id_2);
     $this->assertNull($facet_2);
     // Check fields exists.
@@ -164,8 +146,8 @@ class ListPagesSearchApiConfiguratorTest extends EntityKernelTestBase {
     // Alter the association, change label and add to a new field.
     $association = OpenVocabularyAssociation::load($association_id);
     $fields = [
-      'node.content_type_one.open_vocs',
-      'node.content_type_two.open_vocs',
+      'node.content_type_one.field_open_vocabularies',
+      'node.content_type_two.field_open_vocabularies',
     ];
     $association->set('fields', $fields);
     $association->set('label', 'New label');
@@ -190,7 +172,7 @@ class ListPagesSearchApiConfiguratorTest extends EntityKernelTestBase {
     // Alter the association to remove initial field.
     $association = OpenVocabularyAssociation::load($association_id);
     $fields = [
-      'node.content_type_two.open_vocs',
+      'node.content_type_two.field_open_vocabularies',
     ];
     $association->set('fields', $fields);
     $association->save();

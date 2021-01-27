@@ -1,0 +1,11 @@
+name: OpenEuropa List Pages Open Vocabularies Test
+description: Test module for OpenEuropa List Pages Open Vocabularies
+package: Testing
+
+type: module
+core: 8.x
+
+dependencies:
+  - oe_list_pages_open_vocabularies:oe_list_pages_open_vocabularies
+  - oe_list_pages_filters_test:oe_list_pages_filters_test
+  - open_vocabularies_test:open_vocabularies_test
