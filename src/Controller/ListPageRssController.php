@@ -13,7 +13,7 @@ use Drupal\Core\Cache\CacheableResponse;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Datetime\DateFormatterInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Theme\ThemeManagerInterface;
@@ -28,6 +28,7 @@ use Drupal\oe_list_pages\ListPageEvents;
 use Drupal\oe_list_pages\ListPageRssItemAlterEvent;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -50,11 +51,11 @@ class ListPageRssController extends ControllerBase {
   protected $dateFormatter;
 
   /**
-   * The entity type manager.
+   * The entity repository.
    *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   * @var \Drupal\Core\Entity\EntityRepositoryInterface
    */
-  protected $entityTypeManager;
+  protected $entityRepository;
 
   /**
    * The event dispatcher.
@@ -85,6 +86,13 @@ class ListPageRssController extends ControllerBase {
   protected $renderer;
 
   /**
+   * The request stack.
+   *
+   * @var \Symfony\Component\HttpFoundation\RequestStack
+   */
+  protected $request;
+
+  /**
    * The theme manager.
    *
    * @var \Drupal\Core\Theme\ThemeManagerInterface
@@ -95,11 +103,11 @@ class ListPageRssController extends ControllerBase {
    * ListPageRssController constructor.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   *   The entity type manager.
+   *   The configuration factory.
    * @param \Drupal\Core\Datetime\DateFormatterInterface $date_formatter
    *   The date formatter.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   The entity type manager.
+   * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
+   *   The entity repository.
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
    *   The event dispatcher.
    * @param \Drupal\oe_list_pages\ListBuilderInterface $list_builder
@@ -107,18 +115,21 @@ class ListPageRssController extends ControllerBase {
    * @param \Drupal\oe_list_pages\ListExecutionManagerInterface $list_execution_manager
    *   The list execution manager.
    * @param \Drupal\Core\Render\RendererInterface $renderer
-   *   The event dispatcher.
+   *   The renderer service.
+   * @param \Symfony\Component\HttpFoundation\RequestStack $request
+   *   The request stack.
    * @param \Drupal\Core\Theme\ThemeManagerInterface $theme_manager
    *   The theme manager.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, DateFormatterInterface $date_formatter, EntityTypeManagerInterface $entity_type_manager, EventDispatcherInterface $event_dispatcher, ListBuilderInterface $list_builder, ListExecutionManagerInterface $list_execution_manager, RendererInterface $renderer, ThemeManagerInterface $theme_manager) {
+  public function __construct(ConfigFactoryInterface $config_factory, DateFormatterInterface $date_formatter, EntityRepositoryInterface $entity_repository, EventDispatcherInterface $event_dispatcher, ListBuilderInterface $list_builder, ListExecutionManagerInterface $list_execution_manager, RendererInterface $renderer, RequestStack $request, ThemeManagerInterface $theme_manager) {
     $this->configFactory = $config_factory;
     $this->dateFormatter = $date_formatter;
-    $this->entityTypeManager = $entity_type_manager;
+    $this->entityRepository = $entity_repository;
     $this->eventDispatcher = $event_dispatcher;
     $this->listExecutionManager = $list_execution_manager;
     $this->listBuilder = $list_builder;
     $this->renderer = $renderer;
+    $this->request = $request;
     $this->themeManager = $theme_manager;
   }
 
@@ -129,11 +140,12 @@ class ListPageRssController extends ControllerBase {
     return new static(
       $container->get('config.factory'),
       $container->get('date.formatter'),
-      $container->get('entity_type.manager'),
+      $container->get('entity.repository'),
       $container->get('event_dispatcher'),
       $container->get('oe_list_pages.builder'),
       $container->get('oe_list_pages.execution_manager'),
       $container->get('renderer'),
+      $container->get('request_stack'),
       $container->get('theme.manager')
     );
   }
@@ -148,10 +160,16 @@ class ListPageRssController extends ControllerBase {
    *   The RSS feed response.
    */
   public function build(NodeInterface $node): CacheableResponse {
+    $node = $this->entityRepository->getTranslationFromContext($node);
     // Build the render array for the RSS feed.
     $cache_metadata = CacheableMetadata::createFromObject($node);
     $default_title = $this->getChannelTitle($node, $cache_metadata);
-    $default_link = $node->toUrl('canonical', ['absolute' => TRUE])->toString(TRUE);
+    $query = $this->request->getCurrentRequest()->query->all();
+    $default_link = $node->toUrl('canonical', [
+      'absolute' => TRUE,
+      'query' => $query,
+    ])->toString(TRUE);
+    $cache_metadata->addCacheableDependency($default_link);
     $build = [
       '#theme' => 'oe_list_pages_rss',
       '#title' => $default_title,
@@ -163,16 +181,16 @@ class ListPageRssController extends ControllerBase {
       '#channel_elements' => [],
       '#items' => $this->getItemList($node, $cache_metadata),
     ];
-    $cache_metadata->addCacheableDependency($default_link);
     $cache_metadata->applyTo($build);
 
     // Dispatch event to allow modules to alter the build before being rendered.
     $event = new ListPageRssAlterEvent($build, $node);
     $this->eventDispatcher->dispatch(ListPageEvents::ALTER_RSS_BUILD, $event);
     $build = $event->getBuild();
-
+    $cache_metadata = CacheableMetadata::createFromRenderArray($build);
     // Create the response and add the xml type header.
     $response = new CacheableResponse('', 200);
+    $response->addCacheableDependency($cache_metadata);
     $response->headers->set('Content-Type', 'application/rss+xml; charset=utf-8');
 
     // Render the list and add it to the response.
@@ -303,12 +321,15 @@ class ListPageRssController extends ControllerBase {
    *   The image information array.
    */
   protected function getChannelImage(CacheableMetadata $cache_metadata): array {
-    $title = $this->t('@title logo', ['@title' => 'European Commission']);
+    $site_config = $this->configFactory->get('system.site');
+    $cache_metadata->addCacheableDependency($site_config);
+    $site_name = $site_config->get('name');
+    $title = $this->t('@site_name logo', ['@site_name' => $site_name]);
     // Get the logo location.
     $theme = $this->themeManager->getActiveTheme();
+    $cache_metadata->addCacheContexts(['theme']);
     $site_url = Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString(TRUE);
     $cache_metadata->addCacheableDependency($site_url);
-
     return [
       'url' => file_create_url($theme->getLogo()),
       'title' => $title,
