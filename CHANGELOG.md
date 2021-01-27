@@ -1,4 +1,12 @@
-# Changelog
+# Change Log
+
+## [0.6.0](https://github.com/openeuropa/oe_list_pages/tree/0.6.0) (2021-01-22)
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.5.0...0.6.0)
+
+**Merged pull requests:**
+
+- EWPP-529: Replace scaffold library. [\#64](https://github.com/openeuropa/oe_list_pages/pull/64) ([sergepavle](https://github.com/sergepavle))
+- EWPP-491: Creating a link list source plugin. [\#59](https://github.com/openeuropa/oe_list_pages/pull/59) ([upchuk](https://github.com/upchuk))
 
 ## [0.5.0](https://github.com/openeuropa/oe_list_pages/tree/0.5.0) (2020-12-09)
 
