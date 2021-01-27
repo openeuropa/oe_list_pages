@@ -1,0 +1,52 @@
+<?php
+
+/**
+ * @file
+ * The OpenEuropa List Pages Open Vocabularies module.
+ */
+
+declare(strict_types = 1);
+
+use Drupal\Core\Entity\EntityInterface;
+
+/**
+ * Implements hook_ENTITY_TYPE_insert().
+ */
+function oe_list_pages_open_vocabularies_open_vocabulary_association_insert(EntityInterface $entity) {
+  /** @var \Drupal\oe_list_pages_open_vocabularies\SearchApiConfigurator $configurator */
+  $configurator = Drupal::service('oe_list_pages_open_vocabularies.configurator');
+  $fields = $entity->getFields();
+  foreach ($fields as $field) {
+    $configurator->updateConfig($entity, $field);
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_update().
+ */
+function oe_list_pages_open_vocabularies_open_vocabulary_association_update(EntityInterface $entity) {
+  /** @var \Drupal\oe_list_pages_open_vocabularies\SearchApiConfigurator $configurator */
+  $configurator = Drupal::service('oe_list_pages_open_vocabularies.configurator');
+  $fields = $entity->getFields();
+  foreach ($fields as $field) {
+    $configurator->updateConfig($entity, $field);
+  }
+
+  $old_fields = $entity->original->getFields();
+  $fields_to_remove = array_diff($old_fields, $fields);
+  foreach ($fields_to_remove as $field) {
+    $configurator->removeConfig($entity, $field);
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_delete().
+ */
+function oe_list_pages_open_vocabularies_open_vocabulary_association_delete(EntityInterface $entity) {
+  /** @var \Drupal\oe_list_pages_open_vocabularies\SearchApiConfigurator $configurator */
+  $configurator = Drupal::service('oe_list_pages_open_vocabularies.configurator');
+  $fields = $entity->getFields();
+  foreach ($fields as $field) {
+    $configurator->removeConfig($entity, $field);
+  }
+}

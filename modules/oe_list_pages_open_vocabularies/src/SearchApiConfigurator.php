@@ -6,6 +6,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\facets\Entity\Facet;
 use Drupal\facets\FacetInterface;
 use Drupal\oe_list_pages\ListSourceFactoryInterface;
+use Drupal\open_vocabularies\OpenVocabularyAssociationInterface;
 use Drupal\search_api\Entity\Index;
 use Drupal\search_api\Item\Field;
 use Drupal\search_api\Item\FieldInterface;
@@ -40,16 +41,14 @@ class SearchApiConfigurator {
   /**
    * Updates the search api configuration.
    *
-   * It adds a field and facet for the openvocabularies association.
+   * It adds a search index field and facet for an open vocabulary association.
    *
-   * @param string $association_config_id
-   *   The association config id.
-   * @param string $association_config_label
-   *   The association config label.
+   * @param \Drupal\open_vocabularies\OpenVocabularyAssociationInterface $association
+   *   The openvocabulary association.
    * @param string $field_id
    *   The field_id.
    */
-  public function updateConfig(string $association_config_id, string $association_config_label, string $field_id): void {
+  public function updateConfig(OpenVocabularyAssociationInterface $association, string $field_id): void {
     $field_config_storage = $this->entityTypeManager->getStorage('field_config');
     // Get the correct index looking to the list source.
     $field_config = $field_config_storage->load($field_id);
@@ -61,7 +60,7 @@ class SearchApiConfigurator {
     $index = $list_source->getIndex();
 
     // Generates the field and facet id.
-    $id = 'open_vocabularies_' . str_replace('.', '_', $association_config_id . '_' . $field_id);
+    $id = 'open_vocabularies_' . str_replace('.', '_', $association->id() . '_' . $field_id);
 
     // Creates the field.
     /** @var \Drupal\search_api\Field $index_field */
@@ -69,14 +68,14 @@ class SearchApiConfigurator {
     $index_field->setType('string');
     $index_field->setPropertyPath($field_config->getFieldStorageDefinition()->getName());
     $index_field->setDatasourceId('entity:' . $entity_type);
-    $index_field->setLabel($association_config_label);
+    $index_field->setLabel($association->label());
     $index->save();
 
     // Creates the facet.
     /** @var \Drupal\facets\FacetInterface $facet */
     $facet = $this->getFacet($id);
     $facet->setUrlAlias($id);
-    $facet->set('name', $association_config_label);
+    $facet->set('name', $association->label());
     $facet->addProcessor([
       'processor_id' => 'url_processor_handler',
       'weights' => [],
@@ -92,12 +91,12 @@ class SearchApiConfigurator {
   /**
    * Remove configuration association with open vocabulary association.
    *
-   * @param string $association_config_id
-   *   The association configuration id.
+   * @param \Drupal\open_vocabularies\OpenVocabularyAssociationInterface $association
+   *   The association configuration.
    * @param string $field_id
    *   The field id.
    */
-  public function removeConfig(string $association_config_id, string $field_id): void {
+  public function removeConfig(OpenVocabularyAssociationInterface $association, string $field_id): void {
     $field_config_storage = $this->entityTypeManager->getStorage('field_config');
     // Get the correct index looking to the list source.
     $field_config = $field_config_storage->load($field_id);
@@ -109,7 +108,7 @@ class SearchApiConfigurator {
     $index = $list_source->getIndex();
 
     // Remove field.
-    $id = 'open_vocabularies_' . str_replace('.', '_', $association_config_id . '_' . $field_id);
+    $id = 'open_vocabularies_' . str_replace('.', '_', $association->id() . '_' . $field_id);
     $index->removeField($id);
     $index->save();
 

@@ -1,9 +1,4 @@
 services:
-  oe_list_pages_open_vocabularies.config_subscriber:
-    class: \Drupal\oe_list_pages_open_vocabularies\EventSubscriber\OpenVocabulariesConfigSubscriber
-    arguments: ['@oe_list_pages_open_vocabularies.configurator']
-    tags:
-      - { name: event_subscriber }
   oe_list_pages_open_vocabularies.configurator:
     class: \Drupal\oe_list_pages_open_vocabularies\SearchApiConfigurator
     arguments: ['@entity_type.manager', '@oe_list_pages.list_source.factory']
