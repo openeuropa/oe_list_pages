@@ -6,6 +6,6 @@ type: module
 core: 8.x
 
 dependencies:
-  - oe_list_pages_open_vocabularies:oe_list_pages_open_vocabularies
-  - oe_list_pages_filters_test:oe_list_pages_filters_test
-  - open_vocabularies_test:open_vocabularies_test
+  - oe_list_pages:oe_list_pages_open_vocabularies
+  - oe_list_pages:oe_list_pages_filters_test
+  - open_vocabularies:open_vocabularies

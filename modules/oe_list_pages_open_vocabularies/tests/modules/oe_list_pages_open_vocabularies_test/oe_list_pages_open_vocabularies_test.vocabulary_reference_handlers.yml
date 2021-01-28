@@ -1,0 +1,3 @@
+taxonomy:
+  label: 'Local taxonomy'
+  target_type: taxonomy_term
