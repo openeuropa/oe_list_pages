@@ -160,11 +160,12 @@ class ListPageRssController extends ControllerBase {
       'language' => $language,
     ])->toString(TRUE);
     $cache_metadata->addCacheableDependency($default_link);
+    $default_description = $this->getChannelDescription($node, $cache_metadata);
     $build = [
       '#theme' => 'oe_list_pages_rss',
       '#title' => $default_title,
       '#link' => $default_link->getGeneratedUrl(),
-      '#channel_description' => $this->getChannelDescription($node, $cache_metadata),
+      '#channel_description' => empty($default_description) ? $default_title : $default_description,
       '#language' => $language->getId(),
       '#copyright' => $this->getChannelCopyright(),
       '#image' => $this->getChannelImage($cache_metadata),

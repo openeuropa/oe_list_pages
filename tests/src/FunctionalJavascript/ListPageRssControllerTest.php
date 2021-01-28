@@ -147,7 +147,7 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     $channel = $crawler->filterXPath('//rss[@version=2.0]/channel');
     $this->assertEquals('Drupal | List page test', $channel->filterXPath('//title')->text());
     $this->assertEquals('http://web:8080/build/node/1', $channel->filterXPath('//link')->text());
-    $this->assertEquals('', $channel->filterXPath('//description')->text());
+    $this->assertEquals('Drupal | List page test', $channel->filterXPath('//description')->text());
     $this->assertEquals('en', $channel->filterXPath('//language')->text());
     $this->assertEquals('© European Union, 1995-' . date('Y'), $channel->filterXPath('//copyright')->text());
     $this->assertEquals('http://web:8080/build/core/themes/classy/logo.svg', $channel->filterXPath('//image/url')->text());
