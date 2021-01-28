@@ -66,7 +66,7 @@ class SearchApiConfigurator {
     /** @var \Drupal\search_api\Field $index_field */
     $index_field = $this->getField($index, $id);
     $index_field->setType('string');
-    $index_field->setPropertyPath($field_config->getFieldStorageDefinition()->getName());
+    $index_field->setPropertyPath($field_config->getFieldStorageDefinition()->getName() . ':target_id');
     $index_field->setDatasourceId('entity:' . $entity_type);
     $index_field->setLabel($association->label());
     $index->save();
@@ -74,8 +74,18 @@ class SearchApiConfigurator {
     // Creates the facet.
     /** @var \Drupal\facets\FacetInterface $facet */
     $facet = $this->getFacet($id);
-    $facet->setUrlAlias($id);
+    $facet->setUrlAlias(str_replace('.', '_', $association->id()));
     $facet->set('name', $association->label());
+    $facet->setOnlyVisibleWhenFacetSourceIsVisible(TRUE);
+
+    $facet->setWeight(0);
+    $facet->addProcessor([
+      'processor_id' => 'display_value_widget_order',
+      'weights' => [],
+      'settings' => [
+        'sort' => 'ASC',
+      ],
+    ]);
     $facet->addProcessor([
       'processor_id' => 'url_processor_handler',
       'weights' => [],

@@ -35,7 +35,6 @@ class ListPagesSearchApiConfiguratorTest extends EntityKernelTestBase {
     'oe_list_pages_open_vocabularies',
     'oe_list_pages_open_vocabularies_test',
     'open_vocabularies',
-    'open_vocabularies_test',
     'options',
     'search_api',
     'search_api_db',
@@ -75,10 +74,10 @@ class ListPagesSearchApiConfiguratorTest extends EntityKernelTestBase {
       'id' => 'custom_vocabulary',
       'label' => $this->randomString(),
       'description' => $this->randomString(128),
-      'handler' => 'test_entity_plugin',
+      'handler' => 'taxonomy',
       'handler_settings' => [
         'target_bundles' => [
-          'entity_test' => 'entity_test',
+          'entity_test' => 'vocabulary_one',
         ],
       ],
     ];
@@ -140,6 +139,7 @@ class ListPagesSearchApiConfiguratorTest extends EntityKernelTestBase {
     $node_index = Index::load('node');
     $field_1 = $node_index->getField($id_1);
     $this->assertEquals($id_1, $field_1->getFieldIdentifier());
+    $this->assertEquals('field_open_vocabularies:target_id', $field_1->getPropertyPath());
     $field_2 = $node_index->getField($id_2);
     $this->assertNull($field_2);
 
@@ -168,6 +168,7 @@ class ListPagesSearchApiConfiguratorTest extends EntityKernelTestBase {
     $this->assertEquals($id_1, $field_1->getFieldIdentifier());
     $field_2 = $node_index->getField($id_2);
     $this->assertEquals($id_2, $field_2->getFieldIdentifier());
+    $this->assertEquals('field_open_vocabularies:target_id', $field_2->getPropertyPath());
 
     // Alter the association to remove initial field.
     $association = OpenVocabularyAssociation::load($association_id);
@@ -191,6 +192,7 @@ class ListPagesSearchApiConfiguratorTest extends EntityKernelTestBase {
     $this->assertNull($field_1);
     $field_2 = $node_index->getField($id_2);
     $this->assertEquals($id_2, $field_2->getFieldIdentifier());
+    $this->assertEquals('field_open_vocabularies:target_id', $field_2->getPropertyPath());
 
     // Delete association.
     $association->delete();
