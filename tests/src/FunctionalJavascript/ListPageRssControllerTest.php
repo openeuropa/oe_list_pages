@@ -23,35 +23,36 @@ class ListPageRssControllerTest extends WebDriverTestBase {
    * {@inheritdoc}
    */
   protected static $modules = [
-    'oe_list_pages',
-    'oe_list_pages_event_subscriber_test',
-    'oe_list_pages_filters_test',
-    'oe_list_page_content_type',
+    'language',
+    'content_translation',
     'node',
     'emr',
     'emr_node',
     'search_api',
     'search_api_db',
-    'language',
-    'content_translation',
+    'facets',
+    'oe_list_pages',
+    'oe_list_pages_event_subscriber_test',
+    'oe_list_pages_filters_test',
+    'oe_list_page_content_type',
   ];
 
   /**
    * Tests the access and rendering of the RSS page of a list page.
    */
-  public function testListPageRssPage() {
-
-    // Add Spanish and make list pages translatable.
-    $extra_language = ConfigurableLanguage::createFromLangcode('es');
-    $extra_language->save();
+  public function testListPageRssPage(): void {
+    $user = $this->createUser([], NULL, TRUE);
+    $this->drupalLogin($user);
+    // Make the list pages translatable.
     \Drupal::service('content_translation.manager')->setEnabled('node', 'oe_list_page', TRUE);
-    $fields = \Drupal::service('entity_field.manager')->getBaseFieldDefinitions('node', 'oe_list_page');
-    $field_config = $fields['title']->getConfig('oe_list_page');
-    $field_config->setTranslatable(TRUE);
-    $field_config->save();
+    // Create the ES language.
+    ConfigurableLanguage::createFromLangcode('es')->save();
+    // Making the content translatable messes up the plugin cache somehow,
+    // which makes the test fail on drone. We flush caches here to prevent
+    // this from happening as a temporary solution.
+    drupal_flush_all_caches();
 
     // Create list page.
-    $this->drupalLogin($this->rootUser);
     $this->drupalGet('/node/add/oe_list_page');
     $this->clickLink('List Page');
     $page = $this->getSession()->getPage();
