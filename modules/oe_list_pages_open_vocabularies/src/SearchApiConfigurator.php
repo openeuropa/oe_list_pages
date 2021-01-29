@@ -7,7 +7,7 @@ use Drupal\facets\Entity\Facet;
 use Drupal\facets\FacetInterface;
 use Drupal\oe_list_pages\ListSourceFactoryInterface;
 use Drupal\open_vocabularies\OpenVocabularyAssociationInterface;
-use Drupal\search_api\Entity\Index;
+use Drupal\search_api\IndexInterface;
 use Drupal\search_api\Item\Field;
 use Drupal\search_api\Item\FieldInterface;
 
@@ -19,14 +19,14 @@ class SearchApiConfigurator {
   /**
    * The entity type manager.
    *
-   * @var Drupal\Core\Entity\EntityTypeManagerInterface
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
 
   /**
    * The list source factory.
    *
-   * @var Drupal\oe_list_pages\ListSourceFactoryInterface
+   * @var \Drupal\oe_list_pages\ListSourceFactoryInterface
    */
   protected $listSourceFactory;
 
@@ -44,14 +44,14 @@ class SearchApiConfigurator {
    * It adds a search index field and facet for an open vocabulary association.
    *
    * @param \Drupal\open_vocabularies\OpenVocabularyAssociationInterface $association
-   *   The openvocabulary association.
+   *   The open vocabulary association.
    * @param string $field_id
    *   The field_id.
    */
   public function updateConfig(OpenVocabularyAssociationInterface $association, string $field_id): void {
-    $field_config_storage = $this->entityTypeManager->getStorage('field_config');
-    // Get the correct index looking to the list source.
-    $field_config = $field_config_storage->load($field_id);
+    // Based on the list source, determine the correct index to create the
+    // field in.
+    $field_config = $this->entityTypeManager->getStorage('field_config')->load($field_id);
     $entity_type = $field_config->getTargetEntityTypeId();
     $bundle = $field_config->getTargetBundle();
     /** @var \Drupal\oe_list_pages\ListSourceInterface $list_source */
@@ -59,11 +59,10 @@ class SearchApiConfigurator {
     /** @var \Drupal\search_api\IndexInterface $index */
     $index = $list_source->getIndex();
 
-    // Generates the field and facet id.
+    // Generate the field and facet id.
     $id = 'open_vocabularies_' . str_replace('.', '_', $association->id() . '_' . $field_id);
 
-    // Creates the field.
-    /** @var \Drupal\search_api\Field $index_field */
+    // Create the field.
     $index_field = $this->getField($index, $id);
     $index_field->setType('string');
     $index_field->setPropertyPath($field_config->getFieldStorageDefinition()->getName() . ':target_id');
@@ -71,7 +70,7 @@ class SearchApiConfigurator {
     $index_field->setLabel($association->label());
     $index->save();
 
-    // Creates the facet.
+    // Create the facet for the new field.
     /** @var \Drupal\facets\FacetInterface $facet */
     $facet = $this->getFacet($id);
     $facet->setUrlAlias(str_replace('.', '_', $association->id()));
@@ -91,7 +90,7 @@ class SearchApiConfigurator {
       'weights' => [],
       'settings' => [],
     ]);
-    $facet->setEmptyBehavior([]);
+    $facet->setEmptyBehavior(['behavior' => 'none']);
     $facet->setFacetSourceId($list_source->getSearchId());
     $facet->setWidget('oe_list_pages_multiselect', []);
     $facet->setFieldIdentifier($id);
@@ -99,7 +98,7 @@ class SearchApiConfigurator {
   }
 
   /**
-   * Remove configuration association with open vocabulary association.
+   * Remove search index field and facet created for an association.
    *
    * @param \Drupal\open_vocabularies\OpenVocabularyAssociationInterface $association
    *   The association configuration.
@@ -107,9 +106,9 @@ class SearchApiConfigurator {
    *   The field id.
    */
   public function removeConfig(OpenVocabularyAssociationInterface $association, string $field_id): void {
-    $field_config_storage = $this->entityTypeManager->getStorage('field_config');
-    // Get the correct index looking to the list source.
-    $field_config = $field_config_storage->load($field_id);
+    // Based on the list source, determine the correct index to create the
+    // field in.
+    $field_config = $this->entityTypeManager->getStorage('field_config')->load($field_id);
     $entity_type = $field_config->getTargetEntityTypeId();
     $bundle = $field_config->getTargetBundle();
     /** @var \Drupal\oe_list_pages\ListSourceInterface $list_source */
@@ -128,7 +127,7 @@ class SearchApiConfigurator {
   }
 
   /**
-   * Gets existing facet by facet id or create a new one.
+   * Gets an existing facet by id or creat a new one if doesn't exist.
    *
    * @param string $facet_id
    *   The facet id.
@@ -137,14 +136,14 @@ class SearchApiConfigurator {
    *   The facet.
    */
   protected function getFacet(string $facet_id): FacetInterface {
-    $facet_storage = $this->entityTypeManager->getStorage('facets_facet');
-    return $facet_storage->load($facet_id) ?? new Facet(['id' => $facet_id], 'facets_facet');
+    $facet = $this->entityTypeManager->getStorage('facets_facet')->load($facet_id);
+    return $facet instanceof FacetInterface ? $facet : Facet::create(['id' => $facet_id]);
   }
 
   /**
-   * Gets existing search api field by id or create a new one.
+   * Gets an existing index field by id or create a new one if doesn't exist.
    *
-   * @param \Drupal\search_api\Entity\Index $index
+   * @param \Drupal\search_api\IndexInterface $index
    *   The index.
    * @param string $field_id
    *   The field id.
@@ -152,13 +151,13 @@ class SearchApiConfigurator {
    * @return \Drupal\search_api\Item\FieldInterface
    *   The Search API field.
    */
-  protected function getField(Index $index, string $field_id): FieldInterface {
+  protected function getField(IndexInterface $index, string $field_id): FieldInterface {
     // In case the field exists, just return it.
     if (!empty($index->getField($field_id))) {
       return $index->getField($field_id);
     }
 
-    // Otherwise create a field and add to index.
+    // Otherwise instantiate a new one and add it to the index.
     $field = new Field($index, $field_id);
     $index->addField($field);
     return $field;

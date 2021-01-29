@@ -1,5 +1,5 @@
-name: OpenEuropa List Pages Open Vocabularies Test
-description: Test module for OpenEuropa List Pages Open Vocabularies
+name: 'OpenEuropa List Pages Open Vocabularies Test'
+description: 'Test module for OpenEuropa List Pages Open Vocabularies'
 package: Testing
 
 type: module
