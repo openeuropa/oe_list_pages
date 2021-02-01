@@ -19,6 +19,7 @@ use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Theme\ThemeManagerInterface;
 use Drupal\Core\Url;
 use Drupal\emr\Entity\EntityMetaInterface;
+use Drupal\facets\UrlProcessor\UrlProcessorPluginManager;
 use Drupal\node\NodeInterface;
 use Drupal\oe_list_pages\FacetManipulationTrait;
 use Drupal\oe_list_pages\ListExecutionManagerInterface;
@@ -97,6 +98,13 @@ class ListPageRssController extends ControllerBase {
   protected $themeManager;
 
   /**
+   * The plugin manager for URL Processors.
+   *
+   * @var \Drupal\facets\UrlProcessor\UrlProcessorPluginManager
+   */
+  protected $urlProcessorPluginManager;
+
+  /**
    * ListPageRssController constructor.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -121,10 +129,12 @@ class ListPageRssController extends ControllerBase {
    *   The request stack.
    * @param \Drupal\Core\Theme\ThemeManagerInterface $theme_manager
    *   The theme manager.
+   * @param \Drupal\facets\UrlProcessor\UrlProcessorPluginManager $url_processor_plugin_manager
+   *   The url processor plugin manager.
    *
    * @SuppressWarnings(PHPMD.ExcessiveParameterList)
    */
-  public function __construct(ConfigFactoryInterface $config_factory, DateFormatterInterface $date_formatter, EntityTypeManagerInterface $entity_type_manager, EventDispatcherInterface $event_dispatcher, LanguageManagerInterface $language_manager, ListExecutionManagerInterface $list_execution_manager, ListSourceFactoryInterface $list_source_factory, MultiselectFilterFieldPluginManager $multiselect_plugin_manager, RendererInterface $renderer, RequestStack $request, ThemeManagerInterface $theme_manager) {
+  public function __construct(ConfigFactoryInterface $config_factory, DateFormatterInterface $date_formatter, EntityTypeManagerInterface $entity_type_manager, EventDispatcherInterface $event_dispatcher, LanguageManagerInterface $language_manager, ListExecutionManagerInterface $list_execution_manager, ListSourceFactoryInterface $list_source_factory, MultiselectFilterFieldPluginManager $multiselect_plugin_manager, RendererInterface $renderer, RequestStack $request, ThemeManagerInterface $theme_manager, UrlProcessorPluginManager $url_processor_plugin_manager) {
     $this->configFactory = $config_factory;
     $this->dateFormatter = $date_formatter;
     $this->entityTypeManager = $entity_type_manager;
@@ -136,6 +146,7 @@ class ListPageRssController extends ControllerBase {
     $this->renderer = $renderer;
     $this->request = $request;
     $this->themeManager = $theme_manager;
+    $this->urlProcessorPluginManager = $url_processor_plugin_manager;
   }
 
   /**
@@ -153,7 +164,9 @@ class ListPageRssController extends ControllerBase {
       $container->get('plugin.manager.multiselect_filter_field'),
       $container->get('renderer'),
       $container->get('request_stack'),
-      $container->get('theme.manager')
+      $container->get('theme.manager'),
+      $container->get('plugin.manager.facets.url_processor')
+
     );
   }
 
@@ -372,7 +385,7 @@ class ListPageRssController extends ControllerBase {
     // Load just one of the source facets.
     $facet_storage = $this->entityTypeManager->getStorage('facets_facet');
     $facet = $facet_storage->load(reset($available_filters));
-    $query_string = \Drupal::service('plugin.manager.facets.url_processor')->createInstance('query_string', ['facet' => $facet]);
+    $query_string = $this->urlProcessorPluginManager->createInstance('query_string', ['facet' => $facet]);
     $active_filters = $query_string->getActiveFilters();
     // Load all the facets for the active filters.
     $facets = $facet_storage->loadMultiple(array_keys($active_filters));
