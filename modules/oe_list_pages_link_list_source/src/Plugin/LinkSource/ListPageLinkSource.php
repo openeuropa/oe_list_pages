@@ -18,6 +18,8 @@ use Drupal\oe_link_lists\LinkSourcePluginBase;
 use Drupal\oe_list_pages\Form\ListPageConfigurationSubformFactory;
 use Drupal\oe_list_pages\ListExecutionManagerInterface;
 use Drupal\oe_list_pages\ListPageConfiguration;
+use Drupal\oe_list_pages\ListSourceInterface;
+use Drupal\oe_list_pages_link_list_source\ContextualFiltersConfigurationBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -70,9 +72,16 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
   protected $entityRepository;
 
   /**
+   * The contextual filters form builder.
+   *
+   * @var \Drupal\oe_list_pages_link_list_source\ContextualFiltersConfigurationBuilder
+   */
+  protected $contextualFiltersBuilder;
+
+  /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, ListPageConfigurationSubformFactory $configurationSubformFactory, ListExecutionManagerInterface $listExecutionManager, EventDispatcherInterface $eventDispatcher, EntityTypeManagerInterface $entityTypeManager, EntityRepositoryInterface $entityRepository) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, ListPageConfigurationSubformFactory $configurationSubformFactory, ListExecutionManagerInterface $listExecutionManager, EventDispatcherInterface $eventDispatcher, EntityTypeManagerInterface $entityTypeManager, EntityRepositoryInterface $entityRepository, ContextualFiltersConfigurationBuilder $contextualFiltersBuilder) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->configurationSubformFactory = $configurationSubformFactory;
@@ -80,6 +89,7 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
     $this->eventDispatcher = $eventDispatcher;
     $this->entityTypeManager = $entityTypeManager;
     $this->entityRepository = $entityRepository;
+    $this->contextualFiltersBuilder = $contextualFiltersBuilder;
   }
 
   /**
@@ -94,7 +104,8 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
       $container->get('oe_list_pages.execution_manager'),
       $container->get('event_dispatcher'),
       $container->get('entity_type.manager'),
-      $container->get('entity.repository')
+      $container->get('entity.repository'),
+      $container->get('oe_list_pages_link_list_source.contextual_filters_builder')
     );
   }
 
@@ -107,6 +118,7 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
       'bundle' => '',
       'exposed_filters' => [],
       'exposed_filters_overridden' => FALSE,
+      'contextual_filters' => [],
     ] + parent::defaultConfiguration();
   }
 
@@ -174,6 +186,24 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
       $form['list_page_configuration']['wrapper']['exposed_filters']['#access'] = FALSE;
     }
 
+    $list_source = $form_state->get('list_source');
+    if (!$list_source instanceof ListSourceInterface) {
+      return $form;
+    }
+
+    $parents = $form['#parents'] ?? [];
+    $form['list_page_configuration']['wrapper']['contextual_filters'] = [
+      '#parents' => array_merge($parents, [
+        'list_page_configuration',
+        'wrapper',
+        'contextual_filters',
+      ]),
+      '#tree' => TRUE,
+    ];
+
+    $subform_state = SubformState::createForSubform($form['list_page_configuration']['wrapper']['contextual_filters'], $form, $form_state);
+    $form['list_page_configuration']['wrapper']['contextual_filters'] = $this->contextualFiltersBuilder->buildContextualFilters($form['list_page_configuration']['wrapper']['contextual_filters'], $subform_state, $list_source, $this->configuration);
+
     return $form;
   }
 
@@ -188,6 +218,13 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
     $subform->submitForm($element, $subform_state);
     $configuration = $subform->getConfiguration();
     $this->configuration = $configuration->toArray();
+    $contextual_filters = array_filter($form_state->getValue([
+      'list_page_configuration',
+      'wrapper',
+      'contextual_filters',
+      'current_filters',
+    ], []));
+    $this->configuration['contextual_filters'] = $contextual_filters;
   }
 
 }

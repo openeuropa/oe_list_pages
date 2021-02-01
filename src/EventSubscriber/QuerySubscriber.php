@@ -8,7 +8,7 @@ use Drupal\facets\FacetInterface;
 use Drupal\facets\FacetManager\DefaultFacetManager;
 use Drupal\facets\QueryType\QueryTypePluginManager;
 use Drupal\oe_list_pages\ListPresetFilter;
-use Drupal\oe_list_pages\ListPresetFiltersBuilder;
+use Drupal\oe_list_pages\DefaultFilterConfigurationBuilder;
 use Drupal\search_api\Event\QueryPreExecuteEvent;
 use Drupal\search_api\Event\SearchApiEvents;
 use Drupal\search_api\Query\ConditionGroupInterface;
@@ -154,7 +154,7 @@ class QuerySubscriber implements EventSubscriberInterface {
     // Group the facets by their default filter IDs.
     $facets_by_filter = [];
     foreach ($facets as $facet) {
-      $filter_id = ListPresetFiltersBuilder::generateFilterId($facet->id(), array_keys($facets_by_filter));
+      $filter_id = DefaultFilterConfigurationBuilder::generateFilterId($facet->id(), array_keys($facets_by_filter));
       $facets_by_filter[$filter_id] = $facet;
     }
 
@@ -171,7 +171,7 @@ class QuerySubscriber implements EventSubscriberInterface {
 
         // Generate a new filter ID for each of the clone.
         $this->applyPresetFilterValues($facet, $preset_filter);
-        $clone_filter_id = ListPresetFiltersBuilder::generateFilterId($facet_id, array_keys($facets_by_filter));
+        $clone_filter_id = DefaultFilterConfigurationBuilder::generateFilterId($facet_id, array_keys($facets_by_filter));
         $facets_by_filter[$clone_filter_id] = $facet;
       }
     }
