@@ -82,7 +82,7 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
       $filter_id = static::generateFilterId($facet_id, array_keys($current_filters));
     }
 
-    $form = $this->buildEditPresetFilter($form, $form_state, $facet_id, $filter_id, $list_source);
+    $form = $this->buildEditContextualFilter($form, $form_state, $facet_id, $filter_id, $list_source);
 
     return $form;
   }
@@ -118,7 +118,7 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
    * @return array
    *   The built form.
    */
-  protected function buildEditPresetFilter(array $form, FormStateInterface $form_state, string $facet_id, string $filter_id, ListSourceInterface $list_source): array {
+  protected function buildEditContextualFilter(array $form, FormStateInterface $form_state, string $facet_id, string $filter_id, ListSourceInterface $list_source): array {
     $ajax_wrapper_id = $this->getAjaxWrapperId($form);
 
     $current_filters = static::getCurrentValues($form_state, $list_source);
@@ -229,7 +229,7 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
   }
 
   /**
-   * Ajax request handler for setting a default value for a filters.
+   * Ajax request handler for setting an operator for a contextual filter.
    *
    * @param array $form
    *   The form.
@@ -246,7 +246,7 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
   }
 
   /**
-   * Submit callback for setting a default value for a filters.
+   * Submit callback for setting an operator for a contextual filter.
    *
    * @param array $form
    *   The form.

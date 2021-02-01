@@ -260,7 +260,7 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
     // entity types, we need to reset any filter selection.
     $form_state->set('default_facet_id', NULL);
     $form_state->set('default_filter_id', NULL);
-    $form_state->set('contextual_filter_id', NULL);
+    $form_state->set('contextual_facet_id', NULL);
     $form_state->set('contextual_filter_id', NULL);
     $form_state->setRebuild(TRUE);
   }
@@ -282,7 +282,7 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
     // entity types, we need to reset any filter selection.
     $form_state->set('default_facet_id', NULL);
     $form_state->set('default_filter_id', NULL);
-    $form_state->set('contextual_filter_id', NULL);
+    $form_state->set('contextual_facet_id', NULL);
     $form_state->set('contextual_filter_id', NULL);
 
     // When we change the bundle, we want to set the default exposed filter
