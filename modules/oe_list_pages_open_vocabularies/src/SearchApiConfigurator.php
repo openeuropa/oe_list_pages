@@ -2,6 +2,7 @@
 
 namespace Drupal\oe_list_pages_open_vocabularies;
 
+use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\facets\Entity\Facet;
 use Drupal\facets\FacetInterface;
@@ -31,11 +32,19 @@ class SearchApiConfigurator {
   protected $listSourceFactory;
 
   /**
+   * The entity field manager.
+   *
+   * @var \Drupal\Core\Entity\EntityFieldManagerInterface
+   */
+  protected $entityFieldManager;
+
+  /**
    * {@inheritdoc}
    */
-  public function __construct(EntityTypeManagerInterface $entityTypeManager, ListSourceFactoryInterface $listSourceFactory) {
+  public function __construct(EntityTypeManagerInterface $entityTypeManager, EntityFieldManagerInterface $entityFieldManager, ListSourceFactoryInterface $listSourceFactory) {
     $this->entityTypeManager = $entityTypeManager;
     $this->listSourceFactory = $listSourceFactory;
+    $this->entityFieldManager = $entityFieldManager;
   }
 
   /**
@@ -54,6 +63,9 @@ class SearchApiConfigurator {
     $field_config = $this->entityTypeManager->getStorage('field_config')->load($field_id);
     $entity_type = $field_config->getTargetEntityTypeId();
     $bundle = $field_config->getTargetBundle();
+
+    // Refresh field definitions so that new field is available for search api.
+    $this->entityFieldManager->clearCachedFieldDefinitions();
     /** @var \Drupal\oe_list_pages\ListSourceInterface $list_source */
     $list_source = $this->listSourceFactory->get($entity_type, $bundle);
     /** @var \Drupal\search_api\IndexInterface $index */
@@ -65,7 +77,9 @@ class SearchApiConfigurator {
     // Create the field.
     $index_field = $this->getField($index, $id);
     $index_field->setType('string');
-    $index_field->setPropertyPath($field_config->getFieldStorageDefinition()->getName() . ':target_id');
+    /* @TODO: Extract this id generation to a common method. */
+    $property_path = $association->getName() . '_' . substr(hash('sha256', $field_config->getName()), 0, 10);
+    $index_field->setPropertyPath($property_path);
     $index_field->setDatasourceId('entity:' . $entity_type);
     $index_field->setLabel($association->label());
     $index->save();
@@ -76,7 +90,6 @@ class SearchApiConfigurator {
     $facet->setUrlAlias(str_replace('.', '_', $association->id()));
     $facet->set('name', $association->label());
     $facet->setOnlyVisibleWhenFacetSourceIsVisible(TRUE);
-
     $facet->setWeight(0);
     $facet->addProcessor([
       'processor_id' => 'display_value_widget_order',
@@ -87,6 +100,11 @@ class SearchApiConfigurator {
     ]);
     $facet->addProcessor([
       'processor_id' => 'url_processor_handler',
+      'weights' => [],
+      'settings' => [],
+    ]);
+    $facet->addProcessor([
+      'processor_id' => 'translate_entity',
       'weights' => [],
       'settings' => [],
     ]);
