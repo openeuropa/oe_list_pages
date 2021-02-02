@@ -93,7 +93,7 @@ class ListPagesSearchApiConfiguratorTest extends EntityKernelTestBase {
   public function testVocabularyAssociationChanges(): void {
     $id_1 = 'open_vocabularies_custom_vocabulary_open_vocabulary_node_content_type_one_field_open_vocabularies';
     $id_2 = 'open_vocabularies_custom_vocabulary_open_vocabulary_node_content_type_two_field_open_vocabularies';
-
+    $field_id = 'open_vocabulary_bf49aa6d04';
     /** @var \Drupal\search_api\Entity\Index $node_index */
     $node_index = Index::load('node');
     // Check facet do not exist.
@@ -139,7 +139,7 @@ class ListPagesSearchApiConfiguratorTest extends EntityKernelTestBase {
     $node_index = Index::load('node');
     $field_1 = $node_index->getField($id_1);
     $this->assertEquals($id_1, $field_1->getFieldIdentifier());
-    $this->assertEquals('field_open_vocabularies:target_id', $field_1->getPropertyPath());
+    $this->assertEquals($field_id, $field_1->getPropertyPath());
     $field_2 = $node_index->getField($id_2);
     $this->assertNull($field_2);
 
@@ -155,9 +155,13 @@ class ListPagesSearchApiConfiguratorTest extends EntityKernelTestBase {
 
     // Check facet got changed.
     $this->container->get('kernel')->rebuildContainer();
+    /** @var \Drupal\facets\FacetInterface $facet_1 */
     $facet_1 = Facet::load($id_1);
     $this->assertEquals('New label', $facet_1->label());
     $this->assertEquals($id_1, $facet_1->getFieldIdentifier());
+    $this->assertArrayHasKey('url_processor_handler', $facet_1->getProcessors());
+    $this->assertArrayHasKey('display_value_widget_order', $facet_1->getProcessors());
+    $this->assertArrayHasKey('translate_entity', $facet_1->getProcessors());
     $facet_2 = Facet::load($id_2);
     $this->assertEquals('New label', $facet_2->label());
     $this->assertEquals($id_2, $facet_2->getFieldIdentifier());
@@ -168,7 +172,7 @@ class ListPagesSearchApiConfiguratorTest extends EntityKernelTestBase {
     $this->assertEquals($id_1, $field_1->getFieldIdentifier());
     $field_2 = $node_index->getField($id_2);
     $this->assertEquals($id_2, $field_2->getFieldIdentifier());
-    $this->assertEquals('field_open_vocabularies:target_id', $field_2->getPropertyPath());
+    $this->assertEquals($field_id, $field_2->getPropertyPath());
 
     // Alter the association to remove initial field.
     $association = OpenVocabularyAssociation::load($association_id);
@@ -192,7 +196,7 @@ class ListPagesSearchApiConfiguratorTest extends EntityKernelTestBase {
     $this->assertNull($field_1);
     $field_2 = $node_index->getField($id_2);
     $this->assertEquals($id_2, $field_2->getFieldIdentifier());
-    $this->assertEquals('field_open_vocabularies:target_id', $field_2->getPropertyPath());
+    $this->assertEquals($field_id, $field_2->getPropertyPath());
 
     // Delete association.
     $association->delete();

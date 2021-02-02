@@ -1,4 +1,4 @@
 services:
   oe_list_pages_open_vocabularies.configurator:
     class: \Drupal\oe_list_pages_open_vocabularies\SearchApiConfigurator
-    arguments: ['@entity_type.manager', '@oe_list_pages.list_source.factory']
+    arguments: ['@entity_type.manager', '@entity_field.manager', '@oe_list_pages.list_source.factory']
