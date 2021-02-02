@@ -41,6 +41,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class ListPageRssController extends ControllerBase {
 
   use FacetManipulationTrait;
+
   /**
    * The date formatter.
    *
@@ -378,23 +379,41 @@ class ListPageRssController extends ControllerBase {
    */
   protected function getChannelDescription(NodeInterface $node, CacheableMetadata $cache_metadata): string {
     $cache_metadata->addCacheContexts(['url']);
-    $categories = $keyed_definitions = $keyed_facets = $active_filters_values = [];
+    $categories = [];
+    $keyed_definitions = [];
+    $keyed_facets = [];
+    $active_filters_values = [];
+
     $configuration = ListPageConfiguration::fromEntity($node);
     $list_source = $this->listSourceFactory->get($configuration->getEntityType(), $configuration->getBundle());
     $available_filters = array_keys($list_source->getAvailableFilters());
-    // Load just one of the source facets.
+    if (!$available_filters) {
+      return '';
+    }
+
     $facet_storage = $this->entityTypeManager->getStorage('facets_facet');
+
+    // Load one of the source facets because we need to use it to determine the
+    // current active filters using the query_string plugin.
     $facet = $facet_storage->load(reset($available_filters));
     $query_string = $this->urlProcessorPluginManager->createInstance('query_string', ['facet' => $facet]);
     $active_filters = $query_string->getActiveFilters();
     // Load all the facets for the active filters.
+    /** @var \Drupal\facets\FacetInterface[] $facets */
     $facets = $facet_storage->loadMultiple(array_keys($active_filters));
+    // Determine the filter values for each of the active facets.
     foreach ($facets as $facet) {
       $field_definition = $this->getFacetFieldDefinition($facet, $list_source);
+      if (!$field_definition) {
+        continue;
+      }
+
       $keyed_definitions[$facet->id()] = $field_definition;
       $keyed_facets[$facet->id()] = $facet;
       $active_filters_values[$facet->id()] = $active_filters[$facet->id()];
     }
+
+    // Run through each of the active filter values and prepare their displays.
     foreach ($active_filters_values as $facet_id => $filters) {
       $field_type = $keyed_definitions[$facet_id]->getType();
       $id = $this->multiselectPluginManager->getPluginIdByFieldType($field_type);
@@ -412,6 +431,7 @@ class ListPageRssController extends ControllerBase {
         $plugin = $this->multiselectPluginManager->createInstance($id, $config);
         $display_value = $plugin->getDefaultValuesLabel();
       }
+
       $categories[] = $keyed_facets[$facet_id]->label() . ': ' . $display_value;
     }
 
