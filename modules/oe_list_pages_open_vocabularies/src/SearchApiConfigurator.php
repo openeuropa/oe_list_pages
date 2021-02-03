@@ -71,19 +71,21 @@ class SearchApiConfigurator {
     /** @var \Drupal\search_api\IndexInterface $index */
     $index = $list_source->getIndex();
 
-    // Generate the field and facet id.
-    $id = 'open_vocabularies_' . str_replace('.', '_', $association->id() . '_' . $field_id);
-
-    // Create the field.
-    $index_field = $this->getField($index, $id);
-    $index_field->setType('string');
+    // Generate the field id.
     /* @TODO: Extract this id generation to a common method. */
     $property_path = $association->getName() . '_' . substr(hash('sha256', $field_config->getName()), 0, 10);
+
+    // Create the field.
+    $index_field = $this->getField($index, $property_path);
+    $index_field->setType('string');
+
     $index_field->setPropertyPath($property_path);
     $index_field->setDatasourceId('entity:' . $entity_type);
     $index_field->setLabel($association->label());
     $index->save();
 
+    // Generate the facet id.
+    $id = 'open_vocabularies_' . str_replace('.', '_', $association->id() . '_' . $field_id);
     // Create the facet for the new field.
     /** @var \Drupal\facets\FacetInterface $facet */
     $facet = $this->getFacet($id);
@@ -111,7 +113,7 @@ class SearchApiConfigurator {
     $facet->setEmptyBehavior(['behavior' => 'none']);
     $facet->setFacetSourceId($list_source->getSearchId());
     $facet->setWidget('oe_list_pages_multiselect', []);
-    $facet->setFieldIdentifier($id);
+    $facet->setFieldIdentifier($property_path);
     $facet->save();
   }
 

@@ -132,13 +132,13 @@ class ListPagesSearchApiConfiguratorTest extends EntityKernelTestBase {
     $this->assertEquals('list_facet_source:node:content_type_one', $facet_1->getFacetSourceId());
     // Check values were correctly saved.
     $this->assertEquals($values['label'], $facet_1->label());
-    $this->assertEquals($id_1, $facet_1->getFieldIdentifier());
+    $this->assertEquals($field_id, $facet_1->getFieldIdentifier());
     $facet_2 = Facet::load($id_2);
     $this->assertNull($facet_2);
     // Check fields exists.
     $node_index = Index::load('node');
-    $field_1 = $node_index->getField($id_1);
-    $this->assertEquals($id_1, $field_1->getFieldIdentifier());
+    $field_1 = $node_index->getField($field_id);
+    $this->assertEquals($field_id, $field_1->getFieldIdentifier());
     $this->assertEquals($field_id, $field_1->getPropertyPath());
     $field_2 = $node_index->getField($id_2);
     $this->assertNull($field_2);
@@ -158,21 +158,18 @@ class ListPagesSearchApiConfiguratorTest extends EntityKernelTestBase {
     /** @var \Drupal\facets\FacetInterface $facet_1 */
     $facet_1 = Facet::load($id_1);
     $this->assertEquals('New label', $facet_1->label());
-    $this->assertEquals($id_1, $facet_1->getFieldIdentifier());
+    $this->assertEquals($field_id, $facet_1->getFieldIdentifier());
     $this->assertArrayHasKey('url_processor_handler', $facet_1->getProcessors());
     $this->assertArrayHasKey('display_value_widget_order', $facet_1->getProcessors());
     $this->assertArrayHasKey('translate_entity', $facet_1->getProcessors());
     $facet_2 = Facet::load($id_2);
     $this->assertEquals('New label', $facet_2->label());
-    $this->assertEquals($id_2, $facet_2->getFieldIdentifier());
+    $this->assertEquals($field_id, $facet_2->getFieldIdentifier());
 
     // Check field exists.
     $node_index = Index::load('node');
-    $field_1 = $node_index->getField($id_1);
-    $this->assertEquals($id_1, $field_1->getFieldIdentifier());
-    $field_2 = $node_index->getField($id_2);
-    $this->assertEquals($id_2, $field_2->getFieldIdentifier());
-    $this->assertEquals($field_id, $field_2->getPropertyPath());
+    $field_1 = $node_index->getField($field_id);
+    $this->assertEquals($field_id, $field_1->getFieldIdentifier());
 
     // Alter the association to remove initial field.
     $association = OpenVocabularyAssociation::load($association_id);
@@ -188,15 +185,13 @@ class ListPagesSearchApiConfiguratorTest extends EntityKernelTestBase {
     $this->assertNull($facet_1);
     $facet_2 = Facet::load($id_2);
     $this->assertEquals('New label', $facet_2->label());
-    $this->assertEquals($id_2, $facet_2->getFieldIdentifier());
+    $this->assertEquals($field_id, $facet_2->getFieldIdentifier());
 
     // Check field exists.
     $node_index = Index::load('node');
-    $field_1 = $node_index->getField($id_1);
-    $this->assertNull($field_1);
-    $field_2 = $node_index->getField($id_2);
-    $this->assertEquals($id_2, $field_2->getFieldIdentifier());
-    $this->assertEquals($field_id, $field_2->getPropertyPath());
+    $field_1 = $node_index->getField($field_id);
+    $this->assertEquals($field_id, $field_1->getFieldIdentifier());
+    $this->assertEquals($field_id, $field_1->getPropertyPath());
 
     // Delete association.
     $association->delete();
@@ -208,10 +203,8 @@ class ListPagesSearchApiConfiguratorTest extends EntityKernelTestBase {
     $this->assertNull($facet_2);
     // No more fields.
     $node_index = Index::load('node');
-    $field_1 = $node_index->getField($id_1);
+    $field_1 = $node_index->getField($field_id);
     $this->assertNull($field_1);
-    $field_2 = $node_index->getField($id_2);
-    $this->assertNull($field_2);
   }
 
 }
