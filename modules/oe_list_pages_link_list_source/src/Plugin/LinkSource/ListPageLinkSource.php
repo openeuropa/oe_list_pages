@@ -27,6 +27,7 @@ use Drupal\oe_list_pages\ListSourceFactoryInterface;
 use Drupal\oe_list_pages\ListSourceInterface;
 use Drupal\oe_list_pages\MultiselectFilterFieldPluginManager;
 use Drupal\oe_list_pages_link_list_source\ContextualFiltersConfigurationBuilder;
+use Drupal\oe_list_pages_link_list_source\Exception\InapplicableContextualFilter;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -165,7 +166,17 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
   public function getLinks(int $limit = NULL, int $offset = 0): LinkCollectionInterface {
     $links = new LinkCollection();
     $cache = new CacheableMetadata();
-    $configuration = $this->initializeConfiguration($cache);
+    try {
+      $configuration = $this->initializeConfiguration($cache);
+    }
+    catch (InapplicableContextualFilter $exception) {
+      // If at least one of the contextual filters does not apply, we need to
+      // return an empty list. This is because the operator between each filter
+      // is AND.
+      $links->addCacheableDependency($cache);
+      return $links;
+    }
+
     $limit = is_null($limit) ? 0 : $limit;
     $configuration->setLimit($limit);
     $list_execution = $this->listExecutionManager->executeList($configuration);
@@ -279,12 +290,21 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
     $cache->addCacheContexts(['route']);
 
     // Add the contextual filters.
+    $contextual_filters = $this->configuration['contextual_filters'];
     $entity = $this->getCurrentEntityFromRoute();
     if (!$entity instanceof ContentEntityInterface) {
+      if (!empty($contextual_filters)) {
+        // If we have contextual filters but don't have an entity to check for
+        // the corresponding fields, we cannot have results.
+        throw new InapplicableContextualFilter();
+      }
+
+      // Otherwise, the configuration stays untouched.
       return $configuration;
     }
 
-    $contextual_filters = $this->configuration['contextual_filters'];
+    $cache->addCacheableDependency($entity);
+
     $default_filter_values = $configuration->getDefaultFiltersValues();
     $list_source = $this->listSourceFactory->get($configuration->getEntityType(), $configuration->getBundle());
 
@@ -295,16 +315,21 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
       // We only support contextual filters for fields that exist with the
       // same name both on the current entity and on the listed entity type.
       if (!$entity->hasField($field_name)) {
-        continue;
+        // If the field doesn't exist on the current entity, we need to not
+        // show any results.
+        throw new InapplicableContextualFilter();
       }
 
       $field = $entity->get($field_name);
       $values = $this->extractValuesFromField($field, $facet, $list_source);
-
-      if (!empty($values)) {
-        $contextual_filter->setValues($values);
-        $default_filter_values[ContextualFiltersConfigurationBuilder::generateFilterId($contextual_filter->getFacetId(), array_keys($default_filter_values))] = $contextual_filter;
+      if (empty($values)) {
+        // If the contextual filter does not have a value, we again cannot
+        // show any results.
+        throw new InapplicableContextualFilter();
       }
+
+      $contextual_filter->setValues($values);
+      $default_filter_values[ContextualFiltersConfigurationBuilder::generateFilterId($contextual_filter->getFacetId(), array_keys($default_filter_values))] = $contextual_filter;
     }
 
     $configuration->setDefaultFilterValues($default_filter_values);

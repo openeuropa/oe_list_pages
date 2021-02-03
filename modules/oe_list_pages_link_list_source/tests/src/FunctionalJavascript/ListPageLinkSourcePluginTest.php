@@ -390,7 +390,6 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
       'type' => 'page',
       'title' => 'My contextual page',
       'field_test_boolean' => 1,
-      'field_select_one' => 'test1',
       'field_reference' => $refs['ref1']->id(),
       'field_link' => 'http://example.com',
     ]);
@@ -472,6 +471,21 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
         $this->assertSession()->linkExistsExact($info['title']);
       }
     }
+
+    // Set a contextual filter for a field which is empty in the contextual
+    // page and assert we have no more results.
+    $configuration = $link_list->getConfiguration();
+    $configuration['source']['plugin_configuration']['contextual_filters'] = [
+      ContextualFiltersConfigurationBuilder::generateFilterId('select_one') => new ListPresetFilter('select_one', [], 'or'),
+    ];
+    $link_list->setConfiguration($configuration);
+    $link_list->save();
+    $this->drupalGet($node->toUrl());
+    $this->assertSession()->elementExists('css', '.block-oe-link-lists');
+    $this->assertSession()->elementsCount('css', '.block-oe-link-lists ul li', 0);
+
+    $node->set('field_select_one', 'test1');
+    $node->save();
 
     // Re-loop the text content and assert only the correct ones are visible
     // once we configure the link list to add contextual filters.
@@ -570,6 +584,21 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     // the select and the current entity has test1. So only the one with both
     // show up.
     $this->assertSession()->linkExistsExact('node with both selects');
+
+    // Test that if we view this link list on an entity which doesn't have
+    // a field configured as contextual, we see no results.
+    $user = $this->createUser([], NULL, TRUE);
+    $this->drupalLogin($user);
+    $this->drupalGet($user->toUrl());
+    // We are on the user page which is not going to have the fields.
+    $this->assertSession()->elementExists('css', '.block-oe-link-lists');
+    $this->assertSession()->elementsCount('css', '.block-oe-link-lists ul li', 0);
+
+    // Test that if we view the link list on a page where there is no entity
+    // in the context, we see no results.
+    $this->drupalGet('/admin');
+    $this->assertSession()->elementExists('css', '.block-oe-link-lists');
+    $this->assertSession()->elementsCount('css', '.block-oe-link-lists ul li', 0);
   }
 
   /**
