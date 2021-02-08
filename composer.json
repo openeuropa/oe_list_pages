@@ -27,6 +27,7 @@
         "openeuropa/drupal-core-require-dev": "~8.9",
         "openeuropa/oe_link_lists": "dev-master",
         "openeuropa/oe_multilingual": "^1.5",
+        "openeuropa/open_vocabularies": "dev-master",
         "openeuropa/task-runner": "~1.0.0-beta6",
         "phpunit/phpunit": "~6.5"
     },
