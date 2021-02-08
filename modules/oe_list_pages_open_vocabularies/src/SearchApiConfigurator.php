@@ -4,7 +4,6 @@ namespace Drupal\oe_list_pages_open_vocabularies;
 
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\facets\Entity\Facet;
 use Drupal\facets\FacetInterface;
 use Drupal\oe_list_pages\ListSourceFactoryInterface;
 use Drupal\open_vocabularies\OpenVocabularyAssociationInterface;
@@ -156,8 +155,9 @@ class SearchApiConfigurator {
    *   The facet.
    */
   protected function getFacet(string $facet_id): FacetInterface {
-    $facet = $this->entityTypeManager->getStorage('facets_facet')->load($facet_id);
-    return $facet instanceof FacetInterface ? $facet : Facet::create(['id' => $facet_id]);
+    $facet_storage = $this->entityTypeManager->getStorage('facets_facet');
+    $facet = $facet_storage->load($facet_id);
+    return $facet instanceof FacetInterface ? $facet : $facet_storage->create(['id' => $facet_id]);
   }
 
   /**
