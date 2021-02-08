@@ -15,5 +15,4 @@ dependencies:
   - extra_field:extra_field
   - oe_list_pages:oe_list_pages
   - oe_list_pages:oe_list_page_content_type
-  - oe_list_pages:oe_list_pages_open_vocabularies_test
   - search_api:search_api_db
