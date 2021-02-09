@@ -99,6 +99,7 @@ class EntityReferenceField extends MultiSelectFilterFieldPluginBase {
 
     return [
       '#type' => 'entity_autocomplete',
+      '#required_error' => t('@facet field is required.', ['@facet' => $this->configuration['facet']->label()]),
       '#maxlength' => 1024,
       '#target_type' => $field_definition->getSetting('target_type'),
       '#selection_handler' => $field_definition->getSetting('handler'),
