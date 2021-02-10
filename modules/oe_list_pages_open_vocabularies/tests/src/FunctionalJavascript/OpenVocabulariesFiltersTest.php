@@ -252,6 +252,22 @@ class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
       '2' => 'green color',
     ];
     $this->assertEquals($expected_bundles, $actual_bundles);
+
+    // Delete association.
+    $this->association->delete();
+    // Previous list keeps working.
+    $node = $this->drupalGetNodeByTitle('Node title');
+    $this->drupalGet($node->toUrl());
+    $this->assertSession()->pageTextContains('one yellow fruit');
+    $this->assertSession()->pageTextContains('another yellow fruit');
+
+    // Can be edited again.
+    $this->drupalGet($node->toUrl('edit-form'));
+    $this->clickLink('List Page');
+    $this->assertSession()->fieldNotExists('My amazing association');
+    $page->pressButton('Save');
+    $this->assertSession()->pageTextContains('one yellow fruit');
+    $this->assertSession()->pageTextContains('another yellow fruit');
   }
 
   /**
