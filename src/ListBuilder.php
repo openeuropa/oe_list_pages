@@ -451,7 +451,15 @@ class ListBuilder implements ListBuilderInterface {
       return $value;
     }
 
+    $preset_filter = new ListPresetFilter($facet->id(), [$value]);
+
     $field_definition = $this->getFacetFieldDefinition($facet, $list_source);
+    if (!$field_definition) {
+      // It's possible the field is custom and not mapped to an actual Drupal
+      // field.
+      return $this->getDefaultFilterValuesLabel($facet, $preset_filter);
+    }
+
     $field_type = $field_definition->getType();
     $id = $this->multiselectFilterManager->getPluginIdByFieldType($field_type);
 
