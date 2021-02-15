@@ -1,0 +1,35 @@
+{#
+/**
+ * @file
+ * Default template for feed displays.
+ *
+ * Available variables:
+ * - link: The link to the feed.
+ * - title: The title of the feed.
+ * - channel_description: The feed description.
+ * - langcode: The language encoding.
+ * - copyright: The copyright for the feed.
+ * - image: Array with the image information for the feed. It must contain the following keys: url, title and link.
+ * - channel_elements: The formatted channel elements.
+ * - items: The feed items themselves.
+ */
+#}
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>{{ title }}</title>
+    <link>{{ link }}</link>
+    <description>{{ channel_description }}</description>
+    <language>{{ language }}</language>
+    <copyright>{{ copyright }}</copyright>
+    {% if image is not empty %}
+      <image>
+        <url>{{ image.url }}</url>
+        <title>{{ image.title }}</title>
+        <link>{{ image.link }}</link>
+      </image>
+    {% endif %}
+    {{ channel_elements }}
+    {{ items }}
+  </channel>
+</rss>

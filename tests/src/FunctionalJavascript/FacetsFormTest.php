@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Drupal\Tests\oe_list_pages\Functional;
+namespace Drupal\Tests\oe_list_pages\FunctionalJavascript;
 
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;

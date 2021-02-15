@@ -1,0 +1,7 @@
+entity.node.list_page_rss:
+  path: '/node/{node}/rss'
+  defaults:
+    _controller: '\Drupal\oe_list_pages\Controller\ListPageRssController::build'
+  requirements:
+    _custom_access: '\Drupal\oe_list_pages\Controller\ListPageRssController::checkAccess'
+    _entity_access: 'node.view'
