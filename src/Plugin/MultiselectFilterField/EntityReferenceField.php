@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\oe_list_pages\Plugin\MultiselectFilterField;
 
 use Drupal\Core\Entity\EntityFieldManagerInterface;
+use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\oe_list_pages\MultiSelectFilterFieldPluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -28,6 +29,13 @@ class EntityReferenceField extends MultiSelectFilterFieldPluginBase {
   /**
    * The entity type manager.
    *
+   * @var \Drupal\Core\Entity\EntityRepositoryInterface
+   */
+  protected $entityRepository;
+
+  /**
+   * The entity type manager.
+   *
    * @var \Drupal\Core\Entity\EntityTypeManager
    */
   protected $entityTypeManager;
@@ -35,8 +43,9 @@ class EntityReferenceField extends MultiSelectFilterFieldPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityFieldManagerInterface $entity_field_manager, EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityFieldManagerInterface $entity_field_manager, EntityRepositoryInterface $entity_repository, EntityTypeManagerInterface $entity_type_manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_field_manager);
+    $this->entityRepository = $entity_repository;
     $this->entityTypeManager = $entity_type_manager;
   }
 
@@ -49,6 +58,7 @@ class EntityReferenceField extends MultiSelectFilterFieldPluginBase {
       $plugin_id,
       $plugin_definition,
       $container->get('entity_field.manager'),
+      $container->get('entity.repository'),
       $container->get('entity_type.manager')
     );
   }
@@ -109,6 +119,7 @@ class EntityReferenceField extends MultiSelectFilterFieldPluginBase {
     $values = [];
     foreach ($filter_values as $filter_value) {
       $entity = $entity_storage->load($filter_value);
+      $entity = $this->entityRepository->getTranslationFromContext($entity);
       if (!$entity) {
         continue;
       }

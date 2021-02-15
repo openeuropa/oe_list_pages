@@ -8,6 +8,7 @@ use Behat\Mink\Element\NodeElement;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Url;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
+use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
 use Drupal\search_api\Entity\Index;
@@ -22,24 +23,36 @@ class ListPageRssControllerTest extends WebDriverTestBase {
    * {@inheritdoc}
    */
   protected static $modules = [
-    'oe_list_pages',
-    'oe_list_pages_event_subscriber_test',
-    'oe_list_pages_filters_test',
-    'oe_list_page_content_type',
+    'language',
+    'content_translation',
     'node',
     'emr',
     'emr_node',
     'search_api',
     'search_api_db',
+    'facets',
+    'oe_list_pages',
+    'oe_list_pages_event_subscriber_test',
+    'oe_list_pages_filters_test',
+    'oe_list_page_content_type',
   ];
 
   /**
    * Tests the access and rendering of the RSS page of a list page.
    */
-  public function testListPageRssPage() {
+  public function testListPageRssPage(): void {
+    $user = $this->createUser([], NULL, TRUE);
+    $this->drupalLogin($user);
+    // Make the list pages translatable.
+    \Drupal::service('content_translation.manager')->setEnabled('node', 'oe_list_page', TRUE);
+    // Create the ES language.
+    ConfigurableLanguage::createFromLangcode('es')->save();
+    // Making the content translatable messes up the plugin cache somehow,
+    // which makes the test fail on drone. We flush caches here to prevent
+    // this from happening as a temporary solution.
+    drupal_flush_all_caches();
 
     // Create list page.
-    $this->drupalLogin($this->rootUser);
     $this->drupalGet('/node/add/oe_list_page');
     $this->clickLink('List Page');
     $page = $this->getSession()->getPage();
@@ -93,7 +106,12 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     $index = Index::load('node');
     $index->indexItems();
 
+    // Translate list page.
     $node = $this->drupalGetNodeByTitle('List page test');
+    $spanish_values = $node->toArray();
+    $spanish_values['title'] = 'List page test ES';
+    $node->addTranslation('es', $spanish_values);
+    $node->save();
     $this->drupalLogout();
 
     // Assert the default sorting order on the canonical page
@@ -130,11 +148,11 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     $channel = $crawler->filterXPath('//rss[@version=2.0]/channel');
     $this->assertEquals('Drupal | List page test', $channel->filterXPath('//title')->text());
     $this->assertEquals('http://web:8080/build/node/1', $channel->filterXPath('//link')->text());
-    $this->assertEquals('', $channel->filterXPath('//description')->text());
+    $this->assertEquals('Drupal | List page test', $channel->filterXPath('//description')->text());
     $this->assertEquals('en', $channel->filterXPath('//language')->text());
     $this->assertEquals('© European Union, 1995-' . date('Y'), $channel->filterXPath('//copyright')->text());
     $this->assertEquals('http://web:8080/build/core/themes/classy/logo.svg', $channel->filterXPath('//image/url')->text());
-    $this->assertEquals('European Commission logo', $channel->filterXPath('//image/title')->text());
+    $this->assertEquals('Drupal logo', $channel->filterXPath('//image/title')->text());
     $this->assertEquals('http://web:8080/build/', $channel->filterXPath('//image/link')->text());
     // Assert modules subscribing to the ListPageRssAlterEvent can
     // alter the build.
@@ -204,6 +222,17 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     $crawler = new Crawler($response);
     $channel = $crawler->filterXPath('//rss[@version=2.0]/channel');
     $this->assertEquals('Published: Yes | Select one: test1, test2', $channel->filterXPath('//description')->text());
+
+    // Assert accessing the list page in Spanish shows translated strings.
+    $this->drupalGet('/es/node/1/rss');
+    $response = $this->getTextContent();
+    $crawler = new Crawler($response);
+    // Assert contents of channel elements.
+    $channel = $crawler->filterXPath('//rss[@version=2.0]/channel');
+    $this->assertEquals('Drupal | List page test ES', $channel->filterXPath('//title')->text());
+    $this->assertEquals('http://web:8080/build/es/node/1', $channel->filterXPath('//link')->text());
+    $this->assertEquals('es', $channel->filterXPath('//language')->text());
+    $this->assertEquals('http://web:8080/build/es', $channel->filterXPath('//image/link')->text());
   }
 
 }

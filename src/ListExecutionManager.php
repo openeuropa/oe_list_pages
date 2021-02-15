@@ -85,6 +85,9 @@ class ListExecutionManager implements ListExecutionManagerInterface {
 
     // Determine the query options and execute it.
     $current_page = (int) $this->requestStack->getCurrentRequest()->get('page', 0);
+    if ($current_page < 0) {
+      $current_page = 0;
+    }
     $language = $this->languageManager->getCurrentLanguage()->getId();
     $preset_filters = $configuration->getDefaultFiltersValues();
     // If there is a sort configured use it,

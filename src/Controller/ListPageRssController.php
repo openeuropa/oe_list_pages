@@ -14,20 +14,25 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Render\Element;
+use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Theme\ThemeManagerInterface;
 use Drupal\Core\Url;
 use Drupal\emr\Entity\EntityMetaInterface;
+use Drupal\facets\UrlProcessor\UrlProcessorPluginManager;
 use Drupal\node\NodeInterface;
-use Drupal\oe_list_pages\ListBuilderInterface;
+use Drupal\oe_list_pages\FacetManipulationTrait;
 use Drupal\oe_list_pages\ListExecutionManagerInterface;
 use Drupal\oe_list_pages\ListPageConfiguration;
 use Drupal\oe_list_pages\ListPageRssAlterEvent;
 use Drupal\oe_list_pages\ListPageEvents;
 use Drupal\oe_list_pages\ListPageRssItemAlterEvent;
+use Drupal\oe_list_pages\ListPresetFilter;
+use Drupal\oe_list_pages\ListSourceFactoryInterface;
+use Drupal\oe_list_pages\MultiselectFilterFieldPluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -35,12 +40,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 class ListPageRssController extends ControllerBase {
 
-  /**
-   * The config factory.
-   *
-   * @var \Drupal\Core\Config\ConfigFactoryInterface
-   */
-  protected $configFactory;
+  use FacetManipulationTrait;
 
   /**
    * The date formatter.
@@ -48,13 +48,6 @@ class ListPageRssController extends ControllerBase {
    * @var \Drupal\Core\Datetime\DateFormatterInterface
    */
   protected $dateFormatter;
-
-  /**
-   * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected $entityTypeManager;
 
   /**
    * The event dispatcher.
@@ -71,11 +64,18 @@ class ListPageRssController extends ControllerBase {
   protected $listExecutionManager;
 
   /**
-   * The list builder.
+   * The list source factory manager.
    *
-   * @var \Drupal\oe_list_pages\ListBuilderInterface
+   * @var \Drupal\oe_list_pages\ListSourceFactoryInterface
    */
-  protected $listBuilder;
+  protected $listSourceFactory;
+
+  /**
+   * The multiselect filter field plugin manager.
+   *
+   * @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginManager
+   */
+  protected $multiselectPluginManager;
 
   /**
    * The renderer service.
@@ -85,6 +85,13 @@ class ListPageRssController extends ControllerBase {
   protected $renderer;
 
   /**
+   * The request stack.
+   *
+   * @var \Symfony\Component\HttpFoundation\RequestStack
+   */
+  protected $request;
+
+  /**
    * The theme manager.
    *
    * @var \Drupal\Core\Theme\ThemeManagerInterface
@@ -92,34 +99,55 @@ class ListPageRssController extends ControllerBase {
   protected $themeManager;
 
   /**
+   * The plugin manager for URL Processors.
+   *
+   * @var \Drupal\facets\UrlProcessor\UrlProcessorPluginManager
+   */
+  protected $urlProcessorPluginManager;
+
+  /**
    * ListPageRssController constructor.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   *   The entity type manager.
+   *   The configuration factory.
    * @param \Drupal\Core\Datetime\DateFormatterInterface $date_formatter
    *   The date formatter.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
    *   The event dispatcher.
-   * @param \Drupal\oe_list_pages\ListBuilderInterface $list_builder
-   *   The list builder.
+   * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
+   *   The language manager.
    * @param \Drupal\oe_list_pages\ListExecutionManagerInterface $list_execution_manager
    *   The list execution manager.
+   * @param \Drupal\oe_list_pages\ListSourceFactoryInterface $list_source_factory
+   *   The list source factory.
+   * @param \Drupal\oe_list_pages\MultiselectFilterFieldPluginManager $multiselect_plugin_manager
+   *   The multiselect filter field plugin manager.
    * @param \Drupal\Core\Render\RendererInterface $renderer
-   *   The event dispatcher.
+   *   The renderer service.
+   * @param \Symfony\Component\HttpFoundation\RequestStack $request
+   *   The request stack.
    * @param \Drupal\Core\Theme\ThemeManagerInterface $theme_manager
    *   The theme manager.
+   * @param \Drupal\facets\UrlProcessor\UrlProcessorPluginManager $url_processor_plugin_manager
+   *   The url processor plugin manager.
+   *
+   * @SuppressWarnings(PHPMD.ExcessiveParameterList)
    */
-  public function __construct(ConfigFactoryInterface $config_factory, DateFormatterInterface $date_formatter, EntityTypeManagerInterface $entity_type_manager, EventDispatcherInterface $event_dispatcher, ListBuilderInterface $list_builder, ListExecutionManagerInterface $list_execution_manager, RendererInterface $renderer, ThemeManagerInterface $theme_manager) {
+  public function __construct(ConfigFactoryInterface $config_factory, DateFormatterInterface $date_formatter, EntityTypeManagerInterface $entity_type_manager, EventDispatcherInterface $event_dispatcher, LanguageManagerInterface $language_manager, ListExecutionManagerInterface $list_execution_manager, ListSourceFactoryInterface $list_source_factory, MultiselectFilterFieldPluginManager $multiselect_plugin_manager, RendererInterface $renderer, RequestStack $request, ThemeManagerInterface $theme_manager, UrlProcessorPluginManager $url_processor_plugin_manager) {
     $this->configFactory = $config_factory;
     $this->dateFormatter = $date_formatter;
     $this->entityTypeManager = $entity_type_manager;
     $this->eventDispatcher = $event_dispatcher;
+    $this->languageManager = $language_manager;
     $this->listExecutionManager = $list_execution_manager;
-    $this->listBuilder = $list_builder;
+    $this->listSourceFactory = $list_source_factory;
+    $this->multiselectPluginManager = $multiselect_plugin_manager;
     $this->renderer = $renderer;
+    $this->request = $request;
     $this->themeManager = $theme_manager;
+    $this->urlProcessorPluginManager = $url_processor_plugin_manager;
   }
 
   /**
@@ -131,10 +159,15 @@ class ListPageRssController extends ControllerBase {
       $container->get('date.formatter'),
       $container->get('entity_type.manager'),
       $container->get('event_dispatcher'),
-      $container->get('oe_list_pages.builder'),
+      $container->get('language_manager'),
       $container->get('oe_list_pages.execution_manager'),
+      $container->get('oe_list_pages.list_source.factory'),
+      $container->get('plugin.manager.multiselect_filter_field'),
       $container->get('renderer'),
-      $container->get('theme.manager')
+      $container->get('request_stack'),
+      $container->get('theme.manager'),
+      $container->get('plugin.manager.facets.url_processor')
+
     );
   }
 
@@ -148,31 +181,42 @@ class ListPageRssController extends ControllerBase {
    *   The RSS feed response.
    */
   public function build(NodeInterface $node): CacheableResponse {
+    $language = $this->languageManager->getCurrentLanguage();
+    if ($node->hasTranslation($language->getId())) {
+      $node = $node->getTranslation($language->getId());
+    }
     // Build the render array for the RSS feed.
     $cache_metadata = CacheableMetadata::createFromObject($node);
     $default_title = $this->getChannelTitle($node, $cache_metadata);
-    $default_link = $node->toUrl('canonical', ['absolute' => TRUE])->toString(TRUE);
+    $query = $this->request->getCurrentRequest()->query->all();
+    $default_link = $node->toUrl('canonical', [
+      'absolute' => TRUE,
+      'query' => $query,
+      'language' => $language,
+    ])->toString(TRUE);
+    $cache_metadata->addCacheableDependency($default_link);
+    $default_description = $this->getChannelDescription($node, $cache_metadata);
     $build = [
       '#theme' => 'oe_list_pages_rss',
       '#title' => $default_title,
       '#link' => $default_link->getGeneratedUrl(),
-      '#channel_description' => $this->getChannelDescription($node, $cache_metadata),
-      '#language' => $node->language()->getId(),
+      '#channel_description' => empty($default_description) ? $default_title : $default_description,
+      '#language' => $language->getId(),
       '#copyright' => $this->getChannelCopyright(),
       '#image' => $this->getChannelImage($cache_metadata),
       '#channel_elements' => [],
       '#items' => $this->getItemList($node, $cache_metadata),
     ];
-    $cache_metadata->addCacheableDependency($default_link);
     $cache_metadata->applyTo($build);
 
     // Dispatch event to allow modules to alter the build before being rendered.
     $event = new ListPageRssAlterEvent($build, $node);
     $this->eventDispatcher->dispatch(ListPageEvents::ALTER_RSS_BUILD, $event);
     $build = $event->getBuild();
-
+    $cache_metadata = CacheableMetadata::createFromRenderArray($build);
     // Create the response and add the xml type header.
     $response = new CacheableResponse('', 200);
+    $response->addCacheableDependency($cache_metadata);
     $response->headers->set('Content-Type', 'application/rss+xml; charset=utf-8');
 
     // Render the list and add it to the response.
@@ -303,12 +347,15 @@ class ListPageRssController extends ControllerBase {
    *   The image information array.
    */
   protected function getChannelImage(CacheableMetadata $cache_metadata): array {
-    $title = $this->t('@title logo', ['@title' => 'European Commission']);
+    $site_config = $this->configFactory->get('system.site');
+    $cache_metadata->addCacheableDependency($site_config);
+    $site_name = $site_config->get('name');
+    $title = $this->t('@site_name logo', ['@site_name' => $site_name]);
     // Get the logo location.
     $theme = $this->themeManager->getActiveTheme();
+    $cache_metadata->addCacheContexts(['theme']);
     $site_url = Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString(TRUE);
     $cache_metadata->addCacheableDependency($site_url);
-
     return [
       'url' => file_create_url($theme->getLogo()),
       'title' => $title,
@@ -331,23 +378,64 @@ class ListPageRssController extends ControllerBase {
    *   The default description.
    */
   protected function getChannelDescription(NodeInterface $node, CacheableMetadata $cache_metadata): string {
-    $selected_filter_information = $this->listBuilder->buildSelectedFilters($node);
-    $filter_cache = CacheableMetadata::createFromRenderArray($selected_filter_information);
-    $cache_metadata->addCacheableDependency($filter_cache);
-    // Extract the selected filter information.
-    $selected_filters = [];
-    foreach (Element::children($selected_filter_information) as $child) {
-      $filter_information = $selected_filter_information[$child];
-      $filter_values = [];
-      if (!isset($filter_information['#items'])) {
+    $cache_metadata->addCacheContexts(['url']);
+    $categories = [];
+    $keyed_definitions = [];
+    $keyed_facets = [];
+    $active_filters_values = [];
+
+    $configuration = ListPageConfiguration::fromEntity($node);
+    $list_source = $this->listSourceFactory->get($configuration->getEntityType(), $configuration->getBundle());
+    $available_filters = array_keys($list_source->getAvailableFilters());
+    if (!$available_filters) {
+      return '';
+    }
+
+    $facet_storage = $this->entityTypeManager->getStorage('facets_facet');
+
+    // Load one of the source facets because we need to use it to determine the
+    // current active filters using the query_string plugin.
+    $facet = $facet_storage->load(reset($available_filters));
+    $query_string = $this->urlProcessorPluginManager->createInstance('query_string', ['facet' => $facet]);
+    $active_filters = $query_string->getActiveFilters();
+    // Load all the facets for the active filters.
+    /** @var \Drupal\facets\FacetInterface[] $facets */
+    $facets = $facet_storage->loadMultiple(array_keys($active_filters));
+    // Determine the filter values for each of the active facets.
+    foreach ($facets as $facet) {
+      $field_definition = $this->getFacetFieldDefinition($facet, $list_source);
+      if (!$field_definition) {
         continue;
       }
-      foreach ($filter_information['#items'] as $filter_value_information) {
-        $filter_values[] = $filter_value_information['label'];
-      }
-      $selected_filters[] = $filter_information['#label'] . ': ' . implode(', ', $filter_values);
+
+      $keyed_definitions[$facet->id()] = $field_definition;
+      $keyed_facets[$facet->id()] = $facet;
+      $active_filters_values[$facet->id()] = $active_filters[$facet->id()];
     }
-    return implode(' | ', $selected_filters);
+
+    // Run through each of the active filter values and prepare their displays.
+    foreach ($active_filters_values as $facet_id => $filters) {
+      $field_type = $keyed_definitions[$facet_id]->getType();
+      $id = $this->multiselectPluginManager->getPluginIdByFieldType($field_type);
+      $preset_filter = new ListPresetFilter($facet_id, $filters);
+      if (!$id) {
+        $display_value = $this->getDefaultFilterValuesLabel($keyed_facets[$facet_id], $preset_filter);
+      }
+      else {
+        $config = [
+          'facet' => $keyed_facets[$facet_id],
+          'list_source' => $list_source,
+          'preset_filter' => $preset_filter,
+        ];
+        /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
+        $plugin = $this->multiselectPluginManager->createInstance($id, $config);
+        $display_value = $plugin->getDefaultValuesLabel();
+      }
+
+      $categories[] = $keyed_facets[$facet_id]->label() . ': ' . $display_value;
+    }
+
+    return implode(' | ', $categories);
   }
 
   /**
