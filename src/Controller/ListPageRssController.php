@@ -14,10 +14,10 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\GeneratedUrl;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Theme\ThemeManagerInterface;
-use Drupal\Core\Url;
 use Drupal\emr\Entity\EntityMetaInterface;
 use Drupal\facets\UrlProcessor\UrlProcessorPluginManager;
 use Drupal\node\NodeInterface;
@@ -194,16 +194,18 @@ class ListPageRssController extends ControllerBase {
       'query' => $query,
       'language' => $language,
     ])->toString(TRUE);
+    $atom_link = $this->request->getCurrentRequest()->getSchemeAndHttpHost() . $this->request->getCurrentRequest()->getRequestUri();
     $cache_metadata->addCacheableDependency($default_link);
     $default_description = $this->getChannelDescription($node, $cache_metadata);
     $build = [
       '#theme' => 'oe_list_pages_rss',
       '#title' => $default_title,
       '#link' => $default_link->getGeneratedUrl(),
+      '#atom_link' => $atom_link,
       '#channel_description' => empty($default_description) ? $default_title : $default_description,
       '#language' => $language->getId(),
       '#copyright' => $this->getChannelCopyright(),
-      '#image' => $this->getChannelImage($cache_metadata),
+      '#image' => $this->getChannelImage($default_link, $cache_metadata),
       '#channel_elements' => [],
       '#items' => $this->getItemList($node, $cache_metadata),
     ];
@@ -288,7 +290,7 @@ class ListPageRssController extends ControllerBase {
         $result_item['#item_elements']['pubDate'] = [
           '#type' => 'html_tag',
           '#tag' => 'pubDate',
-          '#value' => $this->dateFormatter->format($creation_date, 'custom', DateTimeInterface::RFC822),
+          '#value' => $this->dateFormatter->format($creation_date, 'custom', DateTimeInterface::RFC2822),
         ];
       }
 
@@ -340,13 +342,15 @@ class ListPageRssController extends ControllerBase {
   /**
    * Get the channel image array.
    *
+   * @param \Drupal\Core\GeneratedUrl $url
+   *   The url to use.
    * @param \Drupal\Core\Cache\CacheableMetadata $cache_metadata
    *   The current cache metadata.
    *
    * @return array
    *   The image information array.
    */
-  protected function getChannelImage(CacheableMetadata $cache_metadata): array {
+  protected function getChannelImage(GeneratedUrl $url, CacheableMetadata $cache_metadata): array {
     $site_config = $this->configFactory->get('system.site');
     $cache_metadata->addCacheableDependency($site_config);
     $site_name = $site_config->get('name');
@@ -354,12 +358,10 @@ class ListPageRssController extends ControllerBase {
     // Get the logo location.
     $theme = $this->themeManager->getActiveTheme();
     $cache_metadata->addCacheContexts(['theme']);
-    $site_url = Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString(TRUE);
-    $cache_metadata->addCacheableDependency($site_url);
     return [
       'url' => file_create_url($theme->getLogo()),
       'title' => $title,
-      'link' => $site_url->getGeneratedUrl(),
+      'link' => $url->getGeneratedUrl(),
     ];
   }
 
