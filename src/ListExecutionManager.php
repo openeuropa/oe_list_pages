@@ -84,14 +84,22 @@ class ListExecutionManager implements ListExecutionManagerInterface {
     }
 
     // Determine the query options and execute it.
-    $bundle_entity_type = $this->entityTypeManager->getDefinition($configuration->getEntityType())->getBundleEntityType();
-    $storage = $this->entityTypeManager->getStorage($bundle_entity_type);
-    $bundle = $storage->load($configuration->getBundle());
-    $sort = $bundle->getThirdPartySetting('oe_list_pages', 'default_sort', []);
     $current_page = (int) $this->requestStack->getCurrentRequest()->get('page', 0);
-    $sort = $sort ? [$sort['name'] => $sort['direction']] : [];
+    if ($current_page < 0) {
+      $current_page = 0;
+    }
     $language = $this->languageManager->getCurrentLanguage()->getId();
     $preset_filters = $configuration->getDefaultFiltersValues();
+    // If there is a sort configured use it,
+    // otherwise use the bundle's default sort if set.
+    $sort = $configuration->getSort();
+    if (!$sort) {
+      $bundle_entity_type = $this->entityTypeManager->getDefinition($configuration->getEntityType())->getBundleEntityType();
+      $storage = $this->entityTypeManager->getStorage($bundle_entity_type);
+      $bundle = $storage->load($configuration->getBundle());
+      $sort = $bundle->getThirdPartySetting('oe_list_pages', 'default_sort', []);
+    }
+    $sort = $sort ? [$sort['name'] => $sort['direction']] : [];
 
     $options = [
       'limit' => $limit,
