@@ -1,0 +1,20 @@
+{#
+/**
+ * @file
+ * Default theme implementation to display an item in a RSS feed.
+ *
+ * Available variables:
+ * - title: RSS item title.
+ * - link: RSS item link.
+ * - guid: RSS item global unique identifier.
+ * - item_description: RSS body text.
+ * - item_elements: RSS item elements to be rendered as XML (pubDate, creator).
+ */
+#}
+<item>
+  <title>{{ title }}</title>
+  <link>{{ link }}</link>
+  <guid>{{ guid }}</guid>
+  <description>{{ item_description }}</description>
+  {{ item_elements }}
+</item>
