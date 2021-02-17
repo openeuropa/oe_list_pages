@@ -136,7 +136,7 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
     }
 
     // Try to determine the multiselect plugin for this field type.
-    $id = $this->multiselectPluginManager->getPluginIdByFieldType($field_type);
+    $id = $field_type ? $this->multiselectPluginManager->getPluginIdByFieldType($field_type) : NULL;
     if (!$id) {
       return $this->build($facet);
     }
@@ -163,7 +163,7 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
     $field_definition = $this->getFacetFieldDefinition($facet, $list_source);
     $field_type = !empty($field_definition) ? $field_definition->getType() : NULL;
 
-    $id = $this->multiselectPluginManager->getPluginIdByFieldType($field_type);
+    $id = $field_type ? $this->multiselectPluginManager->getPluginIdByFieldType($field_type) : NULL;
     if (!$id) {
       return $filter_operators[$filter->getOperator()] . ': ' . parent::getDefaultValuesLabel($facet, $list_source, $filter);
     }
