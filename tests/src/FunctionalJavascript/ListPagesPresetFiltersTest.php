@@ -6,6 +6,7 @@ namespace Drupal\Tests\oe_list_pages\FunctionalJavascript;
 
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
+use Drupal\facets\Entity\Facet;
 use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
 use Drupal\oe_list_pages\ListPresetFilter;
@@ -216,6 +217,77 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
     $this->assertSession()->pageTextContains('Past node 2');
     $this->assertSession()->pageTextContains('Future node');
     $this->assertSession()->pageTextNotContains('Facet for end_value');
+  }
+
+  /**
+   * Tests that we can use custom Search API fields with default statuses.
+   */
+  public function testCustomFieldWithDefaultStatus(): void {
+    // Configure the facet.
+    $processor_options = [
+      'default_status' => '1',
+    ];
+    $facet = Facet::load('oe_list_pages_filters_test_test_field');
+    $facet->addProcessor([
+      'processor_id' => 'oe_list_pages_filters_test_foo_processor',
+      'weights' => ['pre_query' => 60, 'build' => 35],
+      'settings' => $processor_options,
+    ]);
+    $facet->save();
+
+    // Create 2 nodes.
+    $values = [
+      'title' => 'Node 1',
+      'type' => 'content_type_one',
+      'status' => NodeInterface::PUBLISHED,
+    ];
+    $node = Node::create($values);
+    $node->save();
+
+    $values = [
+      'title' => 'Node 2',
+      'type' => 'content_type_one',
+      'status' => NodeInterface::PUBLISHED,
+    ];
+    $node = Node::create($values);
+    $node->save();
+
+    /** @var \Drupal\search_api\Entity\Index $index */
+    $index = Index::load('node');
+    $index->indexItems();
+
+    // Create the list page.
+    $admin = $this->createUser([], NULL, TRUE);
+    $this->drupalLogin($admin);
+    $this->drupalGet('/node/add/oe_list_page');
+    $this->getSession()->getPage()->fillField('Title', 'List page for ct1');
+    $this->clickLink('List Page');
+
+    $this->getSession()->getPage()->selectFieldOption('Source bundle', 'content_type_one');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->pressButton('Save');
+
+    // We should only see Node 1 as the Foo facet defaults to node.
+    $this->assertSession()->pageTextContains('Node 1');
+    $this->assertSession()->pageTextNotContains('Node 2');
+
+    $node = $this->drupalGetNodeByTitle('List page for ct1');
+    $this->drupalGet($node->toUrl('edit-form'));
+    $this->clickLink('List Page');
+
+    // Set preset filter for the Foo facet.
+    $this->getSession()->getPage()->selectFieldOption('Add default value for', 'Foo');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $filter_id = DefaultFilterConfigurationBuilder::generateFilterId($facet->id());
+    $filter_selector = 'emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $filter_id . ']';
+    $this->getSession()->getPage()->selectFieldOption($filter_selector . '[' . $facet->id() . '][0][list]', 2);
+    $this->getSession()->getPage()->pressButton('Set default value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->pressButton('Save');
+
+    // We should only see Node 2 as the Foo facet was set to 2.
+    $this->assertSession()->pageTextNotContains('Node 1');
+    $this->assertSession()->pageTextContains('Node 2');
   }
 
   /**

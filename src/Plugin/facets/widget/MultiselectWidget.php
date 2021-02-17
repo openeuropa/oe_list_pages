@@ -136,7 +136,7 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
     }
 
     // Try to determine the multiselect plugin for this field type.
-    $id = $field_type ? $this->multiselectPluginManager->getPluginIdByFieldType($field_type) : NULL;
+    $id = $this->multiselectPluginManager->getPluginIdByFieldType($field_type);
     if (!$id) {
       return $this->build($facet);
     }

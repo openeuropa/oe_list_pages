@@ -161,6 +161,7 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
       'reference' => 'Reference',
       'select_one' => 'Select one',
       'test_boolean' => 'Test Boolean',
+      'oe_list_pages_filters_test_test_field' => 'Foo',
     ], $options);
 
     $reference_filter_id = ContextualFiltersConfigurationBuilder::generateFilterId('reference');
