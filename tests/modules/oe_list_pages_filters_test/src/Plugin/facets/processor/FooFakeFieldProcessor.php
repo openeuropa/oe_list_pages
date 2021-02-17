@@ -11,7 +11,7 @@ use Drupal\facets\Result\Result;
 use Drupal\oe_list_pages\Plugin\facets\processor\DefaultStatusProcessorBase;
 
 /**
- * Default status processor for the foo fake field..
+ * Default status processor for the foo fake field.
  *
  * @FacetsProcessor(
  *   id = "oe_list_pages_filters_test_foo_processor",

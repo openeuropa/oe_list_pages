@@ -267,7 +267,7 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->pressButton('Save');
 
-    // We should only see Node 1 as the Foo facet defaults to node.
+    // We should only see Node 1 as the default value of Foo face is set to 1.
     $this->assertSession()->pageTextContains('Node 1');
     $this->assertSession()->pageTextNotContains('Node 2');
 
