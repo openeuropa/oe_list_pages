@@ -4,11 +4,14 @@ dependencies:
   config:
     - field.field.node.content_type_one.body
     - field.field.node.content_type_one.field_date_range
+    - field.field.node.content_type_one.field_link
     - field.field.node.content_type_one.field_reference
     - field.field.node.content_type_one.field_select_one
+    - field.field.node.content_type_one.field_test_boolean
     - node.type.content_type_one
   module:
     - datetime_range
+    - link
     - text
 id: node.content_type_one.default
 targetEntityType: node
@@ -32,13 +35,21 @@ content:
     settings: {  }
     third_party_settings: {  }
   field_date_range:
-    weight: 27
+    weight: 9
     settings: {  }
     third_party_settings: {  }
     type: daterange_default
     region: content
+  field_link:
+    type: link_default
+    weight: 10
+    region: content
+    settings:
+      placeholder_url: ''
+      placeholder_title: ''
+    third_party_settings: {  }
   field_reference:
-    weight: 26
+    weight: 8
     settings:
       match_operator: CONTAINS
       match_limit: 10
@@ -53,6 +64,13 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
+  field_test_boolean:
+    weight: 26
+    settings:
+      display_label: true
+    third_party_settings: {  }
+    type: boolean_checkbox
+    region: content
   promote:
     type: boolean_checkbox
     settings:

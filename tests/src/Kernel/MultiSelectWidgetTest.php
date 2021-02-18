@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\Tests\oe_list_pages\Kernel;
 
 use Drupal\oe_list_pages\ListPresetFilter;
-use Drupal\oe_list_pages\ListPresetFiltersBuilder;
+use Drupal\oe_list_pages\DefaultFilterConfigurationBuilder;
 use Drupal\oe_list_pages\ListSourceFactory;
 use Drupal\oe_list_pages\Plugin\facets\widget\MultiselectWidget;
 
@@ -58,7 +58,7 @@ class MultiSelectWidgetTest extends ListsSourceTestBase {
     // KEY1.
     $expected_key_results[] = [
       'filters' => [
-        ListPresetFiltersBuilder::generateFilterId($facet_categories->id()) => new ListPresetFilter($facet_categories->id(), ['cat1'], ListPresetFilter::OR_OPERATOR),
+        DefaultFilterConfigurationBuilder::generateFilterId($facet_categories->id()) => new ListPresetFilter($facet_categories->id(), ['cat1'], ListPresetFilter::OR_OPERATOR),
       ],
       'results' => 3,
     ];
@@ -66,7 +66,7 @@ class MultiSelectWidgetTest extends ListsSourceTestBase {
     // KEY2.
     $expected_key_results[] = [
       'filters' => [
-        ListPresetFiltersBuilder::generateFilterId($facet_categories->id()) => new ListPresetFilter($facet_categories->id(), ['cat2'], ListPresetFilter::OR_OPERATOR),
+        DefaultFilterConfigurationBuilder::generateFilterId($facet_categories->id()) => new ListPresetFilter($facet_categories->id(), ['cat2'], ListPresetFilter::OR_OPERATOR),
       ],
       'results' => 1,
     ];
@@ -74,7 +74,7 @@ class MultiSelectWidgetTest extends ListsSourceTestBase {
     // KEY1 AND KEY2.
     $expected_key_results[] = [
       'filters' => [
-        ListPresetFiltersBuilder::generateFilterId($facet_keywords->id()) => new ListPresetFilter($facet_keywords->id(), [
+        DefaultFilterConfigurationBuilder::generateFilterId($facet_keywords->id()) => new ListPresetFilter($facet_keywords->id(), [
           'key1',
           'key2',
         ], ListPresetFilter::AND_OPERATOR),
@@ -84,29 +84,29 @@ class MultiSelectWidgetTest extends ListsSourceTestBase {
     // KEY1 OR KEY2.
     $expected_key_results[] = [
       'filters' => [
-        ListPresetFiltersBuilder::generateFilterId($facet_keywords->id()) => new ListPresetFilter($facet_keywords->id(), ['key1', 'key2'], ListPresetFilter::OR_OPERATOR),
+        DefaultFilterConfigurationBuilder::generateFilterId($facet_keywords->id()) => new ListPresetFilter($facet_keywords->id(), ['key1', 'key2'], ListPresetFilter::OR_OPERATOR),
       ],
       'results' => 4,
     ];
     // NOT KEY1.
     $expected_key_results[] = [
       'filters' => [
-        ListPresetFiltersBuilder::generateFilterId($facet_keywords->id()) => new ListPresetFilter($facet_keywords->id(), ['key1'], ListPresetFilter::NOT_OPERATOR),
+        DefaultFilterConfigurationBuilder::generateFilterId($facet_keywords->id()) => new ListPresetFilter($facet_keywords->id(), ['key1'], ListPresetFilter::NOT_OPERATOR),
       ],
       'results' => 2,
     ];
     // KEY1 AND NOT KEY2.
     $expected_key_results[] = [
       'filters' => [
-        ListPresetFiltersBuilder::generateFilterId($facet_keywords->id()) => new ListPresetFilter($facet_keywords->id(), ['key1'], ListPresetFilter::OR_OPERATOR),
-        ListPresetFiltersBuilder::generateFilterId($facet_keywords->id()) => new ListPresetFilter($facet_keywords->id(), ['key2'], ListPresetFilter::NOT_OPERATOR),
+        DefaultFilterConfigurationBuilder::generateFilterId($facet_keywords->id()) => new ListPresetFilter($facet_keywords->id(), ['key1'], ListPresetFilter::OR_OPERATOR),
+        DefaultFilterConfigurationBuilder::generateFilterId($facet_keywords->id()) => new ListPresetFilter($facet_keywords->id(), ['key2'], ListPresetFilter::NOT_OPERATOR),
       ],
       'results' => 1,
     ];
     // KEY1 AND NOT (KEY2 OR KEY3)
     $filters = [];
-    $filters[ListPresetFiltersBuilder::generateFilterId($facet_keywords->id())] = new ListPresetFilter($facet_keywords->id(), ['key1'], ListPresetFilter::AND_OPERATOR);
-    $filters[ListPresetFiltersBuilder::generateFilterId($facet_keywords->id(), array_keys($filters))] = new ListPresetFilter($facet_keywords->id(), [
+    $filters[DefaultFilterConfigurationBuilder::generateFilterId($facet_keywords->id())] = new ListPresetFilter($facet_keywords->id(), ['key1'], ListPresetFilter::AND_OPERATOR);
+    $filters[DefaultFilterConfigurationBuilder::generateFilterId($facet_keywords->id(), array_keys($filters))] = new ListPresetFilter($facet_keywords->id(), [
       'key2',
       'key3',
     ], ListPresetFilter::NOT_OPERATOR);
@@ -116,8 +116,8 @@ class MultiSelectWidgetTest extends ListsSourceTestBase {
     ];
     // KEY1 AND (KEY2 OR KEY3)
     $filters = [];
-    $filters[ListPresetFiltersBuilder::generateFilterId($facet_keywords->id())] = new ListPresetFilter($facet_keywords->id(), ['key1'], ListPresetFilter::OR_OPERATOR);
-    $filters[ListPresetFiltersBuilder::generateFilterId($facet_keywords->id(), array_keys($filters))] = new ListPresetFilter($facet_keywords->id(), [
+    $filters[DefaultFilterConfigurationBuilder::generateFilterId($facet_keywords->id())] = new ListPresetFilter($facet_keywords->id(), ['key1'], ListPresetFilter::OR_OPERATOR);
+    $filters[DefaultFilterConfigurationBuilder::generateFilterId($facet_keywords->id(), array_keys($filters))] = new ListPresetFilter($facet_keywords->id(), [
       'key2',
       'key3',
     ], ListPresetFilter::OR_OPERATOR);
@@ -127,8 +127,8 @@ class MultiSelectWidgetTest extends ListsSourceTestBase {
     ];
     // KEY2 AND (KEY2 OR KEY3)
     $filters = [];
-    $filters[ListPresetFiltersBuilder::generateFilterId($facet_keywords->id())] = new ListPresetFilter($facet_keywords->id(), ['key2'], ListPresetFilter::OR_OPERATOR);
-    $filters[ListPresetFiltersBuilder::generateFilterId($facet_keywords->id(), array_keys($filters))] = new ListPresetFilter($facet_keywords->id(), [
+    $filters[DefaultFilterConfigurationBuilder::generateFilterId($facet_keywords->id())] = new ListPresetFilter($facet_keywords->id(), ['key2'], ListPresetFilter::OR_OPERATOR);
+    $filters[DefaultFilterConfigurationBuilder::generateFilterId($facet_keywords->id(), array_keys($filters))] = new ListPresetFilter($facet_keywords->id(), [
       'key2',
       'key3',
     ], ListPresetFilter::OR_OPERATOR);

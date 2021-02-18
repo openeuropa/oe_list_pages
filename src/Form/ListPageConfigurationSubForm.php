@@ -17,7 +17,7 @@ use Drupal\oe_list_pages\ListPageConfiguration;
 use Drupal\oe_list_pages\ListPageConfigurationSubformInterface;
 use Drupal\oe_list_pages\ListPageEvents;
 use Drupal\oe_list_pages\ListPageSourceAlterEvent;
-use Drupal\oe_list_pages\ListPresetFiltersBuilder;
+use Drupal\oe_list_pages\DefaultFilterConfigurationBuilder;
 use Drupal\oe_list_pages\ListSourceFactoryInterface;
 use Drupal\oe_list_pages\ListSourceInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -68,7 +68,7 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
   /**
    * The preset filters builder.
    *
-   * @var \Drupal\oe_list_pages\ListPresetFiltersBuilder
+   * @var \Drupal\oe_list_pages\DefaultFilterConfigurationBuilder
    */
   protected $presetFiltersBuilder;
 
@@ -85,10 +85,10 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
    *   The event dispatcher.
    * @param \Drupal\oe_list_pages\ListSourceFactoryInterface $listSourceFactory
    *   The list source factory.
-   * @param \Drupal\oe_list_pages\ListPresetFiltersBuilder $preset_filters_builder
+   * @param \Drupal\oe_list_pages\DefaultFilterConfigurationBuilder $preset_filters_builder
    *   The preset filters builder.
    */
-  public function __construct(ListPageConfiguration $configuration, EntityTypeManagerInterface $entityTypeManager, EntityTypeBundleInfoInterface $entityTypeBundleInfo, EventDispatcherInterface $eventDispatcher, ListSourceFactoryInterface $listSourceFactory, ListPresetFiltersBuilder $preset_filters_builder) {
+  public function __construct(ListPageConfiguration $configuration, EntityTypeManagerInterface $entityTypeManager, EntityTypeBundleInfoInterface $entityTypeBundleInfo, EventDispatcherInterface $eventDispatcher, ListSourceFactoryInterface $listSourceFactory, DefaultFilterConfigurationBuilder $preset_filters_builder) {
     $this->entityTypeManager = $entityTypeManager;
     $this->entityTypeBundleInfo = $entityTypeBundleInfo;
     $this->eventDispatcher = $eventDispatcher;
@@ -258,8 +258,10 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
 
     // In this form we embed the default filters form as well so if we change
     // entity types, we need to reset any filter selection.
-    $form_state->set('facet_id', NULL);
-    $form_state->set('filter_id', NULL);
+    $form_state->set('default_facet_id', NULL);
+    $form_state->set('default_filter_id', NULL);
+    $form_state->set('contextual_facet_id', NULL);
+    $form_state->set('contextual_filter_id', NULL);
     $form_state->setRebuild(TRUE);
   }
 
@@ -278,8 +280,10 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
 
     // In this form we embed the default filters form as well so if we change
     // entity types, we need to reset any filter selection.
-    $form_state->set('facet_id', NULL);
-    $form_state->set('filter_id', NULL);
+    $form_state->set('default_facet_id', NULL);
+    $form_state->set('default_filter_id', NULL);
+    $form_state->set('contextual_facet_id', NULL);
+    $form_state->set('contextual_filter_id', NULL);
 
     // When we change the bundle, we want to set the default exposed filter
     // values to the user input so that the checkboxes can be checked when the

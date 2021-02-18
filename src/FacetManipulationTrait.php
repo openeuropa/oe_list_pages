@@ -100,7 +100,7 @@ trait FacetManipulationTrait {
    *   The field definition.
    */
   protected function getFacetFieldDefinition(FacetInterface $facet, ListSourceInterface $list_source): ?FieldDefinitionInterface {
-    if (!$this->entityFieldManager || !$this->entityFieldManager instanceof EntityFieldManagerInterface) {
+    if (!isset($this->entityFieldManager) || !$this->entityFieldManager instanceof EntityFieldManagerInterface) {
       $this->entityFieldManager = \Drupal::service('entity_field.manager');
     }
 

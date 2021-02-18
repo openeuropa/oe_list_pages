@@ -61,4 +61,15 @@ interface ListBuilderInterface {
    */
   public function buildPagerInfo(ContentEntityInterface $entity): array;
 
+  /**
+   * Builds a link to the RSS representation of the list page.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The content entity page.
+   *
+   * @return array
+   *   The RSS link render array.
+   */
+  public function buildRssLink(ContentEntityInterface $entity): array;
+
 }

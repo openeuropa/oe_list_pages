@@ -10,6 +10,9 @@ third_party_settings:
     default_exposed_filters:
       - body
       - list_facet_source_node_content_type_onestatus
+    default_sort:
+      name: created
+      direction: DESC
 description: ''
 help: ''
 new_revision: true

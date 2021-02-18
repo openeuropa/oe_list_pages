@@ -173,7 +173,7 @@ class ListPageLinkSourcePluginTest extends KernelTestBase {
 
     $links = $plugin->getLinks();
     $this->assertEquals([], $links->getCacheTags());
-    $this->assertEquals([], $links->getCacheContexts());
+    $this->assertEquals(['route'], $links->getCacheContexts());
     $this->assertEquals(Cache::PERMANENT, $links->getCacheMaxAge());
 
     $plugin->setConfiguration([
@@ -188,7 +188,7 @@ class ListPageLinkSourcePluginTest extends KernelTestBase {
       'entity_test_with_bundle_list',
       'search_api_list:database_search_index',
     ], $links->getCacheTags());
-    $this->assertEquals([], $links->getCacheContexts());
+    $this->assertEquals(['route'], $links->getCacheContexts());
     $this->assertEquals(Cache::PERMANENT, $links->getCacheMaxAge());
 
     // Create a test entity.
@@ -218,7 +218,7 @@ class ListPageLinkSourcePluginTest extends KernelTestBase {
       'entity_test_with_bundle_list',
       'search_api_list:database_search_index',
     ], $links->getCacheTags());
-    $this->assertEquals([], $links->getCacheContexts());
+    $this->assertEquals(['route'], $links->getCacheContexts());
     $this->assertEquals(Cache::PERMANENT, $links->getCacheMaxAge());
   }
 

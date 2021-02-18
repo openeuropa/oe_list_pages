@@ -1,0 +1,29 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_reference
+    - node.type.content_type_one
+    - node.type.content_type_two
+    - node.type.page
+id: node.page.field_reference
+field_name: field_reference
+entity_type: node
+bundle: page
+label: Reference
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:node'
+  handler_settings:
+    target_bundles:
+      content_type_one: content_type_one
+      content_type_two: content_type_two
+    sort:
+      field: _none
+    auto_create: false
+    auto_create_bundle: content_type_one
+field_type: entity_reference

@@ -8,7 +8,7 @@ use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\oe_list_pages\ListPageConfiguration;
 use Drupal\oe_list_pages\ListPageConfigurationFactoryInterface;
-use Drupal\oe_list_pages\ListPresetFiltersBuilder;
+use Drupal\oe_list_pages\DefaultFilterConfigurationBuilder;
 use Drupal\oe_list_pages\ListSourceFactoryInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -48,7 +48,7 @@ class ListPageConfigurationSubformFactory implements ListPageConfigurationFactor
   /**
    * The preset filters builder.
    *
-   * @var \Drupal\oe_list_pages\ListPresetFiltersBuilder
+   * @var \Drupal\oe_list_pages\DefaultFilterConfigurationBuilder
    */
   protected $presetFiltersBuilder;
 
@@ -63,10 +63,10 @@ class ListPageConfigurationSubformFactory implements ListPageConfigurationFactor
    *   The event dispatcher.
    * @param \Drupal\oe_list_pages\ListSourceFactoryInterface $listSourceFactory
    *   The list source factory.
-   * @param \Drupal\oe_list_pages\ListPresetFiltersBuilder $preset_filters_builder
+   * @param \Drupal\oe_list_pages\DefaultFilterConfigurationBuilder $preset_filters_builder
    *   The preset list builder.
    */
-  public function __construct(EntityTypeManagerInterface $entityTypeManager, EntityTypeBundleInfoInterface $entityTypeBundleInfo, EventDispatcherInterface $eventDispatcher, ListSourceFactoryInterface $listSourceFactory, ListPresetFiltersBuilder $preset_filters_builder) {
+  public function __construct(EntityTypeManagerInterface $entityTypeManager, EntityTypeBundleInfoInterface $entityTypeBundleInfo, EventDispatcherInterface $eventDispatcher, ListSourceFactoryInterface $listSourceFactory, DefaultFilterConfigurationBuilder $preset_filters_builder) {
     $this->entityTypeManager = $entityTypeManager;
     $this->entityTypeBundleInfo = $entityTypeBundleInfo;
     $this->eventDispatcher = $eventDispatcher;

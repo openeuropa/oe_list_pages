@@ -10,6 +10,11 @@ targetEntityType: node
 bundle: oe_list_page
 mode: default
 content:
+  'extra_field_oe_list_page_rss_link:node:oe_list_page':
+    weight: 0
+    region: content
+    settings: { }
+    third_party_settings: { }
   'extra_field_oe_list_page_selected_filters:node:oe_list_page':
     weight: 2
     region: content

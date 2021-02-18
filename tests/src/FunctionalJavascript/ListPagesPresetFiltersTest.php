@@ -6,10 +6,11 @@ namespace Drupal\Tests\oe_list_pages\FunctionalJavascript;
 
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
+use Drupal\facets\Entity\Facet;
 use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
 use Drupal\oe_list_pages\ListPresetFilter;
-use Drupal\oe_list_pages\ListPresetFiltersBuilder;
+use Drupal\oe_list_pages\DefaultFilterConfigurationBuilder;
 use Drupal\oe_list_pages\ListSourceFactory;
 use Drupal\oe_list_pages\Plugin\facets\query_type\DateStatus;
 use Drupal\search_api\Entity\Index;
@@ -189,7 +190,7 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
     // Set preset filter for default date facet.
     $this->getSession()->getPage()->selectFieldOption('Add default value for', 'Facet for end_value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $filter_id = ListPresetFiltersBuilder::generateFilterId($facet->id());
+    $filter_id = DefaultFilterConfigurationBuilder::generateFilterId($facet->id());
     $filter_selector = 'emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $filter_id . ']';
 
     $this->getSession()->getPage()->selectFieldOption($filter_selector . '[' . $facet->id() . '][0][list]', DateStatus::UPCOMING);
@@ -205,7 +206,7 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
     // Include both upcoming and past.
     $this->drupalGet($node->toUrl('edit-form'));
     $this->clickLink('List Page');
-    $this->getSession()->getPage()->pressButton('edit-' . $filter_id);
+    $this->getSession()->getPage()->pressButton('default-edit-' . $filter_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->selectFieldOption('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $filter_id . '][oe_list_pages_filter_operator]', 'Any of');
     $this->getSession()->getPage()->selectFieldOption($filter_selector . '[' . $facet->id() . '][1][list]', DateStatus::PAST);
@@ -216,6 +217,77 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
     $this->assertSession()->pageTextContains('Past node 2');
     $this->assertSession()->pageTextContains('Future node');
     $this->assertSession()->pageTextNotContains('Facet for end_value');
+  }
+
+  /**
+   * Tests that we can use custom Search API fields with default statuses.
+   */
+  public function testCustomFieldWithDefaultStatus(): void {
+    // Configure the facet.
+    $processor_options = [
+      'default_status' => '1',
+    ];
+    $facet = Facet::load('oe_list_pages_filters_test_test_field');
+    $facet->addProcessor([
+      'processor_id' => 'oe_list_pages_filters_test_foo_processor',
+      'weights' => ['pre_query' => 60, 'build' => 35],
+      'settings' => $processor_options,
+    ]);
+    $facet->save();
+
+    // Create 2 nodes.
+    $values = [
+      'title' => 'Node 1',
+      'type' => 'content_type_one',
+      'status' => NodeInterface::PUBLISHED,
+    ];
+    $node = Node::create($values);
+    $node->save();
+
+    $values = [
+      'title' => 'Node 2',
+      'type' => 'content_type_one',
+      'status' => NodeInterface::PUBLISHED,
+    ];
+    $node = Node::create($values);
+    $node->save();
+
+    /** @var \Drupal\search_api\Entity\Index $index */
+    $index = Index::load('node');
+    $index->indexItems();
+
+    // Create the list page.
+    $admin = $this->createUser([], NULL, TRUE);
+    $this->drupalLogin($admin);
+    $this->drupalGet('/node/add/oe_list_page');
+    $this->getSession()->getPage()->fillField('Title', 'List page for ct1');
+    $this->clickLink('List Page');
+
+    $this->getSession()->getPage()->selectFieldOption('Source bundle', 'content_type_one');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->pressButton('Save');
+
+    // We should only see Node 1 as the default value of Foo face is set to 1.
+    $this->assertSession()->pageTextContains('Node 1');
+    $this->assertSession()->pageTextNotContains('Node 2');
+
+    $node = $this->drupalGetNodeByTitle('List page for ct1');
+    $this->drupalGet($node->toUrl('edit-form'));
+    $this->clickLink('List Page');
+
+    // Set preset filter for the Foo facet.
+    $this->getSession()->getPage()->selectFieldOption('Add default value for', 'Foo');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $filter_id = DefaultFilterConfigurationBuilder::generateFilterId($facet->id());
+    $filter_selector = 'emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $filter_id . ']';
+    $this->getSession()->getPage()->selectFieldOption($filter_selector . '[' . $facet->id() . '][0][list]', 2);
+    $this->getSession()->getPage()->pressButton('Set default value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->pressButton('Save');
+
+    // We should only see Node 2 as the Foo facet was set to 2.
+    $this->assertSession()->pageTextNotContains('Node 1');
+    $this->assertSession()->pageTextContains('Node 2');
   }
 
   /**
@@ -318,7 +390,7 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
 
     $node = $this->drupalGetNodeByTitle('List page for ct1');
     $filters = [
-      ListPresetFiltersBuilder::generateFilterId('select_one') => new ListPresetFilter('select_one', ['test1']),
+      DefaultFilterConfigurationBuilder::generateFilterId('select_one') => new ListPresetFilter('select_one', ['test1']),
     ];
     $this->setListPageFilters($node, $filters);
     $this->getSession()->reload();
@@ -345,7 +417,7 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
 
     $node = $this->drupalGetNodeByTitle('List page for ct1');
     $filters = [
-      ListPresetFiltersBuilder::generateFilterId('select_one') => new ListPresetFilter('select_one', ['test1', 'test2']),
+      DefaultFilterConfigurationBuilder::generateFilterId('select_one') => new ListPresetFilter('select_one', ['test1', 'test2']),
     ];
     $this->setListPageFilters($node, $filters);
     $this->getSession()->getPage()->pressButton('Clear filters');
@@ -357,7 +429,7 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
 
     // Add a date default filter that includes all results.
     $filters = [
-      ListPresetFiltersBuilder::generateFilterId('created') => new ListPresetFilter('created', ['bt|2009-01-01T15:30:44+01:00|2031-01-01T15:30:44+01:00']),
+      DefaultFilterConfigurationBuilder::generateFilterId('created') => new ListPresetFilter('created', ['bt|2009-01-01T15:30:44+01:00|2031-01-01T15:30:44+01:00']),
     ];
     $this->setListPageFilters($node, $filters);
     $this->getSession()->reload();
