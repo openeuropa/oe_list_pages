@@ -7,6 +7,7 @@ namespace Drupal\oe_list_pages\Plugin\MultiselectFilterField;
 use Drupal\Core\Entity\Element\EntityAutocomplete;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\link\LinkItemInterface;
 use Drupal\link\Plugin\Field\FieldWidget\LinkWidget;
 use Drupal\oe_list_pages\MultiSelectFilterFieldPluginBase;
@@ -103,6 +104,14 @@ class LinkField extends MultiSelectFilterFieldPluginBase {
     }
 
     return implode(', ', $values);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFieldValues(FieldItemListInterface $items): array {
+    $values = $items->getValue();
+    return array_column($values, 'uri');
   }
 
   /**

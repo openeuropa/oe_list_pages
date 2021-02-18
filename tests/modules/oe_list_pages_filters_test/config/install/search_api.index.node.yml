@@ -8,10 +8,12 @@ dependencies:
     - field.storage.node.field_reference
     - field.storage.node.field_select_one
     - field.storage.node.field_select_two
+    - field.storage.node.field_test_boolean
     - search_api.server.database_server
   module:
     - node
     - search_api
+    - oe_list_pages_filters_test
 id: node
 name: Node
 description: ''
@@ -81,6 +83,18 @@ field_settings:
     dependencies:
       config:
         - field.storage.node.field_select_two
+  field_test_boolean:
+    label: 'Test Boolean'
+    datasource_id: 'entity:node'
+    property_path: field_test_boolean
+    type: boolean
+    dependencies:
+      config:
+        - field.storage.node.field_test_boolean
+  oe_list_pages_filters_test_foo_field:
+    label: Foo
+    property_path: oe_list_pages_filters_test_foo_field
+    type: string
   status:
     label: Published
     datasource_id: 'entity:node'
@@ -125,12 +139,14 @@ processor_settings:
       - field_link
       - field_select_one
       - field_select_two
+      - oe_list_pages_filters_test_foo_field
       - title
       - type
     weights:
       preprocess_index: -20
       preprocess_query: -20
   language_with_fallback: {  }
+  oe_list_pages_filters_test_test_field: {  }
   rendered_item: {  }
 tracker_settings:
   default:

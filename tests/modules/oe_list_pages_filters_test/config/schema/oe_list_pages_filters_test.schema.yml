@@ -1,0 +1,7 @@
+plugin.plugin_configuration.facets_processor.oe_list_pages_filters_test_foo_processor:
+  type: mapping
+  label: 'test processor'
+  mapping:
+    default_status:
+      type: string
+      label: 'Default status'

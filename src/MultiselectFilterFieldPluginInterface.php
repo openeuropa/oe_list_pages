@@ -4,6 +4,8 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages;
 
+use Drupal\Core\Field\FieldItemListInterface;
+
 /**
  * Interface of a multiselect filter field plugin.
  */
@@ -32,5 +34,16 @@ interface MultiselectFilterFieldPluginInterface {
    *   The label.
    */
   public function getDefaultValuesLabel(): string;
+
+  /**
+   * Extracts the values from the type of field.
+   *
+   * @param \Drupal\Core\Field\FieldItemListInterface $items
+   *   The items list.
+   *
+   * @return array
+   *   The values.
+   */
+  public function getFieldValues(FieldItemListInterface $items): array;
 
 }

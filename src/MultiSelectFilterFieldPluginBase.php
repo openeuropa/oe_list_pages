@@ -9,6 +9,7 @@ use Drupal\Component\Plugin\Exception\PluginException;
 use Drupal\Component\Plugin\PluginBase;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
+use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\facets\FacetInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -91,6 +92,14 @@ abstract class MultiSelectFilterFieldPluginBase extends PluginBase implements Co
     }
 
     return $this->configuration['preset_filter']->getValues();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFieldValues(FieldItemListInterface $items): array {
+    $values = $items->getValue();
+    return array_column($values, 'value');
   }
 
 }

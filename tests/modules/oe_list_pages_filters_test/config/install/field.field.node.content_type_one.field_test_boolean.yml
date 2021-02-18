@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_test_boolean
+    - node.type.content_type_one
+id: node.content_type_one.field_test_boolean
+field_name: field_test_boolean
+entity_type: node
+bundle: content_type_one
+label: 'Test Boolean'
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

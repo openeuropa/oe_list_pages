@@ -7,6 +7,7 @@ namespace Drupal\oe_list_pages\Plugin\MultiselectFilterField;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\oe_list_pages\MultiSelectFilterFieldPluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -14,8 +15,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Defines the entity field type multiselect filter plugin.
  *
  * @MultiselectFilterField(
- *   id = "entity",
- *   label = @Translation("Entity field"),
+ *   id = "entity_reference",
+ *   label = @Translation("Entity reference field"),
  *   field_types = {
  *     "entity_reference",
  *     "entity_reference_revisions",
@@ -128,6 +129,14 @@ class EntityReferenceField extends MultiSelectFilterFieldPluginBase {
     }
 
     return implode(', ', $values);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFieldValues(FieldItemListInterface $items): array {
+    $values = $items->getValue();
+    return array_column($values, 'target_id');
   }
 
 }
