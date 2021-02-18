@@ -12,6 +12,7 @@ use Drupal\open_vocabularies\Entity\OpenVocabulary;
 use Drupal\open_vocabularies\Entity\OpenVocabularyAssociation;
 use Drupal\search_api\Entity\Index;
 use Drupal\taxonomy\Entity\Term;
+use Drupal\Tests\oe_link_lists\Traits\LinkListTestTrait;
 use Drupal\Tests\oe_list_pages\FunctionalJavascript\ListPagePluginFormTestBase;
 
 /**
@@ -21,10 +22,13 @@ use Drupal\Tests\oe_list_pages\FunctionalJavascript\ListPagePluginFormTestBase;
  */
 class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
 
+  use LinkListTestTrait;
+
   /**
    * {@inheritdoc}
    */
   protected static $modules = [
+    'block',
     'options',
     'facets',
     'entity_reference_revisions',
@@ -32,6 +36,7 @@ class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
     'oe_list_page_content_type',
     'oe_list_pages_filters_test',
     'oe_list_pages_open_vocabularies_test',
+    'oe_list_pages_link_list_source',
     'open_vocabularies',
     'node',
     'emr',
@@ -77,6 +82,7 @@ class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
     // Create association for content types.
     $fields = [
       'node.content_type_one.field_open_vocabularies',
+      'node.content_type_two.field_open_vocabularies',
     ];
     $values = [
       'label' => 'My amazing association',
@@ -142,6 +148,37 @@ class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
     ];
     $node = Node::create($values);
     $node->save();
+
+    // Create some test nodes to index and search in.
+    $date = new DrupalDateTime('09-02-2021');
+    $values = [
+      'title' => 'Sun',
+      'type' => 'content_type_two',
+      'body' => 'This is the sun',
+      'status' => NodeInterface::PUBLISHED,
+      'field_open_vocabularies' => [
+        'target_id' => $term_1->id(),
+        'target_association_id' => $association_id,
+      ],
+      'created' => $date->getTimestamp(),
+    ];
+    $node = Node::create($values);
+    $node->save();
+
+    $values = [
+      'title' => 'Grass',
+      'type' => 'content_type_two',
+      'body' => 'This is grass',
+      'status' => NodeInterface::PUBLISHED,
+      'field_open_vocabularies' => [
+        'target_id' => $term_2->id(),
+        'target_association_id' => $association_id,
+      ],
+      'created' => $date->modify('+ 5 days')->getTimestamp(),
+    ];
+    $node = Node::create($values);
+    $node->save();
+
     /** @var \Drupal\search_api\Entity\Index $index */
     $index = Index::load('node');
     $index->indexItems();
@@ -235,7 +272,7 @@ class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
     $association_filter_id = ListPresetFiltersBuilder::generateFilterId($field_id);
     $default_value_name_prefix = 'emr_plugins_oe_list_page[wrapper][default_filter_values]';
     $filter_selector = $default_value_name_prefix . '[wrapper][edit][' . $association_filter_id . ']';
-    $this->getSession()->getPage()->fillField($filter_selector . '[' . $field_id . '][0][entity]', 'green color (2)');
+    $this->getSession()->getPage()->fillField($filter_selector . '[' . $field_id . '][0][entity_reference]', 'green color (2)');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $expected_set_filters = [
@@ -268,6 +305,57 @@ class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
     $page->pressButton('Save');
     $this->assertSession()->pageTextContains('one yellow fruit');
     $this->assertSession()->pageTextContains('another yellow fruit');
+  }
+
+  /**
+   * Test contextual filters in link lists.
+   */
+  public function testListPageContextualFilters(): void {
+    $admin = $this->createUser([], NULL, TRUE);
+    $this->drupalLogin($admin);
+    $this->drupalGet('link_list/add/dynamic');
+    $this->getSession()->getPage()->selectFieldOption('Link source', 'List page');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $contextual_filter_name_prefix = 'configuration[0][link_source][plugin_configuration_wrapper][list_pages][list_page_configuration][wrapper][contextual_filters]';
+    $this->getSession()->getPage()->fillField('Administrative title', 'List page plugin test');
+    $this->getSession()->getPage()->fillField('Title', 'List page list OpenVocabularies');
+    $this->getSession()->getPage()->selectFieldOption('Link display', 'Title');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $page = $this->getSession()->getPage();
+    $assert = $this->assertSession();
+    $page->selectFieldOption('Source entity type', 'Content');
+    $assert->assertWaitOnAjaxRequest();
+    $page->selectFieldOption('Source bundle', 'Content type one');
+    $assert->assertWaitOnAjaxRequest();
+
+    // Set a contextual filter for the association.
+    $field_id = 'open_vocabularies_custom_vocabulary_open_vocabulary_node_content_type_one_field_open_vocabularies';
+    $association_filter_id = ListPresetFiltersBuilder::generateFilterId($field_id);
+    $expected_contextual_filters = [];
+    $page->selectFieldOption('Add contextual value for', 'My amazing association');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->pageTextContains('Set operator for My amazing association');
+    $filter_selector = $contextual_filter_name_prefix . '[wrapper][edit][' . $association_filter_id . ']';
+    $this->getSession()->getPage()->selectFieldOption($filter_selector . '[operator]', 'and');
+    $page->pressButton('Set operator');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $expected_contextual_filters['reference'] = ['key' => 'My amazing association', 'value' => 'All of'];
+    $this->assertContextualValueForFilters($expected_contextual_filters);
+    $page->pressButton('Save');
+
+    // Place the block for this link list.
+    $link_list = $this->getLinkListByTitle('List page list OpenVocabularies', TRUE);
+
+    // Nodes from content type one with same terms appear.
+    $this->drupalPlaceBlock('oe_link_list_block:' . $link_list->uuid(), ['region' => 'content']);
+    $node = $this->drupalGetNodeByTitle('Sun');
+    $this->drupalGet($node->toUrl());
+    $this->assertSession()->pageTextContains('one yellow fruit');
+    $this->assertSession()->pageTextNotContains('another yellow fruit');
+    $node = $this->drupalGetNodeByTitle('Grass');
+    $this->drupalGet($node->toUrl());
+    $this->assertSession()->pageTextContains('another yellow fruit');
+    $this->assertSession()->pageTextNotContains('one yellow fruit');
   }
 
   /**
