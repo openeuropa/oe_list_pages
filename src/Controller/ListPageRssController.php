@@ -404,10 +404,8 @@ class ListPageRssController extends ControllerBase {
     // Determine the filter values for each of the active facets.
     foreach ($facets as $facet) {
       $field_definition = $this->getFacetFieldDefinition($facet, $list_source);
-      if (!$field_definition) {
-        continue;
-      }
 
+      // The field definition can be NULL as well.
       $keyed_definitions[$facet->id()] = $field_definition;
       $keyed_facets[$facet->id()] = $facet;
       $active_filters_values[$facet->id()] = $active_filters[$facet->id()];
@@ -415,8 +413,8 @@ class ListPageRssController extends ControllerBase {
 
     // Run through each of the active filter values and prepare their displays.
     foreach ($active_filters_values as $facet_id => $filters) {
-      $field_type = $keyed_definitions[$facet_id]->getType();
-      $id = $this->multiselectPluginManager->getPluginIdByFieldType($field_type);
+      $field_type = $keyed_definitions[$facet_id] ? $keyed_definitions[$facet_id]->getType() : NULL;
+      $id = $field_type ? $this->multiselectPluginManager->getPluginIdByFieldType($field_type) : NULL;
       $preset_filter = new ListPresetFilter($facet_id, $filters);
       if (!$id) {
         $display_value = $this->getDefaultFilterValuesLabel($keyed_facets[$facet_id], $preset_filter);
