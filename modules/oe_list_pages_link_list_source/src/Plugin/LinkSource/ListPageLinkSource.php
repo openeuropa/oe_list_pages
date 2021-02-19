@@ -26,6 +26,7 @@ use Drupal\oe_list_pages\ListPageConfiguration;
 use Drupal\oe_list_pages\ListSourceFactoryInterface;
 use Drupal\oe_list_pages\ListSourceInterface;
 use Drupal\oe_list_pages\MultiselectFilterFieldPluginManager;
+use Drupal\oe_list_pages_link_list_source\ContextualFilterFieldMapper;
 use Drupal\oe_list_pages_link_list_source\ContextualFiltersConfigurationBuilder;
 use Drupal\oe_list_pages_link_list_source\Exception\InapplicableContextualFilter;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -109,11 +110,18 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
   protected $multiselectPluginManager;
 
   /**
+   * The contextual filters field mappger.
+   *
+   * @var \Drupal\oe_list_pages_link_list_source\ContextualFilterFieldMapper
+   */
+  protected $contextualFieldMapper;
+
+  /**
    * {@inheritdoc}
    *
    * @SuppressWarnings(PHPMD.ExcessiveParameterList)
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, ListPageConfigurationSubformFactory $configurationSubformFactory, ListExecutionManagerInterface $listExecutionManager, EventDispatcherInterface $eventDispatcher, EntityTypeManagerInterface $entityTypeManager, EntityRepositoryInterface $entityRepository, ContextualFiltersConfigurationBuilder $contextualFiltersBuilder, RouteMatchInterface $routeMatch, ListSourceFactoryInterface $listSourceFactory, MultiselectFilterFieldPluginManager $multiselectPluginManager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, ListPageConfigurationSubformFactory $configurationSubformFactory, ListExecutionManagerInterface $listExecutionManager, EventDispatcherInterface $eventDispatcher, EntityTypeManagerInterface $entityTypeManager, EntityRepositoryInterface $entityRepository, ContextualFiltersConfigurationBuilder $contextualFiltersBuilder, RouteMatchInterface $routeMatch, ListSourceFactoryInterface $listSourceFactory, MultiselectFilterFieldPluginManager $multiselectPluginManager, ContextualFilterFieldMapper $contextualFieldMapper) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->configurationSubformFactory = $configurationSubformFactory;
@@ -125,6 +133,7 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
     $this->routeMatch = $routeMatch;
     $this->listSourceFactory = $listSourceFactory;
     $this->multiselectPluginManager = $multiselectPluginManager;
+    $this->contextualFieldMapper = $contextualFieldMapper;
   }
 
   /**
@@ -143,7 +152,8 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
       $container->get('oe_list_pages_link_list_source.contextual_filters_builder'),
       $container->get('current_route_match'),
       $container->get('oe_list_pages.list_source.factory'),
-      $container->get('plugin.manager.multiselect_filter_field')
+      $container->get('plugin.manager.multiselect_filter_field'),
+      $container->get('oe_list_pages_link_list_source.contextual_filters_field_mapper')
     );
   }
 
@@ -312,9 +322,9 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
       $facet = $this->contextualFiltersBuilder->getFacetById($list_source, $contextual_filter->getFacetId());
       $definition = $this->getFacetFieldDefinition($facet, $list_source);
       $field_name = $definition->getName();
-      // We only support contextual filters for fields that exist with the
-      // same name both on the current entity and on the listed entity type.
-      if (!$entity->hasField($field_name)) {
+      // Map the field correctly.
+      $field_name = $this->contextualFieldMapper->getCorrespondingFieldName($field_name, $entity, $cache);
+      if (!$field_name) {
         // If the field doesn't exist on the current entity, we need to not
         // show any results.
         throw new InapplicableContextualFilter();

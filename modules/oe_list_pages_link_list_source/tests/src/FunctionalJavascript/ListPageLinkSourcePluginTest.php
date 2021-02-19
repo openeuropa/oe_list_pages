@@ -600,6 +600,38 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     $this->drupalGet('/admin');
     $this->assertSession()->elementExists('css', '.block-oe-link-lists');
     $this->assertSession()->elementsCount('css', '.block-oe-link-lists ul li', 0);
+
+    // Test that we can filter also using a field that is mapped and not with
+    // the same name.
+    $node = Node::create([
+      'type' => 'article',
+      'title' => 'My contextual article',
+      'field_another_reference' => $refs['ref1']->id(),
+    ]);
+    $node->save();
+    $configuration = $link_list->getConfiguration();
+    $configuration['source']['plugin_configuration']['default_filter_values'] = [];
+    $configuration['source']['plugin_configuration']['contextual_filters'] = [
+      ContextualFiltersConfigurationBuilder::generateFilterId('reference') => new ListPresetFilter('reference', [], 'or'),
+    ];
+    $link_list->setConfiguration($configuration);
+    $link_list->save();
+    $this->drupalGet($node->toUrl());
+    // By default we don't have any results.
+    $this->assertSession()->elementsCount('css', '.block-oe-link-lists ul li', 0);
+    // Configure the mapping of the reference field.
+    $map = [
+      'field_another_reference' => 'field_reference',
+      'field_reference' => 'field_another_reference',
+    ];
+    $config = \Drupal::configFactory()->getEditable('oe_list_pages_link_list_source.contextual_field_map');
+    $config->set('maps', [$map])->save();
+    $this->drupalGet($node->toUrl());
+
+    // Now we have two results which have the same reference as the Article.
+    $this->assertSession()->elementsCount('css', '.block-oe-link-lists ul li', 2);
+    $this->assertSession()->linkExistsExact('visible reference');
+    $this->assertSession()->linkExistsExact('select one and reference');
   }
 
   /**

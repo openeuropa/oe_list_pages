@@ -1,0 +1,13 @@
+oe_list_pages_link_list_source.contextual_field_map:
+  type: config_object
+  label: 'Contextual field map'
+  mapping:
+    maps:
+      type: sequence
+      label: 'Configured maps'
+      sequence:
+        type: sequence
+        label: 'A map of field names'
+        sequence:
+          type: string
+          label: 'Field name, keyed by mapped field name'
