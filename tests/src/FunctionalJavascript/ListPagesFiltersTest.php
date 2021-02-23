@@ -238,7 +238,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     // can be removed.
     $this->assertSession()->linkExistsExact('Past');
 
-    $this->assertSelectedFiltersLabels(['Published', 'Period', 'Select one']);
+    $this->assertSelectedFiltersLabels(['Period', 'Select one', 'Published']);
 
     // Remove test2 from the selected filters.
     $this->getSession()->getPage()->clickLink('test2');
@@ -251,7 +251,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $this->assertSession()->linkNotExistsExact('Future');
     $this->assertSession()->linkExistsExact('Past');
 
-    $this->assertSelectedFiltersLabels(['Published', 'Period', 'Select one']);
+    $this->assertSelectedFiltersLabels(['Period', 'Select one', 'Published']);
 
     // Remove test1 as well.
     $this->getSession()->getPage()->clickLink('test1');
@@ -262,7 +262,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $this->assertSession()->linkNotExistsExact('test2');
     $this->assertSession()->linkNotExistsExact('Future');
     $this->assertSession()->linkExistsExact('Past');
-    $this->assertSelectedFiltersLabels(['Published', 'Period']);
+    $this->assertSelectedFiltersLabels(['Period', 'Published']);
 
     // Filter by date.
     // Node 1 was created on 20 October 2019.
@@ -301,7 +301,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $this->getSession()->getPage()->fillField('Body', 'banana');
     $this->getSession()->getPage()->selectFieldOption('Select one', 'test1', TRUE);
     $this->getSession()->getPage()->pressButton('Search');
-    $this->assertSelectedFiltersLabels(['Body', 'Period', 'Select one']);
+    $this->assertSelectedFiltersLabels(['Period', 'Body', 'Select one']);
     $this->assertSession()->linkExistsExact('banana');
     $this->assertSession()->linkExistsExact('test1');
     $this->assertSession()->pageTextContains('one yellow fruit');
@@ -309,7 +309,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     // Remove the select field and assert we still show the link with the
     // text filter.
     $this->getSession()->getPage()->clickLink('test1');
-    $this->assertSelectedFiltersLabels(['Body', 'Period']);
+    $this->assertSelectedFiltersLabels(['Period', 'Body']);
     $this->assertSession()->linkExistsExact('banana');
     $this->assertSession()->linkNotExistsExact('test1');
     $this->assertSession()->pageTextContains('one yellow fruit');
@@ -317,7 +317,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     // Add back the select and remove the text filter.
     $this->getSession()->getPage()->selectFieldOption('Select one', 'test1', TRUE);
     $this->getSession()->getPage()->pressButton('Search');
-    $this->assertSelectedFiltersLabels(['Body', 'Period', 'Select one']);
+    $this->assertSelectedFiltersLabels(['Period', 'Body', 'Select one']);
     $this->assertSession()->linkExistsExact('banana');
     $this->assertSession()->linkExistsExact('test1');
     $this->assertSession()->pageTextContains('one yellow fruit');
@@ -348,8 +348,18 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     // The Past link is gone, and also as a simple string.
     $this->assertSession()->linkNotExistsExact('Past');
     $spans = $this->getSession()->getPage()->findAll('css', '.field--name-extra-field-oe-list-page-selected-filtersnodeoe-list-page span');
-    $this->assertCount(1, $spans);
+    $this->assertCount(2, $spans);
     $this->assertEquals('Period', $spans[0]->getText());
+    $this->assertEquals('Published', $spans[1]->getText());
+
+    // Test that even if we have no results, all the selected filters show up.
+    $this->drupalGet($node->toUrl());
+    $this->getSession()->getPage()->selectFieldOption('Select one', 'test1', TRUE);
+    $this->getSession()->getPage()->fillField('Body', 'no results');
+    $this->getSession()->getPage()->pressButton('Search');
+    $this->assertSession()->pageTextNotContains('one yellow fruit');
+    $this->assertSession()->pageTextNotContains('another yellow fruit');
+    $this->assertSelectedFiltersLabels(['Period', 'Body', 'Select one']);
   }
 
   /**

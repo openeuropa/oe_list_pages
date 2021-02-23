@@ -16,6 +16,7 @@ use Drupal\Core\Url;
 use Drupal\facets\FacetInterface;
 use Drupal\facets\FacetManager\DefaultFacetManager;
 use Drupal\facets\Processor\ProcessorPluginManager;
+use Drupal\facets\UrlProcessor\UrlProcessorPluginManager;
 use Drupal\facets\Utility\FacetsUrlGenerator;
 use Drupal\oe_list_pages\Form\ListFacetsForm;
 use Drupal\oe_list_pages\Plugin\facets\processor\DefaultStatusProcessorInterface;
@@ -30,6 +31,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 class ListBuilder implements ListBuilderInterface {
 
   use StringTranslationTrait;
+  use FacetManipulationTrait;
 
   /**
    * The entity type manager.
@@ -95,6 +97,20 @@ class ListBuilder implements ListBuilderInterface {
   protected $requestStack;
 
   /**
+   * The URL processor manager.
+   *
+   * @var \Drupal\facets\UrlProcessor\UrlProcessorPluginManager
+   */
+  protected $urlProcessorManager;
+
+  /**
+   * The multiselect filter field manager.
+   *
+   * @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginManager
+   */
+  protected $multiselectFilterManager;
+
+  /**
    * ListBuilder constructor.
    *
    * @param \Drupal\oe_list_pages\ListExecutionManagerInterface $listExecutionManager
@@ -115,8 +131,14 @@ class ListBuilder implements ListBuilderInterface {
    *   The facets processor plugin manager.
    * @param \Symfony\Component\HttpFoundation\RequestStack $requestStack
    *   The request stack.
+   * @param \Drupal\facets\UrlProcessor\UrlProcessorPluginManager $urlProcessorManager
+   *   The URL processor manager.
+   * @param \Drupal\oe_list_pages\MultiselectFilterFieldPluginManager $multiselectFilterManager
+   *   The multiselect filter field manager.
+   *
+   * @SuppressWarnings(PHPMD.ExcessiveParameterList)
    */
-  public function __construct(ListExecutionManagerInterface $listExecutionManager, EntityTypeManager $entityTypeManager, PagerManagerInterface $pager, EntityRepositoryInterface $entityRepository, FormBuilderInterface $formBuilder, DefaultFacetManager $facetManager, FacetsUrlGenerator $facetsUrlGenerator, ProcessorPluginManager $processorManager, RequestStack $requestStack) {
+  public function __construct(ListExecutionManagerInterface $listExecutionManager, EntityTypeManager $entityTypeManager, PagerManagerInterface $pager, EntityRepositoryInterface $entityRepository, FormBuilderInterface $formBuilder, DefaultFacetManager $facetManager, FacetsUrlGenerator $facetsUrlGenerator, ProcessorPluginManager $processorManager, RequestStack $requestStack, UrlProcessorPluginManager $urlProcessorManager, MultiselectFilterFieldPluginManager $multiselectFilterManager) {
     $this->listExecutionManager = $listExecutionManager;
     $this->entityTypeManager = $entityTypeManager;
     $this->pager = $pager;
@@ -126,6 +148,8 @@ class ListBuilder implements ListBuilderInterface {
     $this->facetsUrlGenerator = $facetsUrlGenerator;
     $this->processorManager = $processorManager;
     $this->requestStack = $requestStack;
+    $this->urlProcessorManager = $urlProcessorManager;
+    $this->multiselectFilterManager = $multiselectFilterManager;
   }
 
   /**
@@ -246,39 +270,39 @@ class ListBuilder implements ListBuilderInterface {
    */
   public function buildSelectedFilters(ContentEntityInterface $entity): array {
     $build = [];
-    $configuration = ListPageConfiguration::fromEntity($entity);
-    $list_execution = $this->listExecutionManager->executeList($configuration);
-    /** @var \Drupal\facets\FacetInterface[] $facets */
-    $facets = $this->facetManager->getFacetsByFacetSourceId($list_execution->getListSource()->getSearchId());
-    $keyed_facets = [];
     $cache = new CacheableMetadata();
     $cache->addCacheContexts(['url']);
 
-    // Prepare an array with all the active filters.
+    $configuration = ListPageConfiguration::fromEntity($entity);
     $active_filters = [];
-    $urls = [];
+
+    // First, determine all the active values for filters that have a "default
+    // status" processor. These won't exist in the URL so we need to get them
+    // from the list execution.
+    $list_execution = $this->listExecutionManager->executeList($configuration);
+    $facets = $this->facetManager->getFacetsByFacetSourceId($list_execution->getListSource()->getSearchId());
     foreach ($facets as $facet) {
-      $this->facetManager->build($facet);
-      if (!$facet->getActiveItems()) {
-        continue;
+      $active_items = $facet->getActiveItems();
+      if (!empty($active_items) && $this->facetHasDefaultStatus($facet, ['raw' => reset($active_items)])) {
+        $active_filters[$facet->id()] = $facet->getActiveItems();
       }
-
-      // If the facet doesn't have results, we cannot get any display value
-      // later on. Except for the facets which use a full text widget because
-      // we can use the actual submitted value.
-      if (!$facet->getResults() && !$facet->getWidgetInstance() instanceof FulltextWidget) {
-        continue;
-      }
-
-      $keyed_facets[$facet->id()] = $facet;
-      $cache->addCacheableDependency($facet);
-      $active_filters[$facet->id()] = $facet->getActiveItems();
     }
 
-    if (!$active_filters) {
+    // Then check for the selected filters from the URL.
+    $list_source = $list_execution->getListSource();
+    $available_filters = array_keys($list_source->getAvailableFilters());
+    if (!$available_filters && !$active_filters) {
       $cache->applyTo($build);
       return $build;
     }
+
+    // Load one of the source facets because we need to use it to determine the
+    // current active filters using the query_string plugin.
+    $facet_storage = $this->entityTypeManager->getStorage('facets_facet');
+    $facets = $facet_storage->loadMultiple($available_filters);
+    $facet = reset($facets);
+    $query_string = $this->urlProcessorManager->createInstance('query_string', ['facet' => $facet]);
+    $active_filters += $query_string->getActiveFilters();
 
     // Prepare the URL for each individual filter value that would remove it
     // from the active filters.
@@ -305,13 +329,11 @@ class ListBuilder implements ListBuilderInterface {
 
     $items = [];
     foreach ($active_filters as $facet_id => $filters) {
-      $facet = $keyed_facets[$facet_id];
+      $facet = $facets[$facet_id];
       $item = [];
+
       foreach ($filters as $key => $value) {
-        $display_value = $this->getFacetResultDisplayLabel($facet, $value);
-        if (!$display_value) {
-          continue;
-        }
+        $display_value = $this->getFacetResultDisplayLabel($facet, $value, $list_source);
 
         $item['items'][] = [
           'url' => $urls[$facet_id][$key],
@@ -323,6 +345,7 @@ class ListBuilder implements ListBuilderInterface {
       if (empty($item['items'])) {
         continue;
       }
+
       $item['name'] = $facet->getName();
       $items[$facet_id] = $item;
     }
@@ -333,7 +356,7 @@ class ListBuilder implements ListBuilderInterface {
       // a DefaultStatusProcessorInterface processor, in which case we need
       // kill the URL and only display it as a label.
       $facet_id = key($items);
-      $facet = $keyed_facets[$facet_id];
+      $facet = $facets[$facet_id];
       if ($this->facetHasDefaultStatus($facet, reset($items[$facet_id]['items']))) {
         foreach ($items as $facet_id => &$filters) {
           $filters['items'][0]['url'] = NULL;
@@ -415,24 +438,44 @@ class ListBuilder implements ListBuilderInterface {
    *   The facet.
    * @param string $value
    *   The raw value.
+   * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
+   *   The list source.
    *
    * @return string|null
    *   The display value.
    */
-  protected function getFacetResultDisplayLabel(FacetInterface $facet, string $value): ?string {
+  protected function getFacetResultDisplayLabel(FacetInterface $facet, string $value, ListSourceInterface $list_source): ?string {
     if ($facet->getWidgetInstance() instanceof FulltextWidget) {
       // For facets that use the full text widget, the actual value is the
       // selected item.
       return $value;
     }
 
-    foreach ($facet->getResults() as $facet_result) {
-      if ($facet_result->getRawValue() === $value) {
-        return (string) $facet_result->getDisplayValue();
-      }
+    $preset_filter = new ListPresetFilter($facet->id(), [$value]);
+
+    $field_definition = $this->getFacetFieldDefinition($facet, $list_source);
+    if (!$field_definition) {
+      // It's possible the field is custom and not mapped to an actual Drupal
+      // field.
+      return $this->getDefaultFilterValuesLabel($facet, $preset_filter);
     }
 
-    return NULL;
+    $field_type = $field_definition->getType();
+    $id = $this->multiselectFilterManager->getPluginIdByFieldType($field_type);
+
+    $preset_filter = new ListPresetFilter($facet->id(), [$value]);
+    if (!$id) {
+      return $this->getDefaultFilterValuesLabel($facet, $preset_filter);
+    }
+
+    $config = [
+      'facet' => $facet,
+      'list_source' => $list_source,
+      'preset_filter' => $preset_filter,
+    ];
+    /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
+    $plugin = $this->multiselectFilterManager->createInstance($id, $config);
+    return $plugin->getDefaultValuesLabel();
   }
 
   /**
