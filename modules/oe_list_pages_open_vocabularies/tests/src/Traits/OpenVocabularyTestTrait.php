@@ -18,10 +18,15 @@ trait OpenVocabularyTestTrait {
   /**
    * Creates test taxonomy vocabulary and terms.
    *
+   * @param array $term_names
+   *   The name of the terms to create.
+   * @param string $vid
+   *   The vocabulary ID.
+   *
    * @return array
    *   The created terms.
    */
-  public function createTestTaxonomyVocabularyAndTerms(): array {
+  public function createTestTaxonomyVocabularyAndTerms(array $term_names, string $vid = 'oe_list_pages_ov_tags'): array {
     // Create a new tags vocabulary.
     $vocabulary = Vocabulary::create([
       'name' => 'Tags',
@@ -29,16 +34,12 @@ trait OpenVocabularyTestTrait {
     ]);
     $vocabulary->save();
 
-    $tags = [
-      'yellow color',
-      'green color',
-    ];
-
     // Create new terms.
-    for ($i = 0; $i < count($tags); $i++) {
+    $terms = [];
+    for ($i = 0; $i < count($term_names); $i++) {
       $values = [
-        'name' => $tags[$i],
-        'vid' => 'oe_list_pages_ov_tags',
+        'name' => $term_names[$i],
+        'vid' => $vid,
       ];
       $term = Term::create($values);
       $term->save();
@@ -49,22 +50,24 @@ trait OpenVocabularyTestTrait {
   }
 
   /**
-   * Creates a new OpenVocabulary assocation for a skos vocabulary.
+   * Creates a new OpenVocabulary association for a SKOS vocabulary.
    *
    * @param array $fields
    *   The field ids for the association.
+   * @param array $concept_schemes
+   *   The target concept schemes.
    *
    * @return \Drupal\open_vocabularies\OpenVocabularyAssociationInterface
    *   The created association.
    */
-  public function createSkosVocabularyAssociation(array $fields): OpenVocabularyAssociationInterface {
+  public function createSkosVocabularyAssociation(array $fields, array $concept_schemes = []): OpenVocabularyAssociationInterface {
     $vocabulary = [
       'id' => 'skos_vocabulary',
       'label' => 'My skos vocabulary',
       'description' => $this->randomString(128),
       'handler' => 'rdf_skos',
       'handler_settings' => [
-        'concept_schemes' => ['http://publications.europa.eu/resource/authority/country'],
+        'concept_schemes' => $concept_schemes,
       ],
     ];
     $vocabulary = OpenVocabulary::create($vocabulary);
@@ -85,22 +88,24 @@ trait OpenVocabularyTestTrait {
     /** @var \Drupal\open_vocabularies\OpenVocabularyAssociationInterface $association */
     $association = OpenVocabularyAssociation::create($vocabulary_association_values);
     $association->save();
-    $vocabulary_associations[] = $association;
+
     return $association;
   }
 
   /**
-   * Creates a new OpenVocabulary assocation for a taxonomy vocabulary.
+   * Creates a new OpenVocabulary association for a taxonomy vocabulary.
    *
    * @param array $fields
    *   The field ids for the association.
+   * @param string $target_bundle
+   *   The target taxonomy vocabulary bundle.
    * @param string $suffix
    *   The suffix to be added.
    *
    * @return \Drupal\open_vocabularies\OpenVocabularyAssociationInterface
    *   The created association.
    */
-  public function createTagsVocabularyAssociation(array $fields, string $suffix = ''): OpenVocabularyAssociationInterface {
+  public function createTagsVocabularyAssociation(array $fields, string $target_bundle = 'oe_list_pages_ov_tags', string $suffix = ''): OpenVocabularyAssociationInterface {
     // Create new open vocabulary for tags vocabulary.
     $vocabulary = [
       'id' => 'tags_vocabulary' . $suffix,
@@ -109,7 +114,7 @@ trait OpenVocabularyTestTrait {
       'handler' => 'taxonomy',
       'handler_settings' => [
         'target_bundles' => [
-          'oe_list_pages_ov_tags' => 'oe_list_pages_ov_tags',
+          $target_bundle => $target_bundle,
         ],
       ],
     ];
@@ -133,7 +138,7 @@ trait OpenVocabularyTestTrait {
     /** @var \Drupal\open_vocabularies\OpenVocabularyAssociationInterface $association */
     $association = OpenVocabularyAssociation::create($vocabulary_association_values);
     $association->save();
-    $vocabulary_associations[] = $association;
+
     return $association;
   }
 
