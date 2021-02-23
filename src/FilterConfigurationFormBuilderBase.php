@@ -120,6 +120,9 @@ abstract class FilterConfigurationFormBuilderBase {
     $rows = [];
     foreach ($current_filters as $filter_id => $filter) {
       $facet = $this->getFacetById($list_source, $filter->getFacetId());
+      if (empty($facet)) {
+        continue;
+      }
       $widget = $facet->getWidgetInstance();
       $filter_value_label = '';
       if ($widget instanceof ListPagesWidgetInterface) {

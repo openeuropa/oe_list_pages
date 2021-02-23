@@ -36,6 +36,7 @@ class ListField extends MultiSelectFilterFieldPluginBase {
 
     return [
       '#type' => 'select',
+      '#required_error' => t('@facet field is required.', ['@facet' => $this->configuration['facet']->label()]),
       '#options' => $field_definition->getSetting('allowed_values'),
       '#empty_option' => $this->t('Select'),
     ];

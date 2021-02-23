@@ -98,8 +98,10 @@ class MultiSelectFilterFieldPluginTest extends ListsSourceTestBase {
         0 => 'Zero',
         1 => 'One',
       ],
-      '#empty_option' => 'Select',
+      '#empty_option' => t('Select'),
+      '#required_error' => t('Facet for list_field field is required.'),
     ];
+
     $this->assertEquals([1], $plugin->getDefaultValues());
     $this->assertEquals($expected_form, $plugin->buildDefaultValueForm());
 
@@ -174,6 +176,7 @@ class MultiSelectFilterFieldPluginTest extends ListsSourceTestBase {
           'item' => 'item',
         ],
       ],
+      '#required_error' => t('Facet for entity_reference_field field is required.'),
     ];;
     $this->assertEquals([$entity], $plugin->getDefaultValues());
     $this->assertEquals($expected_form, $plugin->buildDefaultValueForm());
@@ -219,6 +222,8 @@ class MultiSelectFilterFieldPluginTest extends ListsSourceTestBase {
       '#element_validate' => [[LinkWidget::class, 'validateUriElement']],
       '#maxlength' => 2048,
       '#link_type' => LinkItemInterface::LINK_GENERIC,
+      '#required_error' => t('Facet for link_field field is required.'),
+
     ];
     $this->assertEquals(['custom-route'], $plugin->getDefaultValues());
     $this->assertEquals($expected_form, $plugin->buildDefaultValueForm());
