@@ -356,12 +356,18 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
   protected function getCurrentEntityFromRoute() :?ContentEntityInterface {
     $route_name = $this->routeMatch->getRouteName();
     $parts = explode('.', $route_name);
-    if (count($parts) !== 3 || $parts[0] !== 'entity' || $parts[2] !== 'canonical') {
+    if (count($parts) !== 3 || $parts[0] !== 'entity') {
       return NULL;
     }
 
     $entity_type = $parts[1];
-    return $this->routeMatch->getParameter($entity_type);
+    $entity = $this->routeMatch->getParameter($entity_type);
+
+    // In case the entity parameter is not resolved (e.g.: revisions route.
+    if (!$entity instanceof ContentEntityInterface) {
+      $entity = $this->entityTypeManager->getStorage($entity_type)->load($entity);
+    }
+    return $entity;
   }
 
   /**
