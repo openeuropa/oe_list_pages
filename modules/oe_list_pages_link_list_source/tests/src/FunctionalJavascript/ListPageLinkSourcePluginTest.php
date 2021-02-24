@@ -632,6 +632,16 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     $this->assertSession()->elementsCount('css', '.block-oe-link-lists ul li', 2);
     $this->assertSession()->linkExistsExact('visible reference');
     $this->assertSession()->linkExistsExact('select one and reference');
+
+    $node->isDefaultRevision(FALSE);
+    $node->setNewRevision(TRUE);
+    $node->setPublished(FALSE);
+    $node->save();
+    // Check it also appears on revision page.
+    $this->drupalGet('/node/' . $node->id() . '/revisions/' . $node->getRevisionId() . '/view');
+    $this->assertSession()->elementsCount('css', '.block-oe-link-lists ul li', 2);
+    $this->assertSession()->linkExistsExact('visible reference');
+    $this->assertSession()->linkExistsExact('select one and reference');
   }
 
   /**
