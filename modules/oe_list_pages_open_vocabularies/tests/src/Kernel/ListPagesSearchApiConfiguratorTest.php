@@ -6,6 +6,7 @@ namespace Drupal\Tests\oe_list_pages_open_vocabularies\Kernel;
 
 use Drupal\facets\Entity\Facet;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
+use Drupal\oe_list_pages_open_vocabularies\SearchApiConfigurator;
 use Drupal\open_vocabularies\Entity\OpenVocabulary;
 use Drupal\open_vocabularies\Entity\OpenVocabularyAssociation;
 use Drupal\search_api\Entity\Index;
@@ -133,6 +134,7 @@ class ListPagesSearchApiConfiguratorTest extends EntityKernelTestBase {
     // Check values were correctly saved.
     $this->assertEquals($values['label'], $facet_1->label());
     $this->assertEquals($field_id, $facet_1->getFieldIdentifier());
+    $this->assertEqual(SearchApiConfigurator::MAX_WEIGHT, $facet_1->getWeight());
     $facet_2 = Facet::load($id_2);
     $this->assertNull($facet_2);
     // Check fields exists.
@@ -159,12 +161,14 @@ class ListPagesSearchApiConfiguratorTest extends EntityKernelTestBase {
     $facet_1 = Facet::load($id_1);
     $this->assertEquals('New label', $facet_1->label());
     $this->assertEquals($field_id, $facet_1->getFieldIdentifier());
+    $this->assertEqual(SearchApiConfigurator::MAX_WEIGHT, $facet_1->getWeight());
     $this->assertArrayHasKey('url_processor_handler', $facet_1->getProcessors());
     $this->assertArrayHasKey('display_value_widget_order', $facet_1->getProcessors());
     $this->assertArrayHasKey('translate_entity', $facet_1->getProcessors());
     $facet_2 = Facet::load($id_2);
     $this->assertEquals('New label', $facet_2->label());
     $this->assertEquals($field_id, $facet_2->getFieldIdentifier());
+    $this->assertEqual(SearchApiConfigurator::MAX_WEIGHT, $facet_2->getWeight());
 
     // Check field exists.
     $node_index = Index::load('node');
@@ -185,6 +189,7 @@ class ListPagesSearchApiConfiguratorTest extends EntityKernelTestBase {
     $this->assertNull($facet_1);
     $facet_2 = Facet::load($id_2);
     $this->assertEquals('New label', $facet_2->label());
+    $this->assertEqual(SearchApiConfigurator::MAX_WEIGHT, $facet_2->getWeight());
     $this->assertEquals($field_id, $facet_2->getFieldIdentifier());
 
     // Check field exists.

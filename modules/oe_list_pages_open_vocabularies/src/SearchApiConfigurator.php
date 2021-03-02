@@ -17,6 +17,13 @@ use Drupal\search_api\Item\FieldInterface;
 class SearchApiConfigurator {
 
   /**
+   * The weight of the created facets.
+   *
+   * @var int
+   */
+  const MAX_WEIGHT = 50;
+
+  /**
    * The entity type manager.
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
@@ -91,7 +98,7 @@ class SearchApiConfigurator {
     $facet->setUrlAlias(str_replace('.', '_', $association->id()));
     $facet->set('name', $association->label());
     $facet->setOnlyVisibleWhenFacetSourceIsVisible(TRUE);
-    $facet->setWeight(0);
+    $facet->setWeight(self::MAX_WEIGHT);
     $facet->addProcessor([
       'processor_id' => 'display_value_widget_order',
       'weights' => [],
