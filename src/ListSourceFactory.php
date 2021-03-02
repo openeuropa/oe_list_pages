@@ -139,6 +139,10 @@ class ListSourceFactory implements ListSourceFactoryInterface {
     $filters = [];
     $id = self::generateFacetSourcePluginId($entity_type, $bundle);
     $facets = $this->facetsManager->getFacetsByFacetSourceId($id);
+    usort($facets, function ($facet1, $facet2) {
+      return ($facet1->getWeight() > $facet2->getWeight());
+    });
+
     foreach ($facets as $facet) {
       $field_id = $facet->getFieldIdentifier();
       $field = $facet->getFacetSource()->getIndex()->getField($field_id);
