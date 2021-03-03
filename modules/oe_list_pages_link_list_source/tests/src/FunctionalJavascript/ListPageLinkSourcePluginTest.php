@@ -645,24 +645,6 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
   }
 
   /**
-   * Asserts the contextual value is set for the filter.
-   *
-   * @param array $contextual_values
-   *   The default filters.
-   */
-  protected function assertContextualValueForFilters(array $contextual_values = []): void {
-    $assert = $this->assertSession();
-    $assert->elementsCount('css', 'table.contextual-filters-table tr', count($contextual_values) + 1);
-    foreach ($contextual_values as $filter) {
-      $key = $filter['key'];
-      $default_value = $filter['value'];
-
-      $assert->elementTextContains('css', 'table.contextual-filters-table', $key);
-      $assert->elementTextContains('css', 'table.contextual-filters-table', $default_value);
-    }
-  }
-
-  /**
    * {@inheritdoc}
    */
   protected function goToListPageConfiguration(): void {

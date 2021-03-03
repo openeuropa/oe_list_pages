@@ -163,7 +163,11 @@ class QuerySubscriber implements EventSubscriberInterface {
       // from the context, and clone it for each time it has been set as a
       // preset filters.
       /** @var \Drupal\facets\Entity\Facet $original_facet */
-      $original_facet = $facets[$facet_id];
+      $original_facet = $facets[$facet_id] ?? NULL;
+      if (!$original_facet) {
+        // It means the facet got deleted.
+        continue;
+      }
 
       foreach ($values as $preset_filter_id => $preset_filter) {
         $facet = clone $original_facet;

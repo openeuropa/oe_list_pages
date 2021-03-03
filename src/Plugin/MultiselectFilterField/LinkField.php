@@ -79,6 +79,7 @@ class LinkField extends MultiSelectFilterFieldPluginBase {
     $link_type = $field_definition->getSetting('link_type');
     $form = [
       '#type' => 'url',
+      '#required_error' => t('@facet field is required.', ['@facet' => $this->configuration['facet']->label()]),
       '#element_validate' => [[LinkWidget::class, 'validateUriElement']],
       '#maxlength' => 2048,
       '#link_type' => $link_type,

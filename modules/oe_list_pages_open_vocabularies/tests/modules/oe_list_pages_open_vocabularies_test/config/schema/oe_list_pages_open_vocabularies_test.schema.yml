@@ -1,0 +1,2 @@
+vocabulary_reference_handler_settings.taxonomy:
+  type: entity_reference_selection.default
