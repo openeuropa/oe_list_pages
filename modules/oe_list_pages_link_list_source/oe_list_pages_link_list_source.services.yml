@@ -2,3 +2,6 @@ services:
   oe_list_pages_link_list_source.contextual_filters_builder:
     class: Drupal\oe_list_pages_link_list_source\ContextualFiltersConfigurationBuilder
     arguments: ['@facets.manager']
+  oe_list_pages_link_list_source.contextual_filters_field_mapper:
+    class: Drupal\oe_list_pages_link_list_source\ContextualFilterFieldMapper
+    arguments: ['@config.factory']

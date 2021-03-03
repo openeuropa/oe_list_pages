@@ -148,12 +148,13 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     $channel = $crawler->filterXPath('//rss[@version=2.0]/channel');
     $this->assertEquals('Drupal | List page test', $channel->filterXPath('//title')->text());
     $this->assertEquals('http://web:8080/build/node/1', $channel->filterXPath('//link')->text());
+    $this->assertEquals('http://web:8080/build/node/1/rss', $channel->filterXPath('//atom:link')->attr('href'));
     $this->assertEquals('Drupal | List page test', $channel->filterXPath('//description')->text());
     $this->assertEquals('en', $channel->filterXPath('//language')->text());
     $this->assertEquals('© European Union, 1995-' . date('Y'), $channel->filterXPath('//copyright')->text());
     $this->assertEquals('http://web:8080/build/core/themes/classy/logo.svg', $channel->filterXPath('//image/url')->text());
     $this->assertEquals('Drupal logo', $channel->filterXPath('//image/title')->text());
-    $this->assertEquals('http://web:8080/build/', $channel->filterXPath('//image/link')->text());
+    $this->assertEquals('http://web:8080/build/node/1', $channel->filterXPath('//image/link')->text());
     // Assert modules subscribing to the ListPageRssAlterEvent can
     // alter the build.
     $this->assertEquals('custom_value', $channel->filterXPath('//custom_tag')->text());
@@ -167,7 +168,7 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     $this->assertEquals('&lt;p&gt;this is a banana&lt;/p&gt; ', $first_item->filterXpath('//description')->html());
     $this->assertEquals('http://web:8080/build/node/2', $first_item->filterXpath('//link')->text());
     $this->assertEquals('http://web:8080/build/node/2', $first_item->filterXpath('//guid')->text());
-    $this->assertEquals('Wed, 20 Oct 21 00:00:00 +1100', $first_item->filterXpath('//pubDate')->text());
+    $this->assertEquals('Wed, 20 Oct 2021 00:00:00 +1100', $first_item->filterXpath('//pubDate')->text());
     // Assert modules subscribing to the ListPageRssItemAlterEvent can
     // alter the item build.
     $this->assertEquals('20/10/2020', $first_item->filterXpath('//creationDate')->text());
@@ -177,7 +178,7 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     $this->assertEquals('&lt;p&gt;this is a cherry&lt;/p&gt; ', $second_item->filterXpath('//description')->html());
     $this->assertEquals('http://web:8080/build/node/3', $second_item->filterXpath('//link')->text());
     $this->assertEquals('http://web:8080/build/node/3', $second_item->filterXpath('//guid')->text());
-    $this->assertEquals('Tue, 20 Oct 20 00:00:00 +1100', $second_item->filterXpath('//pubDate')->text());
+    $this->assertEquals('Tue, 20 Oct 2020 00:00:00 +1100', $second_item->filterXpath('//pubDate')->text());
     // Assert modules subscribing to the ListPageRssItemAlterEvent can
     // alter the item build.
     $this->assertEquals('20/10/2021', $second_item->filterXpath('//creationDate')->text());
@@ -234,7 +235,7 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     $this->assertEquals('Drupal | List page test ES', $channel->filterXPath('//title')->text());
     $this->assertEquals('http://web:8080/build/es/node/1', $channel->filterXPath('//link')->text());
     $this->assertEquals('es', $channel->filterXPath('//language')->text());
-    $this->assertEquals('http://web:8080/build/es', $channel->filterXPath('//image/link')->text());
+    $this->assertEquals('http://web:8080/build/es/node/1', $channel->filterXPath('//image/link')->text());
   }
 
 }
