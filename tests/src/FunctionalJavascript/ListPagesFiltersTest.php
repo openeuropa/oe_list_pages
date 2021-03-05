@@ -27,6 +27,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     'entity_reference_revisions',
     'oe_list_pages',
     'oe_list_pages_filters_test',
+    'oe_list_pages_address',
     'oe_list_page_content_type',
     'node',
     'emr',
@@ -157,6 +158,30 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     ]);
     $facet->save();
 
+    // Create a facet for the country code, using a build processor that
+    // transforms the values.
+    $facet = Facet::create([
+      'id' => 'country',
+      'name' => 'Country',
+    ]);
+
+    $facet->setUrlAlias('country');
+    $facet->setFieldIdentifier('field_country_code');
+    $facet->setEmptyBehavior(['behavior' => 'none']);
+    $facet->setFacetSourceId('list_facet_source:node:content_type_one');
+    $facet->setWidget('oe_list_pages_multiselect', []);
+    $facet->addProcessor([
+      'processor_id' => 'url_processor_handler',
+      'weights' => ['pre_query' => -10, 'build' => -10],
+      'settings' => [],
+    ]);
+    $facet->addProcessor([
+      'processor_id' => 'oe_list_pages_address_format_country_code',
+      'weights' => ['pre_query' => 60, 'build' => 35],
+      'settings' => [],
+    ]);
+    $facet->save();
+
     // Create some test nodes to index and search in.
     $date = new DrupalDateTime('20-10-2019');
     $values = [
@@ -165,6 +190,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
       'body' => 'this is a banana',
       'status' => NodeInterface::PUBLISHED,
       'field_select_one' => 'test1',
+      'field_country_code' => 'BE',
       'created' => $date->getTimestamp(),
     ];
     $node = Node::create($values);
@@ -175,6 +201,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
       'body' => 'this is a lemon',
       'status' => NodeInterface::PUBLISHED,
       'field_select_one' => 'test2',
+      'field_country_code' => 'FR',
       'created' => $date->modify('+ 5 days')->getTimestamp(),
     ];
     $node = Node::create($values);
@@ -196,6 +223,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $page->checkField('Published');
     $page->checkField('Period');
     $page->checkField('Body');
+    $page->checkField('Country');
     $page->checkField('Created');
     $page->fillField('Title', 'List page for ct1');
     $page->pressButton('Save');
@@ -360,6 +388,16 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $this->assertSession()->pageTextNotContains('one yellow fruit');
     $this->assertSession()->pageTextNotContains('another yellow fruit');
     $this->assertSelectedFiltersLabels(['Period', 'Body', 'Select one']);
+
+    // Test that processors are used in building the results.
+    $this->drupalGet($node->toUrl());
+    $this->getSession()->getPage()->selectFieldOption('Country', 'Belgium');
+    $this->getSession()->getPage()->pressButton('Search');
+    $this->assertSession()->pageTextContains('one yellow fruit');
+    $this->assertSession()->pageTextNotContains('another yellow fruit');
+    $this->assertSession()->linkNotExistsExact('BE');
+    $this->assertSession()->linkExistsExact('Belgium');
+    $this->assertSelectedFiltersLabels(['Period', 'Country']);
   }
 
   /**

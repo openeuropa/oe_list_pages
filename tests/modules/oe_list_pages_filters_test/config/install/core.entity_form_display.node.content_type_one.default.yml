@@ -3,6 +3,7 @@ status: true
 dependencies:
   config:
     - field.field.node.content_type_one.body
+    - field.field.node.content_type_one.field_country_code
     - field.field.node.content_type_one.field_date_range
     - field.field.node.content_type_one.field_link
     - field.field.node.content_type_one.field_reference
@@ -34,6 +35,14 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
+  field_country_code:
+    weight: 27
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
   field_date_range:
     weight: 9
     settings: {  }
