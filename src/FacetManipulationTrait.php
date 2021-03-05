@@ -6,6 +6,7 @@ use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\facets\FacetInterface;
 use Drupal\facets\Processor\ProcessorInterface;
+use Drupal\facets\Result\Result;
 use Drupal\facets\Result\ResultInterface;
 
 /**
@@ -65,11 +66,20 @@ trait FacetManipulationTrait {
    *   The label.
    */
   protected function getDefaultFilterValuesLabel(FacetInterface $facet, ListPresetFilter $filter): string {
-    // Back up the original active items so we can set them back after
-    // we used the facet to generate the display values from the filter.
+    // Back up the original active items and results so we can set them back
+    // after we used the facet to generate the display values for the filter.
     $active_items = $facet->getActiveItems();
+    $facet_results = $facet->getResults();
+
     $filter_values = $filter->getValues();
     $facet->setActiveItems($filter_values);
+    $results = [];
+    foreach ($filter_values as $filter_value) {
+      $results[] = new Result($facet, $filter_value, $filter_value, 1);
+    }
+    $facet->setResults($results);
+
+    // Process the results with the passed filter values.
     $results = $this->processFacetResults($facet);
 
     $filter_label = [];
@@ -82,8 +92,9 @@ trait FacetManipulationTrait {
       }
     }
 
-    // Reset active items.
+    // Reset the old active items and results.
     $facet->setActiveItems($active_items);
+    $facet->setResults($facet_results);
 
     return implode(', ', $filter_label);
   }

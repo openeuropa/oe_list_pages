@@ -33,10 +33,6 @@ class DateUrlProcessor extends UrlProcessorHandler {
   public function build(FacetInterface $facet, array $results) {
     $facet_results = [];
 
-    if (!empty($results)) {
-      return $results;
-    }
-
     $active_filters = Date::getActiveItems($facet);
     if (!$active_filters) {
       return $facet_results;
