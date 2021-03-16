@@ -35,6 +35,7 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
     'oe_list_pages',
     'oe_list_pages_filters_test',
     'oe_list_page_content_type',
+    'oe_list_pages_address',
     'node',
     'emr',
     'emr_node',

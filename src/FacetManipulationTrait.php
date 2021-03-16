@@ -5,6 +5,7 @@ namespace Drupal\oe_list_pages;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\facets\FacetInterface;
+use Drupal\facets\FacetManager\DefaultFacetManager;
 use Drupal\facets\Processor\ProcessorInterface;
 use Drupal\facets\Result\ResultInterface;
 
@@ -65,25 +66,20 @@ trait FacetManipulationTrait {
    *   The label.
    */
   protected function getDefaultFilterValuesLabel(FacetInterface $facet, ListPresetFilter $filter): string {
-    // Back up the original active items so we can set them back after
-    // we used the facet to generate the display values from the filter.
-    $active_items = $facet->getActiveItems();
     $filter_values = $filter->getValues();
-    $facet->setActiveItems($filter_values);
-    $results = $this->processFacetResults($facet);
+
+    $clone = clone $facet;
+    $this->rebuildFacet($clone, $filter->getValues());
 
     $filter_label = [];
     foreach ($filter_values as $value) {
       $filter_label[$value] = $value;
-      foreach ($results as $result) {
+      foreach ($clone->getResults() as $result) {
         if ($result->getRawValue() == $value) {
           $filter_label[$value] = $result->getDisplayValue();
         }
       }
     }
-
-    // Reset active items.
-    $facet->setActiveItems($active_items);
 
     return implode(', ', $filter_label);
   }
@@ -115,6 +111,71 @@ trait FacetManipulationTrait {
     $field_definitions = $this->entityFieldManager->getFieldDefinitions($list_source->getEntityType(), $list_source->getBundle());
 
     return $field_definitions[$field_name] ?? NULL;
+  }
+
+  /**
+   * Forces a rebuild of a facet using predefined filter values.
+   *
+   * We need this because the facet manager prevents the processing more than
+   * once of facets.
+   *
+   * @param \Drupal\facets\FacetInterface $facet
+   *   The facet.
+   * @param array $values
+   *   The values.
+   */
+  protected function rebuildFacet(FacetInterface $facet, array $values): void {
+    $facet->setActiveItems($values);
+    $configuration = [
+      'query' => NULL,
+      'facet' => $facet,
+      'results' => [],
+    ];
+    foreach ($values as $value) {
+      $configuration['results'][] = [
+        'count' => 1,
+        'filter' => $value,
+      ];
+    }
+    /** @var \Drupal\facets\QueryType\QueryTypeInterface $query_type */
+    $query_type = \Drupal::service('plugin.manager.facets.query_type')->createInstance($facet->getQueryType(), $configuration);
+    $query_type->build();
+    $facet->setResults($this->processFacetResults($facet));
+  }
+
+  /**
+   * Returns the facets of a given list source from the facet manager.
+   *
+   * These facets have already been built and can contain results.
+   *
+   * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
+   *   The list source.
+   *
+   * @return array
+   *   The facets keyed by ID.
+   */
+  protected function getKeyedFacetsFromSource(ListSourceInterface $list_source): array {
+    $facets = $this->getFacetsManager()->getFacetsByFacetSourceId($list_source->getSearchId());
+    $keyed = [];
+    foreach ($facets as $facet) {
+      $keyed[$facet->id()] = $facet;
+    }
+
+    return $keyed;
+  }
+
+  /**
+   * Returns the facets manager.
+   *
+   * @return \Drupal\facets\FacetManager\DefaultFacetManager
+   *   The facets manager.
+   */
+  protected function getFacetsManager(): DefaultFacetManager {
+    if (!isset($this->facetManager)) {
+      $this->facetManager = \Drupal::service('facets.manager');
+    }
+
+    return $this->facetManager;
   }
 
 }

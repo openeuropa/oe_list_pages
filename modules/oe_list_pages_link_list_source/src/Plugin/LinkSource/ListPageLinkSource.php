@@ -26,9 +26,11 @@ use Drupal\oe_list_pages\ListPageConfiguration;
 use Drupal\oe_list_pages\ListSourceFactoryInterface;
 use Drupal\oe_list_pages\ListSourceInterface;
 use Drupal\oe_list_pages\MultiselectFilterFieldPluginManager;
+use Drupal\oe_list_pages_link_list_source\ContextualAwareProcessorInterface;
 use Drupal\oe_list_pages_link_list_source\ContextualFilterFieldMapper;
 use Drupal\oe_list_pages_link_list_source\ContextualFiltersConfigurationBuilder;
 use Drupal\oe_list_pages_link_list_source\Exception\InapplicableContextualFilter;
+use Drupal\search_api\Processor\ProcessorInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -321,24 +323,35 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
     foreach ($contextual_filters as $contextual_filter) {
       $facet = $this->contextualFiltersBuilder->getFacetById($list_source, $contextual_filter->getFacetId());
       $definition = $this->getFacetFieldDefinition($facet, $list_source);
-      $field_name = $definition->getName();
-      // Map the field correctly.
-      $field_name = $this->contextualFieldMapper->getCorrespondingFieldName($field_name, $entity, $cache);
-      if (!$field_name) {
-        // If the field doesn't exist on the current entity, we need to not
-        // show any results.
-        throw new InapplicableContextualFilter();
+      if ($definition) {
+        $field_name = $definition->getName();
+        // Map the field correctly.
+        $field_name = $this->contextualFieldMapper->getCorrespondingFieldName($field_name, $entity, $cache);
+        if (!$field_name) {
+          // If the field doesn't exist on the current entity, we need to not
+          // show any results.
+          throw new InapplicableContextualFilter();
+        }
+
+        $field = $entity->get($field_name);
+        $values = $this->extractValuesFromField($field, $facet, $list_source);
+        if (empty($values)) {
+          // If the contextual filter does not have a value, we again cannot
+          // show any results.
+          throw new InapplicableContextualFilter();
+        }
+
+        $contextual_filter->setValues($values);
+      }
+      else {
+        $processor = $this->getContextualAwareSearchApiProcessor($list_source, $facet);
+        if (!$processor) {
+          throw new InapplicableContextualFilter();
+        }
+
+        $contextual_filter->setValues($processor->getContextualValues($entity));
       }
 
-      $field = $entity->get($field_name);
-      $values = $this->extractValuesFromField($field, $facet, $list_source);
-      if (empty($values)) {
-        // If the contextual filter does not have a value, we again cannot
-        // show any results.
-        throw new InapplicableContextualFilter();
-      }
-
-      $contextual_filter->setValues($values);
       $default_filter_values[ContextualFiltersConfigurationBuilder::generateFilterId($contextual_filter->getFacetId(), array_keys($default_filter_values))] = $contextual_filter;
     }
 
@@ -403,6 +416,34 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
     $plugin = $this->multiselectPluginManager->createInstance($id, $config);
 
     return $plugin->getFieldValues($items);
+  }
+
+  /**
+   * Returns the search API plugins that are contextual filters aware.
+   *
+   * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
+   *   The list source.
+   * @param \Drupal\facets\FacetInterface $facet
+   *   The facet for which to determine the plugin.
+   *
+   * @return \Drupal\oe_list_pages_link_list_source\ContextualAwareProcessorInterface|null
+   *   The processor if found.
+   */
+  protected function getContextualAwareSearchApiProcessor(ListSourceInterface $list_source, FacetInterface $facet): ?ContextualAwareProcessorInterface {
+    $processors = $list_source->getIndex()->getProcessorsByStage(ProcessorInterface::STAGE_ADD_PROPERTIES);
+    $processors = array_filter($processors, function (ProcessorInterface $processor) {
+      return $processor instanceof ContextualAwareProcessorInterface;
+    });
+
+    $property_path = $list_source->getIndex()->getField($facet->getFieldIdentifier())->getPropertyPath();
+    foreach ($processors as $processor) {
+      $properties = $processor->getPropertyDefinitions();
+      if (isset($properties[$property_path])) {
+        return $processor;
+      }
+    }
+
+    return NULL;
   }
 
 }

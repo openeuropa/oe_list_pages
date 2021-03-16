@@ -280,7 +280,7 @@ class ListBuilder implements ListBuilderInterface {
     // status" processor. These won't exist in the URL so we need to get them
     // from the list execution.
     $list_execution = $this->listExecutionManager->executeList($configuration);
-    $facets = $this->facetManager->getFacetsByFacetSourceId($list_execution->getListSource()->getSearchId());
+    $facets = $this->getKeyedFacetsFromSource($list_execution->getListSource());
     foreach ($facets as $facet) {
       $active_items = $facet->getActiveItems();
       if (!empty($active_items) && $this->facetHasDefaultStatus($facet, ['raw' => reset($active_items)])) {
@@ -298,8 +298,6 @@ class ListBuilder implements ListBuilderInterface {
 
     // Load one of the source facets because we need to use it to determine the
     // current active filters using the query_string plugin.
-    $facet_storage = $this->entityTypeManager->getStorage('facets_facet');
-    $facets = $facet_storage->loadMultiple($available_filters);
     $facet = reset($facets);
     $query_string = $this->urlProcessorManager->createInstance('query_string', ['facet' => $facet]);
     $active_filters += $query_string->getActiveFilters();
@@ -434,6 +432,9 @@ class ListBuilder implements ListBuilderInterface {
   /**
    * Returns the display label of a facet result.
    *
+   * At this point, we can expect the facet to have already been built so it
+   * should have the results.
+   *
    * @param \Drupal\facets\FacetInterface $facet
    *   The facet.
    * @param string $value
@@ -451,18 +452,7 @@ class ListBuilder implements ListBuilderInterface {
       return $value;
     }
 
-    $preset_filter = new ListPresetFilter($facet->id(), [$value]);
-
-    $field_definition = $this->getFacetFieldDefinition($facet, $list_source);
-    if (!$field_definition) {
-      // It's possible the field is custom and not mapped to an actual Drupal
-      // field.
-      return $this->getDefaultFilterValuesLabel($facet, $preset_filter);
-    }
-
-    $field_type = $field_definition->getType();
-    $id = $this->multiselectFilterManager->getPluginIdByFieldType($field_type);
-
+    $id = $this->multiselectFilterManager->getPluginIdForFacet($facet, $list_source);
     $preset_filter = new ListPresetFilter($facet->id(), [$value]);
     if (!$id) {
       return $this->getDefaultFilterValuesLabel($facet, $preset_filter);

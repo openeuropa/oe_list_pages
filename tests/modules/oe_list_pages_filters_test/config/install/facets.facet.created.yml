@@ -33,12 +33,6 @@ processor_configs:
       sort: 30
     settings:
       sort: DESC
-  date_processor_handler:
-    processor_id: date_processor_handler
-    weights:
-      pre_query: 50
-      build: 15
-    settings: {  }
   display_value_widget_order:
     processor_id: display_value_widget_order
     weights:

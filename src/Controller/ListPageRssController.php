@@ -19,6 +19,7 @@ use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Theme\ThemeManagerInterface;
 use Drupal\emr\Entity\EntityMetaInterface;
+use Drupal\facets\FacetManager\DefaultFacetManager;
 use Drupal\facets\UrlProcessor\UrlProcessorPluginManager;
 use Drupal\node\NodeInterface;
 use Drupal\oe_list_pages\FacetManipulationTrait;
@@ -106,6 +107,13 @@ class ListPageRssController extends ControllerBase {
   protected $urlProcessorPluginManager;
 
   /**
+   * The facets manager.
+   *
+   * @var \Drupal\facets\FacetManager\DefaultFacetManager
+   */
+  protected $facetManager;
+
+  /**
    * ListPageRssController constructor.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -132,10 +140,12 @@ class ListPageRssController extends ControllerBase {
    *   The theme manager.
    * @param \Drupal\facets\UrlProcessor\UrlProcessorPluginManager $url_processor_plugin_manager
    *   The url processor plugin manager.
+   * @param \Drupal\facets\FacetManager\DefaultFacetManager $facetManager
+   *   The facets manager.
    *
    * @SuppressWarnings(PHPMD.ExcessiveParameterList)
    */
-  public function __construct(ConfigFactoryInterface $config_factory, DateFormatterInterface $date_formatter, EntityTypeManagerInterface $entity_type_manager, EventDispatcherInterface $event_dispatcher, LanguageManagerInterface $language_manager, ListExecutionManagerInterface $list_execution_manager, ListSourceFactoryInterface $list_source_factory, MultiselectFilterFieldPluginManager $multiselect_plugin_manager, RendererInterface $renderer, RequestStack $request, ThemeManagerInterface $theme_manager, UrlProcessorPluginManager $url_processor_plugin_manager) {
+  public function __construct(ConfigFactoryInterface $config_factory, DateFormatterInterface $date_formatter, EntityTypeManagerInterface $entity_type_manager, EventDispatcherInterface $event_dispatcher, LanguageManagerInterface $language_manager, ListExecutionManagerInterface $list_execution_manager, ListSourceFactoryInterface $list_source_factory, MultiselectFilterFieldPluginManager $multiselect_plugin_manager, RendererInterface $renderer, RequestStack $request, ThemeManagerInterface $theme_manager, UrlProcessorPluginManager $url_processor_plugin_manager, DefaultFacetManager $facetManager) {
     $this->configFactory = $config_factory;
     $this->dateFormatter = $date_formatter;
     $this->entityTypeManager = $entity_type_manager;
@@ -148,6 +158,7 @@ class ListPageRssController extends ControllerBase {
     $this->request = $request;
     $this->themeManager = $theme_manager;
     $this->urlProcessorPluginManager = $url_processor_plugin_manager;
+    $this->facetManager = $facetManager;
   }
 
   /**
@@ -166,7 +177,8 @@ class ListPageRssController extends ControllerBase {
       $container->get('renderer'),
       $container->get('request_stack'),
       $container->get('theme.manager'),
-      $container->get('plugin.manager.facets.url_processor')
+      $container->get('plugin.manager.facets.url_processor'),
+      $container->get('facets.manager')
 
     );
   }
@@ -196,19 +208,19 @@ class ListPageRssController extends ControllerBase {
     ])->toString(TRUE);
     $atom_link = $this->request->getCurrentRequest()->getSchemeAndHttpHost() . $this->request->getCurrentRequest()->getRequestUri();
     $cache_metadata->addCacheableDependency($default_link);
-    $default_description = $this->getChannelDescription($node, $cache_metadata);
     $build = [
       '#theme' => 'oe_list_pages_rss',
       '#title' => $default_title,
       '#link' => $default_link->getGeneratedUrl(),
       '#atom_link' => $atom_link,
-      '#channel_description' => empty($default_description) ? $default_title : $default_description,
       '#language' => $language->getId(),
       '#copyright' => $this->getChannelCopyright(),
       '#image' => $this->getChannelImage($default_link, $cache_metadata),
       '#channel_elements' => [],
       '#items' => $this->getItemList($node, $cache_metadata),
     ];
+    $default_description = $this->getChannelDescription($node, $cache_metadata);
+    $build['#channel_description'] = empty($default_description) ? $default_title : $default_description;
     $cache_metadata->applyTo($build);
 
     // Dispatch event to allow modules to alter the build before being rendered.
@@ -382,7 +394,6 @@ class ListPageRssController extends ControllerBase {
   protected function getChannelDescription(NodeInterface $node, CacheableMetadata $cache_metadata): string {
     $cache_metadata->addCacheContexts(['url']);
     $categories = [];
-    $keyed_definitions = [];
     $keyed_facets = [];
     $active_filters_values = [];
 
@@ -393,33 +404,27 @@ class ListPageRssController extends ControllerBase {
       return '';
     }
 
-    $facet_storage = $this->entityTypeManager->getStorage('facets_facet');
-
+    $facets = $this->getKeyedFacetsFromSource($list_source);
     // Load one of the source facets because we need to use it to determine the
     // current active filters using the query_string plugin.
-    $facet = $facet_storage->load(reset($available_filters));
+    $facet = reset($facets);
     $query_string = $this->urlProcessorPluginManager->createInstance('query_string', ['facet' => $facet]);
     $active_filters = $query_string->getActiveFilters();
-    // Load all the facets for the active filters.
-    /** @var \Drupal\facets\FacetInterface[] $facets */
-    $facets = $facet_storage->loadMultiple(array_keys($active_filters));
     // Determine the filter values for each of the active facets.
     foreach ($facets as $facet) {
-      $field_definition = $this->getFacetFieldDefinition($facet, $list_source);
-
-      // The field definition can be NULL as well.
-      $keyed_definitions[$facet->id()] = $field_definition;
       $keyed_facets[$facet->id()] = $facet;
-      $active_filters_values[$facet->id()] = $active_filters[$facet->id()];
+      $active_filters_values[$facet->id()] = $active_filters[$facet->id()] ?? [];
     }
+
+    $active_filters_values = array_filter($active_filters_values);
 
     // Run through each of the active filter values and prepare their displays.
     foreach ($active_filters_values as $facet_id => $filters) {
-      $field_type = $keyed_definitions[$facet_id] ? $keyed_definitions[$facet_id]->getType() : NULL;
-      $id = $field_type ? $this->multiselectPluginManager->getPluginIdByFieldType($field_type) : NULL;
+      $facet = $keyed_facets[$facet_id];
+      $id = $this->multiselectPluginManager->getPluginIdForFacet($facet, $list_source);
       $preset_filter = new ListPresetFilter($facet_id, $filters);
       if (!$id) {
-        $display_value = $this->getDefaultFilterValuesLabel($keyed_facets[$facet_id], $preset_filter);
+        $display_value = $this->getDefaultFilterValuesLabel($facet, $preset_filter);
       }
       else {
         $config = [

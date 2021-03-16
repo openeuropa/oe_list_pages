@@ -5,9 +5,11 @@ declare(strict_types = 1);
 namespace Drupal\oe_list_pages\Plugin\facets\query_type;
 
 use Drupal\Component\Datetime\DateTimePlus;
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\facets\FacetInterface;
 use Drupal\facets\QueryType\QueryTypePluginBase;
+use Drupal\facets\Result\Result;
 
 /**
  * Query type plugin that filters the result by the date active filters.
@@ -83,6 +85,48 @@ class Date extends QueryTypePluginBase {
    * {@inheritdoc}
    */
   public function build() {
+    $facet_results = [];
+    $active_filters = Date::getActiveItems($this->facet);
+
+    if (!$active_filters) {
+      return $this->facet;
+    }
+
+    $operator = $active_filters['operator'];
+    $first_date = $active_filters['first'];
+    $second_date = isset($active_filters['second']) ? $active_filters['second'] : NULL;
+
+    $operators = [
+      'gt' => $this->t('After'),
+      'lt' => $this->t('Before'),
+      'bt' => $this->t('Between'),
+    ];
+
+    if (!isset($operators[$operator])) {
+      return $facet_results;
+    }
+
+    if ($operator === 'bt') {
+      $display = new FormattableMarkup('@operator @first and @second', [
+        '@operator' => $operators[$operator],
+        '@first' => $first_date->format('j F Y'),
+        '@second' => $second_date->format('j F Y'),
+      ]);
+      $result = new Result($this->facet, $active_filters['_raw'], $display, 0);
+      $facet_results[] = $result;
+      $this->facet->setResults($facet_results);
+      return $facet_results;
+    }
+
+    $display = new FormattableMarkup('@operator @first', [
+      '@operator' => $operators[$operator],
+      '@first' => $first_date->format('j F Y'),
+    ]);
+    $result = new Result($this->facet, $active_filters['_raw'], $display, 0);
+    $facet_results[] = $result;
+
+    $this->facet->setResults($facet_results);
+
     return $this->facet;
   }
 
