@@ -38,7 +38,8 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  * @LinkSource(
  *   id = "list_pages",
  *   label = @Translation("List pages"),
- *   description = @Translation("Source plugin that links to internal entities queried using the list pages.")
+ *   description = @Translation("Source plugin that links to internal entities queried using the list pages."),
+ *   bundles = { "dynamic" }
  * )
  */
 class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactoryPluginInterface {
