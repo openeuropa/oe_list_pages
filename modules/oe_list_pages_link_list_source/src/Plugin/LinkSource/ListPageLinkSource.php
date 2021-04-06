@@ -26,11 +26,10 @@ use Drupal\oe_list_pages\ListPageConfiguration;
 use Drupal\oe_list_pages\ListSourceFactoryInterface;
 use Drupal\oe_list_pages\ListSourceInterface;
 use Drupal\oe_list_pages\MultiselectFilterFieldPluginManager;
-use Drupal\oe_list_pages_link_list_source\ContextualAwareProcessorInterface;
 use Drupal\oe_list_pages_link_list_source\ContextualFilterFieldMapper;
 use Drupal\oe_list_pages_link_list_source\ContextualFiltersConfigurationBuilder;
+use Drupal\oe_list_pages_link_list_source\ContextualFiltersHelper;
 use Drupal\oe_list_pages_link_list_source\Exception\InapplicableContextualFilter;
-use Drupal\search_api\Processor\ProcessorInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -344,7 +343,7 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
         $contextual_filter->setValues($values);
       }
       else {
-        $processor = $this->getContextualAwareSearchApiProcessor($list_source, $facet);
+        $processor = ContextualFiltersHelper::getContextualAwareSearchApiProcessor($list_source, $facet);
         if (!$processor) {
           throw new InapplicableContextualFilter();
         }
@@ -416,34 +415,6 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
     $plugin = $this->multiselectPluginManager->createInstance($id, $config);
 
     return $plugin->getFieldValues($items);
-  }
-
-  /**
-   * Returns the search API plugins that are contextual filters aware.
-   *
-   * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
-   *   The list source.
-   * @param \Drupal\facets\FacetInterface $facet
-   *   The facet for which to determine the plugin.
-   *
-   * @return \Drupal\oe_list_pages_link_list_source\ContextualAwareProcessorInterface|null
-   *   The processor if found.
-   */
-  protected function getContextualAwareSearchApiProcessor(ListSourceInterface $list_source, FacetInterface $facet): ?ContextualAwareProcessorInterface {
-    $processors = $list_source->getIndex()->getProcessorsByStage(ProcessorInterface::STAGE_ADD_PROPERTIES);
-    $processors = array_filter($processors, function (ProcessorInterface $processor) {
-      return $processor instanceof ContextualAwareProcessorInterface;
-    });
-
-    $property_path = $list_source->getIndex()->getField($facet->getFieldIdentifier())->getPropertyPath();
-    foreach ($processors as $processor) {
-      $properties = $processor->getPropertyDefinitions();
-      if (isset($properties[$property_path])) {
-        return $processor;
-      }
-    }
-
-    return NULL;
   }
 
 }
