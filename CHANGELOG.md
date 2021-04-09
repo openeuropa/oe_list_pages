@@ -1,10 +1,20 @@
-# Change Log
+# Changelog
+
+## [0.8.0](https://github.com/openeuropa/oe_list_pages/tree/0.8.0) (2021-04-09)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.7.0...0.8.0)
+
+**Merged pull requests:**
+
+- EWPP-837: Refactoring the default filter values and results processing. [\#91](https://github.com/openeuropa/oe_list_pages/pull/91) ([upchuk](https://github.com/upchuk))
 
 ## [0.7.0](https://github.com/openeuropa/oe_list_pages/tree/0.7.0) (2021-03-11)
+
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.6.0...0.7.0)
 
 **Merged pull requests:**
 
+- EWPP-0000: Preparing for release. [\#90](https://github.com/openeuropa/oe_list_pages/pull/90) ([hernani](https://github.com/hernani))
 - Rebasing the taxonomy types filters epic [\#88](https://github.com/openeuropa/oe_list_pages/pull/88) ([upchuk](https://github.com/upchuk))
 - EWPP-825: Fix weight of created facets [\#87](https://github.com/openeuropa/oe_list_pages/pull/87) ([hernani](https://github.com/hernani))
 - EWPP-786: Contextual filters field mapper. [\#85](https://github.com/openeuropa/oe_list_pages/pull/85) ([upchuk](https://github.com/upchuk))
