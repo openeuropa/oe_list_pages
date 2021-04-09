@@ -1,18 +1,18 @@
 langcode: en
 status: true
 dependencies: {  }
-id: created
-name: Created
-url_alias: created
+id: foo_no_contextual
+name: 'Foo - no contextual'
+url_alias: foo_no_contextual
 weight: 0
 min_count: 1
 show_only_one_result: false
-field_identifier: created
+field_identifier: oe_list_pages_filters_test_foo_field_no_contextual
 facet_source_id: 'list_facet_source:node:content_type_one'
 widget:
-  type: oe_list_pages_date
+  type: oe_list_pages_multiselect
   config:
-    date_type: date
+    show_numbers: false
 query_operator: or
 use_hierarchy: false
 expand_hierarchy: false

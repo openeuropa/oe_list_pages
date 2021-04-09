@@ -224,7 +224,7 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     $response = $this->getTextContent();
     $crawler = new Crawler($response);
     $channel = $crawler->filterXPath('//rss[@version=2.0]/channel');
-    $this->assertEquals('Published: Yes | Select one: test1, test2 | Foo: 1, 2', $channel->filterXPath('//description')->text());
+    $this->assertEquals('Published: Yes | Foo: One, Two | Select one: test1, test2', $channel->filterXPath('//description')->text());
 
     // Assert accessing the list page in Spanish shows translated strings.
     $this->drupalGet('/es/node/1/rss');

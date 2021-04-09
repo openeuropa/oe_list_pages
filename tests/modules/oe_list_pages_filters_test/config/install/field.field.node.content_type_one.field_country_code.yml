@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_country_code
+    - node.type.content_type_one
+id: node.content_type_one.field_country_code
+field_name: field_country_code
+entity_type: node
+bundle: content_type_one
+label: 'Country code'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

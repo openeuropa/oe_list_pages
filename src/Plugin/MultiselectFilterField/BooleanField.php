@@ -59,7 +59,7 @@ class BooleanField extends MultiSelectFilterFieldPluginBase {
       new Result($facet, 0, 0, 1),
     ];
     $facet->setResults($results);
-
+    $this->processFacetResults($facet);
     return $this->getDefaultFilterValuesLabel($facet, $preset_filter);
   }
 

@@ -85,6 +85,7 @@ class MultiSelectFilterFieldPluginTest extends ListsSourceTestBase {
 
     $item_list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
     $plugin_id = $this->pluginManager->getPluginIdByFieldType($field_config->getType());
+    $this->assertEquals($this->pluginManager->getPluginIdForFacet($facet, $item_list), $plugin_id);
     /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
     $plugin = $this->pluginManager->createInstance($plugin_id, [
       'facet' => $facet,
@@ -157,6 +158,7 @@ class MultiSelectFilterFieldPluginTest extends ListsSourceTestBase {
 
     $item_list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
     $plugin_id = $this->pluginManager->getPluginIdByFieldType($field_config->getType());
+    $this->assertEquals($this->pluginManager->getPluginIdForFacet($facet, $item_list), $plugin_id);
     /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
     $plugin = $this->pluginManager->createInstance($plugin_id, [
       'facet' => $facet,
@@ -210,6 +212,7 @@ class MultiSelectFilterFieldPluginTest extends ListsSourceTestBase {
 
     $item_list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
     $plugin_id = $this->pluginManager->getPluginIdByFieldType($field_config->getType());
+    $this->assertEquals($this->pluginManager->getPluginIdForFacet($facet, $item_list), $plugin_id);
     /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
     $plugin = $this->pluginManager->createInstance($plugin_id, [
       'facet' => $facet,
@@ -278,11 +281,12 @@ class MultiSelectFilterFieldPluginTest extends ListsSourceTestBase {
     ]);
     $field_config->save();
 
-    $this->addFieldToIndex('boolean_field', 'Boolean field', 'string');
+    $this->addFieldToIndex('boolean_field', 'Boolean field', 'boolean');
     $facet = $this->createFieldFacet('boolean_field');
 
     $item_list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
     $plugin_id = $this->pluginManager->getPluginIdByFieldType($field_config->getType());
+    $this->assertEquals($this->pluginManager->getPluginIdForFacet($facet, $item_list), $plugin_id);
     /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
     $plugin = $this->pluginManager->createInstance($plugin_id, [
       'facet' => $facet,
@@ -323,7 +327,9 @@ class MultiSelectFilterFieldPluginTest extends ListsSourceTestBase {
     $field->setType($type);
     $field->setPropertyPath($id);
     $field->setLabel($label);
+    $field->setDatasourceId('entity:entity_test_mulrev_changed');
     $index->addField($field);
+    $index->save();
   }
 
   /**

@@ -3,6 +3,7 @@ status: true
 dependencies:
   config:
     - field.storage.node.body
+    - field.storage.node.field_country_code
     - field.storage.node.field_date_range
     - field.storage.node.field_link
     - field.storage.node.field_reference
@@ -51,6 +52,14 @@ field_settings:
     dependencies:
       config:
         - field.storage.node.field_date_range
+  field_country_code:
+    label: 'Country code'
+    datasource_id: 'entity:node'
+    property_path: field_country_code
+    type: string
+    dependencies:
+      config:
+        - field.storage.node.field_country_code
   field_link:
     label: Link
     datasource_id: 'entity:node'
@@ -95,6 +104,10 @@ field_settings:
     label: Foo
     property_path: oe_list_pages_filters_test_foo_field
     type: string
+  oe_list_pages_filters_test_foo_field_no_contextual:
+    label: 'Foo - no contextual'
+    property_path: oe_list_pages_filters_test_foo_field_no_contextual
+    type: string
   status:
     label: Published
     datasource_id: 'entity:node'
@@ -136,10 +149,12 @@ processor_settings:
     all_fields: true
     fields:
       - body
+      - field_country_code
       - field_link
       - field_select_one
       - field_select_two
       - oe_list_pages_filters_test_foo_field
+      - oe_list_pages_filters_test_foo_field_no_contextual
       - title
       - type
     weights:
@@ -147,6 +162,7 @@ processor_settings:
       preprocess_query: -20
   language_with_fallback: {  }
   oe_list_pages_filters_test_test_field: {  }
+  oe_list_pages_filters_test_test_field_no_contextual: {  }
   rendered_item: {  }
 tracker_settings:
   default:

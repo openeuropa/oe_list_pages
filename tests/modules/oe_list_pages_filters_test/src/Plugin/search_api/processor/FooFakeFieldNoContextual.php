@@ -5,7 +5,6 @@ declare(strict_types = 1);
 namespace Drupal\oe_list_pages_filters_test\Plugin\search_api\processor;
 
 use Drupal\Core\Entity\ContentEntityInterface;
-use Drupal\oe_list_pages_link_list_source\ContextualAwareProcessorInterface;
 use Drupal\search_api\Datasource\DatasourceInterface;
 use Drupal\search_api\Item\ItemInterface;
 use Drupal\search_api\Processor\ProcessorPluginBase;
@@ -16,8 +15,8 @@ use Drupal\search_api\SearchApiException;
  * Test custom Search API field.
  *
  * @SearchApiProcessor(
- *   id = "oe_list_pages_filters_test_test_field",
- *   label = @Translation("Foo fake field"),
+ *   id = "oe_list_pages_filters_test_test_field_no_contextual",
+ *   label = @Translation("Foo fake field - no contextual"),
  *   description = @Translation("A fake field to base a facet on."),
  *   stages = {
  *     "add_properties" = 0,
@@ -26,7 +25,7 @@ use Drupal\search_api\SearchApiException;
  *   hidden = true,
  * )
  */
-class FooFakeField extends ProcessorPluginBase implements ContextualAwareProcessorInterface {
+class FooFakeFieldNoContextual extends ProcessorPluginBase {
 
   /**
    * {@inheritdoc}
@@ -36,13 +35,13 @@ class FooFakeField extends ProcessorPluginBase implements ContextualAwareProcess
 
     if (!$datasource) {
       $definition = [
-        'label' => $this->t('Foo'),
-        'description' => $this->t('Foo field.'),
+        'label' => $this->t('Foo - no contextual'),
+        'description' => $this->t('Foo field - no contextual.'),
         'type' => 'string',
         'processor_id' => $this->getPluginId(),
         'is_list' => FALSE,
       ];
-      $properties['oe_list_pages_filters_test_foo_field'] = new ProcessorProperty($definition);
+      $properties['oe_list_pages_filters_test_foo_field_no_contextual'] = new ProcessorProperty($definition);
     }
 
     return $properties;
@@ -64,25 +63,12 @@ class FooFakeField extends ProcessorPluginBase implements ContextualAwareProcess
 
     $fields = $item->getFields();
 
-    $fields = $this->getFieldsHelper()->filterForPropertyPath($fields, NULL, 'oe_list_pages_filters_test_foo_field');
+    $fields = $this->getFieldsHelper()->filterForPropertyPath($fields, NULL, 'oe_list_pages_filters_test_foo_field_no_contextual');
 
     foreach ($fields as $field) {
       // We set the entity ID as the field value.
       $field->addValue($entity->id());
     }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getContextualValues(ContentEntityInterface $entity): array {
-    // Check if the entity has a test contextual field that we can return
-    // a value from. Otherwise default to the entity ID.
-    if ($entity->hasField('field_test_contextual_filter')) {
-      return array_column($entity->get('field_test_contextual_filter')->getValue(), 'value');
-    }
-
-    return [$entity->id()];
   }
 
 }

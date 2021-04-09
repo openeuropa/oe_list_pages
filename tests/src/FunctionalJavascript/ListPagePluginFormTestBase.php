@@ -6,6 +6,7 @@ namespace Drupal\Tests\oe_list_pages\FunctionalJavascript;
 
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\facets\Entity\Facet;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
@@ -779,6 +780,114 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->assertSession()->linkNotExistsExact('1');
     $this->assertSession()->linkNotExistsExact('2');
     $this->assertSession()->linkNotExistsExact('3');
+
+    // Clear all default filters.
+    $this->clickLink('Edit');
+    $link = $this->getSession()->getPage()->findLink('List Page');
+    if ($link) {
+      $link->click();
+    }
+
+    $page->pressButton('default-delete-' . $reference_filter_id);
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $page->pressButton('default-delete-' . $second_reference_filter_id);
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $page->pressButton('Save');
+
+    // Test the default string multiselect filter field plugin by creating a
+    // node with a country code, a facet for country code which uses
+    // a processor to turn country codes into country names.
+    $values = [
+      'title' => 'Node with country',
+      'type' => 'content_type_one',
+      'field_country_code' => 'BE',
+    ];
+    $node = Node::create($values);
+    $node->save();
+    Index::load('node')->indexItems();
+
+    $facet = Facet::create([
+      'id' => 'country',
+      'name' => 'Country',
+    ]);
+
+    $facet->setUrlAlias('country');
+    $facet->setFieldIdentifier('field_country_code');
+    $facet->setEmptyBehavior(['behavior' => 'none']);
+    $facet->setFacetSourceId('list_facet_source:node:content_type_one');
+    $facet->setWidget('oe_list_pages_multiselect', []);
+    $facet->addProcessor([
+      'processor_id' => 'url_processor_handler',
+      'weights' => ['pre_query' => -10, 'build' => -10],
+      'settings' => [],
+    ]);
+    $facet->addProcessor([
+      'processor_id' => 'oe_list_pages_address_format_country_code',
+      'weights' => ['pre_query' => 60, 'build' => 35],
+      'settings' => [],
+    ]);
+    $facet->save();
+
+    // Edit the node and add the country code default value.
+    $this->clickLink('Edit');
+    $link = $this->getSession()->getPage()->findLink('List Page');
+    if ($link) {
+      $link->click();
+    }
+    $country_filter_id = DefaultFilterConfigurationBuilder::generateFilterId('country');
+
+    $this->getSession()->getPage()->selectFieldOption('Add default value for', 'Country');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $filter_selector = $default_value_name_prefix . '[wrapper][edit][' . $country_filter_id . '][country][0][string]';
+    $this->getSession()->getPage()->fillField($filter_selector, 'no country');
+    $this->getSession()->getPage()->pressButton('Set default value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $expected_set_filters = [];
+    $expected_set_filters['country'] = ['key' => 'Country', 'value' => 'no country'];
+
+    $this->assertDefaultValueForFilters($expected_set_filters);
+    $this->getSession()->getPage()->pressButton('Save');
+    // We have no results with a dummy country.
+    $this->assertSession()->pageTextNotContains('Node with country');
+    $this->clickLink('Edit');
+    $link = $this->getSession()->getPage()->findLink('List Page');
+    if ($link) {
+      $link->click();
+    }
+
+    // Fill in the country code.
+    $this->getSession()->getPage()->pressButton('default-edit-' . $country_filter_id);
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->fillField($filter_selector, 'BE');
+    $this->getSession()->getPage()->pressButton('Set default value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    // The processor should change from country code to country name because the
+    // default StringField multiselect filter field plugin doesn't know how to
+    // do it.
+    $expected_set_filters['country'] = ['key' => 'Country', 'value' => 'Belgium'];
+    $this->getSession()->getPage()->pressButton('Save');
+    $this->assertSession()->pageTextContains('Node with country');
+
+    // Now test an example in which we don't have a facet processor but we have
+    // a facet-specific multiselect filter field plugin that creates a default
+    // value form and default label.
+    $this->clickLink('Edit');
+    $link = $this->getSession()->getPage()->findLink('List Page');
+    if ($link) {
+      $link->click();
+    }
+    $this->getSession()->getPage()->pressButton('default-delete-' . $country_filter_id);
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->selectFieldOption('Add default value for', 'Foo');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $foo_filter_id = DefaultFilterConfigurationBuilder::generateFilterId('oe_list_pages_filters_test_test_field');
+    $filter_selector = $default_value_name_prefix . '[wrapper][edit][' . $foo_filter_id . '][oe_list_pages_filters_test_test_field][0][foo]';
+    $this->getSession()->getPage()->selectFieldOption($filter_selector, 'Two');
+    $this->getSession()->getPage()->pressButton('Set default value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $expected_set_filters = [];
+    $expected_set_filters['foo'] = ['key' => 'Foo', 'value' => 'Two'];
+    $this->getSession()->getPage()->pressButton('Save');
   }
 
   /**

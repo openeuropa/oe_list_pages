@@ -305,19 +305,26 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
    *
    * These are only the ones that use a Multiselect widget.
    *
-   * @param \Drupal\oe_list_pages\ListSourceInterface $listSource
+   * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
    *   The list source.
    *
    * @return array
    *   The options.
    */
-  protected function getAvailableFilters(ListSourceInterface $listSource): array {
-    $facets = $this->facetsManager->getFacetsByFacetSourceId($listSource->getSearchId());
+  protected function getAvailableFilters(ListSourceInterface $list_source): array {
+    $facets = $this->facetsManager->getFacetsByFacetSourceId($list_source->getSearchId());
     $options = [];
 
     foreach ($facets as $facet) {
       $widget = $facet->getWidgetInstance();
       if (!$widget instanceof MultiselectWidget) {
+        continue;
+      }
+
+      // If the facet is based on a custom Search API field (processor), the
+      // latter should be contextual aware. Otherwise it won't be useful.
+      $processor = ContextualFiltersHelper::getSearchApiFieldProcessor($list_source, $facet);
+      if ($processor && !$processor instanceof ContextualAwareProcessorInterface) {
         continue;
       }
 

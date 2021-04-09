@@ -4,6 +4,8 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\oe_list_pages_link_list_source\FunctionalJavascript;
 
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\node\Entity\Node;
 use Drupal\oe_link_lists\Entity\LinkList;
 use Drupal\oe_list_pages\DefaultFilterConfigurationBuilder;
@@ -32,6 +34,7 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     'oe_link_lists_test',
     'oe_list_pages_event_subscriber_test',
     'oe_list_pages_link_list_source_test',
+    'oe_list_pages_address',
     'facets',
     'entity_reference_revisions',
     'oe_list_pages_filters_test',
@@ -642,6 +645,46 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     $this->assertSession()->elementsCount('css', '.block-oe-link-lists ul li', 2);
     $this->assertSession()->linkExistsExact('visible reference');
     $this->assertSession()->linkExistsExact('select one and reference');
+
+    // Test that we can also use custom search API fields as contextual filters.
+    $configuration['source']['plugin_configuration']['contextual_filters'] = [
+      ContextualFiltersConfigurationBuilder::generateFilterId('oe_list_pages_filters_test_test_field') => new ListPresetFilter('oe_list_pages_filters_test_test_field', [], 'or'),
+    ];
+    $link_list->setConfiguration($configuration);
+    $link_list->save();
+    $this->drupalGet($node->toUrl());
+    // By default we don't have any results.
+    $this->assertSession()->elementsCount('css', '.block-oe-link-lists ul li', 0);
+    // Add the test contextual filter to the Page node type.
+    FieldStorageConfig::create([
+      'entity_type' => 'node',
+      'field_name' => 'field_test_contextual_filter',
+      'type' => 'string',
+      'translatable' => '0',
+      'cardinality' => 2,
+    ])->save();
+    FieldConfig::create([
+      'label' => 'Test contextual filter',
+      'description' => '',
+      'field_name' => 'field_test_contextual_filter',
+      'entity_type' => 'node',
+      'bundle' => 'article',
+      'required' => 0,
+    ])->save();
+    $list_nodes = \Drupal::entityTypeManager()->getStorage('node')->loadByProperties(['title' => ['visible boolean', 'not visible boolean']]);
+    $ids = array_keys($list_nodes);
+    $node = Node::load($node->id());
+    $node->set('field_test_contextual_filter', reset($ids));
+    $node->save();
+    $this->drupalGet($node->toUrl());
+    $this->assertSession()->elementsCount('css', '.block-oe-link-lists ul li', 1);
+    $this->assertSession()->linkExistsExact('not visible boolean');
+    $node->set('field_test_contextual_filter', $ids);
+    $node->save();
+    $this->drupalGet($node->toUrl());
+    $this->assertSession()->elementsCount('css', '.block-oe-link-lists ul li', 2);
+    $this->assertSession()->linkExistsExact('not visible boolean');
+    $this->assertSession()->linkExistsExact('visible boolean');
   }
 
   /**

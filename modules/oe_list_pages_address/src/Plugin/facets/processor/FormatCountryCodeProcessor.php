@@ -64,9 +64,15 @@ class FormatCountryCodeProcessor extends ProcessorPluginBase implements BuildPro
    * {@inheritdoc}
    */
   public function build(FacetInterface $facet, array $results) {
-    // Loop over all results.
+    // Loop over all results and try to determine the country.
     foreach ($results as $i => $result) {
-      $country = $this->countryRepository->get($result->getRawValue());
+      try {
+        $country = $this->countryRepository->get($result->getRawValue());
+      }
+      catch (\Exception $exception) {
+        continue;
+      }
+
       $result->setDisplayValue($country->getName());
     }
     return $results;
@@ -77,9 +83,14 @@ class FormatCountryCodeProcessor extends ProcessorPluginBase implements BuildPro
    */
   public function supportsFacet(FacetInterface $facet) {
     $data_definition = $facet->getDataDefinition();
-    if ($data_definition->getDataType() === 'string') {
+    if (in_array($data_definition->getDataType(), [
+      'string',
+      'field_item:string',
+      'field_item:address_country',
+    ])) {
       return TRUE;
     }
+
     return FALSE;
   }
 

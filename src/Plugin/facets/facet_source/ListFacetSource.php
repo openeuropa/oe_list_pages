@@ -149,21 +149,16 @@ class ListFacetSource extends SearchApiBaseFacetSource implements SearchApiFacet
   public function fillFacetsWithResults(array $facets) {
     $plugin_definition_id = $this->getPluginDefinition()['id'];
     $results = $this->searchApiQueryHelper->getResults($plugin_definition_id);
-    if ($results instanceof ResultSetInterface && $results->getResultCount()) {
-      $facet_results = $results->getExtraData('search_api_facets');
-      // Loop over each facet and execute the build method from the given query
-      // type.
-      foreach ($facets as $facet) {
-        if (isset($facet_results[$facet->getFieldIdentifier()])) {
-          $configuration = [
-            'query' => NULL,
-            'facet' => $facet,
-            'results' => $facet_results[$facet->getFieldIdentifier()],
-          ];
-          $query_type = $this->queryTypePluginManager->createInstance($facet->getQueryType(), $configuration);
-          $query_type->build();
-        }
-      }
+
+    $facet_results = $results instanceof ResultSetInterface ? $results->getExtraData('search_api_facets') : [];
+    foreach ($facets as $facet) {
+      $configuration = [
+        'query' => NULL,
+        'facet' => $facet,
+        'results' => $facet_results[$facet->getFieldIdentifier()] ?? [],
+      ];
+      $query_type = $this->queryTypePluginManager->createInstance($facet->getQueryType(), $configuration);
+      $query_type->build();
     }
   }
 

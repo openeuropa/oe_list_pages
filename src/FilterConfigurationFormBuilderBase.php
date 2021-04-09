@@ -19,6 +19,7 @@ abstract class FilterConfigurationFormBuilderBase {
 
   use StringTranslationTrait;
   use DependencySerializationTrait;
+  use FacetManipulationTrait;
 
   /**
    * The facets manager.
@@ -126,7 +127,10 @@ abstract class FilterConfigurationFormBuilderBase {
       $widget = $facet->getWidgetInstance();
       $filter_value_label = '';
       if ($widget instanceof ListPagesWidgetInterface) {
-        $filter_value_label = $widget->getDefaultValuesLabel($facet, $list_source, $filter);
+        // Ensure the facet is built before we ask for the labels.
+        $clone = clone $facet;
+        $this->rebuildFacet($clone, $filter->getValues());
+        $filter_value_label = $widget->getDefaultValuesLabel($clone, $list_source, $filter);
       }
 
       $rows[] = [

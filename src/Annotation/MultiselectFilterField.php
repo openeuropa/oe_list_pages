@@ -34,11 +34,31 @@ class MultiselectFilterField extends Plugin {
   public $id;
 
   /**
-   * The field types this plugin applies to.
+   * The Drupal field types this plugin applies to.
    *
    * @var array
    */
-  public $fieldTypes;
+  public $field_types;
+
+  /**
+   * The Search API data types this plugin applies to.
+   *
+   * This is optional in case a more specific Drupal field type could be
+   * determined on the facet.
+   *
+   * @var array
+   */
+  public $data_types;
+
+  /**
+   * The Facet IDs this plugin applies to.
+   *
+   * This is when the plugin needs to be targeted towards a very specific
+   * facet.
+   *
+   * @var array
+   */
+  public $facet_ids;
 
   /**
    * The human-readable name of the plugin.
