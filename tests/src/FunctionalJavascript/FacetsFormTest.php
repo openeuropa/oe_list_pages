@@ -37,6 +37,11 @@ class FacetsFormTest extends WebDriverTestBase {
   ];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * The state.
    *
    * @var \Drupal\Core\State\StateInterface

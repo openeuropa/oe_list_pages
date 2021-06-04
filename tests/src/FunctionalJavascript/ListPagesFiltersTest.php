@@ -37,6 +37,11 @@ class ListPagesFiltersTest extends WebDriverTestBase {
   ];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Test fields in a list page content type.
    */
   public function testListPageFilters(): void {

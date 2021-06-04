@@ -19,6 +19,11 @@ use Drupal\search_api\Entity\Index;
 abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Runs assertions for the preset filters form level validations.
    *
    * @param string $default_value_name_prefix

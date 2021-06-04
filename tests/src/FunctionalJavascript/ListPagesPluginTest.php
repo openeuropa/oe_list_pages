@@ -33,6 +33,11 @@ class ListPagesPluginTest extends ListPagePluginFormTestBase {
   ];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Test List Page entity meta plugin and available entity types/bundles.
    */
   public function testListPagePluginForm(): void {

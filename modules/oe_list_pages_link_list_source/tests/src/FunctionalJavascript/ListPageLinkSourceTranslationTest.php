@@ -41,6 +41,11 @@ class ListPageLinkSourceTranslationTest extends ListPagePluginFormTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp() {
     parent::setUp();
 

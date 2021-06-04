@@ -38,6 +38,11 @@ class ListPageRssControllerTest extends WebDriverTestBase {
   ];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Tests the access and rendering of the RSS page of a list page.
    */
   public function testListPageRssPage(): void {

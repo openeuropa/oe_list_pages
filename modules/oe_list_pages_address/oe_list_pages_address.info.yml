@@ -3,7 +3,7 @@ description: This submodule adds support for Address fields in List Pages.
 package: OpenEuropa
 
 type: module
-core: 8.x
+core_version_requirement: ^8 || ^9
 
 dependencies:
   - address:address

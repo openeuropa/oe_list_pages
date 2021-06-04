@@ -1,9 +1,9 @@
-name: 'OpenEuropa List Pages Open Vocabularies'
-description: 'This submodule adds support for OpenVocabularies fields in List Pages.'
+name: OpenEuropa List Pages Open Vocabularies
+description: This submodule adds support for OpenVocabularies fields in List Pages.
 package: OpenEuropa
 
 type: module
-core: 8.x
+core_version_requirement: ^8 || ^9
 
 dependencies:
   - oe_list_pages:oe_list_pages

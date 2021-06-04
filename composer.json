@@ -6,42 +6,49 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "php": ">=7.2",
-        "drupal/core": "^8.9",
-        "drupal/emr": "~1.0-beta11",
-        "drupal/facets": "~1.6",
-        "drupal/multivalue_form_element": "^1.0@beta",
-        "drupal/search_api": "~1.17",
+        "php": ">=7.3",
+        "drupal/core": "^8.9 || ^9.1",
+        "drupal/entity_meta_relation": "dev-OEL-77",
+        "drupal/facets": "~1.8",
+        "drupal/multivalue_form_element": "dev-OEL-160",
+        "drupal/search_api": "~1.19",
         "symfony/options-resolver": "~4.0"
     },
     "require-dev": {
-        "composer/installers": "~1.5",
-        "drupal/core-composer-scaffold": "^8.8",
-        "drupal/address": "^1.8",
+        "composer/installers": "~1.11",
+        "drupal/core-composer-scaffold": "^8.9 || ^9.1",
         "drupal/config_devel": "~1.2",
         "drupal/drupal-extension": "~4.0",
-        "drupal/extra_field": "^1.1",
-        "drupal/inline_entity_form": "^1.0-rc9",
-        "drush/drush": "~9.0@stable",
-        "guzzlehttp/guzzle": "~6.3",
-        "openeuropa/code-review": "^1.5.0",
-        "openeuropa/drupal-core-require-dev": "~8.9",
+        "drush/drush": "~10.3",
+        "openeuropa/code-review": "~1.6",
+        "openeuropa/drupal-core-require-dev": "^8.9 || ^9.1",
+        "openeuropa/task-runner-drupal-project-symlink": "^1.0",
+        "phpspec/prophecy-phpunit": "^1 || ^2",
+        "drupal/address": "~1.9",
+        "drupal/extra_field": "^2.1",
         "openeuropa/oe_link_lists": "dev-master",
-        "openeuropa/oe_multilingual": "^1.5",
-        "openeuropa/open_vocabularies": "dev-master",
-        "openeuropa/task-runner": "~1.0.0-beta6",
-        "phpunit/phpunit": "~6.5"
+        "openeuropa/oe_multilingual": "dev-master",
+        "openeuropa/open_vocabularies": "dev-OEL-165",
+        "drupal/inline_entity_form": "^1.0-rc9"
     },
     "scripts": {
         "post-install-cmd": "./vendor/bin/run drupal:site-setup",
         "post-update-cmd": "./vendor/bin/run drupal:site-setup"
     },
-    "repositories": {
-        "drupal": {
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/openeuropa/multivalue_form_element"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/openeuropa/entity_meta_relation"
+        },
+        {
             "type": "composer",
             "url": "https://packages.drupal.org/8"
         }
-    },
+    ],
     "autoload": {
         "psr-4": {
             "Drupal\\oe_list_pages\\": "./src/"
@@ -50,7 +57,7 @@
     "autoload-dev": {
         "psr-4": {
             "Drupal\\Tests\\oe_list_pages\\": "./tests/src",
-            "Drupal\\Tests\\oe_link_lists\\": "./build/modules/contrib/oe_link_lists/tests",
+            "Drupal\\Tests\\oe_link_lists\\": "./build/modules/contrib/oe_link_lists/tests/src",
             "Drupal\\Tests\\oe_list_pages_link_list_source\\": "./modules/oe_list_pages_link_list_source/tests/src"
         }
     },

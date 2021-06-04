@@ -46,6 +46,11 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
   ];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Tests the plugin configuration form.
    */
   public function testPluginConfigurationForm(): void {
