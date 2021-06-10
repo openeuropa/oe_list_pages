@@ -483,7 +483,7 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
    *   The expected count.
    */
   protected function assertResultCount(int $count): void {
-    $items = $this->getSession()->getPage()->findAll('css', '.node--view-mode-teaser');
+    $items = $this->getSession()->getPage()->findAll('css', 'li > article');
     $this->assertCount($count, $items);
   }
 
