@@ -90,8 +90,8 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     // Edit the link list and check the values are correctly pre-populated.
     $this->drupalGet($link_list->toUrl('edit-form'));
 
-    $this->assertOptionSelected('Source entity type', 'Taxonomy term');
-    $this->assertOptionSelected('Source bundle', 'Vocabulary one');
+    $this->assertSession()->optionExists('Source entity type', 'Taxonomy term');
+    $this->assertSession()->optionExists('Source bundle', 'Vocabulary one');
 
     // Change the source to a Node type.
     $this->getSession()->getPage()->selectFieldOption('Source entity type', 'node');

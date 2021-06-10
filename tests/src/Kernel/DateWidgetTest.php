@@ -169,7 +169,7 @@ class DateWidgetTest extends ListsSourceTestBase {
   public function testDefaultConfiguration(): void {
     $default_config = $this->widget->defaultConfiguration();
     $this->assertArrayHasKey('date_type', $default_config);
-    $this->assertEqual($default_config['date_type'], 'date');
+    $this->assertEquals($default_config['date_type'], 'date');
   }
 
   /**

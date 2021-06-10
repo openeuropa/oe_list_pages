@@ -69,8 +69,8 @@ class ListPagesPluginTest extends ListPagePluginFormTestBase {
     // Edit the node and assert that we show correct values in the form.
     $this->drupalGet($node->toUrl('edit-form'));
     $this->clickLink('List Page');
-    $this->assertOptionSelected('Source entity type', 'Taxonomy term');
-    $this->assertOptionSelected('Source bundle', 'Vocabulary one');
+    $this->assertSession()->optionExists('Source entity type', 'Taxonomy term');
+    $this->assertSession()->optionExists('Source bundle', 'Vocabulary one');
 
     // Change the source to a Node type.
     $this->getSession()->getPage()->fillField('Title', 'Node title 2');
