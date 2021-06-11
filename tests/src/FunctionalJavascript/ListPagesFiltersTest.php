@@ -39,7 +39,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'stark';
+  protected $defaultTheme = 'classy';
 
   /**
    * Test fields in a list page content type.
