@@ -76,7 +76,10 @@ class ListPageLinkSourceTranslationTest extends ListPagePluginFormTestBase {
     $this->goToListPageConfiguration();
     $this->getSession()->getPage()->fillField('Administrative title', 'List page plugin test');
     $this->getSession()->getPage()->fillField('Title', 'List page list');
+<<<<<<< HEAD
 
+=======
+>>>>>>> OEL-70: Fix tests (Foo issue) related to oe_link_lists.
     $this->getSession()->getPage()->selectFieldOption('Link display', 'Title');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->selectFieldOption('Source entity type', 'Content');
