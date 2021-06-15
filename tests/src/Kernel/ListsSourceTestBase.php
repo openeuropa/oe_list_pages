@@ -63,6 +63,7 @@ abstract class ListsSourceTestBase extends EntityKernelTestBase {
     $this->installEntitySchema('node');
     $this->installEntitySchema('entity_meta');
     $this->installEntitySchema('entity_meta_relation');
+    $this->installSchema('emr', ['entity_meta_default_revision']);
 
     \Drupal::state()->set('search_api_use_tracking_batch', FALSE);
 
