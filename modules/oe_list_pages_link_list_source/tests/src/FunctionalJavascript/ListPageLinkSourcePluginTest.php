@@ -67,7 +67,7 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     $this->assertSession()->fieldNotExists('Override default exposed filters');
     $this->assertSession()->fieldNotExists('Exposed filters');
 
-    $this->getSession()->getPage()->selectFieldOption('Link display', 'Foo');
+    $this->getSession()->getPage()->selectFieldOption('Link display', 'Title');
     $this->assertSession()->assertWaitOnAjaxRequest();
 
     // Save the link list.
@@ -124,7 +124,7 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     $this->goToListPageConfiguration();
     $this->getSession()->getPage()->fillField('Administrative title', 'List page plugin test');
     $this->getSession()->getPage()->fillField('Title', 'List page list');
-    $this->getSession()->getPage()->selectFieldOption('Link display', 'Foo');
+    $this->getSession()->getPage()->selectFieldOption('Link display', 'Title');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->assertListPagePresetFilters('configuration[0][link_source][plugin_configuration_wrapper][list_pages][list_page_configuration][wrapper][default_filter_values]');
   }
@@ -141,7 +141,7 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     $this->goToListPageConfiguration();
     $this->getSession()->getPage()->fillField('Administrative title', 'List page plugin test');
     $this->getSession()->getPage()->fillField('Title', 'List page list');
-    $this->getSession()->getPage()->selectFieldOption('Link display', 'Foo');
+    $this->getSession()->getPage()->selectFieldOption('Link display', 'Title');
     $this->assertSession()->assertWaitOnAjaxRequest();
 
     // Set tabs.
