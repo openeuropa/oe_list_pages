@@ -62,7 +62,7 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
     ];
     $this->assertEquals($expected_entity_types, $actual_entity_types);
     // By default, Node is selected if there are no stored values.
-    $this->assertSession()->optionExists('Source entity type', 'Content');
+    $this->assertTrue($this->assertSession()->optionExists('Source entity type', 'Content')->isSelected());
 
     $actual_bundles = $this->getSelectOptions('Source bundle');
     $expected_bundles = [

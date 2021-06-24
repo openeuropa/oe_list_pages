@@ -48,7 +48,7 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'stark';
+  protected $defaultTheme = 'classy';
 
   /**
    * Test presence of preset filters configuration in the plugin.
@@ -483,7 +483,7 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
    *   The expected count.
    */
   protected function assertResultCount(int $count): void {
-    $items = $this->getSession()->getPage()->findAll('css', 'li > article');
+    $items = $this->getSession()->getPage()->findAll('css', '.node--view-mode-teaser');
     $this->assertCount($count, $items);
   }
 
