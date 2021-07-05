@@ -6,7 +6,6 @@ package: Testing
 core_version_requirement: ^8.9 || ^9.1
 
 dependencies:
-  - drupal:entity_reference
   - drupal:link
   - drupal:options
   - drupal:datetime

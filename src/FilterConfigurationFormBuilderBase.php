@@ -230,6 +230,8 @@ abstract class FilterConfigurationFormBuilderBase implements TrustedCallbackInte
       ],
     ];
 
+    $form['wrapper']['#pre_render'][] = [get_class($this), 'preRenderOperationButtons'];
+
     return $form;
   }
 

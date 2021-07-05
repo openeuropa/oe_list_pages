@@ -320,6 +320,12 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $expected_set_filters['body'] = ['key' => 'Body', 'value' => 'cherry'];
     $this->assertDefaultValueForFilters($expected_set_filters);
 
+    // Assert the Edit and Remove buttons are in the right place.
+    $edit = $this->getSession()->getPage()->find('css', '.default-filters-table td input[name="default-edit-' . $body_filter_id . '"]');
+    $this->assertEquals('Edit', $edit->getValue());
+    $delete = $this->getSession()->getPage()->find('css', '.default-filters-table td input[name="default-delete-' . $body_filter_id . '"]');
+    $this->assertEquals('Delete', $delete->getValue());
+
     // Set preset filter for Created.
     $page->selectFieldOption('Add default value for', 'Created');
     $this->assertSession()->assertWaitOnAjaxRequest();
