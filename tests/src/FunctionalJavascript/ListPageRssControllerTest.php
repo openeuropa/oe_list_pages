@@ -38,6 +38,11 @@ class ListPageRssControllerTest extends WebDriverTestBase {
   ];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'classy';
+
+  /**
    * Tests the access and rendering of the RSS page of a list page.
    */
   public function testListPageRssPage(): void {
@@ -135,11 +140,11 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     $rss_link_selector = 'div.field--name-extra-field-oe-list-page-rss-linknodeoe-list-page a';
     $rss_link = $page->find('css', $rss_link_selector);
     $url = $rss_link->getAttribute('href');
-    $this->assertEqual($url, Url::fromRoute('entity.node.list_page_rss', ['node' => $node->id()])->toString());
+    $this->assertEquals(Url::fromRoute('entity.node.list_page_rss', ['node' => $node->id()])->toString(), $url);
     $this->drupalGet(Url::fromRoute('entity.node.canonical', ['node' => $node->id()], ['query' => ['random_arg' => 'value']]));
     $rss_link = $page->find('css', $rss_link_selector);
     $url = $rss_link->getAttribute('href');
-    $this->assertEqual($url, Url::fromRoute('entity.node.list_page_rss', ['node' => $node->id()], ['query' => ['random_arg' => 'value']])->toString());
+    $this->assertEquals(Url::fromRoute('entity.node.list_page_rss', ['node' => $node->id()], ['query' => ['random_arg' => 'value']])->toString(), $url);
 
     $this->drupalGet(Url::fromRoute('entity.node.list_page_rss', ['node' => $node->id()]));
     $response = $this->getTextContent();

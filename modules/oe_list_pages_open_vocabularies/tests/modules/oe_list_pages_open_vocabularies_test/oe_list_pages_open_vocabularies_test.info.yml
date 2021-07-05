@@ -1,9 +1,9 @@
-name: 'OpenEuropa List Pages Open Vocabularies Test'
-description: 'Test module for OpenEuropa List Pages Open Vocabularies'
+name: OpenEuropa List Pages Open Vocabularies Test
+description: Test module for OpenEuropa List Pages Open Vocabularies
 package: Testing
 
 type: module
-core: 8.x
+core_version_requirement: ^8 || ^9
 
 dependencies:
   - oe_list_pages:oe_list_pages_open_vocabularies

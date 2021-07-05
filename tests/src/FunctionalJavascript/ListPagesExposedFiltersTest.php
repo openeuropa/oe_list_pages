@@ -32,6 +32,11 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp() {
     parent::setUp();
     /** @var \Drupal\emr\EntityMetaRelationInstaller $installer */
@@ -57,7 +62,7 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
     ];
     $this->assertEquals($expected_entity_types, $actual_entity_types);
     // By default, Node is selected if there are no stored values.
-    $this->assertOptionSelected('Source entity type', 'Content');
+    $this->assertTrue($this->assertSession()->optionExists('Source entity type', 'Content')->isSelected());
 
     $actual_bundles = $this->getSelectOptions('Source bundle');
     $expected_bundles = [
@@ -115,8 +120,8 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
 
     $this->drupalGet($node->toUrl('edit-form'));
     $this->clickLink('List Page');
-    $this->assertFieldChecked('Select two');
-    $this->assertNoFieldChecked('Facet for status');
+    $this->assertSession()->checkboxChecked('Select two');
+    $this->assertSession()->checkboxNotChecked('Facet for status');
 
     // Unselect all the exposed filters and assert that we have overridden
     // the list page to not show any exposed filters.
@@ -159,9 +164,9 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
     // Disable the overridden exposed filters to return back to the defaults.
     $this->drupalGet($node->toUrl('edit-form'));
     $this->clickLink('List Page');
-    $this->assertFieldChecked('Override default exposed filters');
-    $this->assertFieldChecked('Select two');
-    $this->assertFieldChecked('Facet for status');
+    $this->assertSession()->checkboxChecked('Override default exposed filters');
+    $this->assertSession()->checkboxChecked('Select two');
+    $this->assertSession()->checkboxChecked('Facet for status');
     // Switch to other ct and check overridden is maintained.
     $page->selectFieldOption('Source bundle', 'Content type one');
     $this->assertSession()->assertWaitOnAjaxRequest();
@@ -172,8 +177,8 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
     // Switch back.
     $page->selectFieldOption('Source bundle', 'Content type two');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->assertFieldChecked('Select two');
-    $this->assertNoFieldChecked('Facet for status');
+    $this->assertSession()->checkboxChecked('Select two');
+    $this->assertSession()->checkboxNotChecked('Facet for status');
     $page->uncheckField('Override default exposed filters');
     $page->pressButton('Save');
 

@@ -45,6 +45,11 @@ class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
   ];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * The first association to test.
    *
    * @var \Drupal\open_vocabularies\OpenVocabularyAssociationInterface
