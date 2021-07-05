@@ -4,12 +4,6 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages;
 
-/**
- * Use Component instead of Contracts.
- *
- * @deprecated since Symfony 4.3, use "Symfony\Contracts\EventDispatcher\Event" instead
- * @todo change this when Drupal version supports Symfony >= 4.3.
- */
 use Symfony\Component\EventDispatcher\Event;
 
 /**
