@@ -26,7 +26,7 @@ msgid "Last"
 msgstr "Viimane"
 
 msgid "Clear filters"
-msgstr "Tühjenda filtrid"
+msgstr "Puhasta filtrid"
 
 msgid "Filter by"
 msgstr "Filtreeri"

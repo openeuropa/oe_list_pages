@@ -26,7 +26,7 @@ msgid "Last"
 msgstr "Letzte Seite"
 
 msgid "Clear filters"
-msgstr "Zurücksetzen"
+msgstr "Filter zurücksetzen"
 
 msgid "Filter by"
 msgstr "Filtern nach"

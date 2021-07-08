@@ -26,7 +26,7 @@ msgid "Last"
 msgstr "Ultima"
 
 msgid "Clear filters"
-msgstr "Cancella filtri"
+msgstr "Elimina filtri"
 
 msgid "Filter by"
 msgstr "Filtra per"

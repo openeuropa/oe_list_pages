@@ -26,7 +26,7 @@ msgid "Last"
 msgstr "Viimeinen"
 
 msgid "Clear filters"
-msgstr "Tyhjennä rajaimet"
+msgstr "Poista valinnat"
 
 msgid "Filter by"
 msgstr "Rajaimet"

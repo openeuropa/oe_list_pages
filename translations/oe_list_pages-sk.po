@@ -26,7 +26,7 @@ msgid "Last"
 msgstr "Posledná"
 
 msgid "Clear filters"
-msgstr "Vymazať obsah filtrov"
+msgstr "Vymazať filtre"
 
 msgid "Filter by"
 msgstr "Usporiadať podľa"
