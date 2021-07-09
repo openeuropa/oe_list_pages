@@ -171,6 +171,12 @@ class ListSourceFactory implements ListSourceFactoryInterface {
    */
   protected function isBundleIndexed(DatasourceInterface $datasource, string $bundle): bool {
     $configuration = $datasource->getConfiguration();
+
+    if (!isset($configuration['bundles'])) {
+      // This an entity without a bundle, such as 'user'.
+      return TRUE;
+    }
+
     $selected = $configuration['bundles']['selected'];
     if ($configuration['bundles']['default'] === TRUE && empty($selected)) {
       // All bundles are indexed.
