@@ -497,7 +497,9 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
    *   The exposed filters.
    */
   protected function getBundleDefaultExposedFilters(ListSourceInterface $list_source): array {
-    $bundle_entity_type = $this->entityTypeManager->getDefinition($list_source->getEntityType())->getBundleEntityType();
+    if (!$bundle_entity_type = $this->entityTypeManager->getDefinition($list_source->getEntityType())->getBundleEntityType()) {
+      return [];
+    }
     $storage = $this->entityTypeManager->getStorage($bundle_entity_type);
     $bundle = $storage->load($list_source->getBundle());
     return $bundle->getThirdPartySetting('oe_list_pages', 'default_exposed_filters', []);
