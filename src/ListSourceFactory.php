@@ -173,7 +173,7 @@ class ListSourceFactory implements ListSourceFactoryInterface {
     $configuration = $datasource->getConfiguration();
 
     if (!isset($configuration['bundles'])) {
-      // This an entity without a bundle, such as 'user'.
+      // This is an entity without a bundle, such as 'user'.
       return TRUE;
     }
 
