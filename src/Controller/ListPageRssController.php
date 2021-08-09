@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages\Controller;
 
-use DateTimeInterface;
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
@@ -302,7 +301,7 @@ class ListPageRssController extends ControllerBase {
         $result_item['#item_elements']['pubDate'] = [
           '#type' => 'html_tag',
           '#tag' => 'pubDate',
-          '#value' => $this->dateFormatter->format($creation_date, 'custom', DateTimeInterface::RFC2822),
+          '#value' => $this->dateFormatter->format($creation_date, 'custom', \DateTimeInterface::RFC2822),
         ];
       }
 
@@ -450,7 +449,10 @@ class ListPageRssController extends ControllerBase {
    *   The default copyright value.
    */
   protected function getChannelCopyright(): FormattableMarkup {
-    return new FormattableMarkup('© @copyright_name, 1995-@enddate', ['@copyright_name' => $this->t('European Union'), '@enddate' => date('Y')]);
+    return new FormattableMarkup('© @copyright_name, 1995-@enddate', [
+      '@copyright_name' => $this->t('European Union'),
+      '@enddate' => date('Y'),
+    ]);
   }
 
 }

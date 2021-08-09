@@ -179,7 +179,7 @@ class MultiSelectFilterFieldPluginTest extends ListsSourceTestBase {
         ],
       ],
       '#required_error' => t('Facet for entity_reference_field field is required.'),
-    ];;
+    ];
     $this->assertEquals([$entity], $plugin->getDefaultValues());
     $this->assertEquals($expected_form, $plugin->buildDefaultValueForm());
     $this->assertEquals('test_entity', $plugin->getDefaultValuesLabel());

@@ -205,7 +205,17 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     $this->assertEquals('Published: Yes', $channel->filterXPath('//description')->text());
 
     // Set a filter with multiple values on the url and assert the change.
-    $this->drupalGet(Url::fromRoute('entity.node.list_page_rss', ['node' => $node->id()], ['query' => ['f[0]' => 'select_one:test1', 'f[1]' => 'select_one:test2']]));
+    $this->drupalGet(Url::fromRoute('entity.node.list_page_rss',
+      [
+        'node' => $node->id(),
+      ],
+      [
+        'query' => [
+          'f[0]' => 'select_one:test1',
+          'f[1]' => 'select_one:test2',
+        ],
+      ]
+    ));
     $response = $this->getTextContent();
     $crawler = new Crawler($response);
     $channel = $crawler->filterXPath('//rss[@version=2.0]/channel');

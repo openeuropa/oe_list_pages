@@ -355,7 +355,10 @@ class ListsQueryTest extends ListsSourceTestBase {
 
     $query = $this->list->getQuery([
       'preset_filters' => [
-        DefaultFilterConfigurationBuilder::generateFilterId($facet_id) => new ListPresetFilter($facet_id, ['first class', 'second class']),
+        DefaultFilterConfigurationBuilder::generateFilterId($facet_id) => new ListPresetFilter($facet_id, [
+          'first class',
+          'second class',
+        ]),
       ],
     ]);
     $query->execute();
@@ -563,7 +566,10 @@ class ListsQueryTest extends ListsSourceTestBase {
       }
 
       // Skip the default ones to avoid a lot of duplication.
-      if (in_array($condition->getValue(), ['entity_test_mulrev_changed', 'entity:entity_test_mulrev_changed'])) {
+      if (in_array($condition->getValue(), [
+        'entity_test_mulrev_changed',
+        'entity:entity_test_mulrev_changed',
+      ])) {
         continue;
       }
       $conditions[$condition->getField()][] = $condition->getValue();

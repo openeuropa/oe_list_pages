@@ -65,7 +65,12 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert->pageTextNotContains('Title field is required.');
     $assert->pageTextNotContains('Body field is required.');
-    $this->assertDefaultValueForFilters([['key' => '', 'value' => t('No default values set')]]);
+    $this->assertDefaultValueForFilters([
+      [
+        'key' => '',
+        'value' => t('No default values set'),
+      ],
+    ]);
 
     // Set preset filter for Created.
     $page->selectFieldOption('Add default value for', 'Created');
@@ -324,14 +329,22 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->getSession()->getPage()->fillField($filter_selector . '[created_first_date_wrapper][created_first_date][date]', '10/19/2019');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_set_filters['created'] = ['key' => 'Created', 'value' => 'After 19 October 2019'];
+    $expected_set_filters['created'] = [
+      'key' => 'Created',
+      'value' => 'After 19 October 2019',
+    ];
     $this->assertDefaultValueForFilters($expected_set_filters);
 
     // Switch content type and assert we can add values for that and come back.
     $page->selectFieldOption('Source bundle', 'Content type two');
     $this->assertSession()->assertWaitOnAjaxRequest();
     // We have no preset filters for this content type yet.
-    $this->assertDefaultValueForFilters([['key' => '', 'value' => t('No default values set')]]);
+    $this->assertDefaultValueForFilters([
+      [
+        'key' => '',
+        'value' => t('No default values set'),
+      ],
+    ]);
     // Set a preset filter for Select two.
     $page->selectFieldOption('Add default value for', 'Select two');
     $this->assertSession()->assertWaitOnAjaxRequest();
@@ -341,7 +354,12 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->getSession()->getPage()->selectFieldOption($filter_selector . '[list_facet_source_node_content_type_twofield_select_two][0][list]', 'test1');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->assertDefaultValueForFilters([['key' => 'Select two', 'value' => 'test1']]);
+    $this->assertDefaultValueForFilters([
+      [
+        'key' => 'Select two',
+        'value' => 'test1',
+      ],
+    ]);
     // Switch back to content type one and resume where we left off.
     $page->selectFieldOption('Source bundle', 'Content type one');
     $this->assertSession()->assertWaitOnAjaxRequest();
@@ -356,7 +374,12 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
     // We still have the preset filter values we set earlier as they are kept
     // in form state.
-    $this->assertDefaultValueForFilters([['key' => 'Select two', 'value' => 'test1']]);
+    $this->assertDefaultValueForFilters([
+      [
+        'key' => 'Select two',
+        'value' => 'test1',
+      ],
+    ]);
     // Try to edit and make sure that works.
     $page->pressButton('default-edit-' . $select_two_filter_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
@@ -375,7 +398,10 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->getSession()->getPage()->selectFieldOption($filter_selector . '[list_facet_source_node_content_type_onestatus][0][boolean]', '1');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_set_filters['published'] = ['key' => 'Published', 'value' => 'Yes'];
+    $expected_set_filters['published'] = [
+      'key' => 'Published',
+      'value' => 'Yes',
+    ];
     $this->assertDefaultValueForFilters($expected_set_filters);
 
     // Set preset filter for Reference.
@@ -388,7 +414,10 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->getSession()->getPage()->fillField($filter_selector . '[reference][0][entity_reference]', 'red (1)');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_set_filters['reference'] = ['key' => 'Reference', 'value' => 'red'];
+    $expected_set_filters['reference'] = [
+      'key' => 'Reference',
+      'value' => 'red',
+    ];
     $this->assertDefaultValueForFilters($expected_set_filters);
 
     // Set additional value for reference.
@@ -401,7 +430,10 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->getSession()->getPage()->fillField($filter_selector . '[reference][1][entity_reference]', 'yellow (2)');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_set_filters['reference'] = ['key' => 'Reference', 'value' => 'red, yellow'];
+    $expected_set_filters['reference'] = [
+      'key' => 'Reference',
+      'value' => 'red, yellow',
+    ];
     $this->assertDefaultValueForFilters($expected_set_filters);
 
     // Remove the yellow animal.
@@ -414,7 +446,10 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->getSession()->getPage()->fillField($filter_selector . '[reference][1][entity_reference]', '');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_set_filters['reference'] = ['key' => 'Reference', 'value' => 'red'];
+    $expected_set_filters['reference'] = [
+      'key' => 'Reference',
+      'value' => 'red',
+    ];
     $this->assertDefaultValueForFilters($expected_set_filters);
 
     // Set preset filter for Select one.
@@ -431,7 +466,10 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->getSession()->getPage()->selectFieldOption($filter_selector . '[select_one][1][list]', 'test3');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_set_filters['select_one'] = ['key' => 'Select one', 'value' => 'Test2, Test3'];
+    $expected_set_filters['select_one'] = [
+      'key' => 'Select one',
+      'value' => 'Test2, Test3',
+    ];
     $this->assertDefaultValueForFilters($expected_set_filters);
 
     // Remove preset filter for Published.
@@ -479,7 +517,10 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $page->fillField($default_value_name_prefix . '[wrapper][edit][' . $body_filter_id . '][body]', 'banana');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_set_filters['body'] = ['key' => 'Body', 'value' => 'banana'];
+    $expected_set_filters['body'] = [
+      'key' => 'Body',
+      'value' => 'banana',
+    ];
     $this->assertDefaultValueForFilters($expected_set_filters);
 
     // Edit preset filter for Created.
@@ -493,7 +534,10 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->getSession()->getPage()->fillField($default_value_name_prefix . '[wrapper][edit][' . $created_filter_id . '][created_first_date_wrapper][created_first_date][date]', '10/31/2020');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_set_filters['created'] = ['key' => 'Created', 'value' => 'Before 31 October 2020'];
+    $expected_set_filters['created'] = [
+      'key' => 'Created',
+      'value' => 'Before 31 October 2020',
+    ];
     $this->assertDefaultValueForFilters($expected_set_filters);
 
     // Save.
@@ -521,7 +565,10 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $page->fillField($default_value_name_prefix . '[wrapper][edit][' . $body_filter_id . '][body]', 'cherry');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_set_filters['body'] = ['key' => 'Body', 'value' => 'cherry'];
+    $expected_set_filters['body'] = [
+      'key' => 'Body',
+      'value' => 'cherry',
+    ];
     $this->assertDefaultValueForFilters($expected_set_filters);
     $page->pressButton('Save');
     $assert->pageTextNotContains('Banana title');
@@ -560,7 +607,10 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->getSession()->getPage()->fillField($default_value_name_prefix . '[wrapper][edit][' . $created_filter_id . '][created_first_date_wrapper][created_first_date][date]', '10/30/2020');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_set_filters['created'] = ['key' => 'Created', 'value' => 'Before 30 October 2020'];
+    $expected_set_filters['created'] = [
+      'key' => 'Created',
+      'value' => 'Before 30 October 2020',
+    ];
     $this->assertDefaultValueForFilters($expected_set_filters);
     $page->pressButton('Save');
 
@@ -581,7 +631,10 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->getSession()->getPage()->fillField($default_value_name_prefix . '[wrapper][edit][' . $reference_filter_id . '][reference][0][entity_reference]', 'yellow (2)');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_set_filters['reference'] = ['key' => 'Reference', 'value' => 'yellow'];
+    $expected_set_filters['reference'] = [
+      'key' => 'Reference',
+      'value' => 'yellow',
+    ];
     $this->assertDefaultValueForFilters($expected_set_filters);
     $page->pressButton('Save');
     $assert->pageTextContains('Banana title');
@@ -600,7 +653,10 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->getSession()->getPage()->fillField($default_value_name_prefix . '[wrapper][edit][' . $reference_filter_id . '][reference][0][entity_reference]', 'Red (1)');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_set_filters['reference'] = ['key' => 'Reference', 'value' => 'Red'];
+    $expected_set_filters['reference'] = [
+      'key' => 'Reference',
+      'value' => 'Red',
+    ];
     $this->assertDefaultValueForFilters($expected_set_filters);
     $page->pressButton('Save');
     $assert->pageTextNotContains('Banana title');
@@ -626,7 +682,12 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->getSession()->getPage()->fillField($default_value_name_prefix . '[wrapper][edit][' . $link_filter_id . '][link][0][link]', 'http://banana.com');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_set_filters = [['key' => 'Link', 'value' => 'Any of: http://banana.com']];
+    $expected_set_filters = [
+      [
+        'key' => 'Link',
+        'value' => 'Any of: http://banana.com',
+      ],
+    ];
     $this->assertDefaultValueForFilters($expected_set_filters);
     $page->pressButton('Save');
     $this->assertSession()->pageTextNotContains('Cherry title');
@@ -670,7 +731,12 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->getSession()->getPage()->fillField($default_value_name_prefix . '[wrapper][edit][' . $reference_filter_id . '][reference][1][entity_reference]', 'Yellow (2)');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_set_filters = [['key' => 'Reference', 'value' => 'Any of: Green, Yellow']];
+    $expected_set_filters = [
+      [
+        'key' => 'Reference',
+        'value' => 'Any of: Green, Yellow',
+      ],
+    ];
     $this->assertDefaultValueForFilters($expected_set_filters);
     $page->pressButton('Save');
     $assert->pageTextContains('Banana title');
@@ -693,7 +759,12 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_set_filters = [['key' => 'Reference', 'value' => 'All of: Green, Yellow']];
+    $expected_set_filters = [
+      [
+        'key' => 'Reference',
+        'value' => 'All of: Green, Yellow',
+      ],
+    ];
     $this->assertDefaultValueForFilters($expected_set_filters);
     $page->pressButton('Save');
 
@@ -714,7 +785,12 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_set_filters = [['key' => 'Reference', 'value' => 'None of: Green, Yellow']];
+    $expected_set_filters = [
+      [
+        'key' => 'Reference',
+        'value' => 'None of: Green, Yellow',
+      ],
+    ];
     $this->assertDefaultValueForFilters($expected_set_filters);
     $page->pressButton('Save');
     $assert->pageTextNotContains('Banana title');
@@ -735,7 +811,12 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_set_filters = [['key' => 'Reference', 'value' => 'Any of: Green']];
+    $expected_set_filters = [
+      [
+        'key' => 'Reference',
+        'value' => 'Any of: Green',
+      ],
+    ];
     $this->assertDefaultValueForFilters($expected_set_filters);
     $page->selectFieldOption('Add default value for', 'Reference');
     $this->assertSession()->assertWaitOnAjaxRequest();
@@ -745,8 +826,14 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $expected_set_filters = [
-      ['key' => 'Reference', 'value' => 'Any of: Green'],
-      ['key' => 'Reference', 'value' => 'None of: Yellow'],
+      [
+        'key' => 'Reference',
+        'value' => 'Any of: Green',
+      ],
+      [
+        'key' => 'Reference',
+        'value' => 'None of: Yellow',
+      ],
     ];
     $this->assertDefaultValueForFilters($expected_set_filters);
     $page->pressButton('Save');
@@ -768,8 +855,14 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $expected_set_filters = [
-      ['key' => 'Reference', 'value' => 'Any of: Green'],
-      ['key' => 'Reference', 'value' => 'Any of: Yellow'],
+      [
+        'key' => 'Reference',
+        'value' => 'Any of: Green',
+      ],
+      [
+        'key' => 'Reference',
+        'value' => 'Any of: Yellow',
+      ],
     ];
     $this->assertDefaultValueForFilters($expected_set_filters);
     $page->pressButton('Save');
@@ -843,7 +936,10 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->getSession()->getPage()->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $expected_set_filters = [];
-    $expected_set_filters['country'] = ['key' => 'Country', 'value' => 'no country'];
+    $expected_set_filters['country'] = [
+      'key' => 'Country',
+      'value' => 'no country',
+    ];
 
     $this->assertDefaultValueForFilters($expected_set_filters);
     $this->getSession()->getPage()->pressButton('Save');
@@ -864,7 +960,10 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     // The processor should change from country code to country name because the
     // default StringField multiselect filter field plugin doesn't know how to
     // do it.
-    $expected_set_filters['country'] = ['key' => 'Country', 'value' => 'Belgium'];
+    $expected_set_filters['country'] = [
+      'key' => 'Country',
+      'value' => 'Belgium',
+    ];
     $this->getSession()->getPage()->pressButton('Save');
     $this->assertSession()->pageTextContains('Node with country');
 
@@ -886,7 +985,10 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->getSession()->getPage()->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $expected_set_filters = [];
-    $expected_set_filters['foo'] = ['key' => 'Foo', 'value' => 'Two'];
+    $expected_set_filters['foo'] = [
+      'key' => 'Foo',
+      'value' => 'Two',
+    ];
     $this->getSession()->getPage()->pressButton('Save');
   }
 
