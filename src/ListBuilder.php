@@ -410,7 +410,10 @@ class ListBuilder implements ListBuilderInterface {
     }
 
     $build = [
-      '#markup' => $this->t('Showing results @first to @last', ['@first' => $first, '@last' => $last]),
+      '#markup' => $this->t('Showing results @first to @last', [
+        '@first' => $first,
+        '@last' => $last,
+      ]),
     ];
     $cache->applyTo($build);
     return $build;

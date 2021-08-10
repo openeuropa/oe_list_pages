@@ -214,7 +214,10 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
 
         $parents = $form['#parents'];
         $first_parent = array_shift($parents);
-        $name = $first_parent . '[' . implode('][', array_merge($parents, ['wrapper', 'exposed_filters_override'])) . ']';
+        $name = $first_parent . '[' . implode('][', array_merge($parents, [
+          'wrapper',
+          'exposed_filters_override',
+        ])) . ']';
         $form['wrapper']['exposed_filters'] = [
           '#type' => 'checkboxes',
           '#title' => $this->t('Exposed filters'),
@@ -230,7 +233,10 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
         if ($this->getConfiguration()->areDefaultFilterValuesAllowed()) {
           $parents = $form['#parents'] ?? [];
           $form['wrapper']['default_filter_values'] = [
-            '#parents' => array_merge($parents, ['wrapper', 'default_filter_values']),
+            '#parents' => array_merge($parents, [
+              'wrapper',
+              'default_filter_values',
+            ]),
             '#tree' => TRUE,
           ];
 
@@ -305,7 +311,10 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     $entity_type = $form_state->getValue(['wrapper', 'entity_type']);
     $entity_bundle = $form_state->getValue(['wrapper', 'bundle']);
-    $exposed_filters_overridden = (bool) $form_state->getValue(['wrapper', 'exposed_filters_override']);
+    $exposed_filters_overridden = (bool) $form_state->getValue([
+      'wrapper',
+      'exposed_filters_override',
+    ]);
     $exposed_filters = array_filter($form_state->getValue([
       'wrapper',
       'exposed_filters',
@@ -386,7 +395,10 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
     // @see \Drupal\Core\Render\Element\Checkbox.
     if (isset($element['wrapper']['exposed_filters'])) {
       $options = $element['wrapper']['exposed_filters']['#options'];
-      $parents = array_merge(array_slice($triggering_element['#array_parents'], 0, -2), ['wrapper', 'exposed_filters']);
+      $parents = array_merge(array_slice($triggering_element['#array_parents'], 0, -2), [
+        'wrapper',
+        'exposed_filters',
+      ]);
       foreach (array_keys($options) as $option) {
         NestedArray::setValue($form, array_merge($parents, [
           $option,
