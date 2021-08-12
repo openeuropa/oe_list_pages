@@ -301,7 +301,7 @@ class ListPageRssController extends ControllerBase {
         $result_item['#item_elements']['pubDate'] = [
           '#type' => 'html_tag',
           '#tag' => 'pubDate',
-          '#value' => $this->dateFormatter->format($creation_date, 'custom', \DateTimeInterface::RFC2822),
+          '#value' => $this->dateFormatter->format($creation_date, 'custom', \DateTimeInterface::RFC2822, NULL, 'en'),
         ];
       }
 
