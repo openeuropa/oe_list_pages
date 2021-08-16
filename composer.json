@@ -26,9 +26,9 @@
         "guzzlehttp/guzzle": "~6.3",
         "openeuropa/code-review": "^1.5.0",
         "openeuropa/drupal-core-require-dev": "~8.9",
-        "openeuropa/oe_link_lists": "dev-master",
+        "openeuropa/oe_link_lists": "^0.11",
         "openeuropa/oe_multilingual": "^1.5",
-        "openeuropa/open_vocabularies": "dev-master",
+        "openeuropa/open_vocabularies": "^1.0-alpha4",
         "openeuropa/task-runner": "~1.0.0-beta6",
         "phpunit/phpunit": "~6.5"
     },
