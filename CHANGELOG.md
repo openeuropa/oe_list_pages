@@ -1,17 +1,25 @@
-# Changelog
+# Change Log
+
+## [0.10.0](https://github.com/openeuropa/oe_list_pages/tree/0.10.0) (2021-08-16)
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.9.0...0.10.0)
+
+**Merged pull requests:**
+
+- EWPP-0000: Fix grumphp issues. [\#100](https://github.com/openeuropa/oe_list_pages/pull/100) ([22Alexandra](https://github.com/22Alexandra))
+- EWPP-1404: RSS item pubdate should always be in EN. [\#99](https://github.com/openeuropa/oe_list_pages/pull/99) ([upchuk](https://github.com/upchuk))
+- EWPP-1289: Add missing interface translations. [\#97](https://github.com/openeuropa/oe_list_pages/pull/97) ([yenyasinn](https://github.com/yenyasinn))
 
 ## [0.9.0](https://github.com/openeuropa/oe_list_pages/tree/0.9.0) (2021-06-15)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.8.0...0.9.0)
 
 **Merged pull requests:**
 
 - EWPP-0000: Updating display plugins in tests. [\#96](https://github.com/openeuropa/oe_list_pages/pull/96) ([upchuk](https://github.com/upchuk))
+- Prepare release 0.9.0. [\#95](https://github.com/openeuropa/oe_list_pages/pull/95) ([imanoleguskiza](https://github.com/imanoleguskiza))
 - EWPP-901: Restricting the list page link source to the Dynamic bundle. [\#92](https://github.com/openeuropa/oe_list_pages/pull/92) ([upchuk](https://github.com/upchuk))
 - EWPP-721: Update xdebug configuration. [\#75](https://github.com/openeuropa/oe_list_pages/pull/75) ([22Alexandra](https://github.com/22Alexandra))
 
 ## [0.8.0](https://github.com/openeuropa/oe_list_pages/tree/0.8.0) (2021-04-09)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.7.0...0.8.0)
 
 **Merged pull requests:**
