@@ -121,10 +121,10 @@ class EntityReferenceField extends MultiSelectFilterFieldPluginBase {
     $values = [];
     foreach ($filter_values as $filter_value) {
       $entity = $entity_storage->load($filter_value);
-      $entity = $this->entityRepository->getTranslationFromContext($entity);
       if (!$entity) {
         continue;
       }
+      $entity = $this->entityRepository->getTranslationFromContext($entity);
 
       $values[] = $entity->label();
     }
