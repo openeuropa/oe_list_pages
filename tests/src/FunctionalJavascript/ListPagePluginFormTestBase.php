@@ -82,11 +82,11 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert->pageTextContains('Created field is required.');
-    $assert->pageTextContains('The Date date is required. Please enter a date in the format');
+    $assert->pageTextContains('The date is required. Please enter a date in the format');
     $this->getSession()->getPage()->selectFieldOption($filter_selector . '[created_op]', 'In between');
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $assert->pageTextContains('The Date date is required. Please enter a date in the format');
+    $assert->pageTextContains('The date is required. Please enter a date in the format');
     $assert->pageTextContains('The second date is required.');
     $this->getSession()->getPage()->fillField($filter_selector . '[created_first_date_wrapper][created_first_date][date]', '10/19/2019');
     $this->getSession()->getPage()->fillField($filter_selector . '[created_second_date_wrapper][created_second_date][date]', '10/17/2019');

@@ -183,7 +183,7 @@ class DateWidget extends ListPagesWidgetBase {
       '#type' => 'datetime',
       '#date_date_element' => 'date',
       '#date_time_element' => $date_type === 'date' ? 'none' : 'time',
-      '#title' => $this->t('Date'),
+      '#date_date_callbacks' => [[$this, 'setTitleDisplayVisible']],
       '#default_value' => $first_date_default,
     ];
 
@@ -210,7 +210,10 @@ class DateWidget extends ListPagesWidgetBase {
       '#type' => 'datetime',
       '#date_date_element' => 'date',
       '#date_time_element' => $date_type === 'date' ? 'none' : 'time',
-      '#title' => $this->t('End Date'),
+      '#date_date_callbacks' => [
+        [$this, 'setTitleDisplayVisible'],
+        [$this, 'setEndDateTitle'],
+      ],
       '#default_value' => $second_date_default,
     ];
 
@@ -312,6 +315,34 @@ class DateWidget extends ListPagesWidgetBase {
    */
   public function getQueryType() {
     return 'date_comparison';
+  }
+
+  /**
+   * Sets title visible.
+   *
+   * @param array $element
+   *   The form element whose value is being processed.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
+   * @param \Drupal\Core\Datetime\DrupalDateTime|null $date
+   *   The date object.
+   */
+  public function setTitleDisplayVisible(array &$element, FormStateInterface $form_state, ?DrupalDateTime $date) {
+    $element['date']['#title_display'] = 'before';
+  }
+
+  /**
+   * Sets title label for end date element.
+   *
+   * @param array $element
+   *   The form element whose value is being processed.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
+   * @param \Drupal\Core\Datetime\DrupalDateTime|null $date
+   *   The date object.
+   */
+  public function setEndDateTitle(array &$element, FormStateInterface $form_state, ?DrupalDateTime $date) {
+    $element['date']['#title'] = $this->t('End Date');
   }
 
 }
