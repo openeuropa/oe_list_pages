@@ -1,0 +1,32 @@
+msgid ""
+msgstr ""
+
+msgid "Showing results @first to @last"
+msgstr "Resultats del @first al @last"
+
+msgid "Next"
+msgstr "Següent"
+
+msgid "Previous"
+msgstr "Anterior"
+
+msgid "Go to page @number"
+msgstr "Ves a la pàgina @number"
+
+msgid "Go to previous page"
+msgstr "Pàgina anterior"
+
+msgid "Go to next page"
+msgstr "Pàgina següent"
+
+msgid "First"
+msgstr "Primer(a)"
+
+msgid "Last"
+msgstr "Últim(a)"
+
+msgid "Clear filters"
+msgstr "Esborra els filtres"
+
+msgid "Filter by"
+msgstr "Filtra per"
