@@ -1,0 +1,32 @@
+msgid ""
+msgstr ""
+
+msgid "Showing results @first to @last"
+msgstr "Sýna niðurstöður frá @first til @last"
+
+msgid "Next"
+msgstr "Næst"
+
+msgid "Previous"
+msgstr "Fyrri"
+
+msgid "Go to page @number"
+msgstr "Fara á bls. @number"
+
+msgid "Go to previous page"
+msgstr "Fyrri síða"
+
+msgid "Go to next page"
+msgstr "Næsta síða"
+
+msgid "First"
+msgstr "First"
+
+msgid "Last"
+msgstr "Síðast"
+
+msgid "Clear filters"
+msgstr "Hreinsa síur"
+
+msgid "Filter by"
+msgstr "Sía eftir:"
