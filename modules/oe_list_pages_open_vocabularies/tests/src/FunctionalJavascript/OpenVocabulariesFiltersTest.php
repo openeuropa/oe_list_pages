@@ -273,7 +273,10 @@ class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $expected_set_filters = [
-      ['key' => $this->firstAssociation->label(), 'value' => 'Any of: Green color'],
+      [
+        'key' => $this->firstAssociation->label(),
+        'value' => 'Any of: Green color',
+      ],
     ];
     $this->assertDefaultValueForFilters($expected_set_filters);
     $page->pressButton('Save');
@@ -310,8 +313,14 @@ class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $expected_set_filters = [
-      ['key' => $this->firstAssociation->label(), 'value' => 'Any of: Green color'],
-      ['key' => $this->secondAssociation->label(), 'value' => 'Any of: Yellow color'],
+      [
+        'key' => $this->firstAssociation->label(),
+        'value' => 'Any of: Green color',
+      ],
+      [
+        'key' => $this->secondAssociation->label(),
+        'value' => 'Any of: Yellow color',
+      ],
     ];
     $this->assertDefaultValueForFilters($expected_set_filters);
     $page->pressButton('Save');
@@ -384,7 +393,10 @@ class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
     $this->getSession()->getPage()->selectFieldOption($filter_selector . '[operator]', 'and');
     $page->pressButton('Set operator');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_contextual_filters['reference'] = ['key' => $this->firstAssociation->label(), 'value' => 'All of'];
+    $expected_contextual_filters['reference'] = [
+      'key' => $this->firstAssociation->label(),
+      'value' => 'All of',
+    ];
     $this->assertContextualValueForFilters($expected_contextual_filters);
     $page->pressButton('Save');
 

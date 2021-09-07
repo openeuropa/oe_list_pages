@@ -230,7 +230,10 @@ abstract class FilterConfigurationFormBuilderBase implements TrustedCallbackInte
       ],
     ];
 
-    $form['wrapper']['#pre_render'][] = [get_class($this), 'preRenderOperationButtons'];
+    $form['wrapper']['#pre_render'][] = [
+      get_class($this),
+      'preRenderOperationButtons',
+    ];
 
     return $form;
   }
@@ -390,7 +393,10 @@ abstract class FilterConfigurationFormBuilderBase implements TrustedCallbackInte
   protected static function getCurrentValues(FormStateInterface $form_state, ListSourceInterface $list_source): array {
     $storage = $form_state->getStorage();
     $key = 'current_values_' . static::getFilterType();
-    $current_filter_values = NestedArray::getValue($storage, [$key, $list_source->getSearchId()]);
+    $current_filter_values = NestedArray::getValue($storage, [
+      $key,
+      $list_source->getSearchId(),
+    ]);
     return $current_filter_values ?? [];
   }
 
@@ -412,7 +418,10 @@ abstract class FilterConfigurationFormBuilderBase implements TrustedCallbackInte
   protected static function areCurrentValuesEmpty(FormStateInterface $form_state, ListSourceInterface $list_source): bool {
     $storage = $form_state->getStorage();
     $key = 'current_values_' . static::getFilterType();
-    $values = NestedArray::getValue($storage, [$key, $list_source->getSearchId()]);
+    $values = NestedArray::getValue($storage, [
+      $key,
+      $list_source->getSearchId(),
+    ]);
     // If we have an empty array, it means we removed all the values.
     return is_array($values) && empty($values) ?? FALSE;
   }

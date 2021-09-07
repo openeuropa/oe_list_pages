@@ -187,7 +187,10 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     $this->getSession()->getPage()->selectFieldOption($filter_selector . '[operator]', 'and');
     $page->pressButton('Set operator');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_contextual_filters['reference'] = ['key' => 'Reference', 'value' => 'All of'];
+    $expected_contextual_filters['reference'] = [
+      'key' => 'Reference',
+      'value' => 'All of',
+    ];
     $this->assertContextualValueForFilters($expected_contextual_filters);
 
     // Set a contextual filter for Link.
@@ -198,7 +201,10 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     $this->getSession()->getPage()->selectFieldOption($filter_selector . '[operator]', 'not');
     $page->pressButton('Set operator');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_contextual_filters['link'] = ['key' => 'Link', 'value' => 'None of'];
+    $expected_contextual_filters['link'] = [
+      'key' => 'Link',
+      'value' => 'None of',
+    ];
     $this->assertContextualValueForFilters($expected_contextual_filters);
 
     // Edit the Reference.
@@ -226,7 +232,10 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     $this->getSession()->getPage()->selectFieldOption($filter_selector . '[operator]', 'not');
     $page->pressButton('Set operator');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $expected_contextual_filters['reference'] = ['key' => 'Reference', 'value' => 'None of'];
+    $expected_contextual_filters['reference'] = [
+      'key' => 'Reference',
+      'value' => 'None of',
+    ];
     $this->assertContextualValueForFilters($expected_contextual_filters);
 
     // Start editing one contextual filter and one default value at the same
@@ -273,7 +282,10 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     // Submit them one at the time.
     $filter_selector = $default_value_name_prefix . '[wrapper][edit][' . $body_filter_id . '][body]';
     $page->fillField($filter_selector, 'updated cherry');
-    $expected_default_filters['body'] = ['key' => 'Body', 'value' => 'updated cherry'];
+    $expected_default_filters['body'] = [
+      'key' => 'Body',
+      'value' => 'updated cherry',
+    ];
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->assertDefaultValueForFilters($expected_default_filters);
@@ -285,7 +297,10 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     $page->pressButton('Set operator');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->assertDefaultValueForFilters($expected_default_filters);
-    $expected_contextual_filters['reference'] = ['key' => 'Reference', 'value' => 'Any of'];
+    $expected_contextual_filters['reference'] = [
+      'key' => 'Reference',
+      'value' => 'Any of',
+    ];
     $this->assertContextualValueForFilters($expected_contextual_filters);
 
     // Save the link list and assert the values have been correctly saved.
@@ -676,7 +691,12 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
       'bundle' => 'article',
       'required' => 0,
     ])->save();
-    $list_nodes = \Drupal::entityTypeManager()->getStorage('node')->loadByProperties(['title' => ['visible boolean', 'not visible boolean']]);
+    $list_nodes = \Drupal::entityTypeManager()->getStorage('node')->loadByProperties([
+      'title' => [
+        'visible boolean',
+        'not visible boolean',
+      ],
+    ]);
     $ids = array_keys($list_nodes);
     $node = Node::load($node->id());
     $node->set('field_test_contextual_filter', reset($ids));

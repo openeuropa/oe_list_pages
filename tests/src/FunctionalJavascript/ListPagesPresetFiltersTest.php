@@ -423,7 +423,10 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
 
     $node = $this->drupalGetNodeByTitle('List page for ct1');
     $filters = [
-      DefaultFilterConfigurationBuilder::generateFilterId('select_one') => new ListPresetFilter('select_one', ['test1', 'test2']),
+      DefaultFilterConfigurationBuilder::generateFilterId('select_one') => new ListPresetFilter('select_one', [
+        'test1',
+        'test2',
+      ]),
     ];
     $this->setListPageFilters($node, $filters);
     $this->getSession()->getPage()->pressButton('Clear filters');

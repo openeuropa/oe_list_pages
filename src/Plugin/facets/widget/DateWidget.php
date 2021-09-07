@@ -228,8 +228,14 @@ class DateWidget extends ListPagesWidgetBase {
   public function prepareValueForUrl(FacetInterface $facet, array &$form, FormStateInterface $form_state): array {
     $value_keys = [
       'operator' => $facet->id() . '_op',
-      'first_date' => [$facet->id() . '_first_date_wrapper', $facet->id() . '_first_date'],
-      'second_date' => [$facet->id() . '_second_date_wrapper', $facet->id() . '_second_date'],
+      'first_date' => [
+        $facet->id() . '_first_date_wrapper',
+        $facet->id() . '_first_date',
+      ],
+      'second_date' => [
+        $facet->id() . '_second_date_wrapper',
+        $facet->id() . '_second_date',
+      ],
     ];
 
     $values = [];

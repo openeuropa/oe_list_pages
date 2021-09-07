@@ -49,7 +49,10 @@ class ListPageLinkSourcePluginTest extends KernelTestBase {
     $this->installEntitySchema('user');
 
     $foo = EntityTestBundle::create(['id' => 'foo']);
-    $foo->setThirdPartySetting('oe_list_pages', 'default_sort', ['name' => 'name', 'direction' => 'ASC']);
+    $foo->setThirdPartySetting('oe_list_pages', 'default_sort', [
+      'name' => 'name',
+      'direction' => 'ASC',
+    ]);
     $foo->save();
     EntityTestBundle::create(['id' => 'bar'])->save();
 

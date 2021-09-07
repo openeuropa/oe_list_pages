@@ -9,6 +9,7 @@ use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Url;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\language\Entity\ConfigurableLanguage;
+use Drupal\locale\SourceString;
 use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
 use Drupal\search_api\Entity\Index;
@@ -25,6 +26,7 @@ class ListPageRssControllerTest extends WebDriverTestBase {
   protected static $modules = [
     'language',
     'content_translation',
+    'locale',
     'node',
     'emr',
     'emr_node',
@@ -41,6 +43,26 @@ class ListPageRssControllerTest extends WebDriverTestBase {
    * {@inheritdoc}
    */
   protected $defaultTheme = 'classy';
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    parent::setUp();
+
+    // Translate the Aug (short month) string.
+    $locale_storage = \Drupal::service('locale.storage');
+    $source = $locale_storage->findString(['source' => 'Aug']);
+    if (!$source instanceof SourceString) {
+      // We need to make sure the string is available to be translated.
+      $source = $locale_storage->createString();
+      $source->setString('Aug')->save();
+    }
+
+    $new_translation = $locale_storage->createTranslation($source->getValues(['lid']) + ['language' => 'es']);
+    $new_translation->setString('Ago');
+    $new_translation->save();
+  }
 
   /**
    * Tests the access and rendering of the RSS page of a list page.
@@ -67,8 +89,8 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     $page->pressButton('Save');
 
     // Create some test nodes to index and search in.
-    $earlier_date = new DrupalDateTime('20-10-2020');
-    $later_date = new DrupalDateTime('20-10-2021');
+    $earlier_date = new DrupalDateTime('20-08-2020');
+    $later_date = new DrupalDateTime('20-08-2021');
     $values = [
       'title' => 'that yellow fruit',
       'type' => 'content_type_one',
@@ -173,20 +195,20 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     $this->assertEquals('&lt;p&gt;this is a banana&lt;/p&gt; ', $first_item->filterXpath('//description')->html());
     $this->assertEquals('http://web:8080/build/node/2', $first_item->filterXpath('//link')->text());
     $this->assertEquals('http://web:8080/build/node/2', $first_item->filterXpath('//guid')->text());
-    $this->assertEquals('Wed, 20 Oct 2021 00:00:00 +1100', $first_item->filterXpath('//pubDate')->text());
+    $this->assertEquals('Fri, 20 Aug 2021 00:00:00 +1000', $first_item->filterXpath('//pubDate')->text());
     // Assert modules subscribing to the ListPageRssItemAlterEvent can
     // alter the item build.
-    $this->assertEquals('20/10/2020', $first_item->filterXpath('//creationDate')->text());
+    $this->assertEquals('20/08/2020', $first_item->filterXpath('//creationDate')->text());
 
     $second_item = $items->eq(1);
     $this->assertEquals('that red fruit', $second_item->filterXpath('//title')->text());
     $this->assertEquals('&lt;p&gt;this is a cherry&lt;/p&gt; ', $second_item->filterXpath('//description')->html());
     $this->assertEquals('http://web:8080/build/node/3', $second_item->filterXpath('//link')->text());
     $this->assertEquals('http://web:8080/build/node/3', $second_item->filterXpath('//guid')->text());
-    $this->assertEquals('Tue, 20 Oct 2020 00:00:00 +1100', $second_item->filterXpath('//pubDate')->text());
+    $this->assertEquals('Thu, 20 Aug 2020 00:00:00 +1000', $second_item->filterXpath('//pubDate')->text());
     // Assert modules subscribing to the ListPageRssItemAlterEvent can
     // alter the item build.
-    $this->assertEquals('20/10/2021', $second_item->filterXpath('//creationDate')->text());
+    $this->assertEquals('20/08/2021', $second_item->filterXpath('//creationDate')->text());
 
     // Assert the last item title to make sure we order
     // and limit the list correctly.
@@ -203,14 +225,23 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     $this->assertEquals('Drupal | List page test updated', $channel->filterXPath('//title')->text());
 
     // Set filter values on the url and assert the description was changed.
-    $this->drupalGet(Url::fromRoute('entity.node.list_page_rss', ['node' => $node->id()], ['query' => ['f[0]' => 'status:1']]));
+    $this->drupalGet(Url::fromRoute('entity.node.list_page_rss', [
+      'node' => $node->id(),
+    ], ['query' => ['f[0]' => 'status:1']]));
     $response = $this->getTextContent();
     $crawler = new Crawler($response);
     $channel = $crawler->filterXPath('//rss[@version=2.0]/channel');
     $this->assertEquals('Published: Yes', $channel->filterXPath('//description')->text());
 
     // Set a filter with multiple values on the url and assert the change.
-    $this->drupalGet(Url::fromRoute('entity.node.list_page_rss', ['node' => $node->id()], ['query' => ['f[0]' => 'select_one:test1', 'f[1]' => 'select_one:test2']]));
+    $this->drupalGet(Url::fromRoute('entity.node.list_page_rss', [
+      'node' => $node->id(),
+    ], [
+      'query' => [
+        'f[0]' => 'select_one:test1',
+        'f[1]' => 'select_one:test2',
+      ],
+    ]));
     $response = $this->getTextContent();
     $crawler = new Crawler($response);
     $channel = $crawler->filterXPath('//rss[@version=2.0]/channel');
@@ -231,6 +262,11 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     $channel = $crawler->filterXPath('//rss[@version=2.0]/channel');
     $this->assertEquals('Published: Yes | Foo: One, Two | Select one: test1, test2', $channel->filterXPath('//description')->text());
 
+    // Create a node translation of the first item.
+    $node = $this->drupalGetNodeByTitle('that yellow fruit');
+    $node->addTranslation('es', $node->toArray());
+    $node->save();
+
     // Assert accessing the list page in Spanish shows translated strings.
     $this->drupalGet('/es/node/1/rss');
     $response = $this->getTextContent();
@@ -241,6 +277,10 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     $this->assertEquals('http://web:8080/build/es/node/1', $channel->filterXPath('//link')->text());
     $this->assertEquals('es', $channel->filterXPath('//language')->text());
     $this->assertEquals('http://web:8080/build/es/node/1', $channel->filterXPath('//image/link')->text());
+    // Assert the date is not translated.
+    $items = $channel->filterXPath('//item');
+    $first_item = $items->eq(1);
+    $this->assertEquals('Thu, 20 Aug 2020 00:00:00 +1000', $first_item->filterXpath('//pubDate')->text());
   }
 
 }

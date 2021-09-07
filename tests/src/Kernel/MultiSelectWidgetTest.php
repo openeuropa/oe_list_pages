@@ -84,7 +84,10 @@ class MultiSelectWidgetTest extends ListsSourceTestBase {
     // KEY1 OR KEY2.
     $expected_key_results[] = [
       'filters' => [
-        DefaultFilterConfigurationBuilder::generateFilterId($facet_keywords->id()) => new ListPresetFilter($facet_keywords->id(), ['key1', 'key2'], ListPresetFilter::OR_OPERATOR),
+        DefaultFilterConfigurationBuilder::generateFilterId($facet_keywords->id()) => new ListPresetFilter($facet_keywords->id(), [
+          'key1',
+          'key2',
+        ], ListPresetFilter::OR_OPERATOR),
       ],
       'results' => 4,
     ];
