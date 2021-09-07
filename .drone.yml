@@ -27,6 +27,7 @@ services:
     shm_size: 2g
     environment:
       - DISPLAY=:99
+      - SE_OPTS=-debug
       - SCREEN_WIDTH=1280
       - SCREEN_HEIGHT=800
       - NODE_MAX_INSTANCES=5

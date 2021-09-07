@@ -7,6 +7,7 @@ namespace Drupal\oe_list_pages;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Security\TrustedCallbackInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\facets\FacetInterface;
 use Drupal\facets\FacetManager\DefaultFacetManager;
@@ -15,7 +16,7 @@ use Drupal\oe_list_pages\Plugin\facets\widget\ListPagesWidgetInterface;
 /**
  * Base class for configuration form builders for the list pages.
  */
-abstract class FilterConfigurationFormBuilderBase {
+abstract class FilterConfigurationFormBuilderBase implements TrustedCallbackInterface {
 
   use StringTranslationTrait;
   use DependencySerializationTrait;
@@ -27,6 +28,13 @@ abstract class FilterConfigurationFormBuilderBase {
    * @var \Drupal\facets\FacetManager\DefaultFacetManager
    */
   protected $facetsManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function trustedCallbacks() {
+    return ['preRenderOperationButtons'];
+  }
 
   /**
    * FilterConfigurationFormBuilderBase constructor.
@@ -226,6 +234,7 @@ abstract class FilterConfigurationFormBuilderBase {
       get_class($this),
       'preRenderOperationButtons',
     ];
+
     return $form;
   }
 

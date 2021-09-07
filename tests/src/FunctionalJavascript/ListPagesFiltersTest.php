@@ -37,6 +37,11 @@ class ListPagesFiltersTest extends WebDriverTestBase {
   ];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'classy';
+
+  /**
    * Test fields in a list page content type.
    */
   public function testListPageFilters(): void {
@@ -255,9 +260,9 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $this->assertSession()->pageTextContains('one yellow fruit');
     $this->assertSession()->pageTextContains('another yellow fruit');
     $this->assertSession()->elementExists('css', '.field--name-extra-field-oe-list-page-selected-filtersnodeoe-list-page');
-    $this->assertOptionSelected('Published', 'Yes');
-    $this->assertOptionSelected('Select one', 'test1');
-    $this->assertOptionSelected('Select one', 'test2');
+    $this->assertTrue($this->assertSession()->optionExists('Published', 'Yes')->isSelected());
+    $this->assertTrue($this->assertSession()->optionExists('Select one', 'test1')->isSelected());
+    $this->assertTrue($this->assertSession()->optionExists('Select one', 'test2')->isSelected());
     $this->assertSession()->linkExistsExact('Yes');
     $this->assertSession()->linkExistsExact('test1');
     $this->assertSession()->linkExistsExact('test2');

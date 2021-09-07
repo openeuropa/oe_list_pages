@@ -46,6 +46,11 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
   ];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'classy';
+
+  /**
    * Tests the plugin configuration form.
    */
   public function testPluginConfigurationForm(): void {
@@ -85,8 +90,8 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     // Edit the link list and check the values are correctly pre-populated.
     $this->drupalGet($link_list->toUrl('edit-form'));
 
-    $this->assertOptionSelected('Source entity type', 'Taxonomy term');
-    $this->assertOptionSelected('Source bundle', 'Vocabulary one');
+    $this->assertTrue($this->assertSession()->optionExists('Source entity type', 'Taxonomy term')->isSelected());
+    $this->assertTrue($this->assertSession()->optionExists('Source bundle', 'Vocabulary one')->isSelected());
 
     // Change the source to a Node type.
     $this->getSession()->getPage()->selectFieldOption('Source entity type', 'node');
