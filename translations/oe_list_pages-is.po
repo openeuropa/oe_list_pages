@@ -20,7 +20,7 @@ msgid "Go to next page"
 msgstr "Næsta síða"
 
 msgid "First"
-msgstr "First"
+msgstr "Fyrst"
 
 msgid "Last"
 msgstr "Síðast"
