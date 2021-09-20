@@ -84,7 +84,7 @@ class ListExecutionManager implements ListExecutionManagerInterface {
     }
 
     // Determine the query options and execute it.
-    $current_page = (int) $this->requestStack->getCurrentRequest()->get('page', 0);
+    $current_page = is_null($configuration->getPage()) ? (int) $this->requestStack->getCurrentRequest()->get('page', 0) : $configuration->getPage();
     if ($current_page < 0) {
       $current_page = 0;
     }
