@@ -1,5 +1,12 @@
 # Change Log
 
+## [0.11.0](https://github.com/openeuropa/oe_list_pages/tree/0.11.0)
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.10.0...0.11.0)
+
+**Merged pull requests:**
+
+- OEL-70: Drupal 9 compatibility fixes. [\#94](https://github.com/openeuropa/oe_list_pages/pull/94) ([saidatom](https://github.com/saidatom))
+
 ## [0.10.0](https://github.com/openeuropa/oe_list_pages/tree/0.10.0) (2021-08-16)
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.9.0...0.10.0)
 
