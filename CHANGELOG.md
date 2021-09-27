@@ -1,17 +1,30 @@
-# Change Log
+# Changelog
 
-## [0.11.0](https://github.com/openeuropa/oe_list_pages/tree/0.11.0)
+## [0.12.0](https://github.com/openeuropa/oe_list_pages/tree/0.12.0) (2021-09-27)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.11.0...0.12.0)
+
+**Merged pull requests:**
+
+- EWPP-1465: Enable non-eu languages: nb, is. [\#106](https://github.com/openeuropa/oe_list_pages/pull/106) ([yenyasinn](https://github.com/yenyasinn))
+- EWPP-1478: Add interface translations in non-eu languages. [\#105](https://github.com/openeuropa/oe_list_pages/pull/105) ([yenyasinn](https://github.com/yenyasinn))
+
+## [0.11.0](https://github.com/openeuropa/oe_list_pages/tree/0.11.0) (2021-09-20)
+
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.10.0...0.11.0)
 
 **Merged pull requests:**
 
+- Release 0.11.0 [\#107](https://github.com/openeuropa/oe_list_pages/pull/107) ([yenyasinn](https://github.com/yenyasinn))
 - OEL-70: Drupal 9 compatibility fixes. [\#94](https://github.com/openeuropa/oe_list_pages/pull/94) ([saidatom](https://github.com/saidatom))
 
 ## [0.10.0](https://github.com/openeuropa/oe_list_pages/tree/0.10.0) (2021-08-16)
+
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.9.0...0.10.0)
 
 **Merged pull requests:**
 
+- Prepare release 0.10.0 [\#101](https://github.com/openeuropa/oe_list_pages/pull/101) ([brummbar](https://github.com/brummbar))
 - EWPP-0000: Fix grumphp issues. [\#100](https://github.com/openeuropa/oe_list_pages/pull/100) ([22Alexandra](https://github.com/22Alexandra))
 - EWPP-1404: RSS item pubdate should always be in EN. [\#99](https://github.com/openeuropa/oe_list_pages/pull/99) ([upchuk](https://github.com/upchuk))
 - EWPP-1289: Add missing interface translations. [\#97](https://github.com/openeuropa/oe_list_pages/pull/97) ([yenyasinn](https://github.com/yenyasinn))
