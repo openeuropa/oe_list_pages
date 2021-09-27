@@ -1,0 +1,32 @@
+msgid ""
+msgstr ""
+
+msgid "Showing results @first to @last"
+msgstr "@first ve @last arası sonuçlar gösteriliyor"
+
+msgid "Next"
+msgstr "Sonraki"
+
+msgid "Previous"
+msgstr "Önceki"
+
+msgid "Go to page @number"
+msgstr "@number sayfaya git"
+
+msgid "Go to previous page"
+msgstr "Bir önceki sayfaya git"
+
+msgid "Go to next page"
+msgstr "Bir sonraki sayfaya git"
+
+msgid "First"
+msgstr "İlk"
+
+msgid "Last"
+msgstr "Son"
+
+msgid "Clear filters"
+msgstr "Filtreleri sil"
+
+msgid "Filter by"
+msgstr "Filtre"
