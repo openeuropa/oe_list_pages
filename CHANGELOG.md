@@ -1,16 +1,22 @@
-# Changelog
+# Change Log
+
+## [0.12.1](https://github.com/openeuropa/oe_list_pages/tree/0.12.1) (2021-09-29)
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.12.0...0.12.1)
+
+**Merged pull requests:**
+
+- EWPP-1580: Restore dependency that was mistakenly deleted. [\#111](https://github.com/openeuropa/oe_list_pages/pull/111) ([brummbar](https://github.com/brummbar))
 
 ## [0.12.0](https://github.com/openeuropa/oe_list_pages/tree/0.12.0) (2021-09-27)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.11.0...0.12.0)
 
 **Merged pull requests:**
 
+- Prepare release 0.12.0. [\#110](https://github.com/openeuropa/oe_list_pages/pull/110) ([imanoleguskiza](https://github.com/imanoleguskiza))
 - EWPP-1465: Enable non-eu languages: nb, is. [\#106](https://github.com/openeuropa/oe_list_pages/pull/106) ([yenyasinn](https://github.com/yenyasinn))
 - EWPP-1478: Add interface translations in non-eu languages. [\#105](https://github.com/openeuropa/oe_list_pages/pull/105) ([yenyasinn](https://github.com/yenyasinn))
 
 ## [0.11.0](https://github.com/openeuropa/oe_list_pages/tree/0.11.0) (2021-09-20)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.10.0...0.11.0)
 
 **Merged pull requests:**
