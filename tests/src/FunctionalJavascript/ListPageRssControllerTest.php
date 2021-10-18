@@ -163,11 +163,23 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     $rss_link = $page->find('css', $rss_link_selector);
     $url = $rss_link->getAttribute('href');
     $this->assertEquals(Url::fromRoute('entity.node.list_page_rss', ['node' => $node->id()])->toString(), $url);
+    // Assert the current query parameters are passed onto the RSS link.
     $this->drupalGet(Url::fromRoute('entity.node.canonical', ['node' => $node->id()], ['query' => ['random_arg' => 'value']]));
     $rss_link = $page->find('css', $rss_link_selector);
     $url = $rss_link->getAttribute('href');
     $this->assertEquals(Url::fromRoute('entity.node.list_page_rss', ['node' => $node->id()], ['query' => ['random_arg' => 'value']])->toString(), $url);
+    // Assert pager options are not passed onto the RSS link.
+    $this->drupalGet(Url::fromRoute('entity.node.canonical', ['node' => $node->id()], [
+      'query' => [
+        'random_arg' => 'value',
+        'page' => '1',
+      ],
+    ]));
+    $rss_link = $page->find('css', $rss_link_selector);
+    $url = $rss_link->getAttribute('href');
+    $this->assertEquals(Url::fromRoute('entity.node.list_page_rss', ['node' => $node->id()], ['query' => ['random_arg' => 'value']])->toString(), $url);
 
+    // Load and parse the RSS page.
     $this->drupalGet(Url::fromRoute('entity.node.list_page_rss', ['node' => $node->id()]));
     $response = $this->getTextContent();
     $crawler = new Crawler($response);
@@ -212,6 +224,20 @@ class ListPageRssControllerTest extends WebDriverTestBase {
 
     // Assert the last item title to make sure we order
     // and limit the list correctly.
+    $last_item = $items->eq(24);
+    $this->assertEquals('test node 23', $last_item->filterXpath('//title')->text());
+
+    // Assert that even if we pass pager options these are ignored.
+    $this->drupalGet(Url::fromRoute('entity.node.list_page_rss', ['node' => $node->id()], ['query' => ['page' => '1']]));
+    $response = $this->getTextContent();
+    $crawler = new Crawler($response);
+    $channel = $crawler->filterXPath('//rss[@version=2.0]/channel');
+    // Assert contents of items.
+    $items = $channel->filterXPath('//item');
+    // Assert only the first 25 items are shown.
+    $this->assertEquals(25, $items->count());
+    $first_item = $items->eq(0);
+    $this->assertEquals('that yellow fruit', $first_item->filterXpath('//title')->text());
     $last_item = $items->eq(24);
     $this->assertEquals('test node 23', $last_item->filterXpath('//title')->text());
 

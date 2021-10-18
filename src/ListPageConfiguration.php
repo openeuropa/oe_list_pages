@@ -68,6 +68,14 @@ class ListPageConfiguration {
   protected $limit = NULL;
 
   /**
+   * The page of the query.
+   *
+   * @var int|null
+   */
+  protected $page = NULL;
+
+
+  /**
    * The sorting type for the query.
    *
    * The sort should an array with two values keyed 'name' and 'direction'.
@@ -112,6 +120,7 @@ class ListPageConfiguration {
       'default_filter_values' => $wrapper_configuration['preset_filters'] ?? [],
       'exposed_filters_overridden' => isset($wrapper_configuration['override_exposed_filters']) ? (bool) $wrapper_configuration['override_exposed_filters'] : FALSE,
       'limit' => $wrapper_configuration['limit'] ?? NULL,
+      'page' => $wrapper_configuration['page'] ?? NULL,
       'sort' => [],
     ];
 
@@ -259,6 +268,26 @@ class ListPageConfiguration {
   }
 
   /**
+   * Returns the page.
+   *
+   * @return int
+   *   The page.
+   */
+  public function getPage(): ?int {
+    return $this->page;
+  }
+
+  /**
+   * Sets the page.
+   *
+   * @param int $page
+   *   The page.
+   */
+  public function setPage(int $page = NULL): void {
+    $this->page = $page;
+  }
+
+  /**
    * Returns the sort.
    *
    * @return array
@@ -305,6 +334,7 @@ class ListPageConfiguration {
       'exposed_filters' => $this->getExposedFilters(),
       'default_filter_values' => $this->getDefaultFiltersValues(),
       'limit' => $this->getLimit(),
+      'page' => $this->getPage(),
       'sort' => $this->getSort(),
     ];
   }

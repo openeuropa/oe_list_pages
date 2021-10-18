@@ -424,7 +424,12 @@ class ListBuilder implements ListBuilderInterface {
    */
   public function buildRssLink(ContentEntityInterface $entity): array {
     $url = Url::fromRoute('entity.node.list_page_rss', ['node' => $entity->id()]);
-    $url->setOption('query', $this->requestStack->getCurrentRequest()->query->all());
+    $query_options = $this->requestStack->getCurrentRequest()->query->all();
+    // RSS feeds should not take the pager into account.
+    if (isset($query_options['page'])) {
+      unset($query_options['page']);
+    }
+    $url->setOption('query', $query_options);
     $cache = new CacheableMetadata();
     $cache->addCacheContexts(['url.query_args']);
     $link = Link::fromTextAndUrl(t('RSS'), $url)->toRenderable();
