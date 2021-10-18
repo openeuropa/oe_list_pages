@@ -8,6 +8,7 @@ use Drupal\Core\State\StateInterface;
 use Drupal\oe_list_pages\ListPageRssAlterEvent;
 use Drupal\oe_list_pages\ListPageEvents;
 use Drupal\oe_list_pages\ListPageRssItemAlterEvent;
+use Drupal\oe_list_pages\ListPageSortAlterEvent;
 use Drupal\oe_list_pages\ListPageSourceAlterEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -42,6 +43,7 @@ class ListPagesTestSubscriber implements EventSubscriberInterface {
       ListPageEvents::ALTER_BUNDLES => ['onBundlesAlter'],
       ListPageEvents::ALTER_RSS_BUILD => ['onRssBuildAlter'],
       ListPageEvents::ALTER_RSS_ITEM_BUILD => ['onRssItemBuildAlter'],
+      ListPageEvents::ALTER_SORT_OPTIONS => ['onSortOptionsAlter'],
     ];
   }
 
@@ -115,6 +117,21 @@ class ListPagesTestSubscriber implements EventSubscriberInterface {
       '#value' => date('d/m/Y', (int) $creation_date),
     ];
     $event->setBuild($build);
+  }
+
+  /**
+   * Event handler for altering the sort options.
+   *
+   * @param \Drupal\oe_list_pages\ListPageSortAlterEvent $event
+   *   The event.
+   */
+  public function onSortOptionsAlter(ListPageSortAlterEvent $event): void {
+    $alter = (bool) $this->state->get('oe_list_pages_test.alter_sort_options');
+    if ($alter) {
+      $options = $event->getOptions();
+      $options['title__DESC'] = 'Title desc';
+      $event->setOptions($options);
+    }
   }
 
 }
