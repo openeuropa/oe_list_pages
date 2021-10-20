@@ -4,7 +4,9 @@ namespace Drupal\oe_list_pages_open_vocabularies;
 
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\facets\FacetInterface;
+use Drupal\language\Config\LanguageConfigOverride;
 use Drupal\oe_list_pages\ListSourceFactoryInterface;
 use Drupal\open_vocabularies\OpenVocabularyAssociationInterface;
 use Drupal\search_api\IndexInterface;
@@ -45,12 +47,20 @@ class SearchApiConfigurator {
   protected $entityFieldManager;
 
   /**
+   * The language manager.
+   *
+   * @var \Drupal\Core\Language\LanguageManagerInterface
+   */
+  private $languageManager;
+
+  /**
    * {@inheritdoc}
    */
-  public function __construct(EntityTypeManagerInterface $entityTypeManager, EntityFieldManagerInterface $entityFieldManager, ListSourceFactoryInterface $listSourceFactory) {
+  public function __construct(EntityTypeManagerInterface $entityTypeManager, EntityFieldManagerInterface $entityFieldManager, ListSourceFactoryInterface $listSourceFactory, LanguageManagerInterface $languageManager) {
     $this->entityTypeManager = $entityTypeManager;
     $this->listSourceFactory = $listSourceFactory;
     $this->entityFieldManager = $entityFieldManager;
+    $this->languageManager = $languageManager;
   }
 
   /**
@@ -90,10 +100,8 @@ class SearchApiConfigurator {
     $index_field->setLabel($association->label());
     $index->save();
 
-    // Generate the facet id.
-    $id = 'open_vocabularies_' . str_replace('.', '_', $association->id() . '_' . $field_id);
-    // Create the facet for the new field.
-    /** @var \Drupal\facets\FacetInterface $facet */
+    // Create the facet.
+    $id = $this->generateFacetId($association, $field_id);
     $facet = $this->getFacet($id);
     $facet->setUrlAlias(str_replace('.', '_', $association->id()));
     $facet->set('name', $association->label());
@@ -124,6 +132,48 @@ class SearchApiConfigurator {
   }
 
   /**
+   * Updates a facet with translations from the vocabulary association.
+   *
+   * @param \Drupal\open_vocabularies\OpenVocabularyAssociationInterface $association
+   *   The open vocabulary association.
+   * @param string $field_id
+   *   The field_id.
+   * @param \Drupal\language\Config\LanguageConfigOverride $override
+   *   The translation config override.
+   */
+  public function updateConfigTranslation(OpenVocabularyAssociationInterface $association, string $field_id, LanguageConfigOverride $override): void {
+    $id = $this->generateFacetId($association, $field_id);
+    $facet = $this->getFacet($id);
+    $entity_type_info = $this->entityTypeManager->getDefinition($facet->getEntityTypeId());
+    $facet_config_id = $entity_type_info->getConfigPrefix() . '.' . $facet->id();
+    $language = $override->getLangcode();
+    /** @var \Drupal\facets\FacetInterface $config_translation */
+    $config_translation = $this->languageManager->getLanguageConfigOverride($language, $facet_config_id);
+    $config_translation->set('name', $override->get('label'));
+    $config_translation->save();
+  }
+
+  /**
+   * Deletes a translation from a facet when it is deleted from the association.
+   *
+   * @param \Drupal\open_vocabularies\OpenVocabularyAssociationInterface $association
+   *   The open vocabulary association.
+   * @param string $field_id
+   *   The field_id.
+   * @param string $language
+   *   The language to delete the translation.
+   */
+  public function deleteConfigTranslation(OpenVocabularyAssociationInterface $association, string $field_id, string $language): void {
+    $id = $this->generateFacetId($association, $field_id);
+    $facet = $this->getFacet($id);
+    $entity_type_info = $this->entityTypeManager->getDefinition($facet->getEntityTypeId());
+    $facet_config_id = $entity_type_info->getConfigPrefix() . '.' . $facet->id();
+    /** @var \Drupal\facets\FacetInterface $config_translation */
+    $config_translation = $this->languageManager->getLanguageConfigOverride($language, $facet_config_id);
+    $config_translation->delete();
+  }
+
+  /**
    * Remove search index field and facet created for an association.
    *
    * @param \Drupal\open_vocabularies\OpenVocabularyAssociationInterface $association
@@ -150,6 +200,21 @@ class SearchApiConfigurator {
     // Remove facet.
     $facet = $this->getFacet($id);
     $facet->delete();
+  }
+
+  /**
+   * Generates a facet ID based on the association ID and field name.
+   *
+   * @param \Drupal\open_vocabularies\OpenVocabularyAssociationInterface $association
+   *   The open vocabulary association.
+   * @param string $field_id
+   *   The field_id.
+   *
+   * @return string
+   *   The facet ID.
+   */
+  protected function generateFacetId(OpenVocabularyAssociationInterface $association, string $field_id): string {
+    return 'open_vocabularies_' . str_replace('.', '_', $association->id() . '_' . $field_id);
   }
 
   /**
