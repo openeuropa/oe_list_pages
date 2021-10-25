@@ -1,10 +1,20 @@
-# Change Log
+# Changelog
+
+## [0.13.0](https://github.com/openeuropa/oe_list_pages/tree/0.13.0) (2021-10-25)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.12.1...0.13.0)
+
+**Merged pull requests:**
+
+- EWPP-1247: Do not take pager into account on RSS pages. [\#108](https://github.com/openeuropa/oe_list_pages/pull/108) ([imanoleguskiza](https://github.com/imanoleguskiza))
 
 ## [0.12.1](https://github.com/openeuropa/oe_list_pages/tree/0.12.1) (2021-09-29)
+
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.12.0...0.12.1)
 
 **Merged pull requests:**
 
+- Release 0.12.1 [\#112](https://github.com/openeuropa/oe_list_pages/pull/112) ([brummbar](https://github.com/brummbar))
 - EWPP-1580: Restore dependency that was mistakenly deleted. [\#111](https://github.com/openeuropa/oe_list_pages/pull/111) ([brummbar](https://github.com/brummbar))
 
 ## [0.12.0](https://github.com/openeuropa/oe_list_pages/tree/0.12.0) (2021-09-27)
