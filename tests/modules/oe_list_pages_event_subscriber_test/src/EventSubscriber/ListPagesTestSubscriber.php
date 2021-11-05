@@ -129,7 +129,7 @@ class ListPagesTestSubscriber implements EventSubscriberInterface {
     $alter = (bool) $this->state->get('oe_list_pages_test.alter_sort_options');
     if ($alter) {
       $options = $event->getOptions();
-      $options['title__DESC'] = 'Title desc';
+      $options['field_test_boolean__DESC'] = 'Boolean';
       $event->setOptions($options);
     }
   }

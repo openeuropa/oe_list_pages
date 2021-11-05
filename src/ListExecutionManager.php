@@ -93,13 +93,13 @@ class ListExecutionManager implements ListExecutionManagerInterface {
     // If there is a sort configured use it,
     // otherwise use the bundle's default sort if set.
     $sort = $configuration->getSort();
-    if (!$sort) {
-      $bundle_entity_type = $this->entityTypeManager->getDefinition($configuration->getEntityType())->getBundleEntityType();
-      $storage = $this->entityTypeManager->getStorage($bundle_entity_type);
-      $bundle = $storage->load($configuration->getBundle());
-      $sort = $bundle->getThirdPartySetting('oe_list_pages', 'default_sort', []);
-    }
+    $bundle_sort = $this->getBundleDefaultSort($list_source);
+    // If we have a specific sort, we use that first, followed by the default
+    // bundle sort. Otherwise, just the bundle sort.
     $sort = $sort ? [$sort['name'] => $sort['direction']] : [];
+    if ($bundle_sort) {
+      $sort[$bundle_sort['name']] = $bundle_sort['direction'];
+    }
 
     $options = [
       'limit' => $limit,
@@ -115,6 +115,22 @@ class ListExecutionManager implements ListExecutionManagerInterface {
     $this->executedLists[$configuration->getId()] = $list_execution;
 
     return $list_execution;
+  }
+
+  /**
+   * Get the default sort configuration from the bundle.
+   *
+   * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
+   *   The selected list source.
+   *
+   * @return array
+   *   The sort information.
+   */
+  protected function getBundleDefaultSort(ListSourceInterface $list_source): array {
+    $bundle_entity_type = $this->entityTypeManager->getDefinition($list_source->getEntityType())->getBundleEntityType();
+    $storage = $this->entityTypeManager->getStorage($bundle_entity_type);
+    $bundle = $storage->load($list_source->getBundle());
+    return $bundle->getThirdPartySetting('oe_list_pages', 'default_sort', []);
   }
 
 }

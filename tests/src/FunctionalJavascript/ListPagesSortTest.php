@@ -45,8 +45,36 @@ class ListPagesSortTest extends ListPagePluginFormTestBase {
   public function testSortSelection(): void {
     // Create some nodes to test the sorting.
     $date = new DrupalDateTime('20-10-2020');
+    $date->modify('- 1 hour');
     $values = [
-      'title' => 'A - First by created',
+      'title' => 'Second by created',
+      'type' => 'content_type_one',
+      'status' => NodeInterface::PUBLISHED,
+      'created' => $date->getTimestamp(),
+    ];
+    $this->drupalCreateNode($values);
+
+    $date->modify('+ 2 hours');
+    $values = [
+      'title' => 'First by created',
+      'type' => 'content_type_one',
+      'status' => NodeInterface::PUBLISHED,
+      'created' => $date->getTimestamp(),
+    ];
+    $this->drupalCreateNode($values);
+
+    $date->modify('- 3 hours');
+    $values = [
+      'title' => 'Third by created',
+      'type' => 'content_type_one',
+      'status' => NodeInterface::PUBLISHED,
+      'created' => $date->getTimestamp(),
+    ];
+    $this->drupalCreateNode($values);
+
+    $date->modify('- 1 hour');
+    $values = [
+      'title' => 'Fourth by created',
       'type' => 'content_type_one',
       'status' => NodeInterface::PUBLISHED,
       'created' => $date->getTimestamp(),
@@ -55,9 +83,10 @@ class ListPagesSortTest extends ListPagePluginFormTestBase {
 
     $date = new DrupalDateTime('20-10-2019');
     $values = [
-      'title' => 'Z - First by title',
+      'title' => 'First by boolean field',
       'type' => 'content_type_one',
       'status' => NodeInterface::PUBLISHED,
+      'field_test_boolean' => 1,
       'created' => $date->getTimestamp(),
     ];
     $this->drupalCreateNode($values);
@@ -119,7 +148,7 @@ class ListPagesSortTest extends ListPagePluginFormTestBase {
     $actual_options = $this->getSelectOptions('Sort');
     $expected_options = [
       'created__DESC' => 'Default',
-      'title__DESC' => 'Title desc',
+      'field_test_boolean__DESC' => 'Boolean',
     ];
     $this->assertEquals($expected_options, $actual_options);
     // Assert also that the Default option is selected.
@@ -130,35 +159,44 @@ class ListPagesSortTest extends ListPagePluginFormTestBase {
     $this->getSession()->getPage()->pressButton('Save');
     $this->assertEmpty($this->getSortInformationFromNodeMeta('Node title'));
     $this->assertResultsAreInCorrectOrder([
-      'A - First by created',
-      'Z - First by title',
+      'First by created',
+      'Second by created',
+      'Third by created',
+      'Fourth by created',
+      'First by boolean field',
     ]);
 
     // Edit again the node and save a different sort.
     $this->drupalGet($node->toUrl('edit-form'));
     $this->clickLink('List Page');
-    $this->getSession()->getPage()->selectFieldOption('Sort', 'title__DESC');
+    $this->getSession()->getPage()->selectFieldOption('Sort', 'field_test_boolean__DESC');
     $this->getSession()->getPage()->pressButton('Save');
     $this->assertEquals([
-      'name' => 'title',
+      'name' => 'field_test_boolean',
       'direction' => 'DESC',
     ], $this->getSortInformationFromNodeMeta('Node title'));
 
     $this->assertResultsAreInCorrectOrder([
-      'Z - First by title',
-      'A - First by created',
+      'First by boolean field',
+      'First by created',
+      'Second by created',
+      'Third by created',
+      'Fourth by created',
     ]);
 
     // Switch back to the default sort.
     $this->drupalGet($node->toUrl('edit-form'));
     $this->clickLink('List Page');
-    $this->assertTrue($this->assertSession()->optionExists('Sort', 'Title desc')->isSelected());
+    $this->assertTrue($this->assertSession()->optionExists('Sort', 'Boolean')->isSelected());
     $this->getSession()->getPage()->selectFieldOption('Sort', 'created__DESC');
     $this->getSession()->getPage()->pressButton('Save');
     $this->assertEmpty($this->getSortInformationFromNodeMeta('Node title'));
     $this->assertResultsAreInCorrectOrder([
-      'A - First by created',
-      'Z - First by title',
+      'First by created',
+      'Second by created',
+      'Third by created',
+      'Fourth by created',
+      'First by boolean field',
     ]);
   }
 
