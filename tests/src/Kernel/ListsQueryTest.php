@@ -30,7 +30,7 @@ class ListsQueryTest extends ListsSourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->createTestFacets();
     $this->createTestContent('entity_test_mulrev_changed', 5);

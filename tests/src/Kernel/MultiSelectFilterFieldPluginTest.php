@@ -49,7 +49,7 @@ class MultiSelectFilterFieldPluginTest extends ListsSourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setup() {
+  protected function setUp(): void {
     parent::setUp();
     $this->pluginManager = \Drupal::service('plugin.manager.multiselect_filter_field');
     $this->entityTypeManager = \Drupal::service('entity_type.manager');
