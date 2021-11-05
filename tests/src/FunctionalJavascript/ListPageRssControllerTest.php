@@ -47,7 +47,7 @@ class ListPageRssControllerTest extends WebDriverTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Translate the Aug (short month) string.

@@ -48,7 +48,7 @@ class ListPagesSearchApiConfiguratorTest extends EntityKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->installEntitySchema('search_api_task');
     $this->installSchema('search_api', ['search_api_item']);

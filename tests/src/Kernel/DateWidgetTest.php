@@ -30,7 +30,7 @@ class DateWidgetTest extends ListsSourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->widget = new DateWidget([], 'oe_list_pages_date', []);

@@ -41,7 +41,7 @@ class ListPageLinkSourceTranslationTest extends ListPagePluginFormTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     \Drupal::service('content_translation.manager')->setEnabled('node', 'content_type_one', TRUE);

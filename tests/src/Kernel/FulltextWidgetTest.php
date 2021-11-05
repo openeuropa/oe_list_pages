@@ -24,7 +24,7 @@ class FulltextWidgetTest extends ListsSourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->widget = new FulltextWidget(['fulltext_all_fields' => TRUE], 'oe_list_pages_fulltext', []);
   }

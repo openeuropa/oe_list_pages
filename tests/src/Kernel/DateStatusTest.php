@@ -24,7 +24,7 @@ class DateStatusTest extends ListsSourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $default_list_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'item');
     $this->facet = $this->createFacet('created', $default_list_id, '', 'oe_list_pages_multiselect', []);

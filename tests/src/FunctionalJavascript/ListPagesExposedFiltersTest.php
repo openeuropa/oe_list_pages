@@ -37,7 +37,7 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     /** @var \Drupal\emr\EntityMetaRelationInstaller $installer */
     $installer = \Drupal::service('emr.installer');

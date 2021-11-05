@@ -29,7 +29,7 @@ class ListPageRssAccessTest extends ListsEntityMetaTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->installConfig(['language']);
     // Set up a current user to ensure anonymous users are available.
