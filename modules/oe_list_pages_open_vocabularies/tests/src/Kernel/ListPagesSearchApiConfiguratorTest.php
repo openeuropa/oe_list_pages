@@ -5,88 +5,14 @@ declare(strict_types = 1);
 namespace Drupal\Tests\oe_list_pages_open_vocabularies\Kernel;
 
 use Drupal\facets\Entity\Facet;
-use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\oe_list_pages_open_vocabularies\SearchApiConfigurator;
-use Drupal\open_vocabularies\Entity\OpenVocabulary;
 use Drupal\open_vocabularies\Entity\OpenVocabularyAssociation;
 use Drupal\search_api\Entity\Index;
 
 /**
  * Tests the list page open vocabularies configurator.
  */
-class ListPagesSearchApiConfiguratorTest extends EntityKernelTestBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  public static $modules = [
-    'system',
-    'field',
-    'user',
-    'datetime',
-    'datetime_range',
-    'emr',
-    'entity_reference_revisions',
-    'emr_node',
-    'link',
-    'node',
-    'oe_list_pages',
-    'oe_list_pages_filters_test',
-    'oe_list_page_content_type',
-    'oe_list_pages_open_vocabularies',
-    'oe_list_pages_open_vocabularies_test',
-    'open_vocabularies',
-    'options',
-    'search_api',
-    'search_api_db',
-    'search_api_test_db',
-    'taxonomy',
-    'text',
-    'facets',
-  ];
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function setUp(): void {
-    parent::setUp();
-    $this->installEntitySchema('search_api_task');
-    $this->installSchema('search_api', ['search_api_item']);
-    $this->installEntitySchema('facets_facet');
-    $this->installEntitySchema('node');
-    $this->installEntitySchema('open_vocabulary');
-    $this->installEntitySchema('open_vocabulary_association');
-    $this->installEntitySchema('user');
-    $this->installEntitySchema('taxonomy_term');
-    $this->installEntitySchema('entity_meta');
-    $this->installEntitySchema('entity_meta_relation');
-    $this->installConfig(['node',
-      'open_vocabularies',
-      'oe_list_pages',
-      'oe_list_page_content_type',
-      'oe_list_pages_filters_test',
-      'oe_list_pages_open_vocabularies_test',
-      'emr',
-      'emr_node',
-    ]);
-
-    // Create OpenVocabularies vocabularies.
-    $values = [
-      'id' => 'custom_vocabulary',
-      'label' => $this->randomString(),
-      'description' => $this->randomString(128),
-      'handler' => 'taxonomy',
-      'handler_settings' => [
-        'target_bundles' => [
-          'entity_test' => 'vocabulary_one',
-        ],
-      ],
-    ];
-
-    /** @var \Drupal\open_vocabularies\OpenVocabularyInterface $vocabulary */
-    $vocabulary = OpenVocabulary::create($values);
-    $vocabulary->save();
-  }
+class ListPagesSearchApiConfiguratorTest extends ListPagesSearchApiConfiguratorTestBase {
 
   /**
    * Tests SearchApiConfigurator reaction to vocabulary associations changes.
@@ -97,7 +23,7 @@ class ListPagesSearchApiConfiguratorTest extends EntityKernelTestBase {
     $field_id = 'open_vocabulary_bf49aa6d04';
     /** @var \Drupal\search_api\Entity\Index $node_index */
     $node_index = Index::load('node');
-    // Check facet do not exist.
+    // Check facet does not exist.
     $facet_1 = Facet::load($id_1);
     $this->assertNull($facet_1);
     $facet_2 = Facet::load($id_2);
