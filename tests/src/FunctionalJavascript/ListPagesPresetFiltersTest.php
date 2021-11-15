@@ -198,7 +198,6 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
     $filter_id = DefaultFilterConfigurationBuilder::generateFilterId($facet->id());
     $filter_selector = 'emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $filter_id . ']';
-
     $this->getSession()->getPage()->selectFieldOption($filter_selector . '[' . $facet->id() . '][0][list]', DateStatus::UPCOMING);
     $this->getSession()->getPage()->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();

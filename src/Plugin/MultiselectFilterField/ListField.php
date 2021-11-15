@@ -4,7 +4,9 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages\Plugin\MultiselectFilterField;
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\MultiSelectFilterFieldPluginBase;
 
 /**
@@ -28,7 +30,7 @@ class ListField extends MultiSelectFilterFieldPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function buildDefaultValueForm(): array {
+  public function buildDefaultValueForm(array &$form = [], FormStateInterface $form_state = NULL, ListPresetFilter $preset_filter = NULL): array {
     $field_definition = $this->getFacetFieldDefinition($this->configuration['facet'], $this->configuration['list_source']);
     if (empty($field_definition)) {
       return [];

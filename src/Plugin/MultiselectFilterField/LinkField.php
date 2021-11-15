@@ -8,8 +8,10 @@ use Drupal\Core\Entity\Element\EntityAutocomplete;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\link\LinkItemInterface;
 use Drupal\link\Plugin\Field\FieldWidget\LinkWidget;
+use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\MultiSelectFilterFieldPluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -70,14 +72,14 @@ class LinkField extends MultiSelectFilterFieldPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function buildDefaultValueForm(): array {
+  public function buildDefaultValueForm(array &$form = [], FormStateInterface $form_state = NULL, ListPresetFilter $preset_filter = NULL): array {
     $field_definition = $this->getFacetFieldDefinition($this->configuration['facet'], $this->configuration['list_source']);
     if (empty($field_definition)) {
       return [];
     }
 
     $link_type = $field_definition->getSetting('link_type');
-    $form = [
+    $element = [
       '#type' => 'url',
       '#required_error' => t('@facet field is required.', ['@facet' => $this->configuration['facet']->label()]),
       '#element_validate' => [[LinkWidget::class, 'validateUriElement']],
@@ -85,13 +87,31 @@ class LinkField extends MultiSelectFilterFieldPluginBase {
       '#link_type' => $link_type,
     ];
 
-    if ($link_type == LinkItemInterface::LINK_INTERNAL) {
-      $form['#type'] = 'entity_autocomplete';
-      $form['#target_type'] = 'node';
-      $form['#process_default_value'] = FALSE;
+    if ($link_type == LinkItemInterface::LINK_INTERNAL || $link_type == LinkItemInterface::LINK_GENERIC) {
+      $element['#type'] = 'entity_autocomplete';
+      $element['#target_type'] = 'node';
+      $element['#process_default_value'] = FALSE;
     }
 
-    return $form;
+    return $element;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function prepareDefaultFilterValues(array $values, array $form, FormStateInterface $form_state): array {
+    $facet = $this->configuration['facet'];
+    // Form state values should be better for this form element because they
+    // are already prepared to either be the external link or the entity URI.
+    $form_state_values = $form_state->getValue($facet->id(), []);
+    $prepared_values = [];
+    foreach ($values as $delta => $value) {
+      if (isset($form_state_values[$delta])) {
+        $prepared_values[$delta] = $form_state_values[$delta]['link'];
+      }
+    }
+
+    return $prepared_values;
   }
 
   /**

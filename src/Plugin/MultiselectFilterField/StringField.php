@@ -4,6 +4,8 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages\Plugin\MultiselectFilterField;
 
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\MultiSelectFilterFieldPluginBase;
 
 /**
@@ -29,7 +31,7 @@ class StringField extends MultiSelectFilterFieldPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function buildDefaultValueForm(): array {
+  public function buildDefaultValueForm(array &$form = [], FormStateInterface $form_state = NULL, ListPresetFilter $preset_filter = NULL): array {
     return [
       '#type' => 'textfield',
     ];

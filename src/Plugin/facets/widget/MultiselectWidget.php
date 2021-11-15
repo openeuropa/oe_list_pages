@@ -4,10 +4,12 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages\Plugin\facets\widget;
 
+use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Render\Element;
 use Drupal\facets\FacetInterface;
 use Drupal\facets\Processor\ProcessorPluginManager;
 use Drupal\multivalue_form_element\Element\MultiValue;
@@ -140,7 +142,7 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
     /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
     $plugin = $this->multiselectPluginManager->createInstance($id, $config);
     $form[$facet->id()]['#default_value'] = $plugin->getDefaultValues();
-    $form[$facet->id()][$id] = $plugin->buildDefaultValueForm();
+    $form[$facet->id()][$id] = $plugin->buildDefaultValueForm($form, $form_state, $preset_filter);
     $form_state->set('multivalue_child', $id);
 
     return $form;
@@ -201,10 +203,32 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
     $values = [];
     $child = $form_state->get('multivalue_child');
 
-    foreach ($form_state->getValue($facet->id(), []) as $key => $value) {
-      if (is_array($value) && isset($value[$child]) && $value[$child] !== "") {
-        $values[] = $value[$child];
+    // First, get the values from the submitted element.
+    $element = NestedArray::getValue($form_state->getCompleteForm(), array_merge($form['#array_parents'], [$facet->id()]));
+    if ($element) {
+      foreach (Element::children($element) as $delta) {
+        $sub_element = $element[$delta];
+        if (isset($sub_element[$child]['#value']) && $sub_element[$child]['#value'] !== "") {
+          $values[] = $sub_element[$child]['#value'];
+        }
       }
+    }
+
+    // Allow the individual plugins that were used for building the element
+    // to act on these values as there might be specificities that need some
+    // extra processing.
+    /** @var \Drupal\oe_list_pages\ListSourceInterface $list_source */
+    $list_source = $form_state->get('list_source');
+    $id = $this->multiselectPluginManager->getPluginIdForFacet($facet, $list_source);
+    if ($id) {
+      $config = [
+        'facet' => $facet,
+        'preset_filter' => NULL,
+        'list_source' => $list_source,
+      ];
+      /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
+      $plugin = $this->multiselectPluginManager->createInstance($id, $config);
+      $values = $plugin->prepareDefaultFilterValues($values, $form, $form_state);
     }
 
     // Reset the element count in the form element state so that if we reload

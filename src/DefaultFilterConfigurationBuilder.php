@@ -207,6 +207,10 @@ class DefaultFilterConfigurationBuilder extends FilterConfigurationFormBuilderBa
         'edit',
         $filter_id,
       ]),
+      '#array_parents' => array_merge(
+        array_slice($triggering_element['#array_parents'], 0, -4),
+        ['wrapper', 'edit', $filter_id]
+      ),
       '#tree' => TRUE,
     ];
 
@@ -220,6 +224,7 @@ class DefaultFilterConfigurationBuilder extends FilterConfigurationFormBuilderBa
     static::setCurrentValues($form_state, $list_source, $current_filters);
     $form_state->set('default_facet_id', NULL);
     $form_state->set('default_filter_id', NULL);
+    $form_state->set('default_filter_storage', NULL);
     $form_state->setRebuild(TRUE);
   }
 
@@ -263,6 +268,10 @@ class DefaultFilterConfigurationBuilder extends FilterConfigurationFormBuilderBa
         'edit',
         $filter_id,
       ]),
+      '#array_parents' => array_merge(
+        array_slice($triggering_element['#array_parents'], 0, -4),
+        ['wrapper', 'edit', $filter_id]
+      ),
       '#tree' => TRUE,
     ];
 
@@ -273,6 +282,8 @@ class DefaultFilterConfigurationBuilder extends FilterConfigurationFormBuilderBa
     unset($current_filters[$filter_id]);
     static::setCurrentValues($form_state, $list_source, $current_filters);
     $form_state->set('default_filter_id', NULL);
+    // Clear also the storage that plugins may use for this filter.
+    $form_state->set('default_filter_storage', NULL);
     $form_state->set('default_facet_id', NULL);
 
     $form_state->setRebuild(TRUE);

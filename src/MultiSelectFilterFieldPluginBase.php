@@ -10,6 +10,7 @@ use Drupal\Component\Plugin\PluginBase;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\facets\FacetInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -70,6 +71,13 @@ abstract class MultiSelectFilterFieldPluginBase extends PluginBase implements Co
    */
   public function getConfiguration() {
     return $this->configuration;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function prepareDefaultFilterValues(array $values, array $form, FormStateInterface $form_state): array {
+    return $values;
   }
 
   /**

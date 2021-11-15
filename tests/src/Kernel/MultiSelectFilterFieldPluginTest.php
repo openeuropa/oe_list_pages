@@ -195,6 +195,7 @@ class MultiSelectFilterFieldPluginTest extends ListsSourceTestBase {
       'type' => 'link',
     ])->save();
 
+    /** @var \Drupal\Core\Field\FieldConfigInterface $field_config */
     $field_config = $this->entityTypeManager->getStorage('field_config')->create([
       'bundle' => 'item',
       'field_name' => 'link_field',
@@ -202,7 +203,7 @@ class MultiSelectFilterFieldPluginTest extends ListsSourceTestBase {
       'label' => 'Read more about this entity',
       'settings' => [
         'title' => DRUPAL_OPTIONAL,
-        'link_type' => LinkItemInterface::LINK_GENERIC,
+        'link_type' => LinkItemInterface::LINK_EXTERNAL,
       ],
     ]);
     $field_config->save();
@@ -224,9 +225,8 @@ class MultiSelectFilterFieldPluginTest extends ListsSourceTestBase {
       '#type' => 'url',
       '#element_validate' => [[LinkWidget::class, 'validateUriElement']],
       '#maxlength' => 2048,
-      '#link_type' => LinkItemInterface::LINK_GENERIC,
+      '#link_type' => LinkItemInterface::LINK_EXTERNAL,
       '#required_error' => t('Facet for link_field field is required.'),
-
     ];
     $this->assertEquals(['custom-route'], $plugin->getDefaultValues());
     $this->assertEquals($expected_form, $plugin->buildDefaultValueForm());
@@ -260,6 +260,20 @@ class MultiSelectFilterFieldPluginTest extends ListsSourceTestBase {
       'list_source' => $item_list,
     ]);
     $this->assertEquals('Test node (1)', $plugin->getDefaultValuesLabel());
+
+    // Change the link field type to be generic or internal and assert the
+    // form element changes.
+    $field_config->setSetting('link_type', LinkItemInterface::LINK_INTERNAL);
+    $field_config->save();
+    $expected_form['#type'] = 'entity_autocomplete';
+    $expected_form['#target_type'] = 'node';
+    $expected_form['#process_default_value'] = FALSE;
+    $expected_form['#link_type'] = LinkItemInterface::LINK_INTERNAL;
+    $this->assertEquals($expected_form, $plugin->buildDefaultValueForm());
+    $field_config->setSetting('link_type', LinkItemInterface::LINK_GENERIC);
+    $field_config->save();
+    $expected_form['#link_type'] = LinkItemInterface::LINK_GENERIC;
+    $this->assertEquals($expected_form, $plugin->buildDefaultValueForm());
   }
 
   /**

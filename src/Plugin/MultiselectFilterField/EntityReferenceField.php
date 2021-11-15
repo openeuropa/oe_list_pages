@@ -4,10 +4,13 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages\Plugin\MultiselectFilterField;
 
+use Drupal\Core\Entity\Element\EntityAutocomplete;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\MultiSelectFilterFieldPluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -86,7 +89,7 @@ class EntityReferenceField extends MultiSelectFilterFieldPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function buildDefaultValueForm(): array {
+  public function buildDefaultValueForm(array &$form = [], FormStateInterface $form_state = NULL, ListPresetFilter $preset_filter = NULL): array {
     $field_definition = $this->getFacetFieldDefinition($this->configuration['facet'], $this->configuration['list_source']);
     if (empty($field_definition)) {
       return [];
@@ -105,6 +108,21 @@ class EntityReferenceField extends MultiSelectFilterFieldPluginBase {
       '#selection_handler' => $field_definition->getSetting('handler'),
       '#selection_settings' => $selection_settings,
     ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function prepareDefaultFilterValues(array $values, array $form, FormStateInterface $form_state): array {
+    // For the entity autocomplete element, we need to extract the IDs from the
+    // submitted #value element which contains also the title and the
+    // parenthesis, etc.
+    $prepared_values = [];
+    foreach ($values as $value) {
+      $prepared_values[] = EntityAutocomplete::extractEntityIdFromAutocompleteInput($value);
+    }
+
+    return $prepared_values;
   }
 
   /**
