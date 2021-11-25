@@ -1075,12 +1075,17 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
   protected function assertContextualValueForFilters(array $contextual_values = []): void {
     $assert = $this->assertSession();
     $assert->elementsCount('css', 'table.contextual-filters-table tr', count($contextual_values) + 1);
+    $delta = 0;
     foreach ($contextual_values as $filter) {
       $key = $filter['key'];
-      $default_value = $filter['value'];
+      $operator = $filter['value'];
+      $filter_source = $filter['filter_source'] ?? 'Field values';
 
-      $assert->elementTextContains('css', 'table.contextual-filters-table', $key);
-      $assert->elementTextContains('css', 'table.contextual-filters-table', $default_value);
+      $row = $this->getSession()->getPage()->findAll('css', 'table.contextual-filters-table tbody tr')[$delta];
+      $this->assertEquals($key, $row->findAll('css', 'td')[0]->getText());
+      $this->assertEquals($operator, $row->findAll('css', 'td')[1]->getText());
+      $this->assertEquals($filter_source, $row->findAll('css', 'td')[2]->getText());
+      $delta++;
     }
   }
 

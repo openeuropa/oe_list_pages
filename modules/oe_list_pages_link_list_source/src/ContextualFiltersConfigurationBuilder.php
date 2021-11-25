@@ -7,7 +7,6 @@ namespace Drupal\oe_list_pages_link_list_source;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\oe_list_pages\FilterConfigurationFormBuilderBase;
-use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\ListSourceInterface;
 use Drupal\oe_list_pages\Plugin\facets\widget\MultiselectWidget;
 
@@ -92,10 +91,30 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
    */
   protected function buildSummaryPresetFilters(array $form, FormStateInterface $form_state, ListSourceInterface $list_source, array $available_filters = []): array {
     $form = parent::buildSummaryPresetFilters($form, $form_state, $list_source, $available_filters);
+    /** @var \Drupal\oe_list_pages_link_list_source\ContextualPresetFilter[] $current_filters */
+    $current_filters = static::getCurrentValues($form_state, $list_source);
 
     $form['wrapper']['summary']['table']['#header'][1]['data'] = $this->t('Operator');
     foreach ($form['wrapper']['summary']['table']['#rows'] as $key => &$row) {
       $row[1]['data'] = str_replace(': ', '', $row[1]['data']);
+    }
+
+    // Add an extra column to indicate the filter source.
+    $operations_header = array_pop($form['wrapper']['summary']['table']['#header']);
+    $form['wrapper']['summary']['table']['#header'][] = [
+      'data' => $this->t('Filter source'),
+    ];
+    $form['wrapper']['summary']['table']['#header'][] = $operations_header;
+
+    foreach ($form['wrapper']['summary']['table']['#rows'] as $key => &$row) {
+      $operations_column = array_pop($row);
+      $filter_id = $row[0]['filter_id'];
+      $filter = $current_filters[$filter_id];
+      $row[] = [
+        'data' => ContextualPresetFilter::getFilterSources()[$filter->getFilterSource()],
+      ];
+
+      $row[] = $operations_column;
     }
 
     return $form;
@@ -121,12 +140,13 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
   protected function buildEditContextualFilter(array $form, FormStateInterface $form_state, string $facet_id, string $filter_id, ListSourceInterface $list_source): array {
     $ajax_wrapper_id = $this->getAjaxWrapperId($form);
 
+    /** @var \Drupal\oe_list_pages_link_list_source\ContextualPresetFilter[] $current_filters */
     $current_filters = static::getCurrentValues($form_state, $list_source);
     $available_filters = $this->getAvailableFilters($list_source);
 
     $form['wrapper']['edit'] = [
       '#type' => 'fieldset',
-      '#title' => $this->t('Set operator for :filter', [':filter' => $available_filters[$facet_id]]),
+      '#title' => $this->t('Set contextual options for :filter', [':filter' => $available_filters[$facet_id]]),
     ];
 
     // Store the filter IDs on the form state in case we need to rebuild the
@@ -141,7 +161,7 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
       }
 
       $ajax_definition = [
-        'callback' => [$this, 'setOperatorAjax'],
+        'callback' => [$this, 'setContextualOptionsAjax'],
         'wrapper' => $ajax_wrapper_id,
       ];
 
@@ -156,13 +176,21 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
 
       $form['wrapper']['edit'][$filter_id]['operator'] = [
         '#type' => 'select',
-        '#default_value' => $filter ? $filter->getOperator() : ListPresetFilter::OR_OPERATOR,
-        '#options' => ListPresetFilter::getOperators(),
+        '#default_value' => $filter ? $filter->getOperator() : ContextualPresetFilter::OR_OPERATOR,
+        '#options' => ContextualPresetFilter::getOperators(),
         '#title' => $this->t('Operator'),
       ];
 
+      $form['wrapper']['edit'][$filter_id]['filter_source'] = [
+        '#type' => 'select',
+        '#default_value' => $filter ? $filter->getFilterSource() : ContextualPresetFilter::FILTER_SOURCE_FIELD_VALUES,
+        '#options' => ContextualPresetFilter::getFilterSources(),
+        '#title' => $this->t('Filter source'),
+        '#description' => $this->t('Where should the filter values come from. If unsure, leave unchanged.'),
+      ];
+
       $form['wrapper']['edit'][$filter_id]['set_value'] = [
-        '#value' => $this->t('Set operator'),
+        '#value' => $this->t('Set options'),
         '#type' => 'button',
         '#op' => 'set-operator',
         '#limit_validation_errors' => [
@@ -172,7 +200,7 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
         '#filter_id' => $filter_id,
         '#facet_id' => $facet_id,
         '#executes_submit_callback' => TRUE,
-        '#submit' => [[$this, 'setOperatorSubmit']],
+        '#submit' => [[$this, 'setContextualOptionsSubmit']],
       ];
 
       $form['wrapper']['edit'][$filter_id]['cancel_value'] = [
@@ -229,7 +257,7 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
   }
 
   /**
-   * Ajax request handler for setting an operator for a contextual filter.
+   * Ajax request handler for setting the contextual filter options.
    *
    * @param array $form
    *   The form.
@@ -239,21 +267,21 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
    * @return array
    *   The form element.
    */
-  public function setOperatorAjax(array &$form, FormStateInterface $form_state): array {
+  public function setContextualOptionsAjax(array &$form, FormStateInterface $form_state): array {
     $triggering_element = $form_state->getTriggeringElement();
     $element = NestedArray::getValue($form, array_slice($triggering_element['#array_parents'], 0, -4));
     return $element['wrapper'];
   }
 
   /**
-   * Submit callback for setting an operator for a contextual filter.
+   * Submit callback for setting the contextual filter options.
    *
    * @param array $form
    *   The form.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The form state.
    */
-  public function setOperatorSubmit(array &$form, FormStateInterface $form_state): void {
+  public function setContextualOptionsSubmit(array &$form, FormStateInterface $form_state): void {
     /** @var \Drupal\oe_list_pages\ListSourceInterface $list_source */
     $list_source = $form_state->get('list_source');
     $current_filters = static::getCurrentValues($form_state, $list_source);
@@ -267,8 +295,10 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
 
     $parents = array_splice($triggering_element['#parents'], 0, -1);
     $operator = $form_state->getValue(array_merge($parents, ['operator']));
+    $filter_source = $form_state->getValue(array_merge($parents, ['filter_source']));
 
-    $current_filters[$filter_id] = new ListPresetFilter($facet_id, [], $operator);
+    $current_filters[$filter_id] = new ContextualPresetFilter($facet_id, [], $operator);
+    $current_filters[$filter_id]->setFilterSource($filter_source);
 
     // Set the current filters on the form state so they can be used elsewhere.
     static::setCurrentValues($form_state, $list_source, $current_filters);
@@ -332,6 +362,14 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
     }
 
     return $options;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected static function getOperationsButtonsPosition(): int {
+    // For contextual filters, it's the 4th column in the table.
+    return 3;
   }
 
 }

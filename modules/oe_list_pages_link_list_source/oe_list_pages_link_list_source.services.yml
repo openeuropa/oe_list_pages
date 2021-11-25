@@ -8,3 +8,6 @@ services:
   oe_list_pages_link_list_source.contextual_filters_values_processor:
     class: Drupal\oe_list_pages_link_list_source\ContextualFilterValuesProcessor
     arguments: ['@current_route_match', '@oe_list_pages.list_source.factory', '@oe_list_pages_link_list_source.contextual_filters_builder', '@entity_type.manager', '@oe_list_pages_link_list_source.contextual_filters_field_mapper', '@plugin.manager.multiselect_filter_field']
+  oe_list_pages_link_list_source.contextual_filters_updater:
+    class: Drupal\oe_list_pages_link_list_source\ContextualFiltersUpdater
+    arguments: ['@entity_type.manager']

@@ -9,7 +9,7 @@ namespace Drupal\oe_list_pages;
  *
  * Used to store preset filter values and operators.
  */
-class ListPresetFilter {
+class ListPresetFilter implements ListPresetFilterInterface {
 
   const AND_OPERATOR = 'and';
   const OR_OPERATOR = 'or';
@@ -53,70 +53,49 @@ class ListPresetFilter {
   }
 
   /**
-   * Gets the facet id.
-   *
-   * @return string
-   *   The facet id.
+   * {@inheritdoc}
    */
   public function getFacetId(): string {
     return $this->facetId;
   }
 
   /**
-   * Sets the facet id.
-   *
-   * @param string $facet_id
-   *   The facet id.
+   * {@inheritdoc}
    */
   public function setFacetId(string $facet_id): void {
     $this->facetId = $facet_id;
   }
 
   /**
-   * Gets the filter operator.
-   *
-   * @return string
-   *   The operator.
+   * {@inheritdoc}
    */
   public function getOperator(): string {
     return $this->operator;
   }
 
   /**
-   * Sets the filter operator.
-   *
-   * @param string $operator
-   *   The operator.
+   * {@inheritdoc}
    */
   public function setOperator(string $operator): void {
     $this->operator = $operator;
   }
 
   /**
-   * Gets the values.
-   *
-   * @return array
-   *   The filter values.
+   * {@inheritdoc}
    */
   public function getValues(): array {
     return $this->values;
   }
 
   /**
-   * Sets the values for the filter.
-   *
-   * @param array $values
-   *   The filter values.
+   * {@inheritdoc}
    */
   public function setValues(array $values): void {
     $this->values = $values;
   }
 
   /**
-   * Get available operators.
-   *
-   * @return array
-   *   The available operators.
+   * {@inheritdoc}
    */
   public static function getOperators(): array {
     return [
