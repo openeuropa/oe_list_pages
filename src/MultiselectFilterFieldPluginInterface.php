@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\oe_list_pages;
 
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Interface of a multiselect filter field plugin.
@@ -26,6 +27,22 @@ interface MultiselectFilterFieldPluginInterface {
    *   The default value form array.
    */
   public function buildDefaultValueForm(): array;
+
+  /**
+   * Prepares the default filter values after submission.
+   *
+   * @param array $values
+   *   The initial values taken from the form state in
+   *   MultiselectWidget::prepareDefaultFilterValue().
+   * @param array $form
+   *   The form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   *
+   * @return array
+   *   The prepared values.
+   */
+  public function prepareDefaultFilterValues(array $values, array $form, FormStateInterface $form_state): array;
 
   /**
    * Returns the label for the filter values set as default values.

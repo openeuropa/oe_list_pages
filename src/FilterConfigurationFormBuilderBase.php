@@ -360,6 +360,8 @@ abstract class FilterConfigurationFormBuilderBase implements TrustedCallbackInte
   public function cancelValueSubmit(array &$form, FormStateInterface $form_state): void {
     $form_state->set(static::getFilterType() . '_facet_id', NULL);
     $form_state->set(static::getFilterType() . '_filter_id', NULL);
+    // Clear also any filter specific storage information plugins may set.
+    $form_state->set(static::getFilterType() . '_filter_storage', NULL);
     $form_state->setRebuild(TRUE);
   }
 
