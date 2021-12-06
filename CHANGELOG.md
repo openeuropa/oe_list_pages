@@ -1,11 +1,22 @@
 # Changelog
 
+## [0.14.0](https://github.com/openeuropa/oe_list_pages/tree/0.14.0) (2021-12-06)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.13.0...0.14.0)
+
+**Merged pull requests:**
+
+- EWPP-1576: Refactoring for complex multiselect filter field plugins. [\#119](https://github.com/openeuropa/oe_list_pages/pull/119) ([upchuk](https://github.com/upchuk))
+- EWPP-1706: Clearing the facets source cache definitions on test module install. [\#117](https://github.com/openeuropa/oe_list_pages/pull/117) ([upchuk](https://github.com/upchuk))
+- EWPP-1644: Open vocabulary association facet translations. [\#115](https://github.com/openeuropa/oe_list_pages/pull/115) ([upchuk](https://github.com/upchuk))
+
 ## [0.13.0](https://github.com/openeuropa/oe_list_pages/tree/0.13.0) (2021-10-25)
 
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.12.1...0.13.0)
 
 **Merged pull requests:**
 
+- Prepare release 0.13.0. [\#116](https://github.com/openeuropa/oe_list_pages/pull/116) ([imanoleguskiza](https://github.com/imanoleguskiza))
 - EWPP-1247: Do not take pager into account on RSS pages. [\#108](https://github.com/openeuropa/oe_list_pages/pull/108) ([imanoleguskiza](https://github.com/imanoleguskiza))
 
 ## [0.12.1](https://github.com/openeuropa/oe_list_pages/tree/0.12.1) (2021-09-29)
