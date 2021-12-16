@@ -13,6 +13,8 @@ use Drupal\oe_list_pages\ListPageConfiguration;
 use Drupal\oe_list_pages_link_list_source\ContextualFiltersConfigurationBuilder;
 use Drupal\oe_list_pages_link_list_source\ContextualPresetFilter;
 use Drupal\search_api\Entity\Index;
+use Drupal\search_api\Item\Field;
+use Drupal\taxonomy\Entity\Term;
 use Drupal\Tests\oe_link_lists\Traits\LinkListTestTrait;
 use Drupal\Tests\oe_list_pages\FunctionalJavascript\ListPagePluginFormTestBase;
 use Drupal\user\Entity\Role;
@@ -689,7 +691,7 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     $link_list->setConfiguration($configuration);
     $link_list->save();
     $this->drupalGet($node->toUrl());
-    // By default we don't have any results.
+    // By default, we don't have any results.
     $this->assertSession()->elementsCount('css', '.block-oe-link-lists ul li', 0);
     // Add the test contextual filter to the Page node type.
     FieldStorageConfig::create([
@@ -845,6 +847,175 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     $this->assertSession()->linkNotExistsExact('Listed node');
     $this->drupalGet($ref_two->toUrl());
     $this->assertSession()->linkExistsExact('Listed node');
+  }
+
+  /**
+   * Test list page contextual filtering current entity exclusion.
+   *
+   * Tests that a link list source can be configured so that if placed on an
+   * entity page, it can filter out the current entity from the results.
+   */
+  public function testListPageContextualSelfExclusion(): void {
+    // Create two nodes to render.
+    $node_one = Node::create([
+      'type' => 'content_type_one',
+      'title' => 'Listed node one',
+      'status' => 1,
+    ]);
+    $node_one->save();
+    $node_two = Node::create([
+      'type' => 'content_type_one',
+      'title' => 'Listed node two',
+      'status' => 1,
+    ]);
+    $node_two->save();
+    $index = Index::load('node');
+    $index->indexItems();
+
+    // Create a normal link list that renders a node of content_type_one and
+    // place it on the node page of this content type.
+    /** @var \Drupal\oe_link_lists\Entity\LinkListInterface $link_list */
+    $link_list = LinkList::create([
+      'bundle' => 'dynamic',
+      'title' => 'My link list',
+      'administrative_title' => 'My link list admin',
+      'status' => 1,
+    ]);
+
+    $configuration = [
+      'source' => [
+        'plugin' => 'list_pages',
+        'plugin_configuration' => [
+          'entity_type' => 'node',
+          'bundle' => 'content_type_one',
+          'exposed_filters' => [],
+          'exposed_filters_overridden' => FALSE,
+          'default_filter_values' => [],
+          'contextual_filters' => [],
+        ],
+      ],
+      'display' => [
+        'plugin' => 'title',
+      ],
+    ];
+
+    $link_list->setConfiguration($configuration);
+    $link_list->save();
+    $this->drupalPlaceBlock('page_title_block');
+    $this->drupalPlaceBlock('oe_link_list_block:' . $link_list->uuid(), ['region' => 'content']);
+
+    // Grant permission to anonymous users to view the link list.
+    $role = Role::load('anonymous');
+    $role->grantPermission('view link list');
+    $role->save();
+
+    // Go to each of the node and assert we see the link list.
+    $this->drupalGet($node_one->toUrl());
+    $this->assertSession()->elementContains('css', '.page-title', 'Listed node one');
+    $this->assertSession()->linkExistsExact('Listed node one');
+    $this->assertSession()->linkExistsExact('Listed node two');
+    $this->drupalGet($node_two->toUrl());
+    $this->assertSession()->elementContains('css', '.page-title', 'Listed node two');
+    $this->assertSession()->linkExistsExact('Listed node one');
+    $this->assertSession()->linkExistsExact('Listed node two');
+
+    $web_user = $this->drupalCreateUser([
+      'create dynamic link list',
+      'edit dynamic link list',
+      'view link list',
+    ]);
+    $this->drupalLogin($web_user);
+
+    // Edit the link list and assert we don't yet see the checkbox to exclude
+    // the current entity because we don't have an ID field indexed.
+    $this->drupalGet($link_list->toUrl('edit-form'));
+    $this->assertSession()->selectExists('Link source');
+    $this->assertSession()->fieldNotExists('Exclude the current entity');
+
+    // Add the ID field to the index.
+    $field = new Field($index, 'list_page_link_source_id');
+    $field->setType('integer');
+    $field->setPropertyPath('nid');
+    $field->setDatasourceId('entity:node');
+    $field->setLabel('ID');
+    $field->setDependencies([
+      'modules' => [
+        'node',
+      ],
+    ]);
+    $index->addField($field);
+    $index->save();
+    $index->reindex();
+    $index->indexItems();
+
+    // Edit the link list and exclude the current entity from being shown if
+    // found in the results.
+    $this->drupalGet($link_list->toUrl('edit-form'));
+    $this->assertSession()->fieldExists('Exclude the current entity');
+    $this->getSession()->getPage()->checkField('Exclude the current entity');
+    $this->getSession()->getPage()->pressButton('Save');
+    $this->assertSession()->pageTextContains('Saved the My link list admin Link list.');
+
+    // Go back to the respective nodes and assert we don't see them anymore
+    // in the results.
+    $this->drupalGet($node_one->toUrl());
+    $this->assertSession()->elementContains('css', '.page-title', 'Listed node one');
+    $this->assertSession()->linkNotExistsExact('Listed node one');
+    $this->assertSession()->linkExistsExact('Listed node two');
+    $this->drupalGet($node_two->toUrl());
+    $this->assertSession()->elementContains('css', '.page-title', 'Listed node two');
+    $this->assertSession()->linkExistsExact('Listed node one');
+    $this->assertSession()->linkNotExistsExact('Listed node two');
+
+    // Add the ID field also to the taxonomy index.
+    $index = Index::load('taxonomy');
+    $field = new Field($index, 'list_page_link_source_id');
+    $field->setType('integer');
+    $field->setPropertyPath('tid');
+    $field->setDatasourceId('entity:taxonomy_term');
+    $field->setLabel('ID');
+    $field->setDependencies([
+      'modules' => [
+        'taxonomy',
+      ],
+    ]);
+    $index->addField($field);
+    $index->save();
+
+    // Create terms until we get a term that has the same ID as the first node
+    // we created.
+    $nid = $node_one->id();
+    $tid = 0;
+    while ($nid !== $tid) {
+      $term = Term::create([
+        'vid' => 'vocabulary_one',
+        'name' => 'Term name',
+      ]);
+      $term->save();
+      $term->set('name', 'Term ' . $term->id());
+      $term->save();
+      $tid = $term->id();
+    }
+    $this->assertEquals($nid, $term->id());
+    $index->reindex();
+    $index->indexItems();
+
+    // Change the link list to show taxonomy terms instead of nodes.
+    $this->drupalGet($link_list->toUrl('edit-form'));
+    $this->getSession()->getPage()->selectFieldOption('Source entity type', 'taxonomy_term');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->selectFieldOption('Source bundle', 'vocabulary_one');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->pressButton('Save');
+    $this->assertSession()->pageTextContains('Saved the My link list admin Link list.');
+
+    // Go back to the first node and assert that even if the current entity ID
+    // (the node) has the same ID as a term in the link list result, we won't
+    // hide the term from the results because it's a different list source than
+    // the current entity (node).
+    $this->drupalGet($node_one->toUrl());
+    $this->assertSession()->elementContains('css', '.page-title', 'Listed node one');
+    $this->assertSession()->linkExistsExact($term->label());
   }
 
   /**

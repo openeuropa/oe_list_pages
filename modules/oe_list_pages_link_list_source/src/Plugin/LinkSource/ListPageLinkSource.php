@@ -229,6 +229,14 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
 
     $subform_state = SubformState::createForSubform($form['list_page_configuration']['wrapper']['contextual_filters'], $form, $form_state);
     $form['list_page_configuration']['wrapper']['contextual_filters'] = $this->contextualFiltersBuilder->buildContextualFilters($form['list_page_configuration']['wrapper']['contextual_filters'], $subform_state, $list_source, $this->configuration);
+    $form['list_page_configuration']['wrapper']['exclude_self'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Exclude the current entity'),
+      '#description' => $this->t('Excludes from the results the current entity if found.'),
+      '#default_value' => $this->configuration['exclude_self'] ?? 0,
+      // If we don't have the ID field in the index, we cannot.
+      '#access' => !is_null($list_source->getIndex()->getField('list_page_link_source_id')),
+    ];
 
     return $form;
   }
@@ -252,6 +260,11 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
     ], []));
 
     $this->configuration['contextual_filters'] = $contextual_filters;
+    $this->configuration['exclude_self'] = $form_state->getValue([
+      'list_page_configuration',
+      'wrapper',
+      'exclude_self',
+    ], 0);
   }
 
 }

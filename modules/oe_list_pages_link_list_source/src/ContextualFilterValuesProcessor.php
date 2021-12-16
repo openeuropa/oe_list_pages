@@ -128,6 +128,20 @@ class ContextualFilterValuesProcessor {
       return $configuration;
     }
 
+    // If the link list is configured to exclude the current entity, pass a
+    // special default filter value that will be read by a query subscriber.
+    // see
+    // Drupal\oe_list_pages_link_list_source\EventSubscriber\QuerySubscriber()
+    if (isset($raw_configuration['exclude_self']) && (bool) $raw_configuration['exclude_self']) {
+      $extra = $configuration->getExtra();
+      $extra['exclude_self_data'] = [
+        'id' => $entity->id(),
+        'entity_type' => $entity->getEntityTypeId(),
+        'entity_bundle' => $entity->bundle(),
+      ];
+      $configuration->setExtra($extra);
+    }
+
     $cache->addCacheableDependency($entity);
 
     $default_filter_values = $configuration->getDefaultFiltersValues();

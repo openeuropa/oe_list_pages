@@ -137,6 +137,7 @@ class ListSource implements ListSourceInterface {
       'sort' => [],
       'ignored_filters' => [],
       'preset_filters' => [],
+      'extra' => [],
     ]);
 
     $resolver->setAllowedTypes('limit', 'int');
@@ -145,6 +146,7 @@ class ListSource implements ListSourceInterface {
     $resolver->setAllowedTypes('sort', 'array');
     $resolver->setAllowedTypes('ignored_filters', 'array');
     $resolver->setAllowedTypes('preset_filters', 'array');
+    $resolver->setAllowedTypes('extra', 'array');
 
     $resolved_options = $resolver->resolve($options);
 
@@ -165,7 +167,7 @@ class ListSource implements ListSourceInterface {
       $query->addCondition('language_with_fallback', $resolved_options['language']);
     }
 
-    $query_options = new ListQueryOptions($resolved_options['ignored_filters'], $resolved_options['preset_filters']);
+    $query_options = new ListQueryOptions($resolved_options['ignored_filters'], $resolved_options['preset_filters'], $resolved_options['extra']);
     $query->setOption('oe_list_page_query_options', $query_options);
     $query->setSearchId($this->getSearchId());
 

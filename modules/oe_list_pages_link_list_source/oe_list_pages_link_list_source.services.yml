@@ -11,3 +11,8 @@ services:
   oe_list_pages_link_list_source.contextual_filters_updater:
     class: Drupal\oe_list_pages_link_list_source\ContextualFiltersUpdater
     arguments: ['@entity_type.manager']
+  oe_list_pages_link_list_source.query_event_subscriber:
+    class: Drupal\oe_list_pages_link_list_source\EventSubscriber\QuerySubscriber
+    arguments: ['@oe_list_pages.list_source.factory']
+    tags:
+      - { name: event_subscriber }
