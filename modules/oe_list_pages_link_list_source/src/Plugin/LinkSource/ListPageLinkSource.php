@@ -6,15 +6,11 @@ namespace Drupal\oe_list_pages_link_list_source\Plugin\LinkSource;
 
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
-use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\SubformState;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\facets\FacetInterface;
 use Drupal\oe_link_lists\Event\EntityValueResolverEvent;
 use Drupal\oe_link_lists\LinkCollection;
 use Drupal\oe_link_lists\LinkCollectionInterface;
@@ -23,12 +19,9 @@ use Drupal\oe_list_pages\FacetManipulationTrait;
 use Drupal\oe_list_pages\Form\ListPageConfigurationSubformFactory;
 use Drupal\oe_list_pages\ListExecutionManagerInterface;
 use Drupal\oe_list_pages\ListPageConfiguration;
-use Drupal\oe_list_pages\ListSourceFactoryInterface;
 use Drupal\oe_list_pages\ListSourceInterface;
-use Drupal\oe_list_pages\MultiselectFilterFieldPluginManager;
-use Drupal\oe_list_pages_link_list_source\ContextualFilterFieldMapper;
 use Drupal\oe_list_pages_link_list_source\ContextualFiltersConfigurationBuilder;
-use Drupal\oe_list_pages_link_list_source\ContextualFiltersHelper;
+use Drupal\oe_list_pages_link_list_source\ContextualFilterValuesProcessor;
 use Drupal\oe_list_pages_link_list_source\Exception\InapplicableContextualFilter;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -91,39 +84,18 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
   protected $contextualFiltersBuilder;
 
   /**
-   * The current route match.
+   * The contextual filters value processor.
    *
-   * @var \Drupal\Core\Routing\RouteMatchInterface
+   * @var \Drupal\oe_list_pages_link_list_source\ContextualFilterValuesProcessor
    */
-  protected $routeMatch;
-
-  /**
-   * The list source factory.
-   *
-   * @var \Drupal\oe_list_pages\ListSourceFactoryInterface
-   */
-  protected $listSourceFactory;
-
-  /**
-   * Plugin manager for the multiselect filter fields.
-   *
-   * @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginManager
-   */
-  protected $multiselectPluginManager;
-
-  /**
-   * The contextual filters field mappger.
-   *
-   * @var \Drupal\oe_list_pages_link_list_source\ContextualFilterFieldMapper
-   */
-  protected $contextualFieldMapper;
+  protected $contextualFilterValuesProcessor;
 
   /**
    * {@inheritdoc}
    *
    * @SuppressWarnings(PHPMD.ExcessiveParameterList)
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, ListPageConfigurationSubformFactory $configurationSubformFactory, ListExecutionManagerInterface $listExecutionManager, EventDispatcherInterface $eventDispatcher, EntityTypeManagerInterface $entityTypeManager, EntityRepositoryInterface $entityRepository, ContextualFiltersConfigurationBuilder $contextualFiltersBuilder, RouteMatchInterface $routeMatch, ListSourceFactoryInterface $listSourceFactory, MultiselectFilterFieldPluginManager $multiselectPluginManager, ContextualFilterFieldMapper $contextualFieldMapper) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, ListPageConfigurationSubformFactory $configurationSubformFactory, ListExecutionManagerInterface $listExecutionManager, EventDispatcherInterface $eventDispatcher, EntityTypeManagerInterface $entityTypeManager, EntityRepositoryInterface $entityRepository, ContextualFiltersConfigurationBuilder $contextualFiltersBuilder, ContextualFilterValuesProcessor $contextualFilterValuesProcessor) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->configurationSubformFactory = $configurationSubformFactory;
@@ -132,10 +104,7 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
     $this->entityTypeManager = $entityTypeManager;
     $this->entityRepository = $entityRepository;
     $this->contextualFiltersBuilder = $contextualFiltersBuilder;
-    $this->routeMatch = $routeMatch;
-    $this->listSourceFactory = $listSourceFactory;
-    $this->multiselectPluginManager = $multiselectPluginManager;
-    $this->contextualFieldMapper = $contextualFieldMapper;
+    $this->contextualFilterValuesProcessor = $contextualFilterValuesProcessor;
   }
 
   /**
@@ -152,10 +121,7 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
       $container->get('entity_type.manager'),
       $container->get('entity.repository'),
       $container->get('oe_list_pages_link_list_source.contextual_filters_builder'),
-      $container->get('current_route_match'),
-      $container->get('oe_list_pages.list_source.factory'),
-      $container->get('plugin.manager.multiselect_filter_field'),
-      $container->get('oe_list_pages_link_list_source.contextual_filters_field_mapper')
+      $container->get('oe_list_pages_link_list_source.contextual_filters_values_processor')
     );
   }
 
@@ -179,7 +145,7 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
     $links = new LinkCollection();
     $cache = new CacheableMetadata();
     try {
-      $configuration = $this->initializeConfiguration($cache);
+      $configuration = $this->contextualFilterValuesProcessor->processConfiguration($this->configuration, $cache);
     }
     catch (InapplicableContextualFilter $exception) {
       // If at least one of the contextual filters does not apply, we need to
@@ -286,136 +252,6 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
     ], []));
 
     $this->configuration['contextual_filters'] = $contextual_filters;
-  }
-
-  /**
-   * Prepares the configuration object for this link list.
-   *
-   * @param \Drupal\Core\Cache\CacheableMetadata $cache
-   *   The cacheable metadata.
-   *
-   * @return \Drupal\oe_list_pages\ListPageConfiguration
-   *   The configuration.
-   */
-  protected function initializeConfiguration(CacheableMetadata $cache): ListPageConfiguration {
-    $configuration = new ListPageConfiguration($this->configuration);
-    $cache->addCacheContexts(['route']);
-
-    // Add the contextual filters.
-    $contextual_filters = $this->configuration['contextual_filters'];
-    $entity = $this->getCurrentEntityFromRoute();
-    if (!$entity instanceof ContentEntityInterface) {
-      if (!empty($contextual_filters)) {
-        // If we have contextual filters but don't have an entity to check for
-        // the corresponding fields, we cannot have results.
-        throw new InapplicableContextualFilter();
-      }
-
-      // Otherwise, the configuration stays untouched.
-      return $configuration;
-    }
-
-    $cache->addCacheableDependency($entity);
-
-    $default_filter_values = $configuration->getDefaultFiltersValues();
-    $list_source = $this->listSourceFactory->get($configuration->getEntityType(), $configuration->getBundle());
-
-    foreach ($contextual_filters as $contextual_filter) {
-      $facet = $this->contextualFiltersBuilder->getFacetById($list_source, $contextual_filter->getFacetId());
-      $definition = $this->getFacetFieldDefinition($facet, $list_source);
-      if ($definition) {
-        $field_name = $definition->getName();
-        // Map the field correctly.
-        $field_name = $this->contextualFieldMapper->getCorrespondingFieldName($field_name, $entity, $cache);
-        if (!$field_name) {
-          // If the field doesn't exist on the current entity, we need to not
-          // show any results.
-          throw new InapplicableContextualFilter();
-        }
-
-        $field = $entity->get($field_name);
-        $values = $this->extractValuesFromField($field, $facet, $list_source);
-        if (empty($values)) {
-          // If the contextual filter does not have a value, we again cannot
-          // show any results.
-          throw new InapplicableContextualFilter();
-        }
-
-        $contextual_filter->setValues($values);
-      }
-      else {
-        $processor = ContextualFiltersHelper::getContextualAwareSearchApiProcessor($list_source, $facet);
-        if (!$processor) {
-          throw new InapplicableContextualFilter();
-        }
-
-        $contextual_filter->setValues($processor->getContextualValues($entity));
-      }
-
-      $default_filter_values[ContextualFiltersConfigurationBuilder::generateFilterId($contextual_filter->getFacetId(), array_keys($default_filter_values))] = $contextual_filter;
-    }
-
-    $configuration->setDefaultFilterValues($default_filter_values);
-
-    return $configuration;
-  }
-
-  /**
-   * Get content entity from route.
-   *
-   * @return \Drupal\Core\Entity\ContentEntityInterface|null
-   *   The content entity.
-   */
-  protected function getCurrentEntityFromRoute() :?ContentEntityInterface {
-    $route_name = $this->routeMatch->getRouteName();
-    $parts = explode('.', $route_name);
-    if (count($parts) !== 3 || $parts[0] !== 'entity') {
-      return NULL;
-    }
-
-    $entity_type = $parts[1];
-    $entity = $this->routeMatch->getParameter($entity_type);
-
-    // In case the entity parameter is not resolved (e.g.: revisions route.
-    if (!$entity instanceof ContentEntityInterface) {
-      $entity = $this->entityTypeManager->getStorage($entity_type)->load($entity);
-    }
-    return $entity;
-  }
-
-  /**
-   * Extracts the field values.
-   *
-   * Determines what type of field we are dealing with and delegates to the
-   * correct multiselect filter field plugin to handle the value extraction.
-   *
-   * @param \Drupal\Core\Field\FieldItemListInterface $items
-   *   The field items list.
-   * @param \Drupal\facets\FacetInterface $facet
-   *   The facet.
-   * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
-   *   The list source.
-   *
-   * @return array
-   *   The values.
-   */
-  protected function extractValuesFromField(FieldItemListInterface $items, FacetInterface $facet, ListSourceInterface $list_source) {
-    $field_definition = $items->getFieldDefinition();
-    $id = $this->multiselectPluginManager->getPluginIdByFieldType($field_definition->getType());
-    if (!$id) {
-      return [];
-    }
-
-    $config = [
-      'facet' => $facet,
-      'preset_filter' => [],
-      'list_source' => $list_source,
-    ];
-
-    /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
-    $plugin = $this->multiselectPluginManager->createInstance($id, $config);
-
-    return $plugin->getFieldValues($items);
   }
 
 }
