@@ -388,10 +388,10 @@ class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
     $expected_contextual_filters = [];
     $page->selectFieldOption('Add contextual value for', $this->firstAssociation->label());
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $assert->pageTextContains('Set operator for ' . $this->firstAssociation->label());
+    $assert->pageTextContains('Set contextual options for ' . $this->firstAssociation->label());
     $filter_selector = $contextual_filter_name_prefix . '[wrapper][edit][' . $association_filter_id . ']';
     $this->getSession()->getPage()->selectFieldOption($filter_selector . '[operator]', 'and');
-    $page->pressButton('Set operator');
+    $page->pressButton('Set options');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $expected_contextual_filters['reference'] = [
       'key' => $this->firstAssociation->label(),

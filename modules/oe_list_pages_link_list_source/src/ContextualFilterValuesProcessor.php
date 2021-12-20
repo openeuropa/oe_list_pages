@@ -12,6 +12,7 @@ use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\facets\FacetInterface;
 use Drupal\oe_list_pages\FacetManipulationTrait;
 use Drupal\oe_list_pages\ListPageConfiguration;
+use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\ListSourceFactoryInterface;
 use Drupal\oe_list_pages\ListSourceInterface;
 use Drupal\oe_list_pages\MultiselectFilterFieldPluginManager;
@@ -112,6 +113,7 @@ class ContextualFilterValuesProcessor {
     $cache->addCacheContexts(['route']);
 
     // Add the contextual filters.
+    /** @var \Drupal\oe_list_pages_link_list_source\ContextualPresetFilter[] $contextual_filters */
     $contextual_filters = $raw_configuration['contextual_filters'];
     $entity = $this->getCurrentEntityFromRoute();
 
@@ -132,38 +134,8 @@ class ContextualFilterValuesProcessor {
     $list_source = $this->listSourceFactory->get($configuration->getEntityType(), $configuration->getBundle());
 
     foreach ($contextual_filters as $contextual_filter) {
-      $facet = $this->configurationBuilder->getFacetById($list_source, $contextual_filter->getFacetId());
-      $definition = $this->getFacetFieldDefinition($facet, $list_source);
-      if ($definition) {
-        $field_name = $definition->getName();
-        // Map the field correctly.
-        $field_name = $this->contextualFilterFieldMapper->getCorrespondingFieldName($field_name, $entity, $cache);
-        if (!$field_name) {
-          // If the field doesn't exist on the current entity, we need to not
-          // show any results.
-          throw new InapplicableContextualFilter();
-        }
-
-        $field = $entity->get($field_name);
-        $values = $this->extractValuesFromField($field, $facet, $list_source);
-        if (empty($values)) {
-          // If the contextual filter does not have a value, we again cannot
-          // show any results.
-          throw new InapplicableContextualFilter();
-        }
-
-        $contextual_filter->setValues($values);
-      }
-      else {
-        $processor = ContextualFiltersHelper::getContextualAwareSearchApiProcessor($list_source, $facet);
-        if (!$processor) {
-          throw new InapplicableContextualFilter();
-        }
-
-        $contextual_filter->setValues($processor->getContextualValues($entity));
-      }
-
-      $default_filter_values[ContextualFiltersConfigurationBuilder::generateFilterId($contextual_filter->getFacetId(), array_keys($default_filter_values))] = $contextual_filter;
+      $values = $this->getValuesForContextualFilter($contextual_filter, $entity, $list_source, $cache);
+      $default_filter_values[ContextualFiltersConfigurationBuilder::generateFilterId($contextual_filter->getFacetId(), array_keys($default_filter_values))] = new ListPresetFilter($contextual_filter->getFacetId(), $values, $contextual_filter->getOperator());
     }
 
     $configuration->setDefaultFilterValues($default_filter_values);
@@ -227,6 +199,62 @@ class ContextualFilterValuesProcessor {
     $plugin = $this->multiselectFilterFieldPluginManager->createInstance($id, $config);
 
     return $plugin->getFieldValues($items);
+  }
+
+  /**
+   * Returns the contextual filter values from the current entity.
+   *
+   * @param \Drupal\oe_list_pages_link_list_source\ContextualPresetFilter $contextual_filter
+   *   The contextual filter definition.
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The current entity.
+   * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
+   *   The list source.
+   * @param \Drupal\Core\Cache\CacheableMetadata $cache
+   *   The cacheable metadata.
+   *
+   * @return array
+   *   The filter values.
+   */
+  protected function getValuesForContextualFilter(ContextualPresetFilter $contextual_filter, ContentEntityInterface $entity, ListSourceInterface $list_source, CacheableMetadata $cache): array {
+    // First, determine where the filters need to look for the values.
+    if ($contextual_filter->getFilterSource() === ContextualPresetFilter::FILTER_SOURCE_ENTITY_ID) {
+      // If the current entity ID is the source, we just have to return it.
+      return [$entity->id()];
+    }
+
+    // Otherwise, load the facet and check the field definition.
+    $facet = $this->configurationBuilder->getFacetById($list_source, $contextual_filter->getFacetId());
+    $definition = $this->getFacetFieldDefinition($facet, $list_source);
+    if ($definition) {
+      $field_name = $definition->getName();
+      // Map the field correctly.
+      $field_name = $this->contextualFilterFieldMapper->getCorrespondingFieldName($field_name, $entity, $cache);
+      if (!$field_name) {
+        // If the field doesn't exist on the current entity, we need to not
+        // show any results.
+        throw new InapplicableContextualFilter();
+      }
+
+      $field = $entity->get($field_name);
+      $values = $this->extractValuesFromField($field, $facet, $list_source);
+      if (empty($values)) {
+        // If the contextual filter does not have a value, we again cannot
+        // show any results.
+        throw new InapplicableContextualFilter();
+      }
+
+      return $values;
+    }
+
+    // If there is no field definition, it may be a custom Search API field
+    // processor that may be contextually aware.
+    $processor = ContextualFiltersHelper::getContextualAwareSearchApiProcessor($list_source, $facet);
+    if (!$processor) {
+      throw new InapplicableContextualFilter();
+    }
+
+    return $processor->getContextualValues($entity);
   }
 
 }

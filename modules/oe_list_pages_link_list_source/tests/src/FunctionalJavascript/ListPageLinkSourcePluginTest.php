@@ -10,8 +10,8 @@ use Drupal\node\Entity\Node;
 use Drupal\oe_link_lists\Entity\LinkList;
 use Drupal\oe_list_pages\DefaultFilterConfigurationBuilder;
 use Drupal\oe_list_pages\ListPageConfiguration;
-use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages_link_list_source\ContextualFiltersConfigurationBuilder;
+use Drupal\oe_list_pages_link_list_source\ContextualPresetFilter;
 use Drupal\search_api\Entity\Index;
 use Drupal\Tests\oe_link_lists\Traits\LinkListTestTrait;
 use Drupal\Tests\oe_list_pages\FunctionalJavascript\ListPagePluginFormTestBase;
@@ -182,10 +182,17 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     // Set a contextual filter for Reference.
     $page->selectFieldOption('Add contextual value for', 'Reference');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $assert->pageTextContains('Set operator for Reference');
+    $assert->pageTextContains('Set contextual options for Reference');
+    $options = $this->getSelectOptions('Filter source');
+    $this->assertEquals([
+      'field_values' => 'Field values',
+      'entity_id' => 'Entity ID',
+    ], $options);
+    $this->assertTrue($this->assertSession()->optionExists('Filter source', 'Field values')->hasAttribute('selected'));
+
     $filter_selector = $contextual_filter_name_prefix . '[wrapper][edit][' . $reference_filter_id . ']';
     $this->getSession()->getPage()->selectFieldOption($filter_selector . '[operator]', 'and');
-    $page->pressButton('Set operator');
+    $page->pressButton('Set options');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $expected_contextual_filters['reference'] = [
       'key' => 'Reference',
@@ -196,10 +203,10 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     // Set a contextual filter for Link.
     $page->selectFieldOption('Add contextual value for', 'Link');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $assert->pageTextContains('Set operator for Link');
+    $assert->pageTextContains('Set contextual options for Link');
     $filter_selector = $contextual_filter_name_prefix . '[wrapper][edit][' . $link_filter_id . ']';
     $this->getSession()->getPage()->selectFieldOption($filter_selector . '[operator]', 'not');
-    $page->pressButton('Set operator');
+    $page->pressButton('Set options');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $expected_contextual_filters['link'] = [
       'key' => 'Link',
@@ -210,7 +217,7 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     // Edit the Reference.
     $page->pressButton('contextual-edit-' . $reference_filter_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $assert->pageTextContains('Set operator for Reference');
+    $assert->pageTextContains('Set contextual options for Reference');
     $this->assertTrue($this->assertSession()->optionExists('Operator', 'All of')->hasAttribute('selected'));
 
     // While the Reference contextual filter is open, add a Default filter
@@ -230,7 +237,7 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     // Continue editing the Reference contextual filter.
     $filter_selector = $contextual_filter_name_prefix . '[wrapper][edit][' . $reference_filter_id . ']';
     $this->getSession()->getPage()->selectFieldOption($filter_selector . '[operator]', 'not');
-    $page->pressButton('Set operator');
+    $page->pressButton('Set options');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $expected_contextual_filters['reference'] = [
       'key' => 'Reference',
@@ -242,7 +249,7 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     // time.
     $page->pressButton('contextual-edit-' . $link_filter_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $assert->pageTextContains('Set operator for Link');
+    $assert->pageTextContains('Set contextual options for Link');
     $this->assertTrue($this->assertSession()->optionExists('Operator', 'None of')->hasAttribute('selected'));
 
     $page->pressButton('default-edit-' . $body_filter_id);
@@ -254,7 +261,7 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     // Cancel out of both forms, one at the time.
     $page->pressButton('contextual-cancel-' . $link_filter_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $assert->pageTextNotContains('Set operator for Link');
+    $assert->pageTextNotContains('Set contextual options for Link');
     $this->assertContextualValueForFilters($expected_contextual_filters);
     $assert->pageTextContains('Set default value for Body');
     $filter_selector = $default_value_name_prefix . '[wrapper][edit][' . $body_filter_id . '][body]';
@@ -270,7 +277,7 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     // time.
     $page->pressButton('contextual-edit-' . $reference_filter_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $assert->pageTextContains('Set operator for Reference');
+    $assert->pageTextContains('Set contextual options for Reference');
     $this->assertTrue($this->assertSession()->optionExists('Operator', 'None of')->hasAttribute('selected'));
 
     $page->pressButton('default-edit-' . $body_filter_id);
@@ -289,17 +296,20 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->assertDefaultValueForFilters($expected_default_filters);
-    $assert->pageTextContains('Set operator for Reference');
+    $assert->pageTextContains('Set contextual options for Reference');
     $this->assertTrue($this->assertSession()->optionExists('Operator', 'None of')->hasAttribute('selected'));
 
     $filter_selector = $contextual_filter_name_prefix . '[wrapper][edit][' . $reference_filter_id . ']';
     $this->getSession()->getPage()->selectFieldOption($filter_selector . '[operator]', 'or');
-    $page->pressButton('Set operator');
+    // Change to an Entity ID filter source.
+    $this->getSession()->getPage()->selectFieldOption($filter_selector . '[filter_source]', ContextualPresetFilter::FILTER_SOURCE_ENTITY_ID);
+    $page->pressButton('Set options');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->assertDefaultValueForFilters($expected_default_filters);
     $expected_contextual_filters['reference'] = [
       'key' => 'Reference',
       'value' => 'Any of',
+      'filter_source' => 'Entity ID',
     ];
     $this->assertContextualValueForFilters($expected_contextual_filters);
 
@@ -322,15 +332,19 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     $this->assertEquals('or', $body->getOperator());
     $this->assertEquals(['updated cherry'], $body->getValues());
 
-    /** @var \Drupal\oe_list_pages\ListPresetFilter $body */
+    /** @var \Drupal\oe_list_pages_link_list_source\ContextualPresetFilter $reference */
     $reference = $contextual_filter_values[$reference_filter_id];
+    $this->assertInstanceOf(ContextualPresetFilter::class, $reference);
     $this->assertEquals('reference', $reference->getFacetId());
     $this->assertEquals('or', $reference->getOperator());
+    $this->assertEquals('entity_id', $reference->getFilterSource());
     $this->assertEmpty($reference->getValues());
-    /** @var \Drupal\oe_list_pages\ListPresetFilter $body */
+    /** @var \Drupal\oe_list_pages_link_list_source\ContextualPresetFilter $link */
     $link = $contextual_filter_values[$link_filter_id];
+    $this->assertInstanceOf(ContextualPresetFilter::class, $link);
     $this->assertEquals('link', $link->getFacetId());
     $this->assertEquals('not', $link->getOperator());
+    $this->assertEquals('field_values', $link->getFilterSource());
     $this->assertEmpty($link->getValues());
 
     // Edit the link list and assert the values are pre-populated correctly.
@@ -339,15 +353,17 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     $this->assertDefaultValueForFilters($expected_default_filters);
     $page->pressButton('contextual-edit-' . $link_filter_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $assert->pageTextContains('Set operator for Link');
+    $assert->pageTextContains('Set contextual options for Link');
     $this->assertTrue($this->assertSession()->optionExists('Operator', 'None of')->hasAttribute('selected'));
+    $this->assertTrue($this->assertSession()->optionExists('Filter source', 'Field values')->hasAttribute('selected'));
     $page->pressButton('contextual-cancel-' . $link_filter_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->assertContextualValueForFilters($expected_contextual_filters);
     $page->pressButton('contextual-edit-' . $reference_filter_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $assert->pageTextContains('Set operator for Reference');
+    $assert->pageTextContains('Set contextual options for Reference');
     $this->assertTrue($this->assertSession()->optionExists('Operator', 'Any of')->hasAttribute('selected'));
+    $this->assertTrue($this->assertSession()->optionExists('Filter source', 'Entity ID')->hasAttribute('selected'));
 
     $page->pressButton('default-edit-' . $body_filter_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
@@ -357,9 +373,9 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
   }
 
   /**
-   * Test list page contextual filtering.
+   * Test list page contextual filtering with field values as the source.
    */
-  public function testListPageContextualFilters(): void {
+  public function testListPageContextualFieldValuesFiltering(): void {
     // Create a link list.
     /** @var \Drupal\oe_link_lists\Entity\LinkListInterface $link_list */
     $link_list = LinkList::create([
@@ -500,7 +516,7 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     // page and assert we have no more results.
     $configuration = $link_list->getConfiguration();
     $configuration['source']['plugin_configuration']['contextual_filters'] = [
-      ContextualFiltersConfigurationBuilder::generateFilterId('select_one') => new ListPresetFilter('select_one', [], 'or'),
+      ContextualFiltersConfigurationBuilder::generateFilterId('select_one') => new ContextualPresetFilter('select_one', [], 'or'),
     ];
     $link_list->setConfiguration($configuration);
     $link_list->save();
@@ -517,7 +533,7 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
       $visible = $field_info['visible'];
       $configuration = $link_list->getConfiguration();
       $configuration['source']['plugin_configuration']['contextual_filters'] = [
-        ContextualFiltersConfigurationBuilder::generateFilterId($visible['facet']) => new ListPresetFilter($visible['facet'], [], 'or'),
+        ContextualFiltersConfigurationBuilder::generateFilterId($visible['facet']) => new ContextualPresetFilter($visible['facet'], [], 'or'),
       ];
       $link_list->setConfiguration($configuration);
       $link_list->save();
@@ -537,8 +553,8 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     // Test that we can have multiple contextual filters.
     $configuration = $link_list->getConfiguration();
     $configuration['source']['plugin_configuration']['contextual_filters'] = [
-      ContextualFiltersConfigurationBuilder::generateFilterId('select_one') => new ListPresetFilter('select_one', [], 'or'),
-      ContextualFiltersConfigurationBuilder::generateFilterId('reference') => new ListPresetFilter('reference', [], 'or'),
+      ContextualFiltersConfigurationBuilder::generateFilterId('select_one') => new ContextualPresetFilter('select_one', [], 'or'),
+      ContextualFiltersConfigurationBuilder::generateFilterId('reference') => new ContextualPresetFilter('reference', [], 'or'),
     ];
     $link_list->setConfiguration($configuration);
     $link_list->save();
@@ -561,7 +577,7 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     // Test that other operators also work.
     $configuration = $link_list->getConfiguration();
     $configuration['source']['plugin_configuration']['contextual_filters'] = [
-      ContextualFiltersConfigurationBuilder::generateFilterId('select_one') => new ListPresetFilter('select_one', [], 'not'),
+      ContextualFiltersConfigurationBuilder::generateFilterId('select_one') => new ContextualPresetFilter('select_one', [], 'not'),
     ];
     $link_list->setConfiguration($configuration);
     $link_list->save();
@@ -593,10 +609,10 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
 
     $configuration = $link_list->getConfiguration();
     $configuration['source']['plugin_configuration']['contextual_filters'] = [
-      ContextualFiltersConfigurationBuilder::generateFilterId('select_one') => new ListPresetFilter('select_one', [], 'or'),
+      ContextualFiltersConfigurationBuilder::generateFilterId('select_one') => new ContextualPresetFilter('select_one', [], 'or'),
     ];
     $configuration['source']['plugin_configuration']['default_filter_values'] = [
-      ContextualFiltersConfigurationBuilder::generateFilterId('select_one', array_keys($configuration['source']['plugin_configuration']['contextual_filters'])) => new ListPresetFilter('select_one', ['test2'], 'or'),
+      ContextualFiltersConfigurationBuilder::generateFilterId('select_one', array_keys($configuration['source']['plugin_configuration']['contextual_filters'])) => new ContextualPresetFilter('select_one', ['test2'], 'or'),
     ];
     $link_list->setConfiguration($configuration);
     $link_list->save();
@@ -635,7 +651,7 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     $configuration = $link_list->getConfiguration();
     $configuration['source']['plugin_configuration']['default_filter_values'] = [];
     $configuration['source']['plugin_configuration']['contextual_filters'] = [
-      ContextualFiltersConfigurationBuilder::generateFilterId('reference') => new ListPresetFilter('reference', [], 'or'),
+      ContextualFiltersConfigurationBuilder::generateFilterId('reference') => new ContextualPresetFilter('reference', [], 'or'),
     ];
     $link_list->setConfiguration($configuration);
     $link_list->save();
@@ -668,7 +684,7 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
 
     // Test that we can also use custom search API fields as contextual filters.
     $configuration['source']['plugin_configuration']['contextual_filters'] = [
-      ContextualFiltersConfigurationBuilder::generateFilterId('oe_list_pages_filters_test_test_field') => new ListPresetFilter('oe_list_pages_filters_test_test_field', [], 'or'),
+      ContextualFiltersConfigurationBuilder::generateFilterId('oe_list_pages_filters_test_test_field') => new ContextualPresetFilter('oe_list_pages_filters_test_test_field', [], 'or'),
     ];
     $link_list->setConfiguration($configuration);
     $link_list->save();
@@ -710,6 +726,125 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     $this->assertSession()->elementsCount('css', '.block-oe-link-lists ul li', 2);
     $this->assertSession()->linkExistsExact('not visible boolean');
     $this->assertSession()->linkExistsExact('visible boolean');
+  }
+
+  /**
+   * Test list page contextual filtering with the entity ID as the source.
+   */
+  public function testListPageContextualEntityIdFiltering(): void {
+    // Create a link list.
+    /** @var \Drupal\oe_link_lists\Entity\LinkListInterface $link_list */
+    $link_list = LinkList::create([
+      'bundle' => 'dynamic',
+      'title' => 'My link list',
+      'administrative_title' => 'My link list admin',
+      'status' => 1,
+    ]);
+
+    $configuration = [
+      'source' => [
+        'plugin' => 'list_pages',
+        'plugin_configuration' => [
+          'entity_type' => 'node',
+          'bundle' => 'content_type_one',
+          'exposed_filters' => [],
+          'exposed_filters_overridden' => FALSE,
+          'default_filter_values' => [],
+          'contextual_filters' => [],
+        ],
+      ],
+      'display' => [
+        'plugin' => 'title',
+      ],
+    ];
+
+    $link_list->setConfiguration($configuration);
+    $link_list->save();
+
+    // Place the bock for this link list.
+    $this->drupalPlaceBlock('oe_link_list_block:' . $link_list->uuid(), ['region' => 'content']);
+
+    // Grant permission to anonymous users to view the link list.
+    $role = Role::load('anonymous');
+    $role->grantPermission('view link list');
+    $role->save();
+
+    // Create two nodes that can be referenced.
+    $ref_one = Node::create([
+      'type' => 'content_type_two',
+      'title' => 'Referenced node 1',
+    ]);
+    $ref_one->save();
+    $ref_two = Node::create([
+      'type' => 'content_type_two',
+      'title' => 'Referenced node 2',
+    ]);
+    $ref_two->save();
+
+    // Create a node that can reference nodes and which will be listed by the
+    // link list.
+    $node = Node::create([
+      'type' => 'content_type_one',
+      'field_reference' => $ref_one->id(),
+      'title' => 'Listed node',
+    ]);
+    $node->save();
+
+    // Index the nodes.
+    $index = Index::load('node');
+    $index->indexItems();
+
+    // Without any contextual filters, the listed node should be seen on both
+    // the referenced nodes.
+    $this->drupalGet($ref_one->toUrl());
+    $this->assertSession()->linkExistsExact('Listed node');
+    $this->drupalGet($ref_two->toUrl());
+    $this->assertSession()->linkExistsExact('Listed node');
+
+    // Set a contextual filter on the link list for the Reference field and
+    // assert that now we won't see a result on the link list in any of the
+    // cases. This because content_type_two doesn't even have that field to
+    // get values from which is the default contextual filter behaviour.
+    $configuration = $link_list->getConfiguration();
+    $configuration['source']['plugin_configuration']['contextual_filters'] = [
+      ContextualFiltersConfigurationBuilder::generateFilterId('reference') => new ContextualPresetFilter('reference', [], 'or'),
+    ];
+    $link_list->setConfiguration($configuration);
+    $link_list->save();
+
+    $this->drupalGet($ref_one->toUrl());
+    $this->assertSession()->linkNotExistsExact('Listed node');
+    $this->drupalGet($ref_two->toUrl());
+    $this->assertSession()->linkNotExistsExact('Listed node');
+
+    // Update the contextual filter to set the filter source to be the entity
+    // ID instead of the field values so as to check the current entity ID
+    // when filtering.
+    $filter = new ContextualPresetFilter('reference', [], 'or');
+    $filter->setFilterSource(ContextualPresetFilter::FILTER_SOURCE_ENTITY_ID);
+    $configuration['source']['plugin_configuration']['contextual_filters'] = [
+      ContextualFiltersConfigurationBuilder::generateFilterId('reference') => $filter,
+    ];
+    $link_list->setConfiguration($configuration);
+    $link_list->save();
+
+    // Now we should see the listed node only on the ref_one node because
+    // that is what the listed node references.
+    $this->drupalGet($ref_one->toUrl());
+    $this->assertSession()->linkExistsExact('Listed node');
+    $this->drupalGet($ref_two->toUrl());
+    $this->assertSession()->linkNotExistsExact('Listed node');
+
+    // Switch out the node value and now it should be the other way around.
+    $node->set('field_reference', $ref_two);
+    $node->save();
+    $index = Index::load('node');
+    $index->indexItems();
+
+    $this->drupalGet($ref_one->toUrl());
+    $this->assertSession()->linkNotExistsExact('Listed node');
+    $this->drupalGet($ref_two->toUrl());
+    $this->assertSession()->linkExistsExact('Listed node');
   }
 
   /**
