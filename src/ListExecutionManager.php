@@ -107,6 +107,7 @@ class ListExecutionManager implements ListExecutionManagerInterface {
       'language' => $language,
       'sort' => $sort,
       'preset_filters' => $preset_filters,
+      'extra' => $configuration->getExtra(),
     ];
     $query = $list_source->getQuery($options);
     $result = $query->execute();

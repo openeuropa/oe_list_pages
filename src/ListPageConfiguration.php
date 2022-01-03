@@ -74,7 +74,6 @@ class ListPageConfiguration {
    */
   protected $page = NULL;
 
-
   /**
    * The sorting type for the query.
    *
@@ -83,6 +82,13 @@ class ListPageConfiguration {
    * @var array
    */
   protected $sort = [];
+
+  /**
+   * A map of configuration values specific to various subsystems.
+   *
+   * @var array
+   */
+  protected $extra = [];
 
   /**
    * ListPageConfiguration constructor.
@@ -94,6 +100,9 @@ class ListPageConfiguration {
     foreach ($configuration as $key => $value) {
       if (property_exists($this, $key)) {
         $this->{$key} = $value;
+      }
+      else {
+        $this->extra[$key] = $value;
       }
     }
   }
@@ -123,6 +132,16 @@ class ListPageConfiguration {
       'page' => $wrapper_configuration['page'] ?? NULL,
       'sort' => [],
     ];
+
+    $exclude = [
+      'preset_filters',
+      'override_exposed_filters',
+    ];
+    foreach ($wrapper_configuration as $key => $values) {
+      if (!isset($configuration[$key]) && !in_array($key, $exclude)) {
+        $configuration[$key] = $values;
+      }
+    }
 
     return new static($configuration);
   }
@@ -308,6 +327,26 @@ class ListPageConfiguration {
   }
 
   /**
+   * Returns the extra configuration.
+   *
+   * @return array
+   *   The extra configuration.
+   */
+  public function getExtra(): array {
+    return $this->extra;
+  }
+
+  /**
+   * Sets the extra configuration.
+   *
+   * @param array $extra
+   *   The extra configuration.
+   */
+  public function setExtra(array $extra): void {
+    $this->extra = $extra;
+  }
+
+  /**
    * Returns an ID for the configuration.
    *
    * Calculates a hash based on the configuration values so it can be used
@@ -336,6 +375,7 @@ class ListPageConfiguration {
       'limit' => $this->getLimit(),
       'page' => $this->getPage(),
       'sort' => $this->getSort(),
+      'extra' => $this->getExtra(),
     ];
   }
 
