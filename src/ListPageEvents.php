@@ -37,4 +37,12 @@ final class ListPageEvents {
    */
   const ALTER_RSS_ITEM_BUILD = "oe_list_pages.rss_build_item_alter";
 
+
+  /**
+   * Event fired to determine sort options.
+   *
+   * @var string
+   */
+  const ALTER_SORT_OPTIONS = "oe_list_pages.alter_sort_options";
+
 }
