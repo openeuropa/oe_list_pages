@@ -16,6 +16,7 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\oe_list_pages\ListPageConfiguration;
 use Drupal\oe_list_pages\ListPageConfigurationSubformInterface;
 use Drupal\oe_list_pages\ListPageEvents;
+use Drupal\oe_list_pages\ListPageSortAlterEvent;
 use Drupal\oe_list_pages\ListPageSourceAlterEvent;
 use Drupal\oe_list_pages\DefaultFilterConfigurationBuilder;
 use Drupal\oe_list_pages\ListSourceFactoryInterface;
@@ -24,6 +25,8 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Default list page configuration subform.
+ *
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
  */
 class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterface {
 
@@ -114,6 +117,13 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
     $entity_type_options = $this->getEntityTypeOptions();
     $entity_type_id = $this->configuration->getEntityType();
     $entity_type_bundle = $this->configuration->getBundle();
+    $configuration_sort = $this->configuration->getSort();
+    if ($configuration_sort) {
+      $configuration_sort = static::generateSortMachineName($configuration_sort);
+    }
+    else {
+      $configuration_sort = NULL;
+    }
 
     $ajax_wrapper_id = 'list-page-configuration-' . ($form['#parents'] ? '-' . implode('-', $form['#parents']) : '');
 
@@ -126,6 +136,7 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
 
     $selected_entity_type = $form_state->has('entity_type') ? $form_state->get('entity_type') : $entity_type_id;
     $selected_bundle = $form_state->has('bundle') ? $form_state->get('bundle') : $entity_type_bundle;
+    $selected_sort = $form_state->has('sort') ? $form_state->get('sort') : $configuration_sort;
     if (!$form_state->has('entity_type')) {
       $form_state->set('entity_type', $selected_entity_type);
     }
@@ -191,6 +202,23 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
 
       // Try to get the list source for the selected entity type and bundle.
       $list_source = $this->listSourceFactory->get($selected_entity_type, $selected_bundle);
+
+      if ($list_source) {
+        $sort_options = $this->getSortOptions($list_source);
+        $form_state->set('default_bundle_sort', $this->getBundleDefaultSort($list_source));
+        if ($selected_sort && !isset($sort_options[$selected_sort])) {
+          // In case we no longer have the sort option, we should not show
+          // any default value.
+          $selected_sort = NULL;
+        }
+        $form['wrapper']['sort'] = [
+          '#type' => 'select',
+          '#options' => $sort_options,
+          '#title' => $this->t('Sort'),
+          '#default_value' => $selected_sort,
+          '#access' => count($sort_options) > 1,
+        ];
+      }
 
       // Get available filters.
       if ($list_source && $available_filters = $list_source->getAvailableFilters()) {
@@ -330,6 +358,29 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
     $this->configuration->setDefaultFilterValues($default_filter_values);
     if (!$exposed_filters_overridden) {
       $exposed_filters = [];
+    }
+
+    $sort = $form_state->getValue(['wrapper', 'sort']);
+    $default_bundle_sort = $form_state->get('default_bundle_sort');
+    if ($default_bundle_sort) {
+      // In case a bundle is not properly configured with a default sort, we
+      // need to check if the value is there before we generate a machine name.
+      $default_bundle_sort = static::generateSortMachineName($default_bundle_sort);
+    }
+
+    if ($sort) {
+      list($name, $direction) = explode('__', $sort);
+      $this->configuration->setSort([
+        'name' => $name,
+        'direction' => strtoupper($direction),
+      ]);
+    }
+
+    if ($sort === $default_bundle_sort || $sort == "") {
+      // If the user configured the default bundle sort, we remove the value
+      // from the configuration in case later we change the defaults, we want
+      // the defaults to still take effect.
+      $this->configuration->setSort([]);
     }
 
     $this->configuration->setExposedFilters($exposed_filters);
@@ -513,6 +564,65 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
     $storage = $this->entityTypeManager->getStorage($bundle_entity_type);
     $bundle = $storage->load($list_source->getBundle());
     return $bundle->getThirdPartySetting('oe_list_pages', 'default_exposed_filters', []);
+  }
+
+  /**
+   * Get the default sort configuration from the bundle.
+   *
+   * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
+   *   The selected list source.
+   *
+   * @return array
+   *   The sort information.
+   */
+  protected function getBundleDefaultSort(ListSourceInterface $list_source): array {
+    $default_sort = &drupal_static(__FUNCTION__ . $list_source->getEntityType() . $list_source->getBundle());
+    if ($default_sort) {
+      return $default_sort;
+    }
+    $bundle_entity_type = $this->entityTypeManager->getDefinition($list_source->getEntityType())->getBundleEntityType();
+    $storage = $this->entityTypeManager->getStorage($bundle_entity_type);
+    $bundle = $storage->load($list_source->getBundle());
+    $default_sort = $bundle->getThirdPartySetting('oe_list_pages', 'default_sort', []);
+    return $default_sort;
+  }
+
+  /**
+   * Gets the available sort options.
+   *
+   * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
+   *   The selected list source.
+   *
+   * @return array
+   *   The sort options.
+   */
+  protected function getSortOptions(ListSourceInterface $list_source): array {
+    $options = [];
+
+    // Get the default sort option.
+    $sort = $this->getBundleDefaultSort($list_source);
+    if ($sort) {
+      $options[static::generateSortMachineName($sort)] = $this->t('Default');
+    }
+
+    $event = new ListPageSortAlterEvent($list_source->getEntityType(), $list_source->getBundle());
+    $event->setOptions($options);
+    $this->eventDispatcher->dispatch(ListPageEvents::ALTER_SORT_OPTIONS, $event);
+
+    return $event->getOptions();
+  }
+
+  /**
+   * Given a sort array with "name" and "direction", generate a machine name.
+   *
+   * @param array $sort
+   *   The sort information.
+   *
+   * @return string
+   *   The machine name.
+   */
+  public static function generateSortMachineName(array $sort): string {
+    return $sort['name'] . '__' . strtoupper($sort['direction']);
   }
 
 }

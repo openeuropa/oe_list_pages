@@ -130,7 +130,7 @@ class ListPageConfiguration {
       'exposed_filters_overridden' => isset($wrapper_configuration['override_exposed_filters']) ? (bool) $wrapper_configuration['override_exposed_filters'] : FALSE,
       'limit' => $wrapper_configuration['limit'] ?? NULL,
       'page' => $wrapper_configuration['page'] ?? NULL,
-      'sort' => [],
+      'sort' => $wrapper_configuration['sort'] ?? [],
     ];
 
     $exclude = [
