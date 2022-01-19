@@ -144,7 +144,7 @@ abstract class FilterConfigurationFormBuilderBase implements TrustedCallbackInte
       $rows[] = [
         [
           'data' => $available_filters[$filter->getFacetId()],
-          'facet_id' => $filter_id,
+          'filter_id' => $filter_id,
         ],
         ['data' => $filter_value_label],
         ['data' => ''],
@@ -252,8 +252,8 @@ abstract class FilterConfigurationFormBuilderBase implements TrustedCallbackInte
   public static function preRenderOperationButtons(array $form): array {
     $rows =& $form['summary']['table']['#rows'];
     for ($i = 0; $i < count($rows); $i++) {
-      $facet_id = $rows[$i][0]['facet_id'];
-      $rows[$i][2]['data'] = [
+      $facet_id = $rows[$i][0]['filter_id'];
+      $rows[$i][static::getOperationsButtonsPosition()]['data'] = [
         'edit-' . $facet_id => $form['buttons'][$facet_id]['edit-' . $facet_id],
         'delete-' . $facet_id => $form['buttons'][$facet_id]['delete-' . $facet_id],
       ];
@@ -426,6 +426,17 @@ abstract class FilterConfigurationFormBuilderBase implements TrustedCallbackInte
     ]);
     // If we have an empty array, it means we removed all the values.
     return is_array($values) && empty($values) ?? FALSE;
+  }
+
+  /**
+   * Returns the position in the table of the operations buttons.
+   *
+   * @return int
+   *   The position.
+   */
+  protected static function getOperationsButtonsPosition(): int {
+    // By default, it's the 3rd column in the table.
+    return 2;
   }
 
 }

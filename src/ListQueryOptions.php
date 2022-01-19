@@ -26,16 +26,26 @@ class ListQueryOptions implements ListQueryOptionsInterface {
   protected $presetFiltersValues = [];
 
   /**
+   * Extra configuration from the list page.
+   *
+   * @var array
+   */
+  protected $extra;
+
+  /**
    * ListQueryOptions constructor.
    *
    * @param array $ignored_filters
    *   The ignored filters.
    * @param array $preset_filters
    *   The preset filters.
+   * @param array $extra
+   *   Extra configuration from the list page.
    */
-  public function __construct(array $ignored_filters, array $preset_filters) {
+  public function __construct(array $ignored_filters, array $preset_filters, array $extra) {
     $this->ignoredFilters = $ignored_filters;
     $this->presetFiltersValues = $preset_filters;
+    $this->extra = $extra;
   }
 
   /**
@@ -64,6 +74,26 @@ class ListQueryOptions implements ListQueryOptionsInterface {
    */
   public function setPresetFiltersValues(array $presetFiltersValues): void {
     $this->presetFiltersValues = $presetFiltersValues;
+  }
+
+  /**
+   * Returns the extra configuration from the list page.
+   *
+   * @return array
+   *   Extra configuration from the list page.
+   */
+  public function getExtra(): array {
+    return $this->extra;
+  }
+
+  /**
+   * Sets the extra configuration from the list page.
+   *
+   * @param array $extra
+   *   Extra configuration from the list page.
+   */
+  public function setExtra(array $extra): void {
+    $this->extra = $extra;
   }
 
 }
