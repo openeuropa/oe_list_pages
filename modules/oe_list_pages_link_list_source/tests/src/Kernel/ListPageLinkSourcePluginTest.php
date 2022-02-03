@@ -186,7 +186,7 @@ class ListPageLinkSourcePluginTest extends KernelTestBase {
     $links = $plugin->getLinks();
     $this->assertCount(0, $links);
 
-    $this->assertEquals([
+    $this->assertEqualsCanonicalizing([
       'config:search_api.index.database_search_index',
       'search_api_list:database_search_index',
       'entity_test_with_bundle_list',
@@ -215,7 +215,7 @@ class ListPageLinkSourcePluginTest extends KernelTestBase {
     ]);
     $links = $plugin->getLinks();
     $this->assertCount(1, $links);
-    $this->assertEquals([
+    $this->assertEqualsCanonicalizing([
       'config:search_api.index.database_search_index',
       'search_api_list:database_search_index',
       'entity_test_with_bundle_list',
