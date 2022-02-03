@@ -188,8 +188,8 @@ class ListPageLinkSourcePluginTest extends KernelTestBase {
 
     $this->assertEquals([
       'config:search_api.index.database_search_index',
-      'entity_test_with_bundle_list',
       'search_api_list:database_search_index',
+      'entity_test_with_bundle_list',
     ], $links->getCacheTags());
     $this->assertEquals(['route'], $links->getCacheContexts());
     $this->assertEquals(Cache::PERMANENT, $links->getCacheMaxAge());
@@ -217,9 +217,9 @@ class ListPageLinkSourcePluginTest extends KernelTestBase {
     $this->assertCount(1, $links);
     $this->assertEquals([
       'config:search_api.index.database_search_index',
-      'entity_test_with_bundle:' . $entity->id(),
-      'entity_test_with_bundle_list',
       'search_api_list:database_search_index',
+      'entity_test_with_bundle_list',
+      'entity_test_with_bundle:' . $entity->id(),
     ], $links->getCacheTags());
     $this->assertEquals(['route'], $links->getCacheContexts());
     $this->assertEquals(Cache::PERMANENT, $links->getCacheMaxAge());

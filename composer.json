@@ -6,8 +6,8 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "php": ">=7.3",
-        "drupal/core": "^8.9 || ^9.1",
+        "php": ">=7.4",
+        "drupal/core": "^9.2",
         "drupal/emr": "^1.0-beta11",
         "drupal/facets": "^1.6",
         "drupal/multivalue_form_element": "^1.0@beta",

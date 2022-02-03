@@ -94,7 +94,7 @@ class Date extends QueryTypePluginBase {
 
     $operator = $active_filters['operator'];
     $first_date = $active_filters['first'];
-    $second_date = isset($active_filters['second']) ? $active_filters['second'] : NULL;
+    $second_date = $active_filters['second'] ?? $active_filters['second'];
 
     $operators = [
       'gt' => $this->t('After'),

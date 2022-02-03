@@ -304,7 +304,7 @@ class MultiSelectFilterFieldPluginTest extends ListsSourceTestBase {
     /** @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginInterface $plugin */
     $plugin = $this->pluginManager->createInstance($plugin_id, [
       'facet' => $facet,
-      'preset_filter' => new ListPresetFilter($facet->id(), [0]),
+      'preset_filter' => new ListPresetFilter($facet->id(), ['0']),
       'list_source' => $item_list,
     ]);
 
@@ -318,7 +318,7 @@ class MultiSelectFilterFieldPluginTest extends ListsSourceTestBase {
     $this->assertEquals('0', $plugin->getDefaultValuesLabel());
     $plugin->setConfiguration([
       'facet' => $facet,
-      'preset_filter' => new ListPresetFilter($facet->id(), [1]),
+      'preset_filter' => new ListPresetFilter($facet->id(), ['1']),
       'list_source' => $item_list,
     ]);
     $this->assertEquals('1', $plugin->getDefaultValuesLabel());
