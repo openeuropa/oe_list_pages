@@ -48,7 +48,7 @@ class ListPageWrapper extends EntityMetaWrapper {
       return NULL;
     }
 
-    list($entity_type, $bundle) = explode(':', $source);
+    [$entity_type, $bundle] = explode(':', $source);
     return $entity_type;
   }
 
@@ -64,7 +64,7 @@ class ListPageWrapper extends EntityMetaWrapper {
       return NULL;
     }
 
-    list($entity_type, $bundle) = explode(':', $source);
+    [$entity_type, $bundle] = explode(':', $source);
     return $bundle;
   }
 

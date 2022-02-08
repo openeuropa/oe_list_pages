@@ -83,6 +83,8 @@ class ListPageLinkSourceTranslationTest extends ListPagePluginFormTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->selectFieldOption('Source bundle', 'Content type one');
     $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->selectFieldOption('No results behaviour', 'Hide');
+    $this->assertSession()->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->pressButton('Save');
 
     // In English we see the EN version.

@@ -76,6 +76,8 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
 
     $this->getSession()->getPage()->selectFieldOption('Link display', 'Title');
     $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->selectFieldOption('No results behaviour', 'Hide');
+    $this->assertSession()->assertWaitOnAjaxRequest();
 
     // Save the link list.
     $this->getSession()->getPage()->fillField('Administrative title', 'List page plugin test');
@@ -133,6 +135,8 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     $this->getSession()->getPage()->fillField('Title', 'List page list');
     $this->getSession()->getPage()->selectFieldOption('Link display', 'Title');
     $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->selectFieldOption('No results behaviour', 'Hide');
+    $this->assertSession()->assertWaitOnAjaxRequest();
     $this->assertListPagePresetFilters('configuration[0][link_source][plugin_configuration_wrapper][list_pages][list_page_configuration][wrapper][default_filter_values]');
   }
 
@@ -149,6 +153,8 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     $this->getSession()->getPage()->fillField('Administrative title', 'List page plugin test');
     $this->getSession()->getPage()->fillField('Title', 'List page list');
     $this->getSession()->getPage()->selectFieldOption('Link display', 'Title');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->selectFieldOption('No results behaviour', 'Hide');
     $this->assertSession()->assertWaitOnAjaxRequest();
 
     // Set tabs.
@@ -401,6 +407,10 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
       ],
       'display' => [
         'plugin' => 'title',
+      ],
+      'no_results_behaviour' => [
+        'plugin' => 'hide_list',
+        'plugin_configuration' => [],
       ],
     ];
 
@@ -896,6 +906,10 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
       ],
       'display' => [
         'plugin' => 'title',
+      ],
+      'no_results_behaviour' => [
+        'plugin' => 'hide_list',
+        'plugin_configuration' => [],
       ],
     ];
 

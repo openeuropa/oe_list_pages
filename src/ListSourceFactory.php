@@ -140,7 +140,7 @@ class ListSourceFactory implements ListSourceFactoryInterface {
     $id = self::generateFacetSourcePluginId($entity_type, $bundle);
     $facets = $this->facetsManager->getFacetsByFacetSourceId($id);
     usort($facets, function ($facet1, $facet2) {
-      return ($facet1->getWeight() > $facet2->getWeight());
+      return ($facet1->getWeight() <=> $facet2->getWeight());
     });
 
     foreach ($facets as $facet) {

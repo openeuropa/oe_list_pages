@@ -369,7 +369,7 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
     }
 
     if ($sort) {
-      list($name, $direction) = explode('__', $sort);
+      [$name, $direction] = explode('__', $sort);
       $this->configuration->setSort([
         'name' => $name,
         'direction' => strtoupper($direction),
