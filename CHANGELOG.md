@@ -1,11 +1,27 @@
 # Changelog
 
+## [0.15.0](https://github.com/openeuropa/oe_list_pages/tree/0.15.0) (2022-02-17)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.14.0...0.15.0)
+
+**Merged pull requests:**
+
+- EWPP-1914: Update to PHP8 [\#126](https://github.com/openeuropa/oe_list_pages/pull/126) ([yenyasinn](https://github.com/yenyasinn))
+- EWPP-1552: Default related lists [\#124](https://github.com/openeuropa/oe_list_pages/pull/124) ([upchuk](https://github.com/upchuk))
+- Update epic EWPP-1552: Default related lists [\#123](https://github.com/openeuropa/oe_list_pages/pull/123) ([upchuk](https://github.com/upchuk))
+- EWPP-1680: Allow to exclude the current entity from the link list results. [\#122](https://github.com/openeuropa/oe_list_pages/pull/122) ([upchuk](https://github.com/upchuk))
+- EWPP-1612: Allow current entity ID as contextual filter value. [\#120](https://github.com/openeuropa/oe_list_pages/pull/120) ([upchuk](https://github.com/upchuk))
+- EWPP-760: Configurable sort options. [\#114](https://github.com/openeuropa/oe_list_pages/pull/114) ([upchuk](https://github.com/upchuk))
+- EWPP-1613: Refactoring the contextual filters processing method. [\#113](https://github.com/openeuropa/oe_list_pages/pull/113) ([upchuk](https://github.com/upchuk))
+- EWPP-1585: Make markup of Date facet label consistent with another facet labels [\#109](https://github.com/openeuropa/oe_list_pages/pull/109) ([yenyasinn](https://github.com/yenyasinn))
+
 ## [0.14.0](https://github.com/openeuropa/oe_list_pages/tree/0.14.0) (2021-12-06)
 
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.13.0...0.14.0)
 
 **Merged pull requests:**
 
+- Prepare release 0.14.0. [\#121](https://github.com/openeuropa/oe_list_pages/pull/121) ([imanoleguskiza](https://github.com/imanoleguskiza))
 - EWPP-1576: Refactoring for complex multiselect filter field plugins. [\#119](https://github.com/openeuropa/oe_list_pages/pull/119) ([upchuk](https://github.com/upchuk))
 - EWPP-1706: Clearing the facets source cache definitions on test module install. [\#117](https://github.com/openeuropa/oe_list_pages/pull/117) ([upchuk](https://github.com/upchuk))
 - EWPP-1644: Open vocabulary association facet translations. [\#115](https://github.com/openeuropa/oe_list_pages/pull/115) ([upchuk](https://github.com/upchuk))
@@ -29,6 +45,7 @@
 - EWPP-1580: Restore dependency that was mistakenly deleted. [\#111](https://github.com/openeuropa/oe_list_pages/pull/111) ([brummbar](https://github.com/brummbar))
 
 ## [0.12.0](https://github.com/openeuropa/oe_list_pages/tree/0.12.0) (2021-09-27)
+
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.11.0...0.12.0)
 
 **Merged pull requests:**
@@ -38,6 +55,7 @@
 - EWPP-1478: Add interface translations in non-eu languages. [\#105](https://github.com/openeuropa/oe_list_pages/pull/105) ([yenyasinn](https://github.com/yenyasinn))
 
 ## [0.11.0](https://github.com/openeuropa/oe_list_pages/tree/0.11.0) (2021-09-20)
+
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.10.0...0.11.0)
 
 **Merged pull requests:**
@@ -57,6 +75,7 @@
 - EWPP-1289: Add missing interface translations. [\#97](https://github.com/openeuropa/oe_list_pages/pull/97) ([yenyasinn](https://github.com/yenyasinn))
 
 ## [0.9.0](https://github.com/openeuropa/oe_list_pages/tree/0.9.0) (2021-06-15)
+
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.8.0...0.9.0)
 
 **Merged pull requests:**
@@ -67,6 +86,7 @@
 - EWPP-721: Update xdebug configuration. [\#75](https://github.com/openeuropa/oe_list_pages/pull/75) ([22Alexandra](https://github.com/22Alexandra))
 
 ## [0.8.0](https://github.com/openeuropa/oe_list_pages/tree/0.8.0) (2021-04-09)
+
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.7.0...0.8.0)
 
 **Merged pull requests:**
@@ -102,6 +122,7 @@
 - EWPP-672: Contextual filters selection. [\#66](https://github.com/openeuropa/oe_list_pages/pull/66) ([upchuk](https://github.com/upchuk))
 
 ## [0.6.0](https://github.com/openeuropa/oe_list_pages/tree/0.6.0) (2021-01-25)
+
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.5.0...0.6.0)
 
 **Merged pull requests:**
@@ -114,6 +135,7 @@
 - EWPP-453: Execute and render the RSS list [\#45](https://github.com/openeuropa/oe_list_pages/pull/45) ([imanoleguskiza](https://github.com/imanoleguskiza))
 
 ## [0.5.0](https://github.com/openeuropa/oe_list_pages/tree/0.5.0) (2020-12-09)
+
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.4.0...0.5.0)
 
 **Merged pull requests:**
@@ -122,6 +144,7 @@
 - EWPP-593: Ajax fixes on the list page config subform entity type and bundle selection. [\#57](https://github.com/openeuropa/oe_list_pages/pull/57) ([upchuk](https://github.com/upchuk))
 
 ## [0.4.0](https://github.com/openeuropa/oe_list_pages/tree/0.4.0) (2020-12-04)
+
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.3.0...0.4.0)
 
 **Merged pull requests:**
@@ -140,6 +163,7 @@
 - EWPP-47: List page selection in plugin. [\#28](https://github.com/openeuropa/oe_list_pages/pull/28) ([hernani](https://github.com/hernani))
 
 ## [0.3.0](https://github.com/openeuropa/oe_list_pages/tree/0.3.0) (2020-11-03)
+
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.2.0...0.3.0)
 
 **Merged pull requests:**
@@ -149,6 +173,7 @@
 - EWPP-48: Configurable pager. [\#31](https://github.com/openeuropa/oe_list_pages/pull/31) ([upchuk](https://github.com/upchuk))
 
 ## [0.2.0](https://github.com/openeuropa/oe_list_pages/tree/0.2.0) (2020-10-07)
+
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.1.0...0.2.0)
 
 **Merged pull requests:**
