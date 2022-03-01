@@ -94,7 +94,6 @@ class Date extends QueryTypePluginBase {
 
     $operator = $active_filters['operator'];
     $first_date = $active_filters['first'];
-    $second_date = $active_filters['second'] ?? $active_filters['second'];
 
     $operators = [
       'gt' => $this->t('After'),
@@ -107,6 +106,7 @@ class Date extends QueryTypePluginBase {
     }
 
     if ($operator === 'bt') {
+      $second_date = $active_filters['second'];
       $display = new FormattableMarkup('@operator @first and @second', [
         '@operator' => $operators[$operator],
         '@first' => $first_date->format('j F Y'),
