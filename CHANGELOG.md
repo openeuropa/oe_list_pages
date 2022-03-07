@@ -1,11 +1,20 @@
 # Changelog
 
+## [0.16.0](https://github.com/openeuropa/oe_list_pages/tree/0.16.0) (2022-03-07)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.15.0...0.16.0)
+
+**Merged pull requests:**
+
+- EWPP-2017: Fixing date filter second value initialization. [\#128](https://github.com/openeuropa/oe_list_pages/pull/128) ([upchuk](https://github.com/upchuk))
+
 ## [0.15.0](https://github.com/openeuropa/oe_list_pages/tree/0.15.0) (2022-02-17)
 
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.14.0...0.15.0)
 
 **Merged pull requests:**
 
+- Release-0.15.0: Update changelog. [\#127](https://github.com/openeuropa/oe_list_pages/pull/127) ([nagyad](https://github.com/nagyad))
 - EWPP-1914: Update to PHP8 [\#126](https://github.com/openeuropa/oe_list_pages/pull/126) ([yenyasinn](https://github.com/yenyasinn))
 - EWPP-1552: Default related lists [\#124](https://github.com/openeuropa/oe_list_pages/pull/124) ([upchuk](https://github.com/upchuk))
 - Update epic EWPP-1552: Default related lists [\#123](https://github.com/openeuropa/oe_list_pages/pull/123) ([upchuk](https://github.com/upchuk))
