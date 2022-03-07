@@ -28,7 +28,7 @@
         "drush/drush": "^10.3",
         "egulias/email-validator": "^2.1.22 || ^3.0",
         "openeuropa/code-review": "^2.0",
-        "openeuropa/oe_link_lists": "^0.13",
+        "openeuropa/oe_link_lists": "^0.14",
         "openeuropa/oe_multilingual": "^1.10",
         "openeuropa/open_vocabularies": "^1.0-alpha6",
         "openeuropa/task-runner-drupal-project-symlink": "^1.0.0-beta5",
