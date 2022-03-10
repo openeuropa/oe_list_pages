@@ -6,6 +6,7 @@ namespace Drupal\oe_list_pages\EventSubscriber;
 
 use Drupal\facets\FacetInterface;
 use Drupal\facets\FacetManager\DefaultFacetManager;
+use Drupal\facets\FacetSource\FacetSourcePluginManager;
 use Drupal\facets\QueryType\QueryTypePluginManager;
 use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\DefaultFilterConfigurationBuilder;
@@ -35,16 +36,26 @@ class QuerySubscriber implements EventSubscriberInterface {
   protected $queryTypePluginManager;
 
   /**
+   * The facet source plugin manager.
+   *
+   * @var \Drupal\facets\FacetSource\FacetSourcePluginManager
+   */
+  protected $facetSourcePluginManager;
+
+  /**
    * QuerySubscriber Constructor.
    *
    * @param \Drupal\facets\FacetManager\DefaultFacetManager $facetManager
    *   The facets manager.
    * @param \Drupal\facets\QueryType\QueryTypePluginManager $queryTypePluginManager
    *   The query type plugin manager.
+   * @param \Drupal\facets\FacetSource\FacetSourcePluginManager $facetSourcePluginManager
+   *   The facet source plugin manager.
    */
-  public function __construct(DefaultFacetManager $facetManager, QueryTypePluginManager $queryTypePluginManager) {
+  public function __construct(DefaultFacetManager $facetManager, QueryTypePluginManager $queryTypePluginManager, FacetSourcePluginManager $facetSourcePluginManager) {
     $this->facetManager = $facetManager;
     $this->queryTypePluginManager = $queryTypePluginManager;
+    $this->facetSourcePluginManager = $facetSourcePluginManager;
   }
 
   /**
@@ -63,16 +74,26 @@ class QuerySubscriber implements EventSubscriberInterface {
    *   The query alter event.
    *
    * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+   * @SuppressWarnings(PHPMD.NPathComplexity)
    */
   public function queryAlter(QueryPreExecuteEvent $event) {
     $query = $event->getQuery();
     $ignored_filters = $preset_filter_values = [];
 
+    $source_id = $query->getSearchId();
+    if (!$this->facetSourcePluginManager->hasDefinition($source_id)) {
+      return;
+    }
+
+    $definition = $this->facetSourcePluginManager->getDefinition($source_id);
+    if ($definition['provider'] !== 'oe_list_pages') {
+      return;
+    }
+
     if (!$query->getIndex()->getServerInstance()->supportsFeature('search_api_facets')) {
       return;
     }
 
-    $source_id = $query->getSearchId();
     /** @var \Drupal\oe_list_pages\ListQueryOptionsInterface $query_options */
     $query_options = $query->getOption('oe_list_page_query_options');
 

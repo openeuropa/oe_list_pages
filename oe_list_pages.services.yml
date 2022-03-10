@@ -4,7 +4,7 @@ services:
     arguments: ['@facets.manager', '@entity_type.manager']
   oe_list_pages.query_event_subscriber:
     class: Drupal\oe_list_pages\EventSubscriber\QuerySubscriber
-    arguments: ['@facets.manager', '@plugin.manager.facets.query_type']
+    arguments: ['@facets.manager', '@plugin.manager.facets.query_type', '@plugin.manager.facets.facet_source']
     tags:
       - { name: event_subscriber }
   oe_list_pages.execution_manager:
