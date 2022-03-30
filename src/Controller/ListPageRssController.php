@@ -331,7 +331,7 @@ class ListPageRssController extends ControllerBase {
       return AccessResult::allowed()->addCacheableDependency($node);
     }
 
-    return AccessResult::forbidden($this->t('Node type does not have List Page meta configured.'))->addCacheableDependency($node);
+    return AccessResult::forbidden('Node type does not have List Page meta configured.')->addCacheableDependency($node);
   }
 
   /**

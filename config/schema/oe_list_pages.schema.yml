@@ -46,3 +46,11 @@ oe_list_pages.bundle_third_party_settings:
     default_filter_values_allowed:
       type: boolean
       label: 'Allow this content type to define default values for its filters'
+
+search_api.index.*.third_party.oe_list_pages:
+  type: mapping
+  label: 'List Pages settings'
+  mapping:
+    lists_pages_index:
+      type: boolean
+      label: 'Marks the index to be used for list pages.'

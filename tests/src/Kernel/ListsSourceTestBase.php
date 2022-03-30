@@ -50,6 +50,20 @@ abstract class ListsSourceTestBase extends EntityKernelTestBase {
   protected $listFactory;
 
   /**
+   * A test index.
+   *
+   * @var \Drupal\search_api\IndexInterface
+   */
+  protected $index;
+
+  /**
+   * A test index datasource.
+   *
+   * @var \Drupal\search_api\Datasource\DatasourceInterface
+   */
+  protected $datasource;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
@@ -89,6 +103,7 @@ abstract class ListsSourceTestBase extends EntityKernelTestBase {
 
     // Index new bundles.
     $this->index = Index::load('database_search_index');
+    $this->index->setThirdPartySetting('oe_list_pages', 'lists_pages_index', TRUE);
     $this->datasource = $this->index->getDatasource('entity:entity_test_mulrev_changed');
     $this->datasource->setConfiguration([
       'bundles' => [
