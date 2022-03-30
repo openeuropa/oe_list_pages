@@ -165,6 +165,11 @@ class ContextualFilterValuesProcessor {
    */
   protected function getCurrentEntityFromRoute() :?ContentEntityInterface {
     $route_name = $this->routeMatch->getRouteName();
+
+    if (empty($route_name)) {
+      return NULL;
+    }
+
     $parts = explode('.', $route_name);
     if (count($parts) !== 3 || $parts[0] !== 'entity') {
       return NULL;
