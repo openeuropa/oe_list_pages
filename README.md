@@ -1,7 +1,8 @@
 # OpenEuropa List Pages
 
 The OpenEuropa List Pages component allows creation and management of list pages with configurable options.
-List pages use Search api queries allowing to configure different query options like facet filtering for all the indexed content bundles.
+List pages use Search API queries allowing to configure different query options like facet filtering for all the indexed content bundles.
+In order for a Search API index to be used by list pages, it should be configured with the associated list page option in its settings page.
 
 ## Submodules
 
