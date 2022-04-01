@@ -31,3 +31,6 @@ options:
   index_directly: true
   cron_limit: 50
 server: database_server
+third_party_settings:
+  oe_list_pages:
+    lists_pages_index: true

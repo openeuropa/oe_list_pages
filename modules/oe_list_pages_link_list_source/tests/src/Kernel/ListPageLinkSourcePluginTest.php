@@ -74,6 +74,7 @@ class ListPageLinkSourcePluginTest extends KernelTestBase {
 
     /** @var \Drupal\search_api\IndexInterface $index */
     $index = Index::load('database_search_index');
+    $index->setThirdPartySetting('oe_list_pages', 'lists_pages_index', TRUE);
     $datasource = $this->container->get('search_api.plugin_helper')->createDatasourcePlugin($index, 'entity:entity_test_with_bundle');
     $datasource->setConfiguration([
       'bundles' => [

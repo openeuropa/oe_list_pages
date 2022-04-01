@@ -102,6 +102,10 @@ class ListSourceFactory implements ListSourceFactoryInterface {
 
     /** @var \Drupal\search_api\Entity\Index $index */
     foreach ($indexes as $index) {
+      $lists_pages_index = $index->getThirdPartySetting('oe_list_pages', 'lists_pages_index', FALSE);
+      if (!$lists_pages_index) {
+        continue;
+      }
       $datasources = $index->getDatasources();
       /** @var \Drupal\search_api\Datasource\DatasourceInterface $datasource */
       foreach ($datasources as $datasource) {

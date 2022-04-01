@@ -7,6 +7,9 @@
 
 declare(strict_types = 1);
 
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\search_api\IndexInterface;
+
 /**
  * Implements hook_facets_search_api_query_type_mapping_alter().
  */
@@ -59,4 +62,61 @@ function oe_list_pages_theme($existing, $type, $theme, $path) {
  */
 function oe_list_pages_locale_translation_projects_alter(&$projects) {
   $projects['oe_list_pages']['info']['interface translation server pattern'] = drupal_get_path('module', 'oe_list_pages') . '/translations/%project-%language.po';
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter().
+ */
+function oe_list_pages_form_search_api_index_form_alter(array &$form, FormStateInterface $form_state) {
+  /** @var \Drupal\search_api\IndexInterface $index */
+  $index = $form_state->getBuildInfo()['callback_object']->getEntity();
+  $form['options']['oe_list_pages'] = [
+    '#type' => 'details',
+    '#title' => t('List pages'),
+    'lists_pages_index' => [
+      '#type' => 'checkbox',
+      '#title' => t('List pages index'),
+      '#description' => t('Marks the index to be used for list pages. Please note that only one index should be used for this purpose that contain a given entity_type/bundle combination.'),
+      '#default_value' => $index->getThirdPartySetting('oe_list_pages', 'lists_pages_index', FALSE),
+    ],
+  ];
+
+  $form['#entity_builders'][] = 'oe_list_pages_form_search_api_index_form_submit';
+}
+
+/**
+ * Entity builder for the search index form.
+ *
+ * @param array $form
+ *   The form.
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   The form state.
+ */
+function oe_list_pages_form_search_api_index_form_submit(string $entity_type, IndexInterface $index, array &$form, FormStateInterface $form_state) {
+  $lists_pages_index = (bool) $form_state->getValue([
+    'options',
+    'oe_list_pages',
+    'lists_pages_index',
+  ]);
+  $index->setThirdPartySetting('oe_list_pages', 'lists_pages_index', $lists_pages_index);
+  // Remove from form state so search_api doesn't save it in its own config.
+  $form_state->unsetValue(['options', 'oe_list_pages']);
+}
+
+/**
+ * Implements template_preprocess_search_api_index().
+ */
+function oe_list_pages_preprocess_search_api_index(array &$variables) {
+  /** @var \Drupal\search_api\IndexInterface $index */
+  $index = $variables['index'];
+  $variables['table']['#rows'][] = [
+    'data' => [
+      [
+        'header' => TRUE,
+        'data' => t('List pages index'),
+      ],
+      $index->getThirdPartySetting('oe_list_pages', 'lists_pages_index', FALSE) ? t('Yes') : t('No'),
+    ],
+    'class' => ['list-pages-index'],
+  ];
 }
