@@ -1,0 +1,32 @@
+msgid ""
+msgstr ""
+
+msgid "Showing results @first to @last"
+msgstr "显示结果 @first 到 @last"
+
+msgid "Next"
+msgstr "下一页"
+
+msgid "Previous"
+msgstr "上一页"
+
+msgid "Go to page @number"
+msgstr "转到第 @number 页"
+
+msgid "Go to previous page"
+msgstr "转到上一页"
+
+msgid "Go to next page"
+msgstr "转到下一页"
+
+msgid "First"
+msgstr "第一"
+
+msgid "Last"
+msgstr "最后"
+
+msgid "Clear filters"
+msgstr "清除筛选器"
+
+msgid "Filter by"
+msgstr "过滤选项为"
