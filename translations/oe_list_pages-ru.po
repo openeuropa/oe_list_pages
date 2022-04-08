@@ -1,0 +1,32 @@
+msgid ""
+msgstr ""
+
+msgid "Showing results @first to @last"
+msgstr "Отображение результатов @first до @last"
+
+msgid "Next"
+msgstr "Следующая"
+
+msgid "Previous"
+msgstr "Предыдущая"
+
+msgid "Go to page @number"
+msgstr "Перейти на страницу @number"
+
+msgid "Go to previous page"
+msgstr "Перейти на предыдущую страницу"
+
+msgid "Go to next page"
+msgstr "Перейти на следующую страницу"
+
+msgid "First"
+msgstr "Первая"
+
+msgid "Last"
+msgstr "Последняя"
+
+msgid "Clear filters"
+msgstr "Очистить фильтры"
+
+msgid "Filter by"
+msgstr "Фильтровать по"
