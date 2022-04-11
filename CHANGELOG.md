@@ -1,11 +1,25 @@
 # Changelog
 
+## [0.17.0](https://github.com/openeuropa/oe_list_pages/tree/0.17.0) (2022-04-11)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.16.0...0.17.0)
+
+**Merged pull requests:**
+
+- EWPP-2125: Add translation for ru language. [\#135](https://github.com/openeuropa/oe_list_pages/pull/135) ([sergepavle](https://github.com/sergepavle))
+- EWPP-2101: Add translation for uk and zh languages. [\#134](https://github.com/openeuropa/oe_list_pages/pull/134) ([sergepavle](https://github.com/sergepavle))
+- EWPP-2100: Handle empty route context. [\#133](https://github.com/openeuropa/oe_list_pages/pull/133) ([hernani](https://github.com/hernani))
+- EWPP-2102: Restrict the indexes used by list pages. [\#132](https://github.com/openeuropa/oe_list_pages/pull/132) ([upchuk](https://github.com/upchuk))
+- EWPP-1843: Query subscriber only kicks in for list pages source. [\#131](https://github.com/openeuropa/oe_list_pages/pull/131) ([upchuk](https://github.com/upchuk))
+
 ## [0.16.0](https://github.com/openeuropa/oe_list_pages/tree/0.16.0) (2022-03-07)
 
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.15.0...0.16.0)
 
 **Merged pull requests:**
 
+- EWPP-2035: Use new release of link lists component. [\#130](https://github.com/openeuropa/oe_list_pages/pull/130) ([imanoleguskiza](https://github.com/imanoleguskiza))
+- Prepare release 0.16.0. [\#129](https://github.com/openeuropa/oe_list_pages/pull/129) ([imanoleguskiza](https://github.com/imanoleguskiza))
 - EWPP-2017: Fixing date filter second value initialization. [\#128](https://github.com/openeuropa/oe_list_pages/pull/128) ([upchuk](https://github.com/upchuk))
 
 ## [0.15.0](https://github.com/openeuropa/oe_list_pages/tree/0.15.0) (2022-02-17)
