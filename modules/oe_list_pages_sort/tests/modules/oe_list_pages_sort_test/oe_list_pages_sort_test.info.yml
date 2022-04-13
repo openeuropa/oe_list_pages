@@ -1,0 +1,9 @@
+name: OpenEuropa List Pages Sort Test
+description: Test module for OpenEuropa List Pages Sort form
+package: Testing
+
+type: module
+core_version_requirement: ^9.2
+
+dependencies:
+  - oe_list_pages_sort:oe_list_pages_sort

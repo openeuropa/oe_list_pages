@@ -101,6 +101,7 @@ class ListExecutionManager implements ListExecutionManagerInterface {
       $sort[$bundle_sort['name']] = $bundle_sort['direction'];
     }
 
+    // Call an event subscriber.
     $options = [
       'limit' => $limit,
       'page' => $current_page,
@@ -132,6 +133,23 @@ class ListExecutionManager implements ListExecutionManagerInterface {
     $storage = $this->entityTypeManager->getStorage($bundle_entity_type);
     $bundle = $storage->load($list_source->getBundle());
     return $bundle->getThirdPartySetting('oe_list_pages', 'default_sort', []);
+  }
+
+  /**
+   * Sets dynamic allowed values for the icon field.
+   *
+   * @return array
+   *   An array of possible key and value icon options.
+   *
+   * @see options_allowed_values()
+   */
+  protected function getSubmittedSortValue() {
+    $event = new ListPageSortValueSubmittedEvent();
+
+    $event_dispatcher = \Drupal::service('event_dispatcher');
+    $event_dispatcher->dispatch(ListPageSortValueSubmittedEvent::class, $event);
+
+    return $event->getValue();
   }
 
 }

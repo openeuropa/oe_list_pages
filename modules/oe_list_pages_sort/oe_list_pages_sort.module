@@ -1,0 +1,52 @@
+<?php
+
+/**
+ * @file
+ * Install and update functions for oe_list_page_sort module.
+ */
+
+declare(strict_types = 1);
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\oe_list_pages\Form\ListPageConfigurationSubForm;
+use Drupal\oe_list_pages\ListPageConfiguration;
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter() for oe_list_page nodes form.
+ */
+function oe_list_pages_sort_form_node_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if (!isset($form['emr_plugins_oe_list_page'])) {
+    return;
+  }
+
+  /** @var \Drupal\node\NodeInterface $list_page */
+  $list_page = $form_state->getFormObject()->getEntity();
+  $configuration = ListPageConfiguration::fromEntity($list_page);
+
+  $list_source_factory = \Drupal::service('oe_list_pages.list_source.factory');
+  $list_source = $list_source_factory->get('node', $configuration->getBundle());
+
+  $form['emr_plugins_oe_list_page']['wrapper']['sort_filters'] = [
+    '#type' => 'checkboxes',
+    '#options' => $list_source->getAvailableFilters(),
+    '#title' => t('Select sort exposed options'),
+    '#default_value' => [],
+  ];
+
+  $options = [];
+  foreach ($list_source->getAvailableFilters() as $key => $availableFilter) {
+    $options[] = ListPageConfigurationSubForm::generateSortMachineName([
+      'name' => $availableFilter,
+      'direction' => 'ASC',
+    ]);
+    $options[] = ListPageConfigurationSubForm::generateSortMachineName([
+      'name' => $availableFilter,
+      'direction' => 'DESC',
+    ]);
+  }
+
+  $form['emr_plugins_oe_list_page']['wrapper']['sort']['#multiple'] = TRUE;
+  $form['emr_plugins_oe_list_page']['wrapper']['sort']['#options'] = $options;
+  $form['emr_plugins_oe_list_page']['wrapper']['sort']['#access'] = TRUE;
+
+}

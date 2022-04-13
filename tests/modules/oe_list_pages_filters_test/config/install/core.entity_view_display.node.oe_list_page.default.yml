@@ -35,6 +35,11 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
+  'extra_field_oe_list_page_sort_form:node:oe_list_page':
+    weight: 3
+    region: content
+    settings: { }
+    third_party_settings: { }
   links:
     weight: 0
     region: content

@@ -1,0 +1,9 @@
+name: OpenEuropa List Page sort
+description: OpenEuropa List Page add an exposed form to allow to sort list result.
+package: OpenEuropa
+
+type: module
+core_version_requirement: ^9.2
+
+dependencies:
+  - oe_list_pages:oe_list_pages
