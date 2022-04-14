@@ -5,10 +5,12 @@ declare(strict_types = 1);
 namespace Drupal\oe_list_pages_event_subscriber_test\EventSubscriber;
 
 use Drupal\Core\State\StateInterface;
+use Drupal\oe_list_pages\ListPageDisallowSortEvent;
 use Drupal\oe_list_pages\ListPageRssAlterEvent;
 use Drupal\oe_list_pages\ListPageEvents;
 use Drupal\oe_list_pages\ListPageRssItemAlterEvent;
 use Drupal\oe_list_pages\ListPageSortAlterEvent;
+use Drupal\oe_list_pages\ListPageSortOptionsResolver;
 use Drupal\oe_list_pages\ListPageSourceAlterEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -44,6 +46,7 @@ class ListPagesTestSubscriber implements EventSubscriberInterface {
       ListPageEvents::ALTER_RSS_BUILD => ['onRssBuildAlter'],
       ListPageEvents::ALTER_RSS_ITEM_BUILD => ['onRssItemBuildAlter'],
       ListPageEvents::ALTER_SORT_OPTIONS => ['onSortOptionsAlter'],
+      ListPageEvents::DISALLOW_EXPOSED_SORT => ['disallowExposedSort'],
     ];
   }
 
@@ -127,10 +130,29 @@ class ListPagesTestSubscriber implements EventSubscriberInterface {
    */
   public function onSortOptionsAlter(ListPageSortAlterEvent $event): void {
     $alter = (bool) $this->state->get('oe_list_pages_test.alter_sort_options');
-    if ($alter) {
+    if ($alter && $event->getScope() === ListPageSortOptionsResolver::SCOPE_CONFIGURATION) {
       $options = $event->getOptions();
       $options['field_test_boolean__DESC'] = 'Boolean';
       $event->setOptions($options);
+    }
+
+    if ($alter && $event->getScope() === ListPageSortOptionsResolver::SCOPE_USER) {
+      $options = $event->getOptions();
+      $options['field_test_boolean__DESC'] = 'From 1 to 0';
+      $event->setOptions($options);
+    }
+  }
+
+  /**
+   * Event handler for disallowing frontend sort.
+   *
+   * @param \Drupal\oe_list_pages\ListPageDisallowSortEvent $event
+   *   The event.
+   */
+  public function disallowExposedSort(ListPageDisallowSortEvent $event): void {
+    $disallow = $this->state->get('oe_list_pages_test.disallow_frontend_sort', FALSE);
+    if ($disallow) {
+      $event->disallow();
     }
   }
 

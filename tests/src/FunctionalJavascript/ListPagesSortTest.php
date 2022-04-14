@@ -40,9 +40,11 @@ class ListPagesSortTest extends ListPagePluginFormTestBase {
   protected $defaultTheme = 'stark';
 
   /**
-   * Tests selecting the sort when creating a list page.
+   * {@inheritdoc}
    */
-  public function testSortSelection(): void {
+  protected function setUp() {
+    parent::setUp();
+
     // Create some nodes to test the sorting.
     $date = new DrupalDateTime('20-10-2020');
     $date->modify('- 1 hour');
@@ -95,7 +97,12 @@ class ListPagesSortTest extends ListPagePluginFormTestBase {
     $index = Index::load('node');
     // Index the nodes.
     $index->indexItems();
+  }
 
+  /**
+   * Tests selecting the sort when creating a list page.
+   */
+  public function testBackendSort(): void {
     // Log in and create a list page.
     $admin = $this->createUser([], NULL, TRUE);
     $this->drupalLogin($admin);
@@ -191,6 +198,120 @@ class ListPagesSortTest extends ListPagePluginFormTestBase {
     $this->getSession()->getPage()->selectFieldOption('Sort', 'created__DESC');
     $this->getSession()->getPage()->pressButton('Save');
     $this->assertEmpty($this->getSortInformationFromNodeMeta('Node title'));
+    $this->assertResultsAreInCorrectOrder([
+      'First by created',
+      'Second by created',
+      'Third by created',
+      'Fourth by created',
+      'First by boolean field',
+    ]);
+  }
+
+  /**
+   * Tests the sort for the front end users.
+   */
+  public function testFrontendSort(): void {
+    $admin = $this->createUser([], NULL, TRUE);
+    $this->drupalLogin($admin);
+    $this->goToListPageConfiguration();
+    $this->getSession()->getPage()->selectFieldOption('Source entity type', 'node');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->selectFieldOption('Source bundle', 'content_type_one');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    // Since we don't disallow the sort exposing, assert the checkbox is there.
+    $this->assertSession()->checkboxNotChecked('Expose sort');
+    $this->getSession()->getPage()->fillField('Title', 'Node title');
+    $this->getSession()->getPage()->pressButton('Save');
+    $this->assertSession()->pageTextContains('List page Node title has been created.');
+    $this->assertResultsAreInCorrectOrder([
+      'First by created',
+      'Second by created',
+      'Third by created',
+      'Fourth by created',
+      'First by boolean field',
+    ]);
+
+    // Since we don't have any other sort options and the sort is not even
+    // exposed, we shouldn't see the sort element.
+    $this->assertSession()->fieldNotExists('Sort by');
+
+    // Disallow the sort exposing, assert the form checkbox is gone, then allow
+    // back to expose the sort.
+    \Drupal::state()->set('oe_list_pages_test.disallow_frontend_sort', TRUE);
+    $node = $this->drupalGetNodeByTitle('Node title');
+    $this->drupalGet($node->toUrl('edit-form'));
+    $this->assertSession()->fieldNotExists('Expose sort');
+    \Drupal::state()->set('oe_list_pages_test.disallow_frontend_sort', FALSE);
+    $this->getSession()->reload();
+    $this->assertSession()->fieldExists('Expose sort');
+    $this->clickLink('List Page');
+    $this->getSession()->getPage()->checkField('Expose sort');
+    $this->getSession()->getPage()->pressButton('Save');
+    $this->assertSession()->pageTextContains('List page Node title has been updated.');
+
+    $this->drupalGet($node->toUrl());
+    // Still no exposed sort as we only have 1 sort option.
+    $this->assertSession()->fieldNotExists('Sort by');
+
+    // Implement the subscriber and provide another sort option.
+    \Drupal::state()->set('oe_list_pages_test.alter_sort_options', TRUE);
+    $this->getSession()->reload();
+    $this->assertSession()->fieldExists('Sort by');
+    $this->assertEquals([
+      'created__DESC' => 'Default',
+      'field_test_boolean__DESC' => 'From 1 to 0',
+    ], $this->getSelectOptions('Sort by'));
+
+    // Disallow the sort and reload to assert the exposed sort is gone.
+    \Drupal::state()->set('oe_list_pages_test.disallow_frontend_sort', TRUE);
+    $this->getSession()->reload();
+    $this->assertSession()->fieldNotExists('Sort by');
+
+    \Drupal::state()->set('oe_list_pages_test.disallow_frontend_sort', FALSE);
+    $this->getSession()->reload();
+    $this->assertSession()->fieldExists('Sort by');
+
+    // Change the sort.
+    $this->getSession()->getPage()->selectFieldOption('Sort by', 'From 1 to 0');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->assertResultsAreInCorrectOrder([
+      'First by boolean field',
+      'First by created',
+      'Second by created',
+      'Third by created',
+      'Fourth by created',
+    ]);
+
+    // Assert that if there is no valid sort in the URL, the sort doesn't take
+    // effect.
+    $url = $node->toUrl();
+    // First, a sort that works.
+    $sort = ['name' => 'field_test_boolean', 'direction' => 'DESC'];
+    $url->setOption('query', ['sort' => $sort]);
+    $this->drupalGet($url);
+    $this->assertResultsAreInCorrectOrder([
+      'First by boolean field',
+      'First by created',
+      'Second by created',
+      'Third by created',
+      'Fourth by created',
+    ]);
+
+    // Next, a sort field that doesn't exist.
+    $sort = ['name' => 'not_existing', 'direction' => 'DESC'];
+    $url->setOption('query', ['sort' => $sort]);
+    $this->drupalGet($url);
+    $this->assertResultsAreInCorrectOrder([
+      'First by created',
+      'Second by created',
+      'Third by created',
+      'Fourth by created',
+      'First by boolean field',
+    ]);
+    // Finally, a wrong direction.
+    $sort = ['name' => 'field_test_boolean', 'direction' => 'WRONG'];
+    $url->setOption('query', ['sort' => $sort]);
+    $this->drupalGet($url);
     $this->assertResultsAreInCorrectOrder([
       'First by created',
       'Second by created',

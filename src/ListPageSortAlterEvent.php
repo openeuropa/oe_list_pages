@@ -33,6 +33,17 @@ class ListPageSortAlterEvent extends Event {
   protected $options = [];
 
   /**
+   * The scope of the sorting options.
+   *
+   * The sorting options may differ for when configuring the list page by an
+   * admin versus the options presented to users in the frontend. So the two
+   * possible options are SCOPE_CONFIGURATION or SCOPE_USER.
+   *
+   * @var string
+   */
+  protected $scope = ListPageSortOptionsResolver::SCOPE_CONFIGURATION;
+
+  /**
    * Constructs a new ListPageSourceAlterEvent.
    *
    * @param string $entity_type
@@ -83,6 +94,26 @@ class ListPageSortAlterEvent extends Event {
    */
   public function setOptions(array $options): void {
     $this->options = $options;
+  }
+
+  /**
+   * Returns the scope.
+   *
+   * @return string
+   *   The scope.
+   */
+  public function getScope(): string {
+    return $this->scope;
+  }
+
+  /**
+   * Sets the scope.
+   *
+   * @param string $scope
+   *   The scope.
+   */
+  public function setScope(string $scope): void {
+    $this->scope = $scope;
   }
 
 }

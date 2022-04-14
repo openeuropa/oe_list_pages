@@ -83,6 +83,14 @@ class ListPageConfiguration {
    */
   protected $sort = [];
 
+  // phpcs:disable Drupal.NamingConventions.ValidVariableName.LowerCamelName
+  /**
+   * Whether the sort is exposed to the frontend.
+   *
+   * @var bool
+   */
+  protected $exposed_sort = FALSE;
+
   /**
    * A map of configuration values specific to various subsystems.
    *
@@ -131,6 +139,7 @@ class ListPageConfiguration {
       'limit' => $wrapper_configuration['limit'] ?? NULL,
       'page' => $wrapper_configuration['page'] ?? NULL,
       'sort' => $wrapper_configuration['sort'] ?? [],
+      'exposed_sort' => $wrapper_configuration['exposed_sort'] ?? FALSE,
     ];
 
     $exclude = [
@@ -324,6 +333,26 @@ class ListPageConfiguration {
    */
   public function setSort(array $sort): void {
     $this->sort = $sort;
+  }
+
+  /**
+   * Returns whether the sort is exposed.
+   *
+   * @return bool
+   *   If the sort is exposed.
+   */
+  public function isExposedSort(): bool {
+    return $this->exposed_sort;
+  }
+
+  /**
+   * Sets the exposed sort.
+   *
+   * @param bool $exposed_sort
+   *   The exposed sort.
+   */
+  public function setExposedSort(bool $exposed_sort): void {
+    $this->exposed_sort = $exposed_sort;
   }
 
   /**

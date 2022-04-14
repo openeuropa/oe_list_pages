@@ -19,6 +19,7 @@ use Drupal\facets\Processor\ProcessorPluginManager;
 use Drupal\facets\UrlProcessor\UrlProcessorPluginManager;
 use Drupal\facets\Utility\FacetsUrlGenerator;
 use Drupal\oe_list_pages\Form\ListFacetsForm;
+use Drupal\oe_list_pages\Form\ListPageSortForm;
 use Drupal\oe_list_pages\Plugin\facets\processor\DefaultStatusProcessorInterface;
 use Drupal\oe_list_pages\Plugin\facets\widget\FulltextWidget;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -111,6 +112,13 @@ class ListBuilder implements ListBuilderInterface {
   protected $multiselectFilterManager;
 
   /**
+   * The list source factory.
+   *
+   * @var \Drupal\oe_list_pages\ListSourceFactory
+   */
+  protected $listSourceFactory;
+
+  /**
    * ListBuilder constructor.
    *
    * @param \Drupal\oe_list_pages\ListExecutionManagerInterface $listExecutionManager
@@ -135,10 +143,12 @@ class ListBuilder implements ListBuilderInterface {
    *   The URL processor manager.
    * @param \Drupal\oe_list_pages\MultiselectFilterFieldPluginManager $multiselectFilterManager
    *   The multiselect filter field manager.
+   * @param \Drupal\oe_list_pages\ListSourceFactory $listSourceFactory
+   *   The list source factory.
    *
    * @SuppressWarnings(PHPMD.ExcessiveParameterList)
    */
-  public function __construct(ListExecutionManagerInterface $listExecutionManager, EntityTypeManager $entityTypeManager, PagerManagerInterface $pager, EntityRepositoryInterface $entityRepository, FormBuilderInterface $formBuilder, DefaultFacetManager $facetManager, FacetsUrlGenerator $facetsUrlGenerator, ProcessorPluginManager $processorManager, RequestStack $requestStack, UrlProcessorPluginManager $urlProcessorManager, MultiselectFilterFieldPluginManager $multiselectFilterManager) {
+  public function __construct(ListExecutionManagerInterface $listExecutionManager, EntityTypeManager $entityTypeManager, PagerManagerInterface $pager, EntityRepositoryInterface $entityRepository, FormBuilderInterface $formBuilder, DefaultFacetManager $facetManager, FacetsUrlGenerator $facetsUrlGenerator, ProcessorPluginManager $processorManager, RequestStack $requestStack, UrlProcessorPluginManager $urlProcessorManager, MultiselectFilterFieldPluginManager $multiselectFilterManager, ListSourceFactory $listSourceFactory) {
     $this->listExecutionManager = $listExecutionManager;
     $this->entityTypeManager = $entityTypeManager;
     $this->pager = $pager;
@@ -150,6 +160,7 @@ class ListBuilder implements ListBuilderInterface {
     $this->requestStack = $requestStack;
     $this->urlProcessorManager = $urlProcessorManager;
     $this->multiselectFilterManager = $multiselectFilterManager;
+    $this->listSourceFactory = $listSourceFactory;
   }
 
   /**
@@ -162,8 +173,14 @@ class ListBuilder implements ListBuilderInterface {
 
     $cache = new CacheableMetadata();
     $cache->addCacheTags($entity->getEntityType()->getListCacheTags());
+    $cache->addCacheContexts(['url.query_args']);
 
     $configuration = ListPageConfiguration::fromEntity($entity);
+    $sort = $this->getSortFromUrl($configuration);
+    // The sort could potentially be overridden from the URL.
+    if ($sort) {
+      $configuration->setSort($sort);
+    }
     $list_execution = $this->listExecutionManager->executeList($configuration);
     if (empty($list_execution)) {
       $cache->applyTo($build);
@@ -438,6 +455,20 @@ class ListBuilder implements ListBuilderInterface {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function buildSortElement(ContentEntityInterface $entity): array {
+    $cache = new CacheableMetadata();
+    $cache->addCacheContexts(['url.query_args']);
+    $configuration = ListPageConfiguration::fromEntity($entity);
+    $list_source = $this->listSourceFactory->get($configuration->getEntityType(), $configuration->getBundle());
+    $current_sort = $this->getSortFromUrl($configuration);
+    $form = $this->formBuilder->getForm(ListPageSortForm::class, $configuration, $list_source, $current_sort);
+    $cache->applyTo($form);
+    return $form;
+  }
+
+  /**
    * Returns the display label of a facet result.
    *
    * At this point, we can expect the facet to have already been built so it
@@ -525,6 +556,37 @@ class ListBuilder implements ListBuilderInterface {
     }
 
     return FALSE;
+  }
+
+  /**
+   * Returns sorting information from the URL.
+   *
+   * @param \Drupal\oe_list_pages\ListPageConfiguration $configuration
+   *   The list page configuration.
+   *
+   * @return array
+   *   The sort data.
+   */
+  protected function getSortFromUrl(ListPageConfiguration $configuration): array {
+    $sort = $this->requestStack->getCurrentRequest()->query->get('sort');
+    if (!is_array($sort)) {
+      return [];
+    }
+
+    if (!isset($sort['name']) || !isset($sort['direction'])) {
+      return [];
+    }
+
+    $list_source = $this->listSourceFactory->get($configuration->getEntityType(), $configuration->getBundle());
+    $index = $list_source->getIndex();
+    $allowed_directions = ['ASC', 'DESC'];
+    if (!$index->getField($sort['name']) || !in_array($sort['direction'], $allowed_directions)) {
+      // In case a bad field name is passed or one that doesn't exist in the
+      // index, we don't want to override the preset sort of the list page.
+      return [];
+    }
+
+    return $sort;
   }
 
 }
