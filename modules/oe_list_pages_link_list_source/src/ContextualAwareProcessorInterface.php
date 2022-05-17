@@ -19,10 +19,12 @@ interface ContextualAwareProcessorInterface {
    *
    * @param \Drupal\Core\Entity\ContentEntityInterface $entity
    *   The entity.
+   * @param string $source
+   *   The source from where the contextual filter value should come.
    *
    * @return array
    *   The filter values.
    */
-  public function getContextualValues(ContentEntityInterface $entity): array;
+  public function getContextualValues(ContentEntityInterface $entity, string $source = ContextualPresetFilter::FILTER_SOURCE_FIELD_VALUES): array;
 
 }

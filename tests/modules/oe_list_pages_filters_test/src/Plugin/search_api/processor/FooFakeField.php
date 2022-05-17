@@ -6,6 +6,7 @@ namespace Drupal\oe_list_pages_filters_test\Plugin\search_api\processor;
 
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\oe_list_pages_link_list_source\ContextualAwareProcessorInterface;
+use Drupal\oe_list_pages_link_list_source\ContextualPresetFilter;
 use Drupal\search_api\Datasource\DatasourceInterface;
 use Drupal\search_api\Item\ItemInterface;
 use Drupal\search_api\Processor\ProcessorPluginBase;
@@ -75,7 +76,7 @@ class FooFakeField extends ProcessorPluginBase implements ContextualAwareProcess
   /**
    * {@inheritdoc}
    */
-  public function getContextualValues(ContentEntityInterface $entity): array {
+  public function getContextualValues(ContentEntityInterface $entity, string $source = ContextualPresetFilter::FILTER_SOURCE_FIELD_VALUES): array {
     // Check if the entity has a test contextual field that we can return
     // a value from. Otherwise default to the entity ID.
     if ($entity->hasField('field_test_contextual_filter')) {
