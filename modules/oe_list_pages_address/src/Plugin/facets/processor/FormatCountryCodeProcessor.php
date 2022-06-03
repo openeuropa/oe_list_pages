@@ -84,9 +84,10 @@ class FormatCountryCodeProcessor extends ProcessorPluginBase implements BuildPro
   public function supportsFacet(FacetInterface $facet) {
     $data_definition = $facet->getDataDefinition();
     if (in_array($data_definition->getDataType(), [
-      'string',
-      'field_item:string',
+      'field_item:address',
       'field_item:address_country',
+      'field_item:string',
+      'string',
     ])) {
       return TRUE;
     }
