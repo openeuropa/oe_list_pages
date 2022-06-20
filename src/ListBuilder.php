@@ -155,15 +155,13 @@ class ListBuilder implements ListBuilderInterface {
   /**
    * {@inheritdoc}
    */
-  public function buildList(ContentEntityInterface $entity): array {
+  public function buildList(ListPageConfiguration $configuration): array {
     $build = [
       'list' => [],
     ];
 
     $cache = new CacheableMetadata();
-    $cache->addCacheTags($entity->getEntityType()->getListCacheTags());
 
-    $configuration = ListPageConfiguration::fromEntity($entity);
     $list_execution = $this->listExecutionManager->executeList($configuration);
     if (empty($list_execution)) {
       $cache->applyTo($build);
@@ -177,16 +175,20 @@ class ListBuilder implements ListBuilderInterface {
     }
 
     $query = $list_execution->getQuery();
+    $cache->addCacheableDependency($query);
     $result = $list_execution->getResults();
     $configuration = $list_execution->getConfiguration();
 
     // Determine the view mode to render with and the sorting.
+    $view_mode = NULL;
     $bundle_entity_type = $this->entityTypeManager->getDefinition($configuration->getEntityType())->getBundleEntityType();
-    $storage = $this->entityTypeManager->getStorage($bundle_entity_type);
-    $bundle = $storage->load($configuration->getBundle());
-    $view_mode = $bundle->getThirdPartySetting('oe_list_pages', 'default_view_mode', 'teaser');
-    $cache->addCacheableDependency($query);
-    $cache->addCacheableDependency($bundle);
+    if ($bundle_entity_type) {
+      $storage = $this->entityTypeManager->getStorage($bundle_entity_type);
+      $bundle = $storage->load($configuration->getBundle());
+      $view_mode = $bundle->getThirdPartySetting('oe_list_pages', 'default_view_mode', 'teaser');
+      $cache->addCacheableDependency($bundle);
+    }
+
     $cache->addCacheTags(['search_api_list:' . $query->getIndex()->id()]);
 
     $this->pager->createPager($result->getResultCount(), $query->getOption('limit'));
@@ -223,10 +225,9 @@ class ListBuilder implements ListBuilderInterface {
   /**
    * {@inheritdoc}
    */
-  public function buildFiltersForm(ContentEntityInterface $entity): array {
+  public function buildFiltersForm(ListPageConfiguration $configuration): array {
     $build = $ignored_filters = $exposed_filters = [];
 
-    $configuration = ListPageConfiguration::fromEntity($entity);
     $list_execution = $this->listExecutionManager->executeList($configuration);
     $list_source = $list_execution->getListSource();
 
@@ -242,9 +243,12 @@ class ListBuilder implements ListBuilderInterface {
     }
     else {
       $bundle_entity_type = $this->entityTypeManager->getDefinition($configuration->getEntityType())->getBundleEntityType();
-      $storage = $this->entityTypeManager->getStorage($bundle_entity_type);
-      $bundle = $storage->load($configuration->getBundle());
-      $exposed_filters = $bundle->getThirdPartySetting('oe_list_pages', 'default_exposed_filters', []);
+      if ($bundle_entity_type) {
+        $storage = $this->entityTypeManager->getStorage($bundle_entity_type);
+        $bundle = $storage->load($configuration->getBundle());
+        $exposed_filters = $bundle->getThirdPartySetting('oe_list_pages', 'default_exposed_filters', []);
+      }
+
     }
 
     // By default ignore all filters.
@@ -268,12 +272,11 @@ class ListBuilder implements ListBuilderInterface {
    * @SuppressWarnings(PHPMD.CyclomaticComplexity)
    * @SuppressWarnings(PHPMD.NPathComplexity)
    */
-  public function buildSelectedFilters(ContentEntityInterface $entity): array {
+  public function buildSelectedFilters(ListPageConfiguration $configuration): array {
     $build = [];
     $cache = new CacheableMetadata();
     $cache->addCacheContexts(['url']);
 
-    $configuration = ListPageConfiguration::fromEntity($entity);
     $active_filters = [];
 
     // First, determine all the active values for filters that have a "default
@@ -380,12 +383,11 @@ class ListBuilder implements ListBuilderInterface {
    * @SuppressWarnings(PHPMD.CyclomaticComplexity)
    * @SuppressWarnings(PHPMD.NPathComplexity)
    */
-  public function buildPagerInfo(ContentEntityInterface $entity): array {
+  public function buildPagerInfo(ListPageConfiguration $configuration): array {
     $cache = new CacheableMetadata();
     $cache->addCacheContexts(['url']);
     $build = [];
 
-    $configuration = ListPageConfiguration::fromEntity($entity);
     $list_execution = $this->listExecutionManager->executeList($configuration);
     $results = $list_execution->getResults();
     if (!$results->getResultCount()) {

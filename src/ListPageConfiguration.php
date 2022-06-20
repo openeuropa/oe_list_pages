@@ -91,6 +91,11 @@ class ListPageConfiguration {
   protected $extra = [];
 
   /**
+   * @var \Drupal\oe_list_pages\ListSourceInterface|NULL
+   */
+  protected $list_source = NULL;
+
+  /**
    * ListPageConfiguration constructor.
    *
    * @param array $configuration
@@ -377,6 +382,20 @@ class ListPageConfiguration {
       'sort' => $this->getSort(),
       'extra' => $this->getExtra(),
     ];
+  }
+
+  /**
+   * @return \Drupal\oe_list_pages\ListSourceInterface|NULL
+   */
+  public function getListSource(): ?ListSourceInterface {
+    return $this->list_source;
+  }
+
+  /**
+   * @param \Drupal\oe_list_pages\ListSourceInterface|NULL $list_source
+   */
+  public function setListSource(?ListSourceInterface $list_source): void {
+    $this->list_source = $list_source;
   }
 
 }
