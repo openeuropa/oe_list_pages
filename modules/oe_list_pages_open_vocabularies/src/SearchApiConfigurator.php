@@ -72,8 +72,10 @@ class SearchApiConfigurator {
    *   The open vocabulary association.
    * @param string $field_id
    *   The field_id.
+   * @param \Drupal\search_api\IndexInterface $index
+   *   The index.
    */
-  public function updateConfig(OpenVocabularyAssociationInterface $association, string $field_id): void {
+  public function updateConfig(OpenVocabularyAssociationInterface $association, string $field_id, IndexInterface $index = NULL): void {
     // Based on the list source, determine the correct index to create the
     // field in.
     $field_config = $this->entityTypeManager->getStorage('field_config')->load($field_id);
@@ -84,8 +86,11 @@ class SearchApiConfigurator {
     $this->entityFieldManager->clearCachedFieldDefinitions();
     /** @var \Drupal\oe_list_pages\ListSourceInterface $list_source */
     $list_source = $this->listSourceFactory->get($entity_type, $bundle);
-    /** @var \Drupal\search_api\IndexInterface $index */
-    $index = $list_source->getIndex();
+
+    if (empty($index)) {
+      /** @var \Drupal\search_api\IndexInterface $index */
+      $index = $list_source->getIndex();
+    }
 
     // Generate the field id.
     /* @TODO: Extract this id generation to a common method. */
