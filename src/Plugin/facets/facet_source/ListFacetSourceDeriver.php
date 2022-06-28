@@ -22,6 +22,10 @@ class ListFacetSourceDeriver extends FacetSourceDeriverBase {
     // Loop through all available data sources from enabled indexes.
     $indexes = $index_storage->loadByProperties(['status' => 1]);
     foreach ($indexes as $index) {
+      $lists_pages_index = $index->getThirdPartySetting('oe_list_pages', 'lists_pages_index', FALSE);
+      if (!$lists_pages_index) {
+        continue;
+      }
       $datasources = $index->getDatasources();
       /** @var \Drupal\search_api\Datasource\DatasourceInterface $datasource */
       foreach ($datasources as $datasource) {
