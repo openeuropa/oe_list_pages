@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.18.0](https://github.com/openeuropa/oe_list_pages/tree/0.18.0) (2022-06-28)
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.17.0...0.18.0)
+
+**Merged pull requests:**
+
+- EWPP-2393: Improve support for active indexes used for list pages. [\#143](https://github.com/openeuropa/oe_list_pages/pull/143) ([hernani](https://github.com/hernani))
+- OEL-1677: Add support for Address fields. [\#139](https://github.com/openeuropa/oe_list_pages/pull/139) ([drishu](https://github.com/drishu))
+
 ## [0.17.0](https://github.com/openeuropa/oe_list_pages/tree/0.17.0) (2022-04-11)
 
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.16.0...0.17.0)
