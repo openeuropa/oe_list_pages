@@ -1,0 +1,32 @@
+msgid ""
+msgstr ""
+
+msgid "Clear filters"
+msgstr "Filtere läschen"
+
+msgid "Filter by"
+msgstr "Filteren no"
+
+msgid "Showing results @first to @last"
+msgstr "Resultater @first bis @last ginn ugewisen"
+
+msgid "Next"
+msgstr "Nächst"
+
+msgid "Previous"
+msgstr "Viregt"
+
+msgid "Go to page @number"
+msgstr "Op d’Säit @number wiesselen"
+
+msgid "Go to previous page"
+msgstr "Op déi viregt Säit wiesselen"
+
+msgid "Go to next page"
+msgstr "Op déi nächst Säit wiesselen"
+
+msgid "First"
+msgstr "Éischt"
+
+msgid "Last"
+msgstr "Lescht"
