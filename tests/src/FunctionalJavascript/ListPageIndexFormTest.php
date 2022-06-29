@@ -55,13 +55,14 @@ class ListPageIndexFormTest extends BrowserTestBase {
     $column = $this->getSession()->getPage()->find('css', 'table.search-api-index-summary')->find('css', 'tr.list-pages-index td');
     // By default, the index is marked as Yes for list pages.
     $this->assertEquals('Yes', $column->getText());
+    $index = Index::load('node');
+    $this->assertNull($index->getOptions()['oe_list_pages'] ?? NULL);
 
     // Edit the index and uncheck the box.
     $this->drupalGet('admin/config/search/search-api/index/node/edit');
     $this->assertSession()->checkboxChecked('options[oe_list_pages][lists_pages_index]');
     $this->getSession()->getPage()->uncheckField('options[oe_list_pages][lists_pages_index]');
     $this->getSession()->getPage()->pressButton('Save');
-    file_put_contents('/var/www/html/print.html', $this->getSession()->getPage()->getContent());
 
     $this->assertSession()->pageTextContains('The index was successfully saved.');
     // Assert the index is no longer marked as such.
@@ -69,6 +70,20 @@ class ListPageIndexFormTest extends BrowserTestBase {
     $this->assertEquals('No', $column->getText());
     $index = Index::load('node');
     $this->assertFalse((bool) $index->getThirdPartySetting('oe_list_pages', 'lists_pages_index'));
+    $this->assertNull($index->getOptions()['oe_list_pages'] ?? NULL);
+
+    // Edit again and mark it back to yes.
+    $this->drupalGet('admin/config/search/search-api/index/node/edit');
+    $this->assertSession()->checkboxNotChecked('options[oe_list_pages][lists_pages_index]');
+    $this->getSession()->getPage()->checkField('options[oe_list_pages][lists_pages_index]');
+    $this->getSession()->getPage()->pressButton('Save');
+    $this->assertSession()->pageTextContains('The index was successfully saved.');
+    // Assert the index is is marked correctly.
+    $column = $this->getSession()->getPage()->find('css', 'table.search-api-index-summary')->find('css', 'tr.list-pages-index td');
+    $this->assertEquals('Yes', $column->getText());
+    $index = Index::load('node');
+    $this->assertTrue((bool) $index->getThirdPartySetting('oe_list_pages', 'lists_pages_index'));
+    $this->assertNull($index->getOptions()['oe_list_pages'] ?? NULL);
   }
 
 }

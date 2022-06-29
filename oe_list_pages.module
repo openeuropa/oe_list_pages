@@ -81,7 +81,7 @@ function oe_list_pages_form_search_api_index_form_alter(array &$form, FormStateI
     ],
   ];
 
-  $form['#entity_builders'][] = 'oe_list_pages_form_search_api_index_form_submit';
+  $form['#entity_builders'][] = 'oe_list_pages_form_search_api_index_form_entity_builder';
 }
 
 /**
@@ -92,14 +92,22 @@ function oe_list_pages_form_search_api_index_form_alter(array &$form, FormStateI
  * @param \Drupal\Core\Form\FormStateInterface $form_state
  *   The form state.
  */
-function oe_list_pages_form_search_api_index_form_submit(string $entity_type, IndexInterface $index, array &$form, FormStateInterface $form_state) {
+function oe_list_pages_form_search_api_index_form_entity_builder(string $entity_type, IndexInterface $index, array &$form, FormStateInterface $form_state) {
+  $already_set = $form_state->get('lists_pages_index_set');
+  if ($already_set) {
+    return;
+  }
   $lists_pages_index = (bool) $form_state->getValue([
     'options',
     'oe_list_pages',
     'lists_pages_index',
   ]);
   $index->setThirdPartySetting('oe_list_pages', 'lists_pages_index', $lists_pages_index);
-  // Remove from form state so search_api doesn't save it in its own config.
+  // The entity builder gets called multiple times so we keep track if we
+  // already set our value. This is important because we also need to remove
+  // the option from the form state so search api doesn't save it in its own
+  // options config.
+  $form_state->set('lists_pages_index_set', TRUE);
   $form_state->unsetValue(['options', 'oe_list_pages']);
 }
 
