@@ -1,19 +1,27 @@
-# Changelog
+# Change Log
+
+## [0.18.1](https://github.com/openeuropa/oe_list_pages/tree/0.18.1) (2022-06-29)
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.18.0...0.18.1)
+
+**Merged pull requests:**
+
+- EWPP-2102: Fixing the form restricting the index to list pages. [\#140](https://github.com/openeuropa/oe_list_pages/pull/140) ([upchuk](https://github.com/upchuk))
 
 ## [0.18.0](https://github.com/openeuropa/oe_list_pages/tree/0.18.0) (2022-06-28)
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.17.0...0.18.0)
 
 **Merged pull requests:**
 
+- EWPP-0000: Prepare for release 0.18.0. [\#144](https://github.com/openeuropa/oe_list_pages/pull/144) ([hernani](https://github.com/hernani))
 - EWPP-2393: Improve support for active indexes used for list pages. [\#143](https://github.com/openeuropa/oe_list_pages/pull/143) ([hernani](https://github.com/hernani))
 - OEL-1677: Add support for Address fields. [\#139](https://github.com/openeuropa/oe_list_pages/pull/139) ([drishu](https://github.com/drishu))
 
 ## [0.17.0](https://github.com/openeuropa/oe_list_pages/tree/0.17.0) (2022-04-11)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.16.0...0.17.0)
 
 **Merged pull requests:**
 
+- Prepare release 0.17.0. [\#136](https://github.com/openeuropa/oe_list_pages/pull/136) ([imanoleguskiza](https://github.com/imanoleguskiza))
 - EWPP-2125: Add translation for ru language. [\#135](https://github.com/openeuropa/oe_list_pages/pull/135) ([sergepavle](https://github.com/sergepavle))
 - EWPP-2101: Add translation for uk and zh languages. [\#134](https://github.com/openeuropa/oe_list_pages/pull/134) ([sergepavle](https://github.com/sergepavle))
 - EWPP-2100: Handle empty route context. [\#133](https://github.com/openeuropa/oe_list_pages/pull/133) ([hernani](https://github.com/hernani))
