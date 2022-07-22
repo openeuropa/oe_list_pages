@@ -236,14 +236,16 @@ class ContextualFilterValuesProcessor {
    *   The filter values.
    */
   protected function getValuesForContextualFilter(ContextualPresetFilter $contextual_filter, ContentEntityInterface $entity, ListSourceInterface $list_source, CacheableMetadata $cache): array {
+    $facet = $this->configurationBuilder->getFacetById($list_source, $contextual_filter->getFacetId());
+    $processor = ContextualFiltersHelper::getContextualAwareSearchApiProcessor($list_source, $facet);
+
     // First, determine where the filters need to look for the values.
-    if ($contextual_filter->getFilterSource() === ContextualPresetFilter::FILTER_SOURCE_ENTITY_ID) {
+    if ($contextual_filter->getFilterSource() === ContextualPresetFilter::FILTER_SOURCE_ENTITY_ID && !$processor) {
       // If the current entity ID is the source, we just have to return it.
       return [$entity->id()];
     }
 
     // Otherwise, load the facet and check the field definition.
-    $facet = $this->configurationBuilder->getFacetById($list_source, $contextual_filter->getFacetId());
     $definition = $this->getFacetFieldDefinition($facet, $list_source);
     if ($definition) {
       $field_name = $definition->getName();
@@ -268,12 +270,11 @@ class ContextualFilterValuesProcessor {
 
     // If there is no field definition, it may be a custom Search API field
     // processor that may be contextually aware.
-    $processor = ContextualFiltersHelper::getContextualAwareSearchApiProcessor($list_source, $facet);
     if (!$processor) {
       throw new InapplicableContextualFilter();
     }
 
-    return $processor->getContextualValues($entity);
+    return $processor->getContextualValues($entity, $contextual_filter->getFilterSource());
   }
 
 }
