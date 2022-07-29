@@ -1,13 +1,26 @@
-# Change Log
+# Changelog
+
+## [0.19.0](https://github.com/openeuropa/oe_list_pages/tree/0.19.0) (2022-07-29)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.18.1...0.19.0)
+
+**Merged pull requests:**
+
+- EWPP-2375: Add Luxembourgish string translations. [\#145](https://github.com/openeuropa/oe_list_pages/pull/145) ([22Alexandra](https://github.com/22Alexandra))
+- EWPP-2358: 9.4 support. [\#142](https://github.com/openeuropa/oe_list_pages/pull/142) ([yenyasinn](https://github.com/yenyasinn))
+- EWPP-2234: Passing the contextual filter source to the ContextualAwareProcessorInterface [\#138](https://github.com/openeuropa/oe_list_pages/pull/138) ([upchuk](https://github.com/upchuk))
 
 ## [0.18.1](https://github.com/openeuropa/oe_list_pages/tree/0.18.1) (2022-06-29)
+
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.18.0...0.18.1)
 
 **Merged pull requests:**
 
+- Prepare changelog for release 0.18.1. [\#146](https://github.com/openeuropa/oe_list_pages/pull/146) ([brummbar](https://github.com/brummbar))
 - EWPP-2102: Fixing the form restricting the index to list pages. [\#140](https://github.com/openeuropa/oe_list_pages/pull/140) ([upchuk](https://github.com/upchuk))
 
 ## [0.18.0](https://github.com/openeuropa/oe_list_pages/tree/0.18.0) (2022-06-28)
+
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.17.0...0.18.0)
 
 **Merged pull requests:**
@@ -17,6 +30,7 @@
 - OEL-1677: Add support for Address fields. [\#139](https://github.com/openeuropa/oe_list_pages/pull/139) ([drishu](https://github.com/drishu))
 
 ## [0.17.0](https://github.com/openeuropa/oe_list_pages/tree/0.17.0) (2022-04-11)
+
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.16.0...0.17.0)
 
 **Merged pull requests:**
