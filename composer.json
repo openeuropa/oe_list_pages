@@ -27,7 +27,7 @@
         "drupal/token": "^1.10",
         "drush/drush": "^10.3",
         "openeuropa/code-review": "^2.0",
-        "openeuropa/oe_link_lists": "dev-master",
+        "openeuropa/oe_link_lists": "~0.16.0",
         "openeuropa/oe_multilingual": "^1.10",
         "openeuropa/open_vocabularies": "^1.0-alpha6",
         "openeuropa/task-runner-drupal-project-symlink": "^1.0.0-beta5",
