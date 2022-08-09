@@ -60,8 +60,8 @@ class ListPageIndexFormTest extends BrowserTestBase {
 
     // Edit the index and uncheck the box.
     $this->drupalGet('admin/config/search/search-api/index/node/edit');
-    $this->assertSession()->checkboxChecked('options[oe_list_pages][lists_pages_index]');
-    $this->getSession()->getPage()->uncheckField('options[oe_list_pages][lists_pages_index]');
+    $this->assertSession()->checkboxChecked('third_party_settings[oe_list_pages][lists_pages_index]');
+    $this->getSession()->getPage()->uncheckField('third_party_settings[oe_list_pages][lists_pages_index]');
     $this->getSession()->getPage()->pressButton('Save');
 
     $this->assertSession()->pageTextContains('The index was successfully saved.');
@@ -74,8 +74,8 @@ class ListPageIndexFormTest extends BrowserTestBase {
 
     // Edit again and mark it back to yes.
     $this->drupalGet('admin/config/search/search-api/index/node/edit');
-    $this->assertSession()->checkboxNotChecked('options[oe_list_pages][lists_pages_index]');
-    $this->getSession()->getPage()->checkField('options[oe_list_pages][lists_pages_index]');
+    $this->assertSession()->checkboxNotChecked('third_party_settings[oe_list_pages][lists_pages_index]');
+    $this->getSession()->getPage()->checkField('third_party_settings[oe_list_pages][lists_pages_index]');
     $this->getSession()->getPage()->pressButton('Save');
     $this->assertSession()->pageTextContains('The index was successfully saved.');
     // Assert the index is is marked correctly.
