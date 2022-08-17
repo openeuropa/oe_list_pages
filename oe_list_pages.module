@@ -8,7 +8,6 @@
 declare(strict_types = 1);
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\search_api\IndexInterface;
 
 /**
  * Implements hook_facets_search_api_query_type_mapping_alter().
@@ -67,48 +66,30 @@ function oe_list_pages_locale_translation_projects_alter(&$projects) {
 /**
  * Implements hook_form_BASE_FORM_ID_alter().
  */
-function oe_list_pages_form_search_api_index_form_alter(array &$form, FormStateInterface $form_state) {
-  /** @var \Drupal\search_api\IndexInterface $index */
-  $index = $form_state->getBuildInfo()['callback_object']->getEntity();
-  $form['options']['oe_list_pages'] = [
-    '#type' => 'details',
-    '#title' => t('List pages'),
-    'lists_pages_index' => [
-      '#type' => 'checkbox',
-      '#title' => t('List pages index'),
-      '#description' => t('Marks the index to be used for list pages. Please note that only one index should be used for this purpose that contain a given entity_type/bundle combination.'),
-      '#default_value' => $index->getThirdPartySetting('oe_list_pages', 'lists_pages_index', FALSE),
-    ],
-  ];
-
-  $form['#entity_builders'][] = 'oe_list_pages_form_search_api_index_form_entity_builder';
-}
-
-/**
- * Entity builder for the search index form.
- *
- * @param array $form
- *   The form.
- * @param \Drupal\Core\Form\FormStateInterface $form_state
- *   The form state.
- */
-function oe_list_pages_form_search_api_index_form_entity_builder(string $entity_type, IndexInterface $index, array &$form, FormStateInterface $form_state) {
-  $already_set = $form_state->get('lists_pages_index_set');
-  if ($already_set) {
+function oe_list_pages_form_search_api_index_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
+  // We need to restrict by form ID here because this function is also called
+  // via hook_form_BASE_FORM_ID_alter (which is wrong, e.g. in the case of the
+  // form ID search_api_field_config).
+  if (!in_array($form_id, [
+    'search_api_index_form',
+    'search_api_index_edit_form',
+  ])) {
     return;
   }
-  $lists_pages_index = (bool) $form_state->getValue([
-    'options',
-    'oe_list_pages',
-    'lists_pages_index',
-  ]);
-  $index->setThirdPartySetting('oe_list_pages', 'lists_pages_index', $lists_pages_index);
-  // The entity builder gets called multiple times so we keep track if we
-  // already set our value. This is important because we also need to remove
-  // the option from the form state so search api doesn't save it in its own
-  // options config.
-  $form_state->set('lists_pages_index_set', TRUE);
-  $form_state->unsetValue(['options', 'oe_list_pages']);
+  /** @var \Drupal\search_api\IndexInterface $index */
+  $index = $form_state->getFormObject()->getEntity();
+  $form['third_party_settings']['oe_list_pages'] = [
+    '#tree' => TRUE,
+    '#type' => 'details',
+    '#title' => t('OpenEuropa List Pages specific index options'),
+    '#collapsed' => TRUE,
+  ];
+  $form['third_party_settings']['oe_list_pages']['lists_pages_index'] = [
+    '#type' => 'checkbox',
+    '#title' => t('List pages index'),
+    '#description' => t('Marks the index to be used for list pages. Please note that only one index should be used for this purpose that contain a given entity_type/bundle combination.'),
+    '#default_value' => $index->getThirdPartySetting('oe_list_pages', 'lists_pages_index', FALSE),
+  ];
 }
 
 /**
