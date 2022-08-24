@@ -212,6 +212,12 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
       $form['list_page_configuration']['wrapper']['exposed_filters']['#access'] = FALSE;
     }
 
+    if (isset($form['list_page_configuration']['wrapper']['exposed_sort'])) {
+      // We don't need the form to expose the sort as it doesn't apply to
+      // link lists.
+      $form['list_page_configuration']['wrapper']['exposed_sort']['#access'] = FALSE;
+    }
+
     $list_source = $form_state->get('list_source');
     if (!$list_source instanceof ListSourceInterface) {
       return $form;

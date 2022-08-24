@@ -72,4 +72,15 @@ interface ListBuilderInterface {
    */
   public function buildRssLink(ContentEntityInterface $entity): array;
 
+  /**
+   * Builds the sort form element.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The list page entity.
+   *
+   * @return array
+   *   The sort element form.
+   */
+  public function buildSortElement(ContentEntityInterface $entity): array;
+
 }

@@ -168,6 +168,7 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
       'limit',
     ]);
     $entity_meta_configuration['sort'] = $configuration->getSort();
+    $entity_meta_configuration['exposed_sort'] = $configuration->isExposedSort();
     $entity_meta_wrapper->setConfiguration($entity_meta_configuration);
     $host_entity->get('emr_entity_metas')->attach($entity_meta);
   }

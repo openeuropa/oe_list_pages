@@ -45,4 +45,12 @@ final class ListPageEvents {
    */
   const ALTER_SORT_OPTIONS = "oe_list_pages.alter_sort_options";
 
+
+  /**
+   * Event fired to determine if a site wants to disallow the exposing of sort.
+   *
+   * @var string
+   */
+  const DISALLOW_EXPOSED_SORT = "oe_list_pages.disallow_exposed_sort";
+
 }

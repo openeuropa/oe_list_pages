@@ -64,7 +64,7 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
 
     $this->assertListPageEntityTypeSelection();
 
-    // In link lists, we disable the exposed filters.
+    // In link lists, we disable the exposed filters and exposed sort.
     $this->goToListPageConfiguration();
     $this->getSession()->getPage()->selectFieldOption('Source entity type', 'taxonomy_term');
     $this->assertSession()->assertWaitOnAjaxRequest();
@@ -73,6 +73,7 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->assertSession()->fieldNotExists('Override default exposed filters');
     $this->assertSession()->fieldNotExists('Exposed filters');
+    $this->assertSession()->fieldNotExists('Expose sort');
 
     $this->getSession()->getPage()->selectFieldOption('Link display', 'Title');
     $this->assertSession()->assertWaitOnAjaxRequest();
