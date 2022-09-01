@@ -77,7 +77,7 @@ class ListExecutionManager implements ListExecutionManagerInterface {
 
     // The number of items to show on a page.
     $limit = $configuration->getLimit() ?? 10;
-    $list_source = $this->listSourceFactory->get($configuration->getEntityType(), $configuration->getBundle());
+    $list_source = $configuration->getListSource() ?? $this->listSourceFactory->get($configuration->getEntityType(), $configuration->getBundle());
     if (!$list_source) {
       $this->executedLists[$configuration->getId()] = NULL;
       return NULL;
@@ -129,6 +129,10 @@ class ListExecutionManager implements ListExecutionManagerInterface {
    */
   protected function getBundleDefaultSort(ListSourceInterface $list_source): array {
     $bundle_entity_type = $this->entityTypeManager->getDefinition($list_source->getEntityType())->getBundleEntityType();
+    if (!$bundle_entity_type) {
+      // We can have entity types that have no bundles.
+      return [];
+    }
     $storage = $this->entityTypeManager->getStorage($bundle_entity_type);
     $bundle = $storage->load($list_source->getBundle());
     return $bundle->getThirdPartySetting('oe_list_pages', 'default_sort', []);

@@ -99,6 +99,16 @@ class ListPageConfiguration {
   protected $extra = [];
 
   /**
+   * An optional list source with which this configuration works.
+   *
+   * This is used in special cases in which the default list source factory
+   * is not used and a different list source is therefore needed.
+   *
+   * @var \Drupal\oe_list_pages\ListSourceInterface|null
+   */
+  protected $listSource = NULL;
+
+  /**
    * ListPageConfiguration constructor.
    *
    * @param array $configuration
@@ -406,6 +416,26 @@ class ListPageConfiguration {
       'sort' => $this->getSort(),
       'extra' => $this->getExtra(),
     ];
+  }
+
+  /**
+   * Returns the optional list source.
+   *
+   * @return \Drupal\oe_list_pages\ListSourceInterface|null
+   *   The list source if set.
+   */
+  public function getListSource(): ?ListSourceInterface {
+    return $this->listSource;
+  }
+
+  /**
+   * Sets the optional list source.
+   *
+   * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
+   *   The list source.
+   */
+  public function setListSource(ListSourceInterface $list_source): void {
+    $this->listSource = $list_source;
   }
 
 }

@@ -17,24 +17,24 @@ interface ListBuilderInterface {
   /**
    * Builds the list content to be rendered.
    *
-   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
-   *   The content entity.
+   * @param \Drupal\oe_list_pages\ListPageConfiguration $configuration
+   *   The list page configuration.
    *
    * @return array
    *   The list render array.
    */
-  public function buildList(ContentEntityInterface $entity): array;
+  public function buildList(ListPageConfiguration $configuration): array;
 
   /**
    * Builds the list page filters.
    *
-   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
-   *   The content entity page.
+   * @param \Drupal\oe_list_pages\ListPageConfiguration $configuration
+   *   The list page configuration.
    *
    * @return array
    *   The filters render array.
    */
-  public function buildFiltersForm(ContentEntityInterface $entity): array;
+  public function buildFiltersForm(ListPageConfiguration $configuration): array;
 
   /**
    * Builds the list page selected filters.
@@ -42,30 +42,30 @@ interface ListBuilderInterface {
    * These are the filters that have been selected in the form and are currently
    * filtering the list.
    *
-   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
-   *   The content entity page.
+   * @param \Drupal\oe_list_pages\ListPageConfiguration $configuration
+   *   The list page configuration.
    *
    * @return array
    *   The filters render array.
    */
-  public function buildSelectedFilters(ContentEntityInterface $entity): array;
+  public function buildSelectedFilters(ListPageConfiguration $configuration): array;
 
   /**
    * Builds a descriptive pager information message.
    *
-   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
-   *   The content entity page.
+   * @param \Drupal\oe_list_pages\ListPageConfiguration $configuration
+   *   The list page configuration.
    *
    * @return array
    *   The pager info render array.
    */
-  public function buildPagerInfo(ContentEntityInterface $entity): array;
+  public function buildPagerInfo(ListPageConfiguration $configuration): array;
 
   /**
    * Builds a link to the RSS representation of the list page.
    *
    * @param \Drupal\Core\Entity\ContentEntityInterface $entity
-   *   The content entity page.
+   *   The content entity.
    *
    * @return array
    *   The RSS link render array.
