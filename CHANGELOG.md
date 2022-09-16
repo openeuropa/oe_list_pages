@@ -1,11 +1,30 @@
 # Changelog
 
-## [0.19.0](https://github.com/openeuropa/oe_list_pages/tree/0.19.0) (2022-07-29)
+## [0.20.0](https://github.com/openeuropa/oe_list_pages/tree/0.20.0) (2022-09-16)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.19.0...0.20.0)
+
+**Closed issues:**
+
+- How can I set sorting criteria for list pages? [\#125](https://github.com/openeuropa/oe_list_pages/issues/125)
+- Error after creating a list\_page [\#118](https://github.com/openeuropa/oe_list_pages/issues/118)
+- Null entity on multiple-select list filter [\#103](https://github.com/openeuropa/oe_list_pages/issues/103)
+- Empty entity type and bundle select lists [\#61](https://github.com/openeuropa/oe_list_pages/issues/61)
+
+**Merged pull requests:**
+
+- Issue \#103: Prevent passing a null variable when loading entity reference labels. [\#152](https://github.com/openeuropa/oe_list_pages/pull/152) ([imanoleguskiza](https://github.com/imanoleguskiza))
+- Issue \#150: Fix third party options not being saved for indexes. [\#151](https://github.com/openeuropa/oe_list_pages/pull/151) ([imanoleguskiza](https://github.com/imanoleguskiza))
+- EWPP-2371: Refactoring the list builder and execution manager to work with other config. [\#147](https://github.com/openeuropa/oe_list_pages/pull/147) ([upchuk](https://github.com/upchuk))
+- OEL-1456: List pages sort capability. [\#137](https://github.com/openeuropa/oe_list_pages/pull/137) ([upchuk](https://github.com/upchuk))
+
+## [0.19.0](https://github.com/openeuropa/oe_list_pages/tree/0.19.0) (2022-08-02)
 
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.18.1...0.19.0)
 
 **Merged pull requests:**
 
+- Prepare release 0.19.0. [\#149](https://github.com/openeuropa/oe_list_pages/pull/149) ([imanoleguskiza](https://github.com/imanoleguskiza))
 - EWPP-2375: Add Luxembourgish string translations. [\#145](https://github.com/openeuropa/oe_list_pages/pull/145) ([22Alexandra](https://github.com/22Alexandra))
 - EWPP-2358: 9.4 support. [\#142](https://github.com/openeuropa/oe_list_pages/pull/142) ([yenyasinn](https://github.com/yenyasinn))
 - EWPP-2234: Passing the contextual filter source to the ContextualAwareProcessorInterface [\#138](https://github.com/openeuropa/oe_list_pages/pull/138) ([upchuk](https://github.com/upchuk))
@@ -171,8 +190,13 @@
 - Update rss epic [\#72](https://github.com/openeuropa/oe_list_pages/pull/72) ([imanoleguskiza](https://github.com/imanoleguskiza))
 - EWPP-692: Creating facets and index fields for OpenVocabularies associations. [\#71](https://github.com/openeuropa/oe_list_pages/pull/71) ([hernani](https://github.com/hernani))
 - EWPP-673: Applying contextual filters. [\#70](https://github.com/openeuropa/oe_list_pages/pull/70) ([upchuk](https://github.com/upchuk))
+- EWPP-455: Rebase epic [\#68](https://github.com/openeuropa/oe_list_pages/pull/68) ([imanoleguskiza](https://github.com/imanoleguskiza))
 - EWPP-671: Add multiselect filter field plugins. [\#67](https://github.com/openeuropa/oe_list_pages/pull/67) ([imanoleguskiza](https://github.com/imanoleguskiza))
 - EWPP-672: Contextual filters selection. [\#66](https://github.com/openeuropa/oe_list_pages/pull/66) ([upchuk](https://github.com/upchuk))
+- EWPP-454: Link to the RSS feed. [\#62](https://github.com/openeuropa/oe_list_pages/pull/62) ([sergepavle](https://github.com/sergepavle))
+- Epic Rebase [\#56](https://github.com/openeuropa/oe_list_pages/pull/56) ([imanoleguskiza](https://github.com/imanoleguskiza))
+- EWPP-453: Execute and render the RSS list [\#45](https://github.com/openeuropa/oe_list_pages/pull/45) ([imanoleguskiza](https://github.com/imanoleguskiza))
+- EWPP-452: Add RSS feeds for nodes based on list page metadata. [\#41](https://github.com/openeuropa/oe_list_pages/pull/41) ([imanoleguskiza](https://github.com/imanoleguskiza))
 
 ## [0.6.0](https://github.com/openeuropa/oe_list_pages/tree/0.6.0) (2021-01-25)
 
@@ -181,11 +205,8 @@
 **Merged pull requests:**
 
 - EWPP-0000: Update changelog for release 0.6.0. [\#69](https://github.com/openeuropa/oe_list_pages/pull/69) ([22Alexandra](https://github.com/22Alexandra))
-- EWPP-455: Rebase epic [\#68](https://github.com/openeuropa/oe_list_pages/pull/68) ([imanoleguskiza](https://github.com/imanoleguskiza))
 - EWPP-529: Replace scaffold library. [\#64](https://github.com/openeuropa/oe_list_pages/pull/64) ([sergepavle](https://github.com/sergepavle))
-- EWPP-454: Link to the RSS feed. [\#62](https://github.com/openeuropa/oe_list_pages/pull/62) ([sergepavle](https://github.com/sergepavle))
 - EWPP-491: Creating a link list source plugin. [\#59](https://github.com/openeuropa/oe_list_pages/pull/59) ([upchuk](https://github.com/upchuk))
-- EWPP-453: Execute and render the RSS list [\#45](https://github.com/openeuropa/oe_list_pages/pull/45) ([imanoleguskiza](https://github.com/imanoleguskiza))
 
 ## [0.5.0](https://github.com/openeuropa/oe_list_pages/tree/0.5.0) (2020-12-09)
 
@@ -203,7 +224,6 @@
 **Merged pull requests:**
 
 - EWPP-000: Update CHANGELOG.md for 0.4.0 release. [\#58](https://github.com/openeuropa/oe_list_pages/pull/58) ([sergepavle](https://github.com/sergepavle))
-- Epic Rebase [\#56](https://github.com/openeuropa/oe_list_pages/pull/56) ([imanoleguskiza](https://github.com/imanoleguskiza))
 - EWPP-482: Support for link fields in the multiselect widget. [\#54](https://github.com/openeuropa/oe_list_pages/pull/54) ([upchuk](https://github.com/upchuk))
 - Rebase epic list pages [\#53](https://github.com/openeuropa/oe_list_pages/pull/53) ([upchuk](https://github.com/upchuk))
 - List pages epic [\#52](https://github.com/openeuropa/oe_list_pages/pull/52) ([upchuk](https://github.com/upchuk))
@@ -212,7 +232,6 @@
 - EWPP-306: Preset filter are not included in the selected and exposed filters [\#48](https://github.com/openeuropa/oe_list_pages/pull/48) ([upchuk](https://github.com/upchuk))
 - EWPP-516: Update docker images. [\#46](https://github.com/openeuropa/oe_list_pages/pull/46) ([22Alexandra](https://github.com/22Alexandra))
 - EWPP-491: List pages configuration subform. [\#42](https://github.com/openeuropa/oe_list_pages/pull/42) ([upchuk](https://github.com/upchuk))
-- EWPP-452: Add RSS feeds for nodes based on list page metadata. [\#41](https://github.com/openeuropa/oe_list_pages/pull/41) ([imanoleguskiza](https://github.com/imanoleguskiza))
 - EWPP-47: List page selection in plugin. [\#28](https://github.com/openeuropa/oe_list_pages/pull/28) ([hernani](https://github.com/hernani))
 
 ## [0.3.0](https://github.com/openeuropa/oe_list_pages/tree/0.3.0) (2020-11-03)
@@ -223,7 +242,6 @@
 
 - Prepare release 0.3.0 [\#44](https://github.com/openeuropa/oe_list_pages/pull/44) ([imanoleguskiza](https://github.com/imanoleguskiza))
 - EWPP-0: Update facets module. [\#43](https://github.com/openeuropa/oe_list_pages/pull/43) ([imanoleguskiza](https://github.com/imanoleguskiza))
-- EWPP-48: Configurable pager. [\#31](https://github.com/openeuropa/oe_list_pages/pull/31) ([upchuk](https://github.com/upchuk))
 
 ## [0.2.0](https://github.com/openeuropa/oe_list_pages/tree/0.2.0) (2020-10-07)
 
@@ -256,17 +274,20 @@
 - EWPP-43: Installing the newly required dependencies. [\#13](https://github.com/openeuropa/oe_list_pages/pull/13) ([upchuk](https://github.com/upchuk))
 - EWPP-40: Date - Facet widget. [\#11](https://github.com/openeuropa/oe_list_pages/pull/11) ([sergepavle](https://github.com/sergepavle))
 - EWPP-40: List facet widget [\#10](https://github.com/openeuropa/oe_list_pages/pull/10) ([hernani](https://github.com/hernani))
+- EWPP-39: Fulltext - Facet widget [\#8](https://github.com/openeuropa/oe_list_pages/pull/8) ([sergepavle](https://github.com/sergepavle))
 - EPIC: Default content lists and filters [\#7](https://github.com/openeuropa/oe_list_pages/pull/7) ([hernani](https://github.com/hernani))
+- OPENEUROPA-3373: Add query functionality [\#6](https://github.com/openeuropa/oe_list_pages/pull/6) ([hernani](https://github.com/hernani))
+- OPENEUROPA-3276: Add configuration for exposed filters in the oe\_list\_pages meta plugin. [\#5](https://github.com/openeuropa/oe_list_pages/pull/5) ([sergepavle](https://github.com/sergepavle))
+- OPENEUROPA-3274: Add faceted filters. [\#3](https://github.com/openeuropa/oe_list_pages/pull/3) ([hernani](https://github.com/hernani))
 
 ## [0.1.0](https://github.com/openeuropa/oe_list_pages/tree/0.1.0) (2020-08-06)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/34558ef44eb8921e8b7ce21385710d4ed133cddf...0.1.0)
+
 **Merged pull requests:**
 
 - Release-0.1.0: Update changelog. [\#9](https://github.com/openeuropa/oe_list_pages/pull/9) ([nagyad](https://github.com/nagyad))
-- EWPP-39: Fulltext - Facet widget [\#8](https://github.com/openeuropa/oe_list_pages/pull/8) ([sergepavle](https://github.com/sergepavle))
-- OPENEUROPA-3373: Add query functionality [\#6](https://github.com/openeuropa/oe_list_pages/pull/6) ([hernani](https://github.com/hernani))
-- OPENEUROPA-3276: Add configuration for exposed filters in the oe\_list\_pages meta plugin. [\#5](https://github.com/openeuropa/oe_list_pages/pull/5) ([sergepavle](https://github.com/sergepavle))
 - OPENEUROPA-0000: Fix emr patch. [\#4](https://github.com/openeuropa/oe_list_pages/pull/4) ([hernani](https://github.com/hernani))
-- OPENEUROPA-3274: Add faceted filters. [\#3](https://github.com/openeuropa/oe_list_pages/pull/3) ([hernani](https://github.com/hernani))
 - OPENEUROPA-3272: Create oe\_list\_pages entity meta bundle and plugin. [\#2](https://github.com/openeuropa/oe_list_pages/pull/2) ([sergepavle](https://github.com/sergepavle))
 - OPENEUROPA-3271: Scaffolding of new component. [\#1](https://github.com/openeuropa/oe_list_pages/pull/1) ([sergepavle](https://github.com/sergepavle))
 
