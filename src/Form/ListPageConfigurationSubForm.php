@@ -543,6 +543,9 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
     }
 
     $event = new ListPageSourceAlterEvent(array_keys($entity_type_options));
+    if ($this->configuration->getListSource()) {
+      $event->setListSource($this->configuration->getListSource());
+    }
     $this->eventDispatcher->dispatch(ListPageEvents::ALTER_ENTITY_TYPES, $event);
     return array_intersect_key($entity_type_options, array_combine($event->getEntityTypes(), $event->getEntityTypes()));
   }
@@ -570,6 +573,9 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
 
     $event = new ListPageSourceAlterEvent();
     $event->setBundles($selected_entity_type, array_keys($bundle_options));
+    if ($this->configuration->getListSource()) {
+      $event->setListSource($this->configuration->getListSource());
+    }
     $this->eventDispatcher->dispatch(ListPageEvents::ALTER_BUNDLES, $event);
     return array_intersect_key($bundle_options, array_combine($event->getBundles(), $event->getBundles()));
   }

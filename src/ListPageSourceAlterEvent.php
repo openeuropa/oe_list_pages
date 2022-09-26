@@ -29,6 +29,13 @@ class ListPageSourceAlterEvent extends Event {
   protected $bundles;
 
   /**
+   * The list source.
+   *
+   * @var \Drupal\oe_list_pages\ListSourceInterface
+   */
+  protected $listSource = NULL;
+
+  /**
    * Constructs a new ListPageSourceAlterEvent.
    *
    * @param array $entity_types
@@ -82,6 +89,26 @@ class ListPageSourceAlterEvent extends Event {
   public function setBundles(string $entity_type, array $bundles): void {
     $this->entityTypes = [$entity_type];
     $this->bundles = $bundles;
+  }
+
+  /**
+   * Returns the list source.
+   *
+   * @return \Drupal\oe_list_pages\ListSourceInterface|null
+   *   The list source if set.
+   */
+  public function getListSource(): ?ListSourceInterface {
+    return $this->listSource;
+  }
+
+  /**
+   * Sets the list source.
+   *
+   * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
+   *   The list source.
+   */
+  public function setListSource(ListSourceInterface $list_source): void {
+    $this->listSource = $list_source;
   }
 
 }

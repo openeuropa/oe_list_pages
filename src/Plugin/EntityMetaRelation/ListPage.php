@@ -99,7 +99,7 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
     $form[$key]['#parents'] = [$key];
     $form[$key]['#tree'] = TRUE;
     $subform_state = SubformState::createForSubform($form[$key], $form, $form_state);
-    $configuration = ListPageConfiguration::fromEntity($entity);
+    $configuration = $this->getListPageConfigurationFromEntity($entity);
 
     // Check if the current entity bundle supports default values for its
     // filters.
@@ -139,7 +139,7 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
     $key = $this->getFormKey();
     $element = $form[$key];
     $subform_state = SubformState::createForSubform($element, $form, $form_state);
-    $configuration = ListPageConfiguration::fromEntity($host_entity);
+    $configuration = $this->getListPageConfigurationFromEntity($host_entity);
     $subform = $this->subformFactory->getForm($configuration);
     $subform->submitForm($element, $subform_state);
     /** @var \Drupal\oe_list_pages\ListPageConfiguration $configuration */
@@ -202,6 +202,19 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
     $entity_meta_list = $entity->get('emr_entity_metas');
     /** @var \Drupal\emr\Entity\EntityMetaInterface $navigation_block_entity_meta */
     return $entity_meta_list->getEntityMeta($entity_meta_bundle);
+  }
+
+  /**
+   * Instantiates a list page configuration object from an entity.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The entity.
+   *
+   * @return \Drupal\oe_list_pages\ListPageConfiguration
+   *   The list page configuration.
+   */
+  public function getListPageConfigurationFromEntity(ContentEntityInterface $entity): ListPageConfiguration {
+    return ListPageConfiguration::fromEntity($entity);
   }
 
 }

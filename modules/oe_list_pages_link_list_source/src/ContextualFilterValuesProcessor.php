@@ -145,7 +145,7 @@ class ContextualFilterValuesProcessor {
     $cache->addCacheableDependency($entity);
 
     $default_filter_values = $configuration->getDefaultFiltersValues();
-    $list_source = $this->listSourceFactory->get($configuration->getEntityType(), $configuration->getBundle());
+    $list_source = $configuration->getListSource() ?? $this->listSourceFactory->get($configuration->getEntityType(), $configuration->getBundle());
 
     foreach ($contextual_filters as $contextual_filter) {
       $values = $this->getValuesForContextualFilter($contextual_filter, $entity, $list_source, $cache);
