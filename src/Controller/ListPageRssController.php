@@ -18,7 +18,6 @@ use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Theme\ThemeManagerInterface;
 use Drupal\emr\Entity\EntityMetaInterface;
-use Drupal\facets\FacetManager\DefaultFacetManager;
 use Drupal\facets\UrlProcessor\UrlProcessorPluginManager;
 use Drupal\node\NodeInterface;
 use Drupal\oe_list_pages\FacetManipulationTrait;
@@ -106,13 +105,6 @@ class ListPageRssController extends ControllerBase {
   protected $urlProcessorPluginManager;
 
   /**
-   * The facets manager.
-   *
-   * @var \Drupal\facets\FacetManager\DefaultFacetManager
-   */
-  protected $facetManager;
-
-  /**
    * ListPageRssController constructor.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -139,12 +131,10 @@ class ListPageRssController extends ControllerBase {
    *   The theme manager.
    * @param \Drupal\facets\UrlProcessor\UrlProcessorPluginManager $url_processor_plugin_manager
    *   The url processor plugin manager.
-   * @param \Drupal\facets\FacetManager\DefaultFacetManager $facetManager
-   *   The facets manager.
    *
    * @SuppressWarnings(PHPMD.ExcessiveParameterList)
    */
-  public function __construct(ConfigFactoryInterface $config_factory, DateFormatterInterface $date_formatter, EntityTypeManagerInterface $entity_type_manager, EventDispatcherInterface $event_dispatcher, LanguageManagerInterface $language_manager, ListExecutionManagerInterface $list_execution_manager, ListSourceFactoryInterface $list_source_factory, MultiselectFilterFieldPluginManager $multiselect_plugin_manager, RendererInterface $renderer, RequestStack $request, ThemeManagerInterface $theme_manager, UrlProcessorPluginManager $url_processor_plugin_manager, DefaultFacetManager $facetManager) {
+  public function __construct(ConfigFactoryInterface $config_factory, DateFormatterInterface $date_formatter, EntityTypeManagerInterface $entity_type_manager, EventDispatcherInterface $event_dispatcher, LanguageManagerInterface $language_manager, ListExecutionManagerInterface $list_execution_manager, ListSourceFactoryInterface $list_source_factory, MultiselectFilterFieldPluginManager $multiselect_plugin_manager, RendererInterface $renderer, RequestStack $request, ThemeManagerInterface $theme_manager, UrlProcessorPluginManager $url_processor_plugin_manager) {
     $this->configFactory = $config_factory;
     $this->dateFormatter = $date_formatter;
     $this->entityTypeManager = $entity_type_manager;
@@ -157,7 +147,6 @@ class ListPageRssController extends ControllerBase {
     $this->request = $request;
     $this->themeManager = $theme_manager;
     $this->urlProcessorPluginManager = $url_processor_plugin_manager;
-    $this->facetManager = $facetManager;
   }
 
   /**
@@ -176,9 +165,7 @@ class ListPageRssController extends ControllerBase {
       $container->get('renderer'),
       $container->get('request_stack'),
       $container->get('theme.manager'),
-      $container->get('plugin.manager.facets.url_processor'),
-      $container->get('facets.manager')
-
+      $container->get('plugin.manager.facets.url_processor')
     );
   }
 

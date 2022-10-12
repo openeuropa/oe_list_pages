@@ -9,8 +9,8 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\facets\FacetInterface;
-use Drupal\facets\FacetManager\DefaultFacetManager;
 use Drupal\facets\Utility\FacetsUrlGenerator;
+use Drupal\oe_list_pages\ListFacetManagerWrapper;
 use Drupal\oe_list_pages\ListSourceInterface;
 use Drupal\oe_list_pages\Plugin\facets\widget\ListPagesWidgetInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -23,7 +23,7 @@ class ListFacetsForm extends FormBase {
   /**
    * The facets manager.
    *
-   * @var \Drupal\facets\FacetManager\DefaultFacetManager
+   * @var \Drupal\oe_list_pages\ListFacetManagerWrapper
    */
   protected $facetsManager;
 
@@ -37,12 +37,12 @@ class ListFacetsForm extends FormBase {
   /**
    * Constructs an instance of ListFacetsForm.
    *
-   * @param \Drupal\facets\FacetManager\DefaultFacetManager $facets_manager
+   * @param \Drupal\oe_list_pages\ListFacetManagerWrapper $facets_manager
    *   The facets manager.
    * @param \Drupal\facets\Utility\FacetsUrlGenerator $facets_url_generator
    *   The facets url generator.
    */
-  public function __construct(DefaultFacetManager $facets_manager, FacetsUrlGenerator $facets_url_generator) {
+  public function __construct(ListFacetManagerWrapper $facets_manager, FacetsUrlGenerator $facets_url_generator) {
     $this->facetsManager = $facets_manager;
     $this->facetsUrlGenerator = $facets_url_generator;
   }
@@ -52,7 +52,7 @@ class ListFacetsForm extends FormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('facets.manager'),
+      $container->get('oe_list_pages.list_facet_manager_wrapper'),
       $container->get('facets.utility.url_generator')
     );
   }
@@ -78,7 +78,7 @@ class ListFacetsForm extends FormBase {
     $source_id = $list_source->getSearchId();
 
     /** @var \Drupal\facets\FacetInterface[] $facets */
-    $facets = $this->facetsManager->getFacetsByFacetSourceId($source_id);
+    $facets = $this->facetsManager->getFacetsByFacetSourceId($source_id, $list_source->getIndex());
     if (!$facets) {
       $cache->applyTo($form);
       return $form;
@@ -101,7 +101,7 @@ class ListFacetsForm extends FormBase {
       }
 
       if ($widget instanceof ListPagesWidgetInterface) {
-        $form['facets'][$facet->id()] = $this->facetsManager->build($facet);
+        $form['facets'][$facet->id()] = $this->facetsManager->getFacetManager()->build($facet);
       }
     }
 

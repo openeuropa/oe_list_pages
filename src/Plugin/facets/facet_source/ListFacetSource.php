@@ -9,6 +9,7 @@ use Drupal\Core\Path\CurrentPathStack;
 use Drupal\facets\FacetSource\SearchApiFacetSourceInterface;
 use Drupal\facets\Plugin\facets\facet_source\SearchApiBaseFacetSource;
 use Drupal\search_api\Display\DisplayPluginManager;
+use Drupal\search_api\IndexInterface;
 use Drupal\search_api\Query\ResultSetInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -95,6 +96,16 @@ class ListFacetSource extends SearchApiBaseFacetSource implements SearchApiFacet
    */
   public function getIndex() {
     return $this->index;
+  }
+
+  /**
+   * Sets the search_api index.
+   *
+   * @param \Drupal\search_api\IndexInterface $index
+   *   The index.
+   */
+  public function setIndex(IndexInterface $index): void {
+    $this->index = $index;
   }
 
   /**

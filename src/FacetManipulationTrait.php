@@ -5,7 +5,6 @@ namespace Drupal\oe_list_pages;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\facets\FacetInterface;
-use Drupal\facets\FacetManager\DefaultFacetManager;
 use Drupal\facets\Processor\ProcessorInterface;
 use Drupal\facets\Result\ResultInterface;
 
@@ -155,7 +154,7 @@ trait FacetManipulationTrait {
    *   The facets keyed by ID.
    */
   protected function getKeyedFacetsFromSource(ListSourceInterface $list_source): array {
-    $facets = $this->getFacetsManager()->getFacetsByFacetSourceId($list_source->getSearchId());
+    $facets = $this->getFacetsManager()->getFacetsByFacetSourceId($list_source->getSearchId(), $list_source->getIndex());
     $keyed = [];
     foreach ($facets as $facet) {
       $keyed[$facet->id()] = $facet;
@@ -167,12 +166,12 @@ trait FacetManipulationTrait {
   /**
    * Returns the facets manager.
    *
-   * @return \Drupal\facets\FacetManager\DefaultFacetManager
+   * @return \Drupal\oe_list_pages\ListFacetManagerWrapper
    *   The facets manager.
    */
-  protected function getFacetsManager(): DefaultFacetManager {
+  protected function getFacetsManager(): ListFacetManagerWrapper {
     if (!isset($this->facetManager)) {
-      $this->facetManager = \Drupal::service('facets.manager');
+      $this->facetManager = \Drupal::service('oe_list_pages.list_facet_manager_wrapper');
     }
 
     return $this->facetManager;

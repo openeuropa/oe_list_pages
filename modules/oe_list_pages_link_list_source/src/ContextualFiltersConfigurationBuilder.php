@@ -342,7 +342,7 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
    *   The options.
    */
   protected function getAvailableFilters(ListSourceInterface $list_source): array {
-    $facets = $this->facetsManager->getFacetsByFacetSourceId($list_source->getSearchId());
+    $facets = $this->facetsManager->getFacetsByFacetSourceId($list_source->getSearchId(), $list_source->getIndex());
     $options = [];
 
     foreach ($facets as $facet) {

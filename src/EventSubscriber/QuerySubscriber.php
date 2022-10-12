@@ -5,9 +5,9 @@ declare(strict_types = 1);
 namespace Drupal\oe_list_pages\EventSubscriber;
 
 use Drupal\facets\FacetInterface;
-use Drupal\facets\FacetManager\DefaultFacetManager;
 use Drupal\facets\FacetSource\FacetSourcePluginManager;
 use Drupal\facets\QueryType\QueryTypePluginManager;
+use Drupal\oe_list_pages\ListFacetManagerWrapper;
 use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\DefaultFilterConfigurationBuilder;
 use Drupal\search_api\Event\QueryPreExecuteEvent;
@@ -24,7 +24,7 @@ class QuerySubscriber implements EventSubscriberInterface {
   /**
    * The facets manager.
    *
-   * @var \Drupal\facets\FacetManager\DefaultFacetManager
+   * @var \Drupal\oe_list_pages\ListFacetManagerWrapper
    */
   protected $facetManager;
 
@@ -45,14 +45,14 @@ class QuerySubscriber implements EventSubscriberInterface {
   /**
    * QuerySubscriber Constructor.
    *
-   * @param \Drupal\facets\FacetManager\DefaultFacetManager $facetManager
+   * @param \Drupal\oe_list_pages\ListFacetManagerWrapper $facetManager
    *   The facets manager.
    * @param \Drupal\facets\QueryType\QueryTypePluginManager $queryTypePluginManager
    *   The query type plugin manager.
    * @param \Drupal\facets\FacetSource\FacetSourcePluginManager $facetSourcePluginManager
    *   The facet source plugin manager.
    */
-  public function __construct(DefaultFacetManager $facetManager, QueryTypePluginManager $queryTypePluginManager, FacetSourcePluginManager $facetSourcePluginManager) {
+  public function __construct(ListFacetManagerWrapper $facetManager, QueryTypePluginManager $queryTypePluginManager, FacetSourcePluginManager $facetSourcePluginManager) {
     $this->facetManager = $facetManager;
     $this->queryTypePluginManager = $queryTypePluginManager;
     $this->facetSourcePluginManager = $facetSourcePluginManager;
@@ -103,7 +103,7 @@ class QuerySubscriber implements EventSubscriberInterface {
     }
 
     $facets = [];
-    foreach ($this->facetManager->getFacetsByFacetSourceId($source_id) as $facet) {
+    foreach ($this->facetManager->getFacetsByFacetSourceId($source_id, $query->getIndex()) as $facet) {
       $facets[$facet->id()] = $facet;
     }
 
