@@ -61,6 +61,13 @@ class ListPagesSearchApiConfiguratorTest extends ListPagesSearchApiConfiguratorT
     $this->assertEquals($values['label'], $facet_1->label());
     $this->assertEquals($field_id, $facet_1->getFieldIdentifier());
     $this->assertEquals($facet_1->getWeight(), SearchApiConfigurator::MAX_WEIGHT);
+    // Assert overriding of empty_behavior value by
+    // \Drupal\oe_list_pages_open_vocabularies_test\EventSubscriber\SearchApiFacetTestSubscriber.
+    $this->assertEquals([
+      'behavior' => 'text',
+      'text' => 'No results found for this block!',
+      'text_format' => 'plain_text',
+    ], $facet_1->getEmptyBehavior());
     $facet_2 = Facet::load($id_2);
     $this->assertNull($facet_2);
     // Check fields exists.
@@ -88,6 +95,13 @@ class ListPagesSearchApiConfiguratorTest extends ListPagesSearchApiConfiguratorT
     $this->assertEquals('New label', $facet_1->label());
     $this->assertEquals($field_id, $facet_1->getFieldIdentifier());
     $this->assertEquals($facet_1->getWeight(), SearchApiConfigurator::MAX_WEIGHT);
+    // Assert overriding of empty_behavior value by
+    // \Drupal\oe_list_pages_open_vocabularies_test\EventSubscriber\SearchApiFacetTestSubscriber.
+    $this->assertEquals([
+      'behavior' => 'text',
+      'text' => 'No results found for this block!',
+      'text_format' => 'plain_text',
+    ], $facet_1->getEmptyBehavior());
     $this->assertArrayHasKey('url_processor_handler', $facet_1->getProcessors());
     $this->assertArrayHasKey('display_value_widget_order', $facet_1->getProcessors());
     $this->assertArrayHasKey('translate_entity', $facet_1->getProcessors());
@@ -95,7 +109,13 @@ class ListPagesSearchApiConfiguratorTest extends ListPagesSearchApiConfiguratorT
     $this->assertEquals('New label', $facet_2->label());
     $this->assertEquals($field_id, $facet_2->getFieldIdentifier());
     $this->assertEquals($facet_2->getWeight(), SearchApiConfigurator::MAX_WEIGHT);
-
+    // Assert overriding of empty_behavior value by
+    // \Drupal\oe_list_pages_open_vocabularies_test\EventSubscriber\SearchApiFacetTestSubscriber.
+    $this->assertEquals([
+      'behavior' => 'text',
+      'text' => 'No results found for this block!',
+      'text_format' => 'plain_text',
+    ], $facet_2->getEmptyBehavior());
     // Check field exists.
     $node_index = Index::load('node');
     $field_1 = $node_index->getField($field_id);
