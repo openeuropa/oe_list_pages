@@ -8,8 +8,7 @@ use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\facets\FacetInterface;
 use Drupal\language\Config\LanguageConfigOverride;
 use Drupal\oe_list_pages\ListSourceFactoryInterface;
-use Drupal\oe_list_pages_open_vocabularies\Event\SearchApiConfigurationEvents;
-use Drupal\oe_list_pages_open_vocabularies\Event\SearchApiFacetUpdateEvent;
+use Drupal\oe_list_pages_open_vocabularies\Event\AssociationFacetCreationEvent;
 use Drupal\open_vocabularies\OpenVocabularyAssociationInterface;
 use Drupal\search_api\IndexInterface;
 use Drupal\search_api\Item\Field;
@@ -146,8 +145,8 @@ class SearchApiConfigurator {
     $facet->setFieldIdentifier($property_path);
 
     // Use event dispatching to allow alter facet config before saving.
-    $event = new SearchApiFacetUpdateEvent($facet);
-    $this->eventDispatcher->dispatch($event, SearchApiConfigurationEvents::UPDATE_SEARCH_API_FACET);
+    $event = new AssociationFacetCreationEvent($facet);
+    $this->eventDispatcher->dispatch($event, AssociationFacetCreationEvent::NAME);
     $event->getFacet()->save();
   }
 

@@ -4,8 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages_open_vocabularies_test\EventSubscriber;
 
-use Drupal\oe_list_pages_open_vocabularies\Event\SearchApiConfigurationEvents;
-use Drupal\oe_list_pages_open_vocabularies\Event\SearchApiFacetUpdateEvent;
+use Drupal\oe_list_pages_open_vocabularies\Event\AssociationFacetCreationEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -17,17 +16,17 @@ class SearchApiFacetTestSubscriber implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events[SearchApiConfigurationEvents::UPDATE_SEARCH_API_FACET] = 'onFacetUpdate';
+    $events[AssociationFacetCreationEvent::NAME] = 'onFacetUpdate';
     return $events;
   }
 
   /**
    * Updates the open vocabulary facets before saving.
    *
-   * @param \Drupal\oe_list_pages_open_vocabularies\Event\SearchApiFacetUpdateEvent $event
+   * @param \Drupal\oe_list_pages_open_vocabularies\Event\AssociationFacetCreationEvent $event
    *   The Search API Facet update event.
    */
-  public function onFacetUpdate(SearchApiFacetUpdateEvent $event) {
+  public function onFacetUpdate(AssociationFacetCreationEvent $event) {
     $facet = $event->getFacet();
     $settings = [
       'behavior' => 'text',

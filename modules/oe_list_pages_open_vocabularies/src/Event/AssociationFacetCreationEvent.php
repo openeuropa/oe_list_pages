@@ -8,19 +8,27 @@ use Drupal\facets\FacetInterface;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
- * Event for updating search api facet configuration.
+ * Event fired when a facet is created from an open vocabularies association.
  */
-class SearchApiFacetUpdateEvent extends Event {
+class AssociationFacetCreationEvent extends Event {
 
   /**
-   * The facet.
+   * The name of the event.
+   */
+  const NAME = 'oe_list_pages_open_vocabularies.associated_facet_creation_event';
+
+  /**
+   * The created but not yet saved facet.
    *
    * @var \Drupal\facets\FacetInterface
    */
-  protected FacetInterface $facet;
+  protected $facet;
 
   /**
-   * SearchApiFacetUpdateEvent constructor.
+   * AssociationFacetCreationEvent constructor.
+   *
+   * @param \Drupal\facets\FacetInterface $facet
+   *   The created but not yet saved facet.
    */
   public function __construct(FacetInterface $facet) {
     $this->facet = $facet;
@@ -44,7 +52,7 @@ class SearchApiFacetUpdateEvent extends Event {
    *
    * @return $this
    */
-  public function setFacet(FacetInterface $facet): SearchApiFacetUpdateEvent {
+  public function setFacet(FacetInterface $facet): AssociationFacetCreationEvent {
     $this->facet = $facet;
     return $this;
   }
