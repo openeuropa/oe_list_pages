@@ -165,7 +165,8 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
     $results = $list_execution->getResults();
     $query = $list_execution->getQuery();
     $cache->addCacheableDependency($query);
-    $cache->addCacheTags(['search_api_list:' . $query->getIndex()->id()]);
+    $cache->addCacheTags([$configuration->getEntityType() . '_list:' . $configuration->getBundle()]);
+
     $cache->addCacheTags($this->entityTypeManager->getDefinition($configuration->getEntityType())->getListCacheTags());
     $cache->addCacheContexts($this->entityTypeManager->getDefinition($configuration->getEntityType())->getListCacheContexts());
 

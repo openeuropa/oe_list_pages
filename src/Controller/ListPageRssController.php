@@ -269,7 +269,8 @@ class ListPageRssController extends ControllerBase {
     $query = $execution_result->getQuery();
     $results = $execution_result->getResults();
     $cache_metadata->addCacheableDependency($query);
-    $cache_metadata->addCacheTags(['search_api_list:' . $query->getIndex()->id()]);
+    $cache_metadata->addCacheTags([$configuration->getEntityType() . '_list:' . $configuration->getBundle()]);
+
     $result_items = [];
     foreach ($results->getResultItems() as $item) {
       /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */

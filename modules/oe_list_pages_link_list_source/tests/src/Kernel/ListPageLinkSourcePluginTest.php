@@ -189,7 +189,7 @@ class ListPageLinkSourcePluginTest extends KernelTestBase {
 
     $this->assertEqualsCanonicalizing([
       'config:search_api.index.database_search_index',
-      'search_api_list:database_search_index',
+      'entity_test_with_bundle_list:foo',
       'entity_test_with_bundle_list',
     ], $links->getCacheTags());
     $this->assertEquals(['route'], $links->getCacheContexts());
@@ -218,7 +218,7 @@ class ListPageLinkSourcePluginTest extends KernelTestBase {
     $this->assertCount(1, $links);
     $this->assertEqualsCanonicalizing([
       'config:search_api.index.database_search_index',
-      'search_api_list:database_search_index',
+      'entity_test_with_bundle_list:foo',
       'entity_test_with_bundle_list',
       'entity_test_with_bundle:' . $entity->id(),
     ], $links->getCacheTags());
