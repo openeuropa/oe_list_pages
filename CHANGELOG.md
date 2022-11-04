@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.21.0](https://github.com/openeuropa/oe_list_pages/tree/0.21.0) (2022-11-04)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.20.0...0.21.0)
+
+**Merged pull requests:**
+
+- EWPP-2618: Change cache tag for lists. [\#159](https://github.com/openeuropa/oe_list_pages/pull/159) ([hernani](https://github.com/hernani))
+
 ## [0.20.0](https://github.com/openeuropa/oe_list_pages/tree/0.20.0) (2022-09-16)
 
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.19.0...0.20.0)
@@ -13,6 +21,7 @@
 
 **Merged pull requests:**
 
+- Prepare release 0.20.0. [\#153](https://github.com/openeuropa/oe_list_pages/pull/153) ([imanoleguskiza](https://github.com/imanoleguskiza))
 - Issue \#103: Prevent passing a null variable when loading entity reference labels. [\#152](https://github.com/openeuropa/oe_list_pages/pull/152) ([imanoleguskiza](https://github.com/imanoleguskiza))
 - Issue \#150: Fix third party options not being saved for indexes. [\#151](https://github.com/openeuropa/oe_list_pages/pull/151) ([imanoleguskiza](https://github.com/imanoleguskiza))
 - EWPP-2371: Refactoring the list builder and execution manager to work with other config. [\#147](https://github.com/openeuropa/oe_list_pages/pull/147) ([upchuk](https://github.com/upchuk))
