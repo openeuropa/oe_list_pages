@@ -83,6 +83,10 @@ class FooFakeField extends ProcessorPluginBase implements ContextualAwareProcess
       return array_column($entity->get('field_test_contextual_filter')->getValue(), 'value');
     }
 
+    if ($source === ContextualPresetFilter::FILTER_SOURCE_FIELD_VALUES) {
+      return [];
+    }
+
     return [$entity->id()];
   }
 

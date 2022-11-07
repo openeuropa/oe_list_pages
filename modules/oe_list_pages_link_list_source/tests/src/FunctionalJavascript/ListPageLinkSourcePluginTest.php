@@ -720,6 +720,13 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
       'bundle' => 'article',
       'required' => 0,
     ])->save();
+
+    // We added the field but with no values, so we should still see no results.
+    $this->drupalGet($node->toUrl());
+    $this->assertSession()->elementsCount('css', '.block-oe-link-lists ul li', 0);
+
+    // Add some IDs as the field values so that our test processor can return
+    // them.
     $list_nodes = \Drupal::entityTypeManager()->getStorage('node')->loadByProperties([
       'title' => [
         'visible boolean',
