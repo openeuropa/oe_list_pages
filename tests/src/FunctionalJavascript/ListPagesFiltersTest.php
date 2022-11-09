@@ -29,6 +29,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     'oe_list_pages_filters_test',
     'oe_list_page_content_type',
     'oe_list_pages_address',
+    'oe_time_caching',
     'node',
     'emr',
     'emr_node',

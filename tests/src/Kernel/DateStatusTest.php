@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\oe_list_pages\Kernel;
 
+use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\DefaultFilterConfigurationBuilder;
 use Drupal\oe_list_pages\ListSourceFactory;
@@ -71,6 +72,15 @@ class DateStatusTest extends ListsSourceTestBase {
       DateStatus::UPCOMING => t('Upcoming'),
       DateStatus::PAST => t('Past'),
     ];
+
+    // Assert the time cache tags on the facet.
+    $now = new DrupalDateTime();
+    $current_time = $this->container->get('datetime.time')->getCurrentTime();
+    $now->setTimestamp($current_time);
+    $now->setTimezone(new \DateTimeZone('UTC'));
+    $now->modify('+1 hour');
+    $expected_time_cache_tags = $this->container->get('oe_time_caching.time_based_cache_tag_generator')->generateTags($now->getPhpDateTime());
+    $this->assertTrue(!array_diff($expected_time_cache_tags, $this->facet->getCacheTags()));
 
     $this->assertEquals($default_options, $actual['#options']);
     $this->assertEquals([], $actual['#default_value']);

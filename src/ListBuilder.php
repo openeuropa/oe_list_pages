@@ -267,7 +267,6 @@ class ListBuilder implements ListBuilderInterface {
         $bundle = $storage->load($configuration->getBundle());
         $exposed_filters = $bundle->getThirdPartySetting('oe_list_pages', 'default_exposed_filters', []);
       }
-
     }
 
     // By default ignore all filters.
@@ -304,6 +303,8 @@ class ListBuilder implements ListBuilderInterface {
     $list_execution = $this->listExecutionManager->executeList($configuration);
     $facets = $this->getKeyedFacetsFromSource($list_execution->getListSource());
     foreach ($facets as $facet) {
+      // Bubble up the facet cache tags.
+      $cache->addCacheableDependency($facet);
       $active_items = $facet->getActiveItems();
       if (!empty($active_items) && $this->facetHasDefaultStatus($facet, ['raw' => reset($active_items)])) {
         $active_filters[$facet->id()] = $facet->getActiveItems();

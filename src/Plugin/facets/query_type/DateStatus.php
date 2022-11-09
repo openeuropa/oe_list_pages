@@ -9,6 +9,7 @@ use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\facets\QueryType\QueryTypePluginBase;
 use Drupal\facets\Result\Result;
+use Drupal\oe_time_caching\Cache\TimeBasedCacheTagGeneratorInterface;
 use Drupal\search_api\Query\QueryInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -45,6 +46,13 @@ class DateStatus extends QueryTypePluginBase implements ContainerFactoryPluginIn
   protected $time;
 
   /**
+   * The time based cache generator.
+   *
+   * @var \Drupal\oe_time_caching\Cache\TimeBasedCacheTagGeneratorInterface
+   */
+  protected $timeBasedCacheTagGenerator;
+
+  /**
    * Constructs the DateStatus plugin.
    *
    * @param array $configuration
@@ -55,10 +63,13 @@ class DateStatus extends QueryTypePluginBase implements ContainerFactoryPluginIn
    *   The plugin definition.
    * @param \Drupal\Component\Datetime\TimeInterface $time
    *   The system time.
+   * @param \Drupal\oe_time_caching\Cache\TimeBasedCacheTagGeneratorInterface $time_based_cache_tag_generator
+   *   The time based cache generator.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, TimeInterface $time) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, TimeInterface $time, TimeBasedCacheTagGeneratorInterface $time_based_cache_tag_generator) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->time = $time;
+    $this->timeBasedCacheTagGenerator = $time_based_cache_tag_generator;
   }
 
   /**
@@ -69,7 +80,8 @@ class DateStatus extends QueryTypePluginBase implements ContainerFactoryPluginIn
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('datetime.time')
+      $container->get('datetime.time'),
+      $container->get('oe_time_caching.time_based_cache_tag_generator')
     );
   }
 
@@ -146,6 +158,7 @@ class DateStatus extends QueryTypePluginBase implements ContainerFactoryPluginIn
     }
 
     $this->facet->setResults($facet_results);
+    $this->facet->addCacheTags($this->timeBasedCacheTagGenerator->generateTags($now->getPhpDateTime()->modify('+1 hour')));
     return $this->facet;
   }
 

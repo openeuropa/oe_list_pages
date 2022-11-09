@@ -12,7 +12,8 @@
         "drupal/facets": "^2.0",
         "drupal/multivalue_form_element": "^1.0@beta",
         "drupal/search_api": "~1.17",
-        "symfony/options-resolver": "^4"
+        "symfony/options-resolver": "^4",
+        "openeuropa/oe_time_caching": "~1.0"
     },
     "require-dev": {
         "composer/installers": "^1.11",

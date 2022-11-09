@@ -28,6 +28,7 @@ class FacetsFormTest extends WebDriverTestBase {
     'entity_reference_revisions',
     'oe_list_pages',
     'oe_list_pages_filters_test',
+    'oe_time_caching',
     'node',
     'emr',
     'emr_node',

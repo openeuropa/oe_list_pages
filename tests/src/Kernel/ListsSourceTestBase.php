@@ -24,6 +24,7 @@ abstract class ListsSourceTestBase extends EntityKernelTestBase {
     'facets',
     'entity_reference_revisions',
     'oe_list_pages',
+    'oe_time_caching',
     'node',
     'language',
     'emr',
