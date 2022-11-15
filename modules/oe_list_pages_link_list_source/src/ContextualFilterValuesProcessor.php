@@ -274,7 +274,14 @@ class ContextualFilterValuesProcessor {
       throw new InapplicableContextualFilter();
     }
 
-    return $processor->getContextualValues($entity, $contextual_filter->getFilterSource());
+    $values = $processor->getContextualValues($entity, $contextual_filter->getFilterSource());
+    if (empty($values)) {
+      // If the contextual filter does not have a value, we again cannot
+      // show any results.
+      throw new InapplicableContextualFilter();
+    }
+
+    return $values;
   }
 
 }
