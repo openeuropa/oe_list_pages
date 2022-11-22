@@ -45,8 +45,9 @@ class ListPagesFiltersTest extends WebDriverTestBase {
    * Test fields in a list page content type.
    */
   public function testListPageFilters(): void {
+    $user = $this->createUser([], NULL, TRUE);
     // Create list for content type one.
-    $this->drupalLogin($this->rootUser);
+    $this->drupalLogin($user);
     $this->drupalGet('/node/add/oe_list_page');
     $this->clickLink('List Page');
     $page = $this->getSession()->getPage();
@@ -57,6 +58,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $page->checkField('Published');
     $page->fillField('Title', 'List page for ct1');
     $page->pressButton('Save');
+    $this->assertSession()->pageTextContains('List page for ct1');
 
     // Create list for content type two.
     $this->drupalGet('/node/add/oe_list_page');

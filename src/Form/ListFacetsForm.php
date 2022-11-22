@@ -8,6 +8,7 @@ use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\facets\Exception\InvalidQueryTypeException;
 use Drupal\facets\FacetInterface;
 use Drupal\facets\Utility\FacetsUrlGenerator;
 use Drupal\oe_list_pages\ListFacetManagerWrapper;
@@ -66,6 +67,9 @@ class ListFacetsForm extends FormBase {
 
   /**
    * {@inheritdoc}
+   *
+   * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+   * @SuppressWarnings(PHPMD.NPathComplexity)
    */
   public function buildForm(array $form, FormStateInterface $form_state, ListSourceInterface $list_source = NULL, array $ignored_filters = []) {
     if (!$list_source) {
@@ -93,6 +97,15 @@ class ListFacetsForm extends FormBase {
     });
 
     foreach ($facets as $facet) {
+      try {
+        // Check that we are able to determine the query type and not crash
+        // the application if we cannot. Just skip it.
+        $facet->getQueryType();
+      }
+      catch (InvalidQueryTypeException $exception) {
+        continue;
+      }
+
       $widget = $facet->getWidgetInstance();
 
       // If facet id should be ignored due to query configuration.

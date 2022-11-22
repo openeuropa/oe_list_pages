@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages\EventSubscriber;
 
+use Drupal\facets\Exception\InvalidQueryTypeException;
 use Drupal\facets\FacetInterface;
 use Drupal\facets\FacetSource\FacetSourcePluginManager;
 use Drupal\facets\QueryType\QueryTypePluginManager;
@@ -124,12 +125,19 @@ class QuerySubscriber implements EventSubscriberInterface {
         $facet->setActiveItems([]);
       }
 
-      /** @var \Drupal\facets\QueryType\QueryTypeInterface $query_type_plugin */
-      $query_type_plugin = $this->queryTypePluginManager->createInstance($facet->getQueryType(), [
-        'query' => $query,
-        'facet' => $facet,
-      ]);
-      $query_type_plugin->execute();
+      try {
+        /** @var \Drupal\facets\QueryType\QueryTypeInterface $query_type_plugin */
+        $query_type_plugin = $this->queryTypePluginManager->createInstance($facet->getQueryType(), [
+          'query' => $query,
+          'facet' => $facet,
+        ]);
+        $query_type_plugin->execute();
+      }
+      catch (InvalidQueryTypeException $exception) {
+        // If the facet doesn't have a query type, continue and don't crash
+        // the application.
+        continue;
+      }
 
       if (!isset($cloned_facets[$facet->id()])) {
         continue;

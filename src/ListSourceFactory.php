@@ -6,6 +6,7 @@ namespace Drupal\oe_list_pages;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\PluginBase;
+use Drupal\facets\Exception\InvalidQueryTypeException;
 use Drupal\search_api\Datasource\DatasourceInterface;
 use Drupal\search_api\IndexInterface;
 
@@ -154,6 +155,15 @@ class ListSourceFactory implements ListSourceFactoryInterface {
         // application.
         continue;
       }
+
+      try {
+        // Try to see if the facet has a query type and skip if not.
+        $facet->getQueryType();
+      }
+      catch (InvalidQueryTypeException $exception) {
+        continue;
+      }
+
       $filters[$facet->id()] = $facet->label();
     }
 

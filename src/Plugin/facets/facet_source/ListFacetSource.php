@@ -6,6 +6,7 @@ namespace Drupal\oe_list_pages\Plugin\facets\facet_source;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Path\CurrentPathStack;
+use Drupal\facets\Exception\InvalidQueryTypeException;
 use Drupal\facets\FacetSource\SearchApiFacetSourceInterface;
 use Drupal\facets\Plugin\facets\facet_source\SearchApiBaseFacetSource;
 use Drupal\search_api\Display\DisplayPluginManager;
@@ -168,8 +169,14 @@ class ListFacetSource extends SearchApiBaseFacetSource implements SearchApiFacet
         'facet' => $facet,
         'results' => $facet_results[$facet->getFieldIdentifier()] ?? [],
       ];
-      $query_type = $this->queryTypePluginManager->createInstance($facet->getQueryType(), $configuration);
-      $query_type->build();
+      try {
+        $query_type = $this->queryTypePluginManager->createInstance($facet->getQueryType(), $configuration);
+        $query_type->build();
+      }
+      catch (InvalidQueryTypeException $exception) {
+        // Do nothing.
+      }
+
     }
   }
 
