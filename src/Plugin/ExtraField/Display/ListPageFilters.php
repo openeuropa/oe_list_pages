@@ -37,6 +37,10 @@ class ListPageFilters extends ListPageExtraFieldBase {
       return isset($form['#cache']) ? ['#cache' => $form['#cache']] : [];
     }
 
+    if (!empty($form['#cache']['tags'])) {
+      $entity->addCacheTags($form['#cache']['tags']);
+    }
+
     return $form;
   }
 

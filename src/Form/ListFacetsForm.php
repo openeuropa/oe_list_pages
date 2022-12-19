@@ -115,6 +115,7 @@ class ListFacetsForm extends FormBase {
 
       if ($widget instanceof ListPagesWidgetInterface) {
         $form['facets'][$facet->id()] = $this->facetsManager->getFacetManager()->build($facet);
+        $cache->addCacheTags($facet->getCacheTags());
       }
     }
 
