@@ -183,6 +183,7 @@ class ListBuilder implements ListBuilderInterface {
 
     $query = $list_execution->getQuery();
     $cache->addCacheableDependency($query);
+    $cache->addCacheTags($query->getCacheTags());
     $result = $list_execution->getResults();
     $configuration = $list_execution->getConfiguration();
 
