@@ -14,7 +14,6 @@ use Drupal\Core\Pager\PagerManagerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
 use Drupal\facets\FacetInterface;
-use Drupal\facets\FacetManager\DefaultFacetManager;
 use Drupal\facets\Processor\ProcessorPluginManager;
 use Drupal\facets\UrlProcessor\UrlProcessorPluginManager;
 use Drupal\facets\Utility\FacetsUrlGenerator;
@@ -68,13 +67,6 @@ class ListBuilder implements ListBuilderInterface {
    * @var \Drupal\oe_list_pages\ListExecutionManagerInterface
    */
   protected $listExecutionManager;
-
-  /**
-   * The facets manager.
-   *
-   * @var \Drupal\facets\FacetManager\DefaultFacetManager
-   */
-  protected $facetManager;
 
   /**
    * The facets URL generator.
@@ -131,8 +123,6 @@ class ListBuilder implements ListBuilderInterface {
    *   The entity repository.
    * @param \Drupal\Core\Form\FormBuilderInterface $formBuilder
    *   The form builder.
-   * @param \Drupal\facets\FacetManager\DefaultFacetManager $facetManager
-   *   The facets manager.
    * @param \Drupal\facets\Utility\FacetsUrlGenerator $facetsUrlGenerator
    *   The facets URL generator.
    * @param \Drupal\facets\Processor\ProcessorPluginManager $processorManager
@@ -148,13 +138,12 @@ class ListBuilder implements ListBuilderInterface {
    *
    * @SuppressWarnings(PHPMD.ExcessiveParameterList)
    */
-  public function __construct(ListExecutionManagerInterface $listExecutionManager, EntityTypeManager $entityTypeManager, PagerManagerInterface $pager, EntityRepositoryInterface $entityRepository, FormBuilderInterface $formBuilder, DefaultFacetManager $facetManager, FacetsUrlGenerator $facetsUrlGenerator, ProcessorPluginManager $processorManager, RequestStack $requestStack, UrlProcessorPluginManager $urlProcessorManager, MultiselectFilterFieldPluginManager $multiselectFilterManager, ListSourceFactory $listSourceFactory) {
+  public function __construct(ListExecutionManagerInterface $listExecutionManager, EntityTypeManager $entityTypeManager, PagerManagerInterface $pager, EntityRepositoryInterface $entityRepository, FormBuilderInterface $formBuilder, FacetsUrlGenerator $facetsUrlGenerator, ProcessorPluginManager $processorManager, RequestStack $requestStack, UrlProcessorPluginManager $urlProcessorManager, MultiselectFilterFieldPluginManager $multiselectFilterManager, ListSourceFactory $listSourceFactory) {
     $this->listExecutionManager = $listExecutionManager;
     $this->entityTypeManager = $entityTypeManager;
     $this->pager = $pager;
     $this->entityRepository = $entityRepository;
     $this->formBuilder = $formBuilder;
-    $this->facetManager = $facetManager;
     $this->facetsUrlGenerator = $facetsUrlGenerator;
     $this->processorManager = $processorManager;
     $this->requestStack = $requestStack;

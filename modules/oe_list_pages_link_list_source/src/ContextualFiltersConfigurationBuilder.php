@@ -6,6 +6,7 @@ namespace Drupal\oe_list_pages_link_list_source;
 
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\facets\Exception\InvalidQueryTypeException;
 use Drupal\oe_list_pages\FilterConfigurationFormBuilderBase;
 use Drupal\oe_list_pages\ListSourceInterface;
 use Drupal\oe_list_pages\Plugin\facets\widget\MultiselectWidget;
@@ -342,7 +343,7 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
    *   The options.
    */
   protected function getAvailableFilters(ListSourceInterface $list_source): array {
-    $facets = $this->facetsManager->getFacetsByFacetSourceId($list_source->getSearchId());
+    $facets = $this->facetsManager->getFacetsByFacetSourceId($list_source->getSearchId(), $list_source->getIndex());
     $options = [];
 
     foreach ($facets as $facet) {
@@ -355,6 +356,14 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
       // latter should be contextual aware. Otherwise it won't be useful.
       $processor = ContextualFiltersHelper::getSearchApiFieldProcessor($list_source, $facet);
       if ($processor && !$processor instanceof ContextualAwareProcessorInterface) {
+        continue;
+      }
+
+      try {
+        // Try to see if the facet has a query type and skip if not.
+        $facet->getQueryType();
+      }
+      catch (InvalidQueryTypeException $exception) {
         continue;
       }
 

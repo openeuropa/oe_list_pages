@@ -10,7 +10,6 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Security\TrustedCallbackInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\facets\FacetInterface;
-use Drupal\facets\FacetManager\DefaultFacetManager;
 use Drupal\oe_list_pages\Plugin\facets\widget\ListPagesWidgetInterface;
 
 /**
@@ -25,7 +24,7 @@ abstract class FilterConfigurationFormBuilderBase implements TrustedCallbackInte
   /**
    * The facets manager.
    *
-   * @var \Drupal\facets\FacetManager\DefaultFacetManager
+   * @var \Drupal\oe_list_pages\ListFacetManagerWrapper
    */
   protected $facetsManager;
 
@@ -39,10 +38,10 @@ abstract class FilterConfigurationFormBuilderBase implements TrustedCallbackInte
   /**
    * FilterConfigurationFormBuilderBase constructor.
    *
-   * @param \Drupal\facets\FacetManager\DefaultFacetManager $facetManager
+   * @param \Drupal\oe_list_pages\ListFacetManagerWrapper $facetManager
    *   The facets manager.
    */
-  public function __construct(DefaultFacetManager $facetManager) {
+  public function __construct(ListFacetManagerWrapper $facetManager) {
     $this->facetsManager = $facetManager;
   }
 
@@ -87,7 +86,7 @@ abstract class FilterConfigurationFormBuilderBase implements TrustedCallbackInte
    *   The facet if found.
    */
   public function getFacetById(ListSourceInterface $list_source, string $id): ?FacetInterface {
-    $facets = $this->facetsManager->getFacetsByFacetSourceId($list_source->getSearchId());
+    $facets = $this->facetsManager->getFacetsByFacetSourceId($list_source->getSearchId(), $list_source->getIndex());
     foreach ($facets as $facet) {
       if ($id === $facet->id()) {
         return $facet;

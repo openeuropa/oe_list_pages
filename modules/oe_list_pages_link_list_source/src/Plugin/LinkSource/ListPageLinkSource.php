@@ -201,7 +201,7 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
     ];
     $form['list_page_configuration']['#tree'] = TRUE;
     $subform_state = SubformState::createForSubform($form['list_page_configuration'], $form, $form_state);
-    $configuration = new ListPageConfiguration($this->configuration);
+    $configuration = $this->createListPageConfiguration();
     $configuration->setDefaultFilterValuesAllowed(TRUE);
     $subform = $this->configurationSubformFactory->getForm($configuration);
     $form['list_page_configuration'] = $subform->buildForm($form['list_page_configuration'], $subform_state);
@@ -254,7 +254,7 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
     $element = $form['list_page_configuration'];
     $subform_state = SubformState::createForSubform($element, $form, $form_state);
-    $configuration = new ListPageConfiguration($this->configuration);
+    $configuration = $this->createListPageConfiguration();
     $subform = $this->configurationSubformFactory->getForm($configuration);
     $subform->submitForm($element, $subform_state);
     $configuration = $subform->getConfiguration();
@@ -272,6 +272,16 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
       'wrapper',
       'exclude_self',
     ], 0);
+  }
+
+  /**
+   * Creates the list page configuration from the raw config values.
+   *
+   * @return \Drupal\oe_list_pages\ListPageConfiguration
+   *   The configuration.
+   */
+  protected function createListPageConfiguration(): ListPageConfiguration {
+    return new ListPageConfiguration($this->configuration);
   }
 
 }

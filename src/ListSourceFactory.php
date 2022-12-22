@@ -6,7 +6,7 @@ namespace Drupal\oe_list_pages;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\PluginBase;
-use Drupal\facets\FacetManager\DefaultFacetManager;
+use Drupal\facets\Exception\InvalidQueryTypeException;
 use Drupal\search_api\Datasource\DatasourceInterface;
 use Drupal\search_api\IndexInterface;
 
@@ -18,7 +18,7 @@ class ListSourceFactory implements ListSourceFactoryInterface {
   /**
    * The facets manager.
    *
-   * @var \Drupal\facets\FacetManager\DefaultFacetManager
+   * @var \Drupal\oe_list_pages\ListFacetManagerWrapper
    */
   protected $facetsManager;
 
@@ -39,12 +39,12 @@ class ListSourceFactory implements ListSourceFactoryInterface {
   /**
    * ListSourceFactory constructor.
    *
-   * @param \Drupal\facets\FacetManager\DefaultFacetManager $facetsManager
+   * @param \Drupal\oe_list_pages\ListFacetManagerWrapper $facetsManager
    *   The facets manager.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The entity type manager.
    */
-  public function __construct(DefaultFacetManager $facetsManager, EntityTypeManagerInterface $entityTypeManager) {
+  public function __construct(ListFacetManagerWrapper $facetsManager, EntityTypeManagerInterface $entityTypeManager) {
     $this->facetsManager = $facetsManager;
     $this->entityTypeManager = $entityTypeManager;
   }
@@ -142,7 +142,7 @@ class ListSourceFactory implements ListSourceFactoryInterface {
   protected function create(string $entity_type, string $bundle, IndexInterface $index): ListSourceInterface {
     $filters = [];
     $id = self::generateFacetSourcePluginId($entity_type, $bundle);
-    $facets = $this->facetsManager->getFacetsByFacetSourceId($id);
+    $facets = $this->facetsManager->getFacetsByFacetSourceId($id, $index);
     usort($facets, function ($facet1, $facet2) {
       return ($facet1->getWeight() <=> $facet2->getWeight());
     });
@@ -155,6 +155,15 @@ class ListSourceFactory implements ListSourceFactoryInterface {
         // application.
         continue;
       }
+
+      try {
+        // Try to see if the facet has a query type and skip if not.
+        $facet->getQueryType();
+      }
+      catch (InvalidQueryTypeException $exception) {
+        continue;
+      }
+
       $filters[$facet->id()] = $facet->label();
     }
 

@@ -45,7 +45,11 @@ class ContextualFiltersHelper {
    *   The processor if found, NULL otherwise.
    */
   public static function getSearchApiFieldProcessor(ListSourceInterface $list_source, FacetInterface $facet): ?ProcessorInterface {
-    $property_path = $list_source->getIndex()->getField($facet->getFieldIdentifier())->getPropertyPath();
+    $field = $list_source->getIndex()->getField($facet->getFieldIdentifier());
+    if (!$field) {
+      return NULL;
+    }
+    $property_path = $field->getPropertyPath();
     $processors = $list_source->getIndex()->getProcessorsByStage(ProcessorInterface::STAGE_ADD_PROPERTIES);
     foreach ($processors as $processor) {
       $properties = $processor->getPropertyDefinitions();
