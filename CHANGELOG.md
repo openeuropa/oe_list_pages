@@ -1,11 +1,21 @@
 # Changelog
 
+## [0.22.0](https://github.com/openeuropa/oe_list_pages/tree/0.22.0) (2023-01-03)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.21.0...0.22.0)
+
+**Merged pull requests:**
+
+- EWPP-2748: Empty contextual aware processors should also cause the inapplicable contextual filter exception. [\#161](https://github.com/openeuropa/oe_list_pages/pull/161) ([upchuk](https://github.com/upchuk))
+- EWPP-2632: Minor refactor for extensibility. [\#154](https://github.com/openeuropa/oe_list_pages/pull/154) ([upchuk](https://github.com/upchuk))
+
 ## [0.21.0](https://github.com/openeuropa/oe_list_pages/tree/0.21.0) (2022-11-04)
 
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.20.0...0.21.0)
 
 **Merged pull requests:**
 
+- Prepare release 0.21.0. [\#160](https://github.com/openeuropa/oe_list_pages/pull/160) ([imanoleguskiza](https://github.com/imanoleguskiza))
 - EWPP-2618: Change cache tag for lists. [\#159](https://github.com/openeuropa/oe_list_pages/pull/159) ([hernani](https://github.com/hernani))
 
 ## [0.20.0](https://github.com/openeuropa/oe_list_pages/tree/0.20.0) (2022-09-16)
