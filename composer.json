@@ -12,9 +12,10 @@
         "drupal/facets": "^2.0",
         "drupal/multivalue_form_element": "^1.0@beta",
         "drupal/search_api": "^1.27",
-        "symfony/options-resolver": "^4"
+        "symfony/options-resolver": "^4.4.30"
     },
     "require-dev": {
+        "behat/mink-selenium2-driver": "^1.5",
         "composer/installers": "^1.11",
         "drupal/address": "^1.8",
         "drupal/config_devel": "^1.2",
@@ -24,6 +25,8 @@
         "drupal/extra_field": "^2.1",
         "drupal/inline_entity_form": "^1.0-rc12",
         "drush/drush": "^11.1",
+        "guzzlehttp/guzzle": "^7.0",
+        "masterminds/html5": "^2.7.6",
         "mikey179/vfsstream": "^1.6.10",
         "openeuropa/code-review": "^2.0",
         "openeuropa/oe_link_lists": "^0.19",
@@ -82,6 +85,7 @@
         "_readme": [
             "Explicit minimum version requirement of drupal/ctools due to previous versions having the 'core' key set in .info.yml files.",
             "Explicit minimum version requirement of mikey179/vfsstream due to lower versions missing return type on vfsStreamDirectory::getIterator() method.",
+            "Use master branch of drupal/drupal-extension to replace fabpot/goutte with behat/mink-browserkit-driver.",
             "Explicit minimum version requirement of symfony/phpunit-bridge to replace drupal/core-dev testing classes and traits.",
             "Explicit minimum version requirement of guzzlehttp/guzzle due to lower versions missing return type on CookieJar::getIterator() and CookieJar::count() methods.",
             "Explicit minimum version requirement of symfony packages due to lower versions missing return type on various methods being incompatible with PHP 8.1 parent methods.",
