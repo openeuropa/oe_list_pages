@@ -11,6 +11,9 @@ plugin.plugin_configuration.facets_processor.oe_list_pages_date_status_processor
     past_label:
       type: string
       label: 'Past label'
+    sort_alter_field_identifier:
+      type: string
+      label: 'Sort alter field identifier'
 
 node.type.*.third_party.oe_list_pages:
   type: oe_list_pages.bundle_third_party_settings
