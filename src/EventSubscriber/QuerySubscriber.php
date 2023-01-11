@@ -133,7 +133,8 @@ class QuerySubscriber implements EventSubscriberInterface {
         ]);
         $query_type_plugin->execute();
 
-        // Add query tags to the query.
+        // Add facet cache tags to the query.
+        // Facets can modify the query, we add the same cache tags to it.
         if (!empty($facet)) {
           $query->addCacheTags($facet->getCacheTags());
         }
