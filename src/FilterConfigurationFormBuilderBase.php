@@ -249,7 +249,7 @@ abstract class FilterConfigurationFormBuilderBase implements TrustedCallbackInte
    *   The altered array.
    */
   public static function preRenderOperationButtons(array $form): array {
-    $rows =& $form['summary']['table']['#rows'];
+    $rows = &$form['summary']['table']['#rows'];
     for ($i = 0; $i < count($rows); $i++) {
       $facet_id = $rows[$i][0]['filter_id'];
       $rows[$i][static::getOperationsButtonsPosition()]['data'] = [
