@@ -72,7 +72,9 @@ class DateStatusTest extends ListsSourceTestBase {
       DateStatus::PAST => t('Past'),
     ];
     // Assert the query has the corresponding cache tag from the facet.
-    $this->assertContains($this->facet->getCacheTags()[0], $query->getCacheTags());
+    $expected_tag = 'config:facets.facet.list_facet_source_entity_test_mulrev_changed_itemcreated';
+    $this->assertContains($expected_tag, $this->facet->getCacheTags());
+    $this->assertContains($expected_tag, $query->getCacheTags());
 
     $this->assertEquals($default_options, $actual['#options']);
     $this->assertEquals([], $actual['#default_value']);
@@ -86,7 +88,9 @@ class DateStatusTest extends ListsSourceTestBase {
       DateStatus::PAST => t('Past items'),
     ];
     // Assert the query has the corresponding cache tag from the facet.
-    $this->assertContains($this->facet->getCacheTags()[0], $query->getCacheTags());
+    $expected_tag = 'config:facets.facet.list_facet_source_entity_test_mulrev_changed_itemcreated';
+    $this->assertContains($expected_tag, $this->facet->getCacheTags());
+    $this->assertContains($expected_tag, $query->getCacheTags());
 
     $this->assertEquals($default_options, $actual['#options']);
     $this->assertEquals([DateStatus::UPCOMING], $actual['#default_value']);
