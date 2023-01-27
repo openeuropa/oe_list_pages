@@ -37,6 +37,13 @@ class ListPageFilters extends ListPageExtraFieldBase {
       return isset($form['#cache']) ? ['#cache' => $form['#cache']] : [];
     }
 
+    // Facets might have added cache tags to the form related with their
+    // content. We guarantee the cache tags are added also to the entity
+    // here so they bubble up to the page.
+    if (!empty($form['#cache']['tags'])) {
+      $entity->addCacheTags($form['#cache']['tags']);
+    }
+
     return $form;
   }
 

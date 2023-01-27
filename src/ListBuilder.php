@@ -183,6 +183,7 @@ class ListBuilder implements ListBuilderInterface {
 
     $query = $list_execution->getQuery();
     $cache->addCacheableDependency($query);
+    $cache->addCacheTags($query->getCacheTags());
     $result = $list_execution->getResults();
     $configuration = $list_execution->getConfiguration();
 
@@ -293,6 +294,7 @@ class ListBuilder implements ListBuilderInterface {
     $list_execution = $this->listExecutionManager->executeList($configuration);
     $facets = $this->getKeyedFacetsFromSource($list_execution->getListSource());
     foreach ($facets as $facet) {
+      $cache->addCacheableDependency($facet);
       $active_items = $facet->getActiveItems();
       if (!empty($active_items) && $this->facetHasDefaultStatus($facet, ['raw' => reset($active_items)])) {
         $active_filters[$facet->id()] = $facet->getActiveItems();
