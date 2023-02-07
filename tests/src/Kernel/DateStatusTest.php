@@ -118,18 +118,31 @@ class DateStatusTest extends ListsSourceTestBase {
     $list->getIndex()->indexItems();
 
     /** @var \Drupal\search_api\Query\QueryInterface $default_query */
-    $query = $list->getQuery();
+    $query = $list->getQuery(['sort' => ['created' => 'DESC']]);
     $query->execute();
     $results = $query->getResults();
 
     // We have no facet configuration so we get all results.
     $this->assertCount(4, $results->getResultItems());
 
+    // Assert that the query has been sorted by created DESC.
+    $this->assertSort($results->getResultItems(), [
+      'future',
+      'tomorrow',
+      'old',
+      'oldest',
+    ]);
+
     $filter = new ListPresetFilter($this->facet->id(), [DateStatus::PAST]);
-    $query = $list->getQuery(['preset_filters' => [DefaultFilterConfigurationBuilder::generateFilterId($this->facet->id()) => $filter]]);
+    $query = $list->getQuery([
+      'preset_filters' => [DefaultFilterConfigurationBuilder::generateFilterId($this->facet->id()) => $filter],
+      'sort' => ['created' => 'DESC'],
+    ]);
     $query->execute();
     $results = $query->getResults();
     $this->assertCount(2, $results->getResultItems());
+    // The facet field identifier matches the configured query sort, to for
+    // past items, the sort has been kept as DESC.
     $this->assertSort($results->getResultItems(), [
       'old',
       'oldest',
@@ -137,10 +150,15 @@ class DateStatusTest extends ListsSourceTestBase {
 
     $this->container->get('kernel')->rebuildContainer();
     $filter = new ListPresetFilter($this->facet->id(), [DateStatus::UPCOMING]);
-    $query = $list->getQuery(['preset_filters' => [DefaultFilterConfigurationBuilder::generateFilterId($this->facet->id()) => $filter]]);
+    $query = $list->getQuery([
+      'preset_filters' => [DefaultFilterConfigurationBuilder::generateFilterId($this->facet->id()) => $filter],
+      'sort' => ['created' => 'DESC'],
+    ]);
     $query->execute();
     $results = $query->getResults();
     $this->assertCount(2, $results->getResultItems());
+    // The facet field identifier matches the configured query sort, to for
+    // upcoming items, the sort has altered as ASC.
     $this->assertSort($results->getResultItems(), [
       'tomorrow',
       'future',
@@ -153,18 +171,44 @@ class DateStatusTest extends ListsSourceTestBase {
     ]);
 
     $query = $list->getQuery([
-      'preset_filters' => [
-        DefaultFilterConfigurationBuilder::generateFilterId($this->facet->id()) => $filter,
-      ],
+      'preset_filters' => [DefaultFilterConfigurationBuilder::generateFilterId($this->facet->id()) => $filter],
+      'sort' => ['created' => 'DESC'],
     ]);
     $query->execute();
     $results = $query->getResults();
     $this->assertCount(4, $results->getResultItems());
+    // The facet field identifier matches the configured query sort, to for
+    // both past and upcoming items, the sort has been kept as DESC.
     $this->assertSort($results->getResultItems(), [
       'future',
       'tomorrow',
       'old',
       'oldest',
+    ]);
+
+    // Update the processor config to use the body field as the sort alter
+    // field.
+    $configs = $this->facet->getProcessorConfigs();
+    $configs['oe_list_pages_date_status_processor']['settings']['sort_alter_field_identifier'] = 'name';
+    $this->facet->set('processor_configs', $configs);
+    $this->facet->save();
+
+    $this->container->get('kernel')->rebuildContainer();
+    $filter = new ListPresetFilter($this->facet->id(), [DateStatus::UPCOMING]);
+    $query = $list->getQuery([
+      'preset_filters' => [DefaultFilterConfigurationBuilder::generateFilterId($this->facet->id()) => $filter],
+      'sort' => ['name' => 'DESC'],
+    ]);
+    $query->execute();
+    $results = $query->getResults();
+    $this->assertCount(2, $results->getResultItems());
+    // The query sort field is now different so assert that the query gets
+    // filtered by the correct date field (so show only upcoming items) but the
+    // sort alter is applied to the configured query sort. This means that it
+    // will be sorted by name ASC.
+    $this->assertSort($results->getResultItems(), [
+      'future',
+      'tomorrow',
     ]);
   }
 

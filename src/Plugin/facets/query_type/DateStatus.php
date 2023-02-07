@@ -95,17 +95,23 @@ class DateStatus extends QueryTypePluginBase implements ContainerFactoryPluginIn
       $filter = $query->createConditionGroup('OR', ['facet:' . $field_identifier]);
       foreach ($active_items as $value) {
         if ($value === self::PAST) {
-          $filter->addCondition($this->facet->getFieldIdentifier(), $now->getTimestamp(), "<=");
+          $filter->addCondition($field_identifier, $now->getTimestamp(), "<=");
         }
         elseif ($value === self::UPCOMING) {
           $condition_group = $query->createConditionGroup('OR');
-          $condition_group->addCondition($this->facet->getFieldIdentifier(), $now->getTimestamp(), ">");
-          $condition_group->addCondition($this->facet->getFieldIdentifier(), NULL);
+          $condition_group->addCondition($field_identifier, $now->getTimestamp(), ">");
+          $condition_group->addCondition($field_identifier, NULL);
           $filter->addConditionGroup($condition_group);
         }
       }
       $query->addConditionGroup($filter);
-      $this->applySort($query, $active_items, $this->facet->getFieldIdentifier());
+      // Apply the sort using the field identifier of the current facet or the
+      // overridden one that was configured on the corresponding processor.
+      $sort_field_identifier = $field_identifier;
+      if ($this->facet->get('default_status_sort_alter_field_identifier')) {
+        $sort_field_identifier = $this->facet->get('default_status_sort_alter_field_identifier');
+      }
+      $this->applySort($query, $active_items, $sort_field_identifier);
     }
   }
 
