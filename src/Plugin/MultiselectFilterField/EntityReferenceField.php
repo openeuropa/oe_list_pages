@@ -138,6 +138,9 @@ class EntityReferenceField extends MultiSelectFilterFieldPluginBase {
     $entity_storage = $this->entityTypeManager->getStorage($field_definition->getSetting('target_type'));
     $values = [];
     foreach ($filter_values as $filter_value) {
+      if (!$filter_value) {
+        continue;
+      }
       $entity = $entity_storage->load($filter_value);
       if (!$entity) {
         continue;
