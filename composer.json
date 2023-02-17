@@ -9,7 +9,7 @@
         "php": ">=8.0",
         "drupal/core": "^9.4",
         "drupal/emr": "^1.1",
-        "drupal/facets": "^2.0",
+        "drupal/facets": "^3.0@beta",
         "drupal/multivalue_form_element": "^1.0@beta",
         "drupal/search_api": "^1.27",
         "symfony/options-resolver": "^4.4.30"
@@ -91,7 +91,8 @@
             "Explicit minimum version requirement of symfony/phpunit-bridge to replace drupal/core-dev testing classes and traits.",
             "Explicit minimum version requirement of guzzlehttp/guzzle due to lower versions missing return type on CookieJar::getIterator() and CookieJar::count() methods.",
             "Explicit minimum version requirement of symfony packages due to lower versions missing return type on various methods being incompatible with PHP 8.1 parent methods.",
-            "Explicit minimum version requirement of masterminds/html5 due to lower versions passing NULL parameters instead of string when calling DOMImplementation::createDocument() method."
+            "Explicit minimum version requirement of masterminds/html5 due to lower versions passing NULL parameters instead of string when calling DOMImplementation::createDocument() method.",
+            "Explicit minimum version requirement of drupal/facets due to lower versions throwing PHP deprecation warnings."
         ]
     },
     "config": {
