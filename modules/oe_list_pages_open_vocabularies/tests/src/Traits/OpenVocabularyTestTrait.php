@@ -56,14 +56,23 @@ trait OpenVocabularyTestTrait {
    *   The field ids for the association.
    * @param array $concept_schemes
    *   The target concept schemes.
+   * @param array $names
+   *   Specific skos vocabulary association settings.
    *
    * @return \Drupal\open_vocabularies\OpenVocabularyAssociationInterface
    *   The created association.
    */
-  public function createSkosVocabularyAssociation(array $fields, array $concept_schemes = []): OpenVocabularyAssociationInterface {
+  public function createSkosVocabularyAssociation(array $fields, array $concept_schemes = [], array $names = []): OpenVocabularyAssociationInterface {
+    $names += [
+      'vocabulary_id' => 'skos_vocabulary',
+      'vocabulary_label' => 'My skos vocabulary',
+      'association_id' => 'skos_vocabulary',
+      'association_label' => 'Skos association',
+    ];
+
     $vocabulary = [
-      'id' => 'skos_vocabulary',
-      'label' => 'My skos vocabulary',
+      'id' => $names['vocabulary_id'],
+      'label' => $names['vocabulary_label'],
       'description' => $this->randomString(128),
       'handler' => 'rdf_skos',
       'handler_settings' => [
@@ -74,14 +83,14 @@ trait OpenVocabularyTestTrait {
     $vocabulary->save();
 
     $vocabulary_association_values = [
-      'label' => 'Skos association',
-      'name' => 'skos_vocabulary',
+      'label' => $names['association_label'],
+      'name' => $names['association_id'],
       'widget_type' => 'entity_reference_autocomplete',
       'required' => TRUE,
       'help_text' => 'Some text',
       'predicate' => 'http://example.com/#name',
       'cardinality' => 5,
-      'vocabulary' => 'skos_vocabulary',
+      'vocabulary' => $names['vocabulary_id'],
       'fields' => $fields,
     ];
     $this->container->get('kernel')->rebuildContainer();
