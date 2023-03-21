@@ -1,11 +1,23 @@
 # Changelog
 
+## [0.23.0](https://github.com/openeuropa/oe_list_pages/tree/0.23.0) (2023-03-21)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.22.0...0.23.0)
+
+**Merged pull requests:**
+
+- EWPP-2919: Check entity id validity before loading. [\#168](https://github.com/openeuropa/oe_list_pages/pull/168) ([sergepavle](https://github.com/sergepavle))
+- EWPP-2838: Date status processor specific sort alter field. [\#166](https://github.com/openeuropa/oe_list_pages/pull/166) ([upchuk](https://github.com/upchuk))
+- OEL-2115: Update to PHP 8.1 [\#165](https://github.com/openeuropa/oe_list_pages/pull/165) ([brummbar](https://github.com/brummbar))
+- EWPP-2724: Bubble up facet cache. [\#163](https://github.com/openeuropa/oe_list_pages/pull/163) ([nagyad](https://github.com/nagyad))
+
 ## [0.22.0](https://github.com/openeuropa/oe_list_pages/tree/0.22.0) (2023-01-03)
 
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.21.0...0.22.0)
 
 **Merged pull requests:**
 
+- Release-0.22.0: Update changelog. [\#164](https://github.com/openeuropa/oe_list_pages/pull/164) ([nagyad](https://github.com/nagyad))
 - EWPP-2748: Empty contextual aware processors should also cause the inapplicable contextual filter exception. [\#161](https://github.com/openeuropa/oe_list_pages/pull/161) ([upchuk](https://github.com/upchuk))
 - EWPP-2632: Minor refactor for extensibility. [\#154](https://github.com/openeuropa/oe_list_pages/pull/154) ([upchuk](https://github.com/upchuk))
 
