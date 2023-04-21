@@ -1,7 +1,13 @@
-# Changelog
+# Change Log
+
+## [0.24.0](https://github.com/openeuropa/oe_list_pages/tree/0.24.0) (2023-04-21)
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.23.0...0.24.0)
+
+**Merged pull requests:**
+
+- EWPP-2310: Increasing the options resolver dependency. [\#170](https://github.com/openeuropa/oe_list_pages/pull/170) ([upchuk](https://github.com/upchuk))
 
 ## [0.23.0](https://github.com/openeuropa/oe_list_pages/tree/0.23.0) (2023-03-21)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.22.0...0.23.0)
 
 **Merged pull requests:**
