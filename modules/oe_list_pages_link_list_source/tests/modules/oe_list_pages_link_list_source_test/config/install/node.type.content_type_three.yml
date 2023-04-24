@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies: {  }
+name: 'Content type three'
+type: content_type_three
+description: ''
+help: ''
+new_revision: false
+preview_mode: 1
+display_submitted: false

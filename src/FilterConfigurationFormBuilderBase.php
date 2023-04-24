@@ -117,7 +117,7 @@ abstract class FilterConfigurationFormBuilderBase implements TrustedCallbackInte
    */
   protected function buildSummaryPresetFilters(array $form, FormStateInterface $form_state, ListSourceInterface $list_source, array $available_filters = []): array {
     $ajax_wrapper_id = $this->getAjaxWrapperId($form);
-    $current_filters = static::getCurrentValues($form_state, $list_source);
+    $current_filters = static::getCurrentValues($form_state, $list_source, $ajax_wrapper_id);
 
     $header = [
       ['data' => $this->t('Filter')],
@@ -373,9 +373,11 @@ abstract class FilterConfigurationFormBuilderBase implements TrustedCallbackInte
    *   The list source the filter values belong to.
    * @param array $current_filter_values
    *   The filter values.
+   * @param string $ajax_wrapper_id
+   *   The element Ajax wrapper ID.
    */
-  protected static function setCurrentValues(FormStateInterface $form_state, ListSourceInterface $list_source, array $current_filter_values): void {
-    $key = 'current_values_' . static::getFilterType();
+  protected static function setCurrentValues(FormStateInterface $form_state, ListSourceInterface $list_source, array $current_filter_values, string $ajax_wrapper_id): void {
+    $key = 'current_values_' . $ajax_wrapper_id . '_' . static::getFilterType();
     $storage = &$form_state->getStorage();
     NestedArray::setValue($storage, [$key, $list_source->getSearchId()], $current_filter_values);
   }
@@ -387,13 +389,15 @@ abstract class FilterConfigurationFormBuilderBase implements TrustedCallbackInte
    *   The form state.
    * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
    *   The list source the filter values belong to.
+   * @param string $ajax_wrapper_id
+   *   The element Ajax wrapper ID.
    *
    * @return ListPresetFilter[]
    *   The filter values.
    */
-  protected static function getCurrentValues(FormStateInterface $form_state, ListSourceInterface $list_source): array {
+  protected static function getCurrentValues(FormStateInterface $form_state, ListSourceInterface $list_source, string $ajax_wrapper_id): array {
     $storage = $form_state->getStorage();
-    $key = 'current_values_' . static::getFilterType();
+    $key = 'current_values_' . $ajax_wrapper_id . '_' . static::getFilterType();
     $current_filter_values = NestedArray::getValue($storage, [
       $key,
       $list_source->getSearchId(),
@@ -412,13 +416,15 @@ abstract class FilterConfigurationFormBuilderBase implements TrustedCallbackInte
    *   The form state.
    * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
    *   The list source the filter values belong to.
+   * @param string $ajax_wrapper_id
+   *   The element Ajax wrapper ID.
    *
    * @return bool
    *   Whether the values have been emptied..
    */
-  protected static function areCurrentValuesEmpty(FormStateInterface $form_state, ListSourceInterface $list_source): bool {
+  protected static function areCurrentValuesEmpty(FormStateInterface $form_state, ListSourceInterface $list_source, string $ajax_wrapper_id): bool {
     $storage = $form_state->getStorage();
-    $key = 'current_values_' . static::getFilterType();
+    $key = 'current_values_' . $ajax_wrapper_id . '_' . static::getFilterType();
     $values = NestedArray::getValue($storage, [
       $key,
       $list_source->getSearchId(),

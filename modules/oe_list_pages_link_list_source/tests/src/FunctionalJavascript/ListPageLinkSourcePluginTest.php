@@ -142,6 +142,176 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
   }
 
   /**
+   * Test list page preset filters configuration for multiple link lists.
+   *
+   * Tests that default and contextual filter values form storage is kept
+   * separate and we can configure them on a page with multiple link lists.
+   */
+  public function testMultipleListPageFilters(): void {
+    $admin = $this->createUser([], NULL, TRUE);
+    $page = $this->getSession()->getPage();
+    $assert = $this->assertSession();
+
+    $default_value_name_prefix_one = 'field_link_lists[form][0][configuration][0][link_source][plugin_configuration_wrapper][list_pages][list_page_configuration][wrapper][default_filter_values]';
+    $default_value_name_prefix_two = 'field_link_lists[form][1][configuration][0][link_source][plugin_configuration_wrapper][list_pages][list_page_configuration][wrapper][default_filter_values]';
+
+    $contextual_filter_name_prefix_one = 'field_link_lists[form][0][configuration][0][link_source][plugin_configuration_wrapper][list_pages][list_page_configuration][wrapper][contextual_filters]';
+    $contextual_filter_name_prefix_two = 'field_link_lists[form][1][configuration][0][link_source][plugin_configuration_wrapper][list_pages][list_page_configuration][wrapper][contextual_filters]';
+
+    $this->drupalLogin($admin);
+    $this->drupalGet('/node/add/content_type_three');
+    $this->getSession()->getPage()->fillField('Title', 'Test');
+    $this->getSession()->getPage()->pressButton('Add new link list');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->fillField('Administrative title', 'First link list');
+
+    $body_filter_id = DefaultFilterConfigurationBuilder::generateFilterId('body');
+    $created_filter_id = DefaultFilterConfigurationBuilder::generateFilterId('created');
+    $link_filter_id = ContextualFiltersConfigurationBuilder::generateFilterId('link');
+
+    $this->getSession()->getPage()->selectFieldOption('Link source', 'List page');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $page->selectFieldOption('Source entity type', 'Content');
+    $assert->assertWaitOnAjaxRequest();
+    $page->selectFieldOption('Source bundle', 'Content type one');
+    $assert->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->selectFieldOption('Link display', 'Title');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->selectFieldOption('No results behaviour', 'Hide');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+
+    $expected_set_filters_one = [];
+    $expected_contextual_filters_one = [];
+
+    // Set preset filter for Body.
+    $page->selectFieldOption('Add default value for', 'Body');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert = $this->assertSession();
+    $assert->pageTextContains('Set default value for Body');
+    $page = $this->getSession()->getPage();
+    $filter_selector = $default_value_name_prefix_one . '[wrapper][edit][' . $body_filter_id . '][body]';
+    $page->fillField($filter_selector, 'cherry');
+    $page->pressButton('Set default value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $expected_set_filters_one['body'] = ['key' => 'Body', 'value' => 'cherry'];
+    $this->assertDefaultValueForFilters($expected_set_filters_one);
+
+    // Set preset filter for Created.
+    $page->selectFieldOption('Add default value for', 'Created');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->pageTextContains('Set default value for Created');
+    $filter_selector = $default_value_name_prefix_one . '[wrapper][edit][' . $created_filter_id . ']';
+    $this->getSession()->getPage()->selectFieldOption($filter_selector . '[created_op]', 'After');
+    $this->getSession()->getPage()->fillField($filter_selector . '[created_first_date_wrapper][created_first_date][date]', '10/19/2019');
+    $page->pressButton('Set default value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $expected_set_filters_one['created'] = [
+      'key' => 'Created',
+      'value' => 'After 19 October 2019',
+    ];
+    $this->assertDefaultValueForFilters($expected_set_filters_one);
+
+    // Set a contextual filter for Link.
+    $page->selectFieldOption('Add contextual value for', 'Link');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->pageTextContains('Set contextual options for Link');
+    $filter_selector = $contextual_filter_name_prefix_one . '[wrapper][edit][' . $link_filter_id . ']';
+    $this->getSession()->getPage()->selectFieldOption($filter_selector . '[operator]', 'or');
+    $page->pressButton('Set options');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $expected_contextual_filters_one['link'] = [
+      'key' => 'Link',
+      'value' => 'Any of',
+    ];
+    $this->assertContextualValueForFilters($expected_contextual_filters_one);
+
+    // Close the link list and start another one.
+    $this->getSession()->getPage()->pressButton('Create link list');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+
+    $this->getSession()->getPage()->pressButton('Add new link list');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->fillField('Administrative title', 'First link list');
+
+    $this->getSession()->getPage()->selectFieldOption('Link source', 'List page');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $page->selectFieldOption('Source entity type', 'Content');
+    $assert->assertWaitOnAjaxRequest();
+    $page->selectFieldOption('Source bundle', 'Content type one');
+    $assert->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->selectFieldOption('Link display', 'Title');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->selectFieldOption('No results behaviour', 'Hide');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+
+    $expected_set_filters_two = [];
+    $expected_contextual_filters_two = [];
+
+    // Set preset filter for Body.
+    $page->selectFieldOption('Add default value for', 'Body');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert = $this->assertSession();
+    $assert->pageTextContains('Set default value for Body');
+    $page = $this->getSession()->getPage();
+    $filter_selector = $default_value_name_prefix_two . '[wrapper][edit][' . $body_filter_id . '][body]';
+    $page->fillField($filter_selector, 'tomato');
+    $page->pressButton('Set default value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $expected_set_filters_two['body'] = ['key' => 'Body', 'value' => 'tomato'];
+    $this->assertDefaultValueForFilters($expected_set_filters_two);
+
+    // Set preset filter for Created.
+    $page->selectFieldOption('Add default value for', 'Created');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->pageTextContains('Set default value for Created');
+    $filter_selector = $default_value_name_prefix_two . '[wrapper][edit][' . $created_filter_id . ']';
+    $this->getSession()->getPage()->selectFieldOption($filter_selector . '[created_op]', 'After');
+    $this->getSession()->getPage()->fillField($filter_selector . '[created_first_date_wrapper][created_first_date][date]', '10/19/2020');
+    $page->pressButton('Set default value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $expected_set_filters_two['created'] = [
+      'key' => 'Created',
+      'value' => 'After 19 October 2020',
+    ];
+    $this->assertDefaultValueForFilters($expected_set_filters_two);
+
+    // Set a contextual filter for Link.
+    $page->selectFieldOption('Add contextual value for', 'Link');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->pageTextContains('Set contextual options for Link');
+    $filter_selector = $contextual_filter_name_prefix_two . '[wrapper][edit][' . $link_filter_id . ']';
+    $this->getSession()->getPage()->selectFieldOption($filter_selector . '[operator]', 'not');
+    $page->pressButton('Set options');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $expected_contextual_filters_two['link'] = [
+      'key' => 'Link',
+      'value' => 'None of',
+    ];
+    $this->assertContextualValueForFilters($expected_contextual_filters_two);
+
+    // Close the link list and edit the first one again to assert the default
+    // filter values.
+    $this->getSession()->getPage()->pressButton('Create link list');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+
+    // Save the node and edit it back to assert we see correctly the values.
+    $this->getSession()->getPage()->pressButton('Save');
+    $node = $this->drupalGetNodeByTitle('Test');
+    $this->drupalGet($node->toUrl('edit-form'));
+
+    $this->getSession()->getPage()->pressButton('ief-field_link_lists-form-entity-edit-0');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->assertDefaultValueForFilters($expected_set_filters_one);
+    $this->assertContextualValueForFilters($expected_contextual_filters_one);
+    $this->getSession()->getPage()->pressButton('Cancel');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->pressButton('ief-field_link_lists-form-entity-edit-1');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->assertDefaultValueForFilters($expected_set_filters_two);
+    $this->assertContextualValueForFilters($expected_contextual_filters_two);
+  }
+
+  /**
    * Test list page contextual filters configuration form.
    */
   public function testListPageContextualFiltersForm(): void {
