@@ -138,7 +138,7 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->selectFieldOption('No results behaviour', 'Hide');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->assertListPagePresetFilters('configuration[0][link_source][plugin_configuration_wrapper][list_pages][list_page_configuration][wrapper][default_filter_values]');
+    $this->assertListPagePresetFilters('configuration[0][link_source][plugin_configuration_wrapper][list_pages][list_page_configuration][wrapper][default_filter_values]', 'list-page-default_filter_values--configuration-0-link_source-plugin_configuration_wrapper-list_pages-list_page_configuration-wrapper-default_filter_values');
   }
 
   /**
@@ -317,6 +317,8 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
   public function testListPageContextualFiltersForm(): void {
     $contextual_filter_name_prefix = 'configuration[0][link_source][plugin_configuration_wrapper][list_pages][list_page_configuration][wrapper][contextual_filters]';
     $default_value_name_prefix = 'configuration[0][link_source][plugin_configuration_wrapper][list_pages][list_page_configuration][wrapper][default_filter_values]';
+    $ajax_wrapper_id_default_filter = 'list-page-default_filter_values--configuration-0-link_source-plugin_configuration_wrapper-list_pages-list_page_configuration-wrapper-default_filter_values';
+    $ajax_wrapper_id_contextual_filter = 'list-page-contextual-filter-values--configuration-0-link_source-plugin_configuration_wrapper-list_pages-list_page_configuration-wrapper-contextual_filters';
 
     $admin = $this->createUser([], NULL, TRUE);
     $this->drupalLogin($admin);
@@ -394,7 +396,7 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     $this->assertContextualValueForFilters($expected_contextual_filters);
 
     // Edit the Reference.
-    $page->pressButton('contextual-edit-' . $reference_filter_id);
+    $page->pressButton('contextual-edit-' . $reference_filter_id . '-' . $ajax_wrapper_id_contextual_filter);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert->pageTextContains('Set contextual options for Reference');
     $this->assertTrue($this->assertSession()->optionExists('Operator', 'All of')->hasAttribute('selected'));
@@ -426,19 +428,19 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
 
     // Start editing one contextual filter and one default value at the same
     // time.
-    $page->pressButton('contextual-edit-' . $link_filter_id);
+    $page->pressButton('contextual-edit-' . $link_filter_id . '-' . $ajax_wrapper_id_contextual_filter);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert->pageTextContains('Set contextual options for Link');
     $this->assertTrue($this->assertSession()->optionExists('Operator', 'None of')->hasAttribute('selected'));
 
-    $page->pressButton('default-edit-' . $body_filter_id);
+    $page->pressButton('default-edit-' . $body_filter_id . '-' . $ajax_wrapper_id_default_filter);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert->pageTextContains('Set default value for Body');
     $filter_selector = $default_value_name_prefix . '[wrapper][edit][' . $body_filter_id . '][body]';
     $this->assertSession()->fieldValueEquals($filter_selector, 'cherry');
 
     // Cancel out of both forms, one at the time.
-    $page->pressButton('contextual-cancel-' . $link_filter_id);
+    $page->pressButton('contextual-cancel-' . $link_filter_id . '-' . $ajax_wrapper_id_contextual_filter);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert->pageTextNotContains('Set contextual options for Link');
     $this->assertContextualValueForFilters($expected_contextual_filters);
@@ -446,7 +448,7 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     $filter_selector = $default_value_name_prefix . '[wrapper][edit][' . $body_filter_id . '][body]';
     $this->assertSession()->fieldValueEquals($filter_selector, 'cherry');
 
-    $page->pressButton('default-cancel-' . $body_filter_id);
+    $page->pressButton('default-cancel-' . $body_filter_id . '-' . $ajax_wrapper_id_default_filter);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert->pageTextNotContains('Set default value for Body');
     $this->assertContextualValueForFilters($expected_contextual_filters);
@@ -454,12 +456,12 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
 
     // Edit again one contextual filter and one default value at the same
     // time.
-    $page->pressButton('contextual-edit-' . $reference_filter_id);
+    $page->pressButton('contextual-edit-' . $reference_filter_id . '-' . $ajax_wrapper_id_contextual_filter);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert->pageTextContains('Set contextual options for Reference');
     $this->assertTrue($this->assertSession()->optionExists('Operator', 'None of')->hasAttribute('selected'));
 
-    $page->pressButton('default-edit-' . $body_filter_id);
+    $page->pressButton('default-edit-' . $body_filter_id . '-' . $ajax_wrapper_id_default_filter);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert->pageTextContains('Set default value for Body');
     $filter_selector = $default_value_name_prefix . '[wrapper][edit][' . $body_filter_id . '][body]';
@@ -530,21 +532,21 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     $this->clickLink('Edit');
     $this->assertContextualValueForFilters($expected_contextual_filters);
     $this->assertDefaultValueForFilters($expected_default_filters);
-    $page->pressButton('contextual-edit-' . $link_filter_id);
+    $page->pressButton('contextual-edit-' . $link_filter_id . '-' . $ajax_wrapper_id_contextual_filter);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert->pageTextContains('Set contextual options for Link');
     $this->assertTrue($this->assertSession()->optionExists('Operator', 'None of')->hasAttribute('selected'));
     $this->assertTrue($this->assertSession()->optionExists('Filter source', 'Field values')->hasAttribute('selected'));
-    $page->pressButton('contextual-cancel-' . $link_filter_id);
+    $page->pressButton('contextual-cancel-' . $link_filter_id . '-' . $ajax_wrapper_id_contextual_filter);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->assertContextualValueForFilters($expected_contextual_filters);
-    $page->pressButton('contextual-edit-' . $reference_filter_id);
+    $page->pressButton('contextual-edit-' . $reference_filter_id . '-' . $ajax_wrapper_id_contextual_filter);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert->pageTextContains('Set contextual options for Reference');
     $this->assertTrue($this->assertSession()->optionExists('Operator', 'Any of')->hasAttribute('selected'));
     $this->assertTrue($this->assertSession()->optionExists('Filter source', 'Entity ID')->hasAttribute('selected'));
 
-    $page->pressButton('default-edit-' . $body_filter_id);
+    $page->pressButton('default-edit-' . $body_filter_id . '-' . $ajax_wrapper_id_default_filter);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert->pageTextContains('Set default value for Body');
     $filter_selector = $default_value_name_prefix . '[wrapper][edit][' . $body_filter_id . '][body]';

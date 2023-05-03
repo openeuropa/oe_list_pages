@@ -69,7 +69,7 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
       '#value' => $current_filters,
     ];
 
-    $facet_id = $form_state->get('contextual_facet_id');
+    $facet_id = $form_state->get('contextual_facet_id_' . $ajax_wrapper_id);
 
     // If we could not determine a facet ID, we default to showing the summary
     // of default values.
@@ -77,7 +77,7 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
       return $this->buildSummaryPresetFilters($form, $form_state, $list_source, $this->getAvailableFilters($list_source));
     }
 
-    $filter_id = $form_state->get('contextual_filter_id');
+    $filter_id = $form_state->get('contextual_filter_id_' . $ajax_wrapper_id);
     if (!isset($filter_id)) {
       $filter_id = static::generateFilterId($facet_id, array_keys($current_filters));
     }
@@ -152,7 +152,7 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
 
     // Store the filter IDs on the form state in case we need to rebuild the
     // form.
-    $form_state->set(static::getFilterType() . '_filter_id', $filter_id);
+    $form_state->set(static::getFilterType() . '_filter_id_' . $ajax_wrapper_id, $filter_id);
 
     $facet = $this->getFacetById($list_source, $facet_id);
     if (!empty($facet) && ($widget = $facet->getWidgetInstance()) && ($widget instanceof MultiselectWidget)) {
@@ -202,13 +202,14 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
         '#facet_id' => $facet_id,
         '#executes_submit_callback' => TRUE,
         '#submit' => [[$this, 'setContextualOptionsSubmit']],
+        '#name' => static::getFilterType() . '-set-' . $filter_id . '-' . $ajax_wrapper_id,
       ];
 
       $form['wrapper']['edit'][$filter_id]['cancel_value'] = [
         '#value' => $this->t('Cancel'),
         '#type' => 'button',
         '#op' => 'cancel-contextual-filter',
-        '#name' => static::getFilterType() . '-cancel-' . $filter_id,
+        '#name' => static::getFilterType() . '-cancel-' . $filter_id . '-' . $ajax_wrapper_id,
         '#limit_validation_errors' => [
           array_merge($form['#parents'], [
             'wrapper',
@@ -309,8 +310,8 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
 
     // Set the current filters on the form state so they can be used elsewhere.
     static::setCurrentValues($form_state, $list_source, $current_filters, $ajax_wrapper_id);
-    $form_state->set('contextual_facet_id', NULL);
-    $form_state->set('contextual_filter_id', NULL);
+    $form_state->set('contextual_facet_id_' . $ajax_wrapper_id, NULL);
+    $form_state->set('contextual_filter_id_' . $ajax_wrapper_id, NULL);
     $form_state->setRebuild(TRUE);
   }
 
@@ -334,8 +335,8 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
 
     unset($current_filters[$filter_id]);
     static::setCurrentValues($form_state, $list_source, $current_filters, $ajax_wrapper_id);
-    $form_state->set('contextual_facet_id', NULL);
-    $form_state->set('contextual_filter_id', NULL);
+    $form_state->set('contextual_facet_id_' . $ajax_wrapper_id, NULL);
+    $form_state->set('contextual_filter_id_' . $ajax_wrapper_id, NULL);
 
     $form_state->setRebuild(TRUE);
   }

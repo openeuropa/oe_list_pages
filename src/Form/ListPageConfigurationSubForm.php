@@ -310,12 +310,26 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
     $form_state->set('entity_type', $triggering_element['#value']);
     $form_state->set('bundle', NULL);
 
+    $element = NestedArray::getValue($form, array_slice($triggering_element['#array_parents'], 0, -4));
+    $ajax_wrapper_id_part = ($element['#parents'] ? '-' . implode('-', $element['#parents']) : '');
+
     // In this form we embed the default filters form as well so if we change
     // entity types, we need to reset any filter selection.
-    $form_state->set('default_facet_id', NULL);
-    $form_state->set('default_filter_id', NULL);
-    $form_state->set('contextual_facet_id', NULL);
-    $form_state->set('contextual_filter_id', NULL);
+    $remove = [];
+    foreach ($form_state->getStorage() as $name => $value) {
+      if (strpos($name, $ajax_wrapper_id_part) === FALSE) {
+        continue;
+      }
+
+      if (str_starts_with($name, 'default_facet_id') || str_starts_with($name, 'default_filter_id') || str_starts_with($name, 'contextual_facet_id') || str_starts_with($name, 'contextual_filter_id')) {
+        $remove[] = $name;
+      }
+    }
+
+    foreach ($remove as $name) {
+      $form_state->set($name, NULL);
+    }
+
     $form_state->setRebuild(TRUE);
   }
 
@@ -326,18 +340,33 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
    *   The form.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The form state.
+   *
+   * @SuppressWarnings(PHPMD.CyclomaticComplexity)
    */
   public function bundleSelectSubmit(array &$form, FormStateInterface $form_state): void {
     $triggering_element = $form_state->getTriggeringElement();
     $form_state->set('bundle', $triggering_element['#value']);
     $form_state->setRebuild(TRUE);
 
+    $element = NestedArray::getValue($form, array_slice($triggering_element['#array_parents'], 0, -4));
+    $ajax_wrapper_id_part = ($element['#parents'] ? '-' . implode('-', $element['#parents']) : '');
+
     // In this form we embed the default filters form as well so if we change
     // entity types, we need to reset any filter selection.
-    $form_state->set('default_facet_id', NULL);
-    $form_state->set('default_filter_id', NULL);
-    $form_state->set('contextual_facet_id', NULL);
-    $form_state->set('contextual_filter_id', NULL);
+    $remove = [];
+    foreach ($form_state->getStorage() as $name => $value) {
+      if (strpos($name, $ajax_wrapper_id_part) === FALSE) {
+        continue;
+      }
+
+      if (str_starts_with($name, 'default_facet_id') || str_starts_with($name, 'default_filter_id') || str_starts_with($name, 'contextual_facet_id') || str_starts_with($name, 'contextual_filter_id')) {
+        $remove[] = $name;
+      }
+    }
+
+    foreach ($remove as $name) {
+      $form_state->set($name, NULL);
+    }
 
     // When we change the bundle, we want to set the default exposed filter
     // values to the user input so that the checkboxes can be checked when the

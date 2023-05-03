@@ -71,7 +71,7 @@ class DefaultFilterConfigurationBuilder extends FilterConfigurationFormBuilderBa
       '#value' => $current_filters,
     ];
 
-    $facet_id = $form_state->get('default_facet_id');
+    $facet_id = $form_state->get('default_facet_id_' . $ajax_wrapper_id);
 
     // If we could not determine a facet ID, we default to showing the
     // summary of default values.
@@ -79,7 +79,7 @@ class DefaultFilterConfigurationBuilder extends FilterConfigurationFormBuilderBa
       return $this->buildSummaryPresetFilters($form, $form_state, $list_source, $list_source->getAvailableFilters());
     }
 
-    $filter_id = $form_state->get('default_filter_id');
+    $filter_id = $form_state->get('default_filter_id_' . $ajax_wrapper_id);
     if (!isset($filter_id)) {
       $filter_id = static::generateFilterId($facet_id, array_keys($current_filters));
     }
@@ -119,7 +119,7 @@ class DefaultFilterConfigurationBuilder extends FilterConfigurationFormBuilderBa
 
     // Store the filter IDs on the form state in case we need to rebuild the
     // form.
-    $form_state->set(static::getFilterType() . '_filter_id', $filter_id);
+    $form_state->set(static::getFilterType() . '_filter_id_' . $ajax_wrapper_id, $filter_id);
 
     $facet = $this->getFacetById($list_source, $facet_id);
     if (!empty($facet) && ($widget = $facet->getWidgetInstance()) && ($widget instanceof ListPagesWidgetInterface)) {
@@ -151,6 +151,7 @@ class DefaultFilterConfigurationBuilder extends FilterConfigurationFormBuilderBa
         '#limit_validation_errors' => [
           array_merge($form['#parents'], ['wrapper', 'edit']),
         ],
+        '#name' => static::getFilterType() . '-set-' . $filter_id . '-' . $ajax_wrapper_id,
         '#ajax' => $ajax_definition,
         '#filter_id' => $filter_id,
         '#facet_id' => $facet_id,
@@ -161,7 +162,7 @@ class DefaultFilterConfigurationBuilder extends FilterConfigurationFormBuilderBa
       $form['wrapper']['edit'][$filter_id]['cancel_value'] = [
         '#value' => $this->t('Cancel'),
         '#type' => 'button',
-        '#name' => static::getFilterType() . '-cancel-' . $filter_id,
+        '#name' => static::getFilterType() . '-cancel-' . $filter_id . '-' . $ajax_wrapper_id,
         '#limit_validation_errors' => [
           array_merge($form['#parents'], [
             'wrapper',
@@ -224,9 +225,9 @@ class DefaultFilterConfigurationBuilder extends FilterConfigurationFormBuilderBa
 
     // Set the current filters on the form state so they can be used elsewhere.
     static::setCurrentValues($form_state, $list_source, $current_filters, $ajax_wrapper_id);
-    $form_state->set('default_facet_id', NULL);
-    $form_state->set('default_filter_id', NULL);
-    $form_state->set('default_filter_storage', NULL);
+    $form_state->set('default_facet_id_' . $ajax_wrapper_id, NULL);
+    $form_state->set('default_filter_id_' . $ajax_wrapper_id, NULL);
+    $form_state->set('default_filter_storage_' . $ajax_wrapper_id, NULL);
     $form_state->setRebuild(TRUE);
   }
 
@@ -285,10 +286,10 @@ class DefaultFilterConfigurationBuilder extends FilterConfigurationFormBuilderBa
     $widget->prepareDefaultFilterValue($facet, $current_filters[$filter_id], $subform_state);
     unset($current_filters[$filter_id]);
     static::setCurrentValues($form_state, $list_source, $current_filters, $ajax_wrapper_id);
-    $form_state->set('default_filter_id', NULL);
+    $form_state->set('default_filter_id_' . $ajax_wrapper_id, NULL);
     // Clear also the storage that plugins may use for this filter.
-    $form_state->set('default_filter_storage', NULL);
-    $form_state->set('default_facet_id', NULL);
+    $form_state->set('default_filter_storage_' . $ajax_wrapper_id, NULL);
+    $form_state->set('default_facet_id_' . $ajax_wrapper_id, NULL);
 
     $form_state->setRebuild(TRUE);
   }
