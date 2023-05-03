@@ -6,9 +6,9 @@ namespace Drupal\oe_list_pages\Form;
 
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\oe_list_pages\DefaultFilterConfigurationBuilder;
 use Drupal\oe_list_pages\ListPageConfiguration;
 use Drupal\oe_list_pages\ListPageConfigurationFactoryInterface;
-use Drupal\oe_list_pages\DefaultFilterConfigurationBuilder;
 use Drupal\oe_list_pages\ListPageSortOptionsResolver;
 use Drupal\oe_list_pages\ListSourceFactoryInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;

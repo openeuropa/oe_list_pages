@@ -5,17 +5,17 @@ declare(strict_types = 1);
 namespace Drupal\oe_list_pages_open_vocabularies\Event;
 
 use Drupal\facets\FacetInterface;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
- * Event fired when a facet is created from an open vocabularies association.
+ * Event fired when a facet is updated from an open vocabularies association.
  */
-class AssociationFacetCreationEvent extends Event {
+class AssociationFacetUpdateEvent extends Event {
 
   /**
    * The name of the event.
    */
-  const NAME = 'oe_list_pages_open_vocabularies.associated_facet_creation_event';
+  const NAME = 'oe_list_pages_open_vocabularies.associated_facet_update_event';
 
   /**
    * The created but not yet saved facet.
@@ -25,7 +25,7 @@ class AssociationFacetCreationEvent extends Event {
   protected $facet;
 
   /**
-   * AssociationFacetCreationEvent constructor.
+   * AssociationFacetUpdateEvent constructor.
    *
    * @param \Drupal\facets\FacetInterface $facet
    *   The created but not yet saved facet.
@@ -52,7 +52,7 @@ class AssociationFacetCreationEvent extends Event {
    *
    * @return $this
    */
-  public function setFacet(FacetInterface $facet): AssociationFacetCreationEvent {
+  public function setFacet(FacetInterface $facet): AssociationFacetUpdateEvent {
     $this->facet = $facet;
     return $this;
   }
