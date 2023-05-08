@@ -31,7 +31,6 @@
         "mikey179/vfsstream": "^1.6.10",
         "openeuropa/code-review": "^2.0",
         "openeuropa/oe_link_lists": "^0.21",
-        "openeuropa/oe_multilingual": "^1.12",
         "openeuropa/open_vocabularies": "dev-master",
         "openeuropa/task-runner-drupal-project-symlink": "^1.0.0-beta5",
         "phpspec/prophecy-phpunit": "^2",
