@@ -3,7 +3,7 @@ description: Test module for OpenEuropa List Pages Open Vocabularies
 package: Testing
 
 type: module
-core_version_requirement: ^9.4
+core_version_requirement: ^9.4 || ^10
 
 dependencies:
   - oe_list_pages:oe_list_pages_open_vocabularies

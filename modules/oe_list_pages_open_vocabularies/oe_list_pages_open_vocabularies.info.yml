@@ -3,7 +3,7 @@ description: This submodule adds support for OpenVocabularies fields in List Pag
 package: OpenEuropa
 
 type: module
-core_version_requirement: ^9.4
+core_version_requirement: ^9.4 || ^10
 
 dependencies:
   - oe_list_pages:oe_list_pages
