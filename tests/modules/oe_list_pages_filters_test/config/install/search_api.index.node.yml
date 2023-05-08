@@ -3,8 +3,8 @@ status: true
 dependencies:
   config:
     - field.storage.node.body
-    - field.storage.node.field_country_code
     - field.storage.node.field_date_range
+    - field.storage.node.field_country_code
     - field.storage.node.field_link
     - field.storage.node.field_reference
     - field.storage.node.field_select_one
@@ -12,9 +12,13 @@ dependencies:
     - field.storage.node.field_test_boolean
     - search_api.server.database_server
   module:
+    - oe_list_pages
     - node
     - search_api
     - oe_list_pages_filters_test
+third_party_settings:
+  oe_list_pages:
+    lists_pages_index: true
 id: node
 name: Node
 description: ''
@@ -170,7 +174,5 @@ tracker_settings:
 options:
   index_directly: true
   cron_limit: 50
+  track_changes_in_references: true
 server: database_server
-third_party_settings:
-  oe_list_pages:
-    lists_pages_index: true

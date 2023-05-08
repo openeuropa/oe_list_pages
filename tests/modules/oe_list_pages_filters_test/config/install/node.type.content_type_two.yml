@@ -2,14 +2,14 @@ langcode: en
 status: true
 dependencies:
   module:
-    - emr
-name: 'Content type two'
-type: content_type_two
-description: ''
+    - oe_list_pages
 third_party_settings:
   oe_list_pages:
     default_exposed_filters:
       - list_facet_source_node_content_type_twofield_select_two
+name: 'Content type two'
+type: content_type_two
+description: ''
 help: ''
 new_revision: true
 preview_mode: 0

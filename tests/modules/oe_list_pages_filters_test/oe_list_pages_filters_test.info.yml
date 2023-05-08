@@ -16,3 +16,44 @@ dependencies:
   - oe_list_pages:oe_list_page_content_type
   - oe_list_pages:oe_list_pages_link_list_source
   - search_api:search_api_db
+
+config_devel:
+  install:
+    - core.entity_form_display.node.content_type_one.default
+    - core.entity_form_display.node.content_type_two.default
+    - core.entity_view_display.node.oe_list_page.default
+    - facets.facet.body
+    - facets.facet.created
+    - facets.facet.foo_no_contextual
+    - facets.facet.id
+    - facets.facet.link
+    - facets.facet.list_facet_source_node_content_type_onestatus
+    - facets.facet.list_facet_source_node_content_type_twofield_select_two
+    - facets.facet.list_facet_source_node_content_type_twostatus
+    - facets.facet.oe_list_pages_filters_test_test_field
+    - facets.facet.reference
+    - facets.facet.select_one
+    - facets.facet.test_boolean
+    - field.field.node.content_type_one.body
+    - field.field.node.content_type_one.field_country_code
+    - field.field.node.content_type_one.field_date_range
+    - field.field.node.content_type_one.field_link
+    - field.field.node.content_type_one.field_reference
+    - field.field.node.content_type_one.field_select_one
+    - field.field.node.content_type_one.field_test_boolean
+    - field.field.node.content_type_two.body
+    - field.field.node.content_type_two.field_select_two
+    - field.storage.node.field_country_code
+    - field.storage.node.field_date_range
+    - field.storage.node.field_link
+    - field.storage.node.field_reference
+    - field.storage.node.field_select_one
+    - field.storage.node.field_select_two
+    - field.storage.node.field_test_boolean
+    - node.type.content_type_one
+    - node.type.content_type_two
+    - search_api.index.node
+    - search_api.index.taxonomy
+    - search_api.server.database_server
+    - taxonomy.vocabulary.vocabulary_one
+    - taxonomy.vocabulary.vocabulary_two

@@ -1,25 +1,26 @@
 langcode: en
 status: true
-dependencies:
-  module:
-    - facets
-  config:
-    - node.type.content_type_two
-    - search_api.server.database_server
+dependencies: {  }
 id: list_facet_source_node_content_type_twofield_select_two
 name: 'Select two'
+url_alias: select_two
+weight: 0
 min_count: 1
+missing: false
+missing_label: others
 show_only_one_result: false
 field_identifier: field_select_two
 facet_source_id: 'list_facet_source:node:content_type_two'
-url_alias: select_two
-weight: 0
 widget:
   type: oe_list_pages_multiselect
   config:
     show_numbers: false
 query_operator: null
 use_hierarchy: false
+keep_hierarchy_parents_active: false
+hierarchy:
+  type: taxonomy
+  config: {  }
 expand_hierarchy: false
 enable_parent_when_child_gets_disabled: true
 hard_limit: null
