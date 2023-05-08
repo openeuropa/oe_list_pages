@@ -21,7 +21,6 @@
         "drupal/config_devel": "^1.2",
         "drupal/core-composer-scaffold": "^9.4",
         "drupal/ctools": "^3.7",
-        "drupal/drupal-extension": "dev-master as 4.0",
         "drupal/extra_field": "^2.1",
         "drupal/inline_entity_form": "^1.0-rc15",
         "drupal/token": "^1.10",
