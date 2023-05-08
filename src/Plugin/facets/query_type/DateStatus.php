@@ -95,11 +95,11 @@ class DateStatus extends QueryTypePluginBase implements ContainerFactoryPluginIn
       $filter = $query->createConditionGroup('OR', ['facet:' . $field_identifier]);
       foreach ($active_items as $value) {
         if ($value === self::PAST) {
-          $filter->addCondition($field_identifier, $now->getTimestamp(), "<=");
+          $filter->addCondition($field_identifier, $this->prepareTimestamp($now), "<=");
         }
         elseif ($value === self::UPCOMING) {
           $condition_group = $query->createConditionGroup('OR');
-          $condition_group->addCondition($field_identifier, $now->getTimestamp(), ">");
+          $condition_group->addCondition($field_identifier, $this->prepareTimestamp($now), ">");
           $condition_group->addCondition($field_identifier, NULL);
           $filter->addConditionGroup($condition_group);
         }
@@ -139,7 +139,7 @@ class DateStatus extends QueryTypePluginBase implements ContainerFactoryPluginIn
     if (!empty($this->results)) {
       foreach ($this->results as $result) {
         $result_filter = trim($result['filter'], '"');
-        $now->getTimestamp() > $result_filter ? $count[self::UPCOMING]++ : $count[self::PAST]++;
+        $this->prepareTimestamp($now) > $result_filter ? $count[self::UPCOMING]++ : $count[self::PAST]++;
       }
     }
 
@@ -182,6 +182,13 @@ class DateStatus extends QueryTypePluginBase implements ContainerFactoryPluginIn
     $item = reset($active_items);
     // Past items should be sorted DESC whereas upcoming ones ASC.
     $sorts[$field_name] = $item === self::PAST ? 'DESC' : 'ASC';
+  }
+
+  /**
+   * Prepares the timestamp to be used in the query.
+   */
+  protected function prepareTimestamp(DrupalDateTime $date): int {
+    return $date->getTimestamp();
   }
 
 }
