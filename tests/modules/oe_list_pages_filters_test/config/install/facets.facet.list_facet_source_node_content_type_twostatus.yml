@@ -1,17 +1,13 @@
 langcode: en
 status: true
-dependencies:
-  module:
-    - facets
-  config:
-    - node.type.content_type_two
-    - search_api.server.database_server
-    - search_api.server.database_server
+dependencies: {  }
 id: list_facet_source_node_content_type_twostatus
 name: 'Facet for status'
 url_alias: status
 weight: null
 min_count: 1
+missing: false
+missing_label: others
 show_only_one_result: false
 field_identifier: status
 facet_source_id: 'list_facet_source:node:content_type_two'
@@ -21,6 +17,10 @@ widget:
     show_numbers: false
 query_operator: null
 use_hierarchy: false
+keep_hierarchy_parents_active: false
+hierarchy:
+  type: taxonomy
+  config: {  }
 expand_hierarchy: false
 enable_parent_when_child_gets_disabled: true
 hard_limit: null

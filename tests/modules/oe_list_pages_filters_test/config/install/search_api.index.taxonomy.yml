@@ -4,8 +4,13 @@ dependencies:
   config:
     - search_api.server.database_server
   module:
+    - oe_list_pages
     - search_api
+    - oe_list_pages_filters_test
     - taxonomy
+third_party_settings:
+  oe_list_pages:
+    lists_pages_index: true
 id: taxonomy
 name: Taxonomy
 description: ''
@@ -30,7 +35,5 @@ tracker_settings:
 options:
   index_directly: true
   cron_limit: 50
+  track_changes_in_references: true
 server: database_server
-third_party_settings:
-  oe_list_pages:
-    lists_pages_index: true

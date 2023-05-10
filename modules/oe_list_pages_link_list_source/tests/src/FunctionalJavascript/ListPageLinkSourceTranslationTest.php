@@ -90,13 +90,13 @@ class ListPageLinkSourceTranslationTest extends ListPagePluginFormTestBase {
     $this->getSession()->getPage()->pressButton('Save');
 
     // In English we see the EN version.
-    $this->assertSession()->pageTextContains('Banana title EN');
+    $this->assertSession()->pageTextContainsOnce('Banana title EN');
 
     // Switch to French and assert we see the translation.
     $link_list = $this->getLinkListByTitle('List page list');
     $this->drupalGet($link_list->toUrl('canonical', ['language' => \Drupal::languageManager()->getLanguage('fr')]));
 
-    $this->assertSession()->pageTextContains('Banana title FR');
+    $this->assertSession()->pageTextContainsOnce('Banana title FR');
     $this->assertSession()->pageTextNotContains('Banana title EN');
   }
 
