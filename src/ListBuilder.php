@@ -563,10 +563,7 @@ class ListBuilder implements ListBuilderInterface {
    *   The sort data.
    */
   protected function getSortFromUrl(ListPageConfiguration $configuration): array {
-    $sort = $this->requestStack->getCurrentRequest()->query->get('sort');
-    if (!is_array($sort)) {
-      return [];
-    }
+    $sort = $this->requestStack->getCurrentRequest()->query->all('sort');
 
     if (!isset($sort['name']) || !isset($sort['direction'])) {
       return [];
