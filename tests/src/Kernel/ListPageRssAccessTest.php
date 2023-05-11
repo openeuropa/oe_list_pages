@@ -22,7 +22,7 @@ class ListPageRssAccessTest extends ListsEntityMetaTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'language',
   ];
 

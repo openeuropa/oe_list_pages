@@ -15,6 +15,7 @@ use Drupal\oe_link_lists\Entity\LinkList;
 function oe_list_pages_link_list_source_post_update_0001(&$sandbox) {
   if (!isset($sandbox['total'])) {
     $link_list_ids = \Drupal::entityTypeManager()->getStorage('link_list')->getQuery()
+      ->accessCheck(FALSE)
       ->addTag('allow_local_link_lists')
       ->execute();
 

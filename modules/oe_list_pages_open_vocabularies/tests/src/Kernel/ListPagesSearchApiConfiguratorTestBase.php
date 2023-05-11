@@ -15,7 +15,7 @@ abstract class ListPagesSearchApiConfiguratorTestBase extends EntityKernelTestBa
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'system',
     'field',
     'user',

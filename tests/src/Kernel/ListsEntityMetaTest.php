@@ -12,7 +12,7 @@ class ListsEntityMetaTest extends ListsEntityMetaTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'user',
   ];
 

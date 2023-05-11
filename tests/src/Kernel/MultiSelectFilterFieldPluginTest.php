@@ -41,7 +41,7 @@ class MultiSelectFilterFieldPluginTest extends ListsSourceTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'link',
     'options',
   ];

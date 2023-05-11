@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\oe_list_pages;
 
 use Drupal\Core\Entity\ContentEntityInterface;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * Event thrown in order to alter an RSS item build before it's rendered.

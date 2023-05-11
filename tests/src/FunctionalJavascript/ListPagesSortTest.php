@@ -42,7 +42,7 @@ class ListPagesSortTest extends ListPagePluginFormTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Create some nodes to test the sorting.

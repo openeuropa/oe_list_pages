@@ -75,7 +75,7 @@ class ListPageSortOptionsResolver {
     $event = new ListPageSortAlterEvent($list_source->getEntityType(), $list_source->getBundle());
     $event->setOptions($options);
     $event->setScope($scope);
-    $this->eventDispatcher->dispatch(ListPageEvents::ALTER_SORT_OPTIONS, $event);
+    $this->eventDispatcher->dispatch($event, ListPageEvents::ALTER_SORT_OPTIONS);
 
     return $event->getOptions();
   }
@@ -112,7 +112,7 @@ class ListPageSortOptionsResolver {
    */
   public function isExposedSortAllowed(ListSourceInterface $list_source): bool {
     $event = new ListPageDisallowSortEvent($list_source->getEntityType(), $list_source->getBundle());
-    $this->eventDispatcher->dispatch(ListPageEvents::DISALLOW_EXPOSED_SORT, $event);
+    $this->eventDispatcher->dispatch($event, ListPageEvents::DISALLOW_EXPOSED_SORT);
     return !$event->isDisallowed();
   }
 
