@@ -31,7 +31,6 @@ class ListPagesSortTest extends ListPagePluginFormTestBase {
     'search_api',
     'search_api_db',
     'oe_list_pages_event_subscriber_test',
-    'oe_list_pages_filters_test',
   ];
 
   /**
