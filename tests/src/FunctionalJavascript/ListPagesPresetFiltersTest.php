@@ -48,7 +48,7 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'classy';
+  protected $defaultTheme = 'starterkit_theme';
 
   /**
    * Test presence of preset filters configuration in the plugin.
