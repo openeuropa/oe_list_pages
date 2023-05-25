@@ -3,7 +3,7 @@ description: Provides a link list source plugin that collect links from a list p
 package: OpenEuropa
 
 type: module
-core_version_requirement: ^9.4
+core_version_requirement: ^9.4 || ^10
 
 dependencies:
   - oe_link_lists:oe_link_lists

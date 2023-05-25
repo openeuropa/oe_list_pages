@@ -6,6 +6,7 @@ namespace Drupal\oe_list_pages\Plugin\facets\widget;
 
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Security\TrustedCallbackInterface;
 use Drupal\facets\FacetInterface;
 use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\Plugin\facets\query_type\Date;
@@ -19,7 +20,7 @@ use Drupal\oe_list_pages\Plugin\facets\query_type\Date;
  *   description = @Translation("A date filter widget."),
  * )
  */
-class DateWidget extends ListPagesWidgetBase {
+class DateWidget extends ListPagesWidgetBase implements TrustedCallbackInterface {
 
   /**
    * The ID of the facet.
@@ -343,6 +344,16 @@ class DateWidget extends ListPagesWidgetBase {
    */
   public function setEndDateTitle(array &$element, FormStateInterface $form_state, ?DrupalDateTime $date) {
     $element['date']['#title'] = $this->t('End Date');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function trustedCallbacks() {
+    return [
+      'setTitleDisplayVisible',
+      'setEndDateTitle',
+    ];
   }
 
 }

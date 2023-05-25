@@ -42,7 +42,7 @@ class ListPageRssControllerTest extends WebDriverTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'classy';
+  protected $defaultTheme = 'starterkit_theme';
 
   /**
    * {@inheritdoc}
@@ -191,7 +191,7 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     $this->assertEquals('Drupal | List page test', $channel->filterXPath('//description')->text());
     $this->assertEquals('en', $channel->filterXPath('//language')->text());
     $this->assertEquals('© European Union, 1995-' . date('Y'), $channel->filterXPath('//copyright')->text());
-    $this->assertEquals('http://web:8080/build/core/themes/classy/logo.svg', $channel->filterXPath('//image/url')->text());
+    $this->assertEquals('http://web:8080/build/core/themes/starterkit_theme/logo.svg', $channel->filterXPath('//image/url')->text());
     $this->assertEquals('Drupal logo', $channel->filterXPath('//image/title')->text());
     $this->assertEquals('http://web:8080/build/node/1', $channel->filterXPath('//image/link')->text());
     // Assert modules subscribing to the ListPageRssAlterEvent can

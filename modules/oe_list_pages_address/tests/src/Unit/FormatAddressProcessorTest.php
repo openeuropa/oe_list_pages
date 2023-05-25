@@ -26,9 +26,7 @@ class FormatAddressProcessorTest extends UnitTestCase {
       'name' => 'United Kingdom',
       'locale' => 'en_US',
     ]);
-    $country_repository = $this->getMockBuilder(CountryRepositoryInterface::class)
-      ->disableOriginalConstructor()
-      ->getMock();
+    $country_repository = $this->createMock(CountryRepositoryInterface::class);
     $country_repository->expects($this->any())
       ->method('get')
       ->with('GB')

@@ -287,7 +287,7 @@ class ListsQueryTest extends ListsSourceTestBase {
     // Change current request and set category to "third class".
     $search_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
     $facet_id = $this->generateFacetId('category', $search_id);
-    $request = $this->container->get('request_stack')->getMasterRequest();
+    $request = $this->container->get('request_stack')->getMainRequest();
     $request->query->set('f', [$facet_id . ':third class']);
 
     // Run a query and assert it gets filtered by the "third class" category.
@@ -301,7 +301,7 @@ class ListsQueryTest extends ListsSourceTestBase {
     $this->assertQueryConditions(['category' => ['third class']], $query);
 
     $this->container->get('kernel')->rebuildContainer();
-    $request = $this->container->get('request_stack')->getMasterRequest();
+    $request = $this->container->get('request_stack')->getMainRequest();
     $request->query->set('f', [$facet_id . ':third class']);
 
     // Run the query, but this time, ignore the "category" facet.
@@ -373,7 +373,7 @@ class ListsQueryTest extends ListsSourceTestBase {
 
     // If we run the query again, without the preset filters, it should change
     // the category to only include "first class".
-    $request = $this->container->get('request_stack')->getMasterRequest();
+    $request = $this->container->get('request_stack')->getMainRequest();
     $request->query->set('f', [$facet_id . ':first class']);
 
     $query = $this->list->getQuery();

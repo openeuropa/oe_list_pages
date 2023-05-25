@@ -31,7 +31,6 @@ class ListPagesSortTest extends ListPagePluginFormTestBase {
     'search_api',
     'search_api_db',
     'oe_list_pages_event_subscriber_test',
-    'oe_list_pages_filters_test',
   ];
 
   /**
@@ -42,7 +41,7 @@ class ListPagesSortTest extends ListPagePluginFormTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Create some nodes to test the sorting.

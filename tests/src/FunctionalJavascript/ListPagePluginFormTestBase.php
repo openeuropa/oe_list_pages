@@ -21,7 +21,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'classy';
+  protected $defaultTheme = 'starterkit_theme';
 
   /**
    * Runs assertions for the preset filters form level validations.

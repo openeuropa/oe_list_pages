@@ -19,7 +19,7 @@ abstract class ListsSourceTestBase extends EntityKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'entity_test',
     'facets',
     'entity_reference_revisions',

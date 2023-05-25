@@ -16,7 +16,7 @@ class ListPagesSearchApiConfiguratorTranslationTest extends ListPagesSearchApiCo
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'language',
     'config_translation',
   ];

@@ -22,6 +22,7 @@ function oe_list_pages_open_vocabularies_post_update_0001(&$sandbox) {
     // Get all the association entities.
     $ids = \Drupal::entityTypeManager()->getStorage('open_vocabulary_association')
       ->getQuery()
+      ->accessCheck(FALSE)
       ->execute();
 
     if (!$ids) {

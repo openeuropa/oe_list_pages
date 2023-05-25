@@ -18,7 +18,7 @@ class DateWidgetTest extends ListsSourceTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [];
+  protected static $modules = [];
 
   /**
    * The widget.

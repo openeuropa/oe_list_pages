@@ -15,7 +15,7 @@ abstract class ListPagesSearchApiConfiguratorTestBase extends EntityKernelTestBa
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'system',
     'field',
     'user',
@@ -56,6 +56,13 @@ abstract class ListPagesSearchApiConfiguratorTestBase extends EntityKernelTestBa
     $this->installEntitySchema('taxonomy_term');
     $this->installEntitySchema('entity_meta');
     $this->installEntitySchema('entity_meta_relation');
+
+    // Set tracking page size so tracking will work properly.
+    $this->container->get('config.factory')
+      ->getEditable('search_api.settings')
+      ->set('tracking_page_size', 100)
+      ->save();
+
     $this->installConfig(['node',
       'open_vocabularies',
       'oe_list_pages',

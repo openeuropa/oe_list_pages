@@ -40,6 +40,7 @@ class ContextualFiltersUpdater {
    */
   public function updateLinkList(LinkListInterface $link_list): bool {
     $ids = $this->entityTypeManager->getStorage('link_list')->getQuery()
+      ->accessCheck(FALSE)
       ->allRevisions()
       ->addTag('allow_local_link_lists')
       ->condition('id', $link_list->id())

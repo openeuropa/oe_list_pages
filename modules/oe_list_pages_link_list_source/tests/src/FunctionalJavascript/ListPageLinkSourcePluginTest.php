@@ -50,7 +50,7 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'classy';
+  protected $defaultTheme = 'starterkit_theme';
 
   /**
    * Tests the plugin configuration form.

@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_list_pages;
 
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * Event thrown to see if exposing of the frontend sort is disallowed.
