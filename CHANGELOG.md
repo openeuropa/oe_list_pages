@@ -1,5 +1,15 @@
 # Change Log
 
+## [1.0.0](https://github.com/openeuropa/oe_list_pages/tree/1.0.0) (2023-05-25)
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.24.0...1.0.0)
+
+**Merged pull requests:**
+
+- EWPP-3018: Drupal 10 compatibility. [\#181](https://github.com/openeuropa/oe_list_pages/pull/181) ([brummbar](https://github.com/brummbar))
+- EWPP-3018: Nodes are shown twice when using test module. [\#180](https://github.com/openeuropa/oe_list_pages/pull/180) ([brummbar](https://github.com/brummbar))
+- EWPP-3018: Drop dependency introduced only for test setup. [\#179](https://github.com/openeuropa/oe_list_pages/pull/179) ([brummbar](https://github.com/brummbar))
+- EWPP-2957: Minor timestamp generation refactor. [\#169](https://github.com/openeuropa/oe_list_pages/pull/169) ([upchuk](https://github.com/upchuk))
+
 ## [0.24.0](https://github.com/openeuropa/oe_list_pages/tree/0.24.0) (2023-04-21)
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.23.0...0.24.0)
 
