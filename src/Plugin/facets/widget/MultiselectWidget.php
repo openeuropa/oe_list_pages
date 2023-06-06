@@ -12,6 +12,7 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Render\Element;
 use Drupal\facets\FacetInterface;
 use Drupal\facets\Processor\ProcessorPluginManager;
+use Drupal\facets\Result\Result;
 use Drupal\multivalue_form_element\Element\MultiValue;
 use Drupal\oe_list_pages\FacetManipulationTrait;
 use Drupal\oe_list_pages\ListPresetFilter;
@@ -175,6 +176,9 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
    */
   public function build(FacetInterface $facet) {
     $results = $facet->getResults();
+    $results = array_filter($results, function (Result $result) {
+      return $result->getDisplayValue() !== "";
+    });
 
     $options = $this->transformResultsToOptions($results);
 
