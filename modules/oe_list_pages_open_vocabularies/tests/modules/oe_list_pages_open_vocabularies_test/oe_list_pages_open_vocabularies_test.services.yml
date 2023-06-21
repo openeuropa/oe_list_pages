@@ -1,0 +1,6 @@
+services:
+  oe_list_pages_open_vocabularies_test.config_subscriber:
+    class: Drupal\oe_list_pages_open_vocabularies_test\EventSubscriber\SearchApiFacetTestSubscriber
+    arguments: ['@oe_list_pages_open_vocabularies.configurator', '@entity_type.manager']
+    tags:
+      - { name: event_subscriber }

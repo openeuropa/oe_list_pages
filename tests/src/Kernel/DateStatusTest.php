@@ -4,8 +4,8 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\oe_list_pages\Kernel;
 
-use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\DefaultFilterConfigurationBuilder;
+use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\ListSourceFactory;
 use Drupal\oe_list_pages\Plugin\facets\query_type\DateStatus;
 

@@ -6,8 +6,8 @@ namespace Drupal\oe_list_pages_event_subscriber_test\EventSubscriber;
 
 use Drupal\Core\State\StateInterface;
 use Drupal\oe_list_pages\ListPageDisallowSortEvent;
-use Drupal\oe_list_pages\ListPageRssAlterEvent;
 use Drupal\oe_list_pages\ListPageEvents;
+use Drupal\oe_list_pages\ListPageRssAlterEvent;
 use Drupal\oe_list_pages\ListPageRssItemAlterEvent;
 use Drupal\oe_list_pages\ListPageSortAlterEvent;
 use Drupal\oe_list_pages\ListPageSortOptionsResolver;

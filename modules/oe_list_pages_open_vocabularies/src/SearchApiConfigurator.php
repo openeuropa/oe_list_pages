@@ -8,10 +8,12 @@ use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\facets\FacetInterface;
 use Drupal\language\Config\LanguageConfigOverride;
 use Drupal\oe_list_pages\ListSourceFactoryInterface;
+use Drupal\oe_list_pages_open_vocabularies\Event\AssociationFacetUpdateEvent;
 use Drupal\open_vocabularies\OpenVocabularyAssociationInterface;
 use Drupal\search_api\IndexInterface;
 use Drupal\search_api\Item\Field;
 use Drupal\search_api\Item\FieldInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Configure search api when vocabulary associations are created.
@@ -54,13 +56,21 @@ class SearchApiConfigurator {
   private $languageManager;
 
   /**
+   * The event dispatcher.
+   *
+   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   */
+  protected $eventDispatcher;
+
+  /**
    * {@inheritdoc}
    */
-  public function __construct(EntityTypeManagerInterface $entityTypeManager, EntityFieldManagerInterface $entityFieldManager, ListSourceFactoryInterface $listSourceFactory, LanguageManagerInterface $languageManager) {
+  public function __construct(EntityTypeManagerInterface $entityTypeManager, EntityFieldManagerInterface $entityFieldManager, ListSourceFactoryInterface $listSourceFactory, LanguageManagerInterface $languageManager, EventDispatcherInterface $eventDispatcher) {
     $this->entityTypeManager = $entityTypeManager;
     $this->listSourceFactory = $listSourceFactory;
     $this->entityFieldManager = $entityFieldManager;
     $this->languageManager = $languageManager;
+    $this->eventDispatcher = $eventDispatcher;
   }
 
   /**
@@ -133,7 +143,11 @@ class SearchApiConfigurator {
     $facet->setFacetSourceId($list_source->getSearchId());
     $facet->setWidget('oe_list_pages_multiselect', []);
     $facet->setFieldIdentifier($property_path);
-    $facet->save();
+
+    // Use event dispatching to allow alter facet config before saving.
+    $event = new AssociationFacetUpdateEvent($facet);
+    $this->eventDispatcher->dispatch($event, AssociationFacetUpdateEvent::NAME);
+    $event->getFacet()->save();
   }
 
   /**
