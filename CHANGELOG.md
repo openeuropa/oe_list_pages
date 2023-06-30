@@ -1,27 +1,41 @@
-# Change Log
+# Changelog
+
+## [1.1.0](https://github.com/openeuropa/oe_list_pages/tree/1.1.0) (2023-06-30)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.0.0...1.1.0)
+
+**Merged pull requests:**
+
+- EWPP-2570: Allow to alter facet creation. [\#155](https://github.com/openeuropa/oe_list_pages/pull/155) ([sergepavle](https://github.com/sergepavle))
 
 ## [1.0.0](https://github.com/openeuropa/oe_list_pages/tree/1.0.0) (2023-05-25)
+
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.24.0...1.0.0)
 
 **Merged pull requests:**
 
+- Release-1.0.0: Changelog. [\#183](https://github.com/openeuropa/oe_list_pages/pull/183) ([22Alexandra](https://github.com/22Alexandra))
 - EWPP-3018: Drupal 10 compatibility. [\#181](https://github.com/openeuropa/oe_list_pages/pull/181) ([brummbar](https://github.com/brummbar))
 - EWPP-3018: Nodes are shown twice when using test module. [\#180](https://github.com/openeuropa/oe_list_pages/pull/180) ([brummbar](https://github.com/brummbar))
 - EWPP-3018: Drop dependency introduced only for test setup. [\#179](https://github.com/openeuropa/oe_list_pages/pull/179) ([brummbar](https://github.com/brummbar))
 - EWPP-2957: Minor timestamp generation refactor. [\#169](https://github.com/openeuropa/oe_list_pages/pull/169) ([upchuk](https://github.com/upchuk))
 
 ## [0.24.0](https://github.com/openeuropa/oe_list_pages/tree/0.24.0) (2023-04-21)
+
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.23.0...0.24.0)
 
 **Merged pull requests:**
 
+- Release-0.24.0: Update changelog. [\#177](https://github.com/openeuropa/oe_list_pages/pull/177) ([22Alexandra](https://github.com/22Alexandra))
 - EWPP-2310: Increasing the options resolver dependency. [\#170](https://github.com/openeuropa/oe_list_pages/pull/170) ([upchuk](https://github.com/upchuk))
 
 ## [0.23.0](https://github.com/openeuropa/oe_list_pages/tree/0.23.0) (2023-03-21)
+
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.22.0...0.23.0)
 
 **Merged pull requests:**
 
+- Release-0.23.0: Update changelog. [\#175](https://github.com/openeuropa/oe_list_pages/pull/175) ([nagyad](https://github.com/nagyad))
 - EWPP-2919: Check entity id validity before loading. [\#168](https://github.com/openeuropa/oe_list_pages/pull/168) ([sergepavle](https://github.com/sergepavle))
 - EWPP-2838: Date status processor specific sort alter field. [\#166](https://github.com/openeuropa/oe_list_pages/pull/166) ([upchuk](https://github.com/upchuk))
 - OEL-2115: Update to PHP 8.1 [\#165](https://github.com/openeuropa/oe_list_pages/pull/165) ([brummbar](https://github.com/brummbar))
