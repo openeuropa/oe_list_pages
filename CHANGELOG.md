@@ -1,15 +1,22 @@
-# Changelog
+# Change Log
+
+## [1.2.0](https://github.com/openeuropa/oe_list_pages/tree/1.2.0) (2023-07-26)
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.1.0...1.2.0)
+
+**Merged pull requests:**
+
+- EWPP-3494: Remove restriction for symfony/validator. [\#187](https://github.com/openeuropa/oe_list_pages/pull/187) ([hernani](https://github.com/hernani))
+- EWPP-3343: Filtering out multiselect filter values that are missing a display value. [\#184](https://github.com/openeuropa/oe_list_pages/pull/184) ([upchuk](https://github.com/upchuk))
 
 ## [1.1.0](https://github.com/openeuropa/oe_list_pages/tree/1.1.0) (2023-06-30)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.0.0...1.1.0)
 
 **Merged pull requests:**
 
+- Prepare release 1.1.0 [\#185](https://github.com/openeuropa/oe_list_pages/pull/185) ([imanoleguskiza](https://github.com/imanoleguskiza))
 - EWPP-2570: Allow to alter facet creation. [\#155](https://github.com/openeuropa/oe_list_pages/pull/155) ([sergepavle](https://github.com/sergepavle))
 
 ## [1.0.0](https://github.com/openeuropa/oe_list_pages/tree/1.0.0) (2023-05-25)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.24.0...1.0.0)
 
 **Merged pull requests:**
