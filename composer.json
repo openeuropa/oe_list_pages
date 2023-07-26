@@ -12,8 +12,7 @@
         "drupal/facets": "^2.0",
         "drupal/multivalue_form_element": "^1.0@beta",
         "drupal/search_api": "^1.27",
-        "symfony/options-resolver": "^4.4.30 || ^5 || ^6",
-        "symfony/validator": "~v4.4.48 || ~v6.2.5"
+        "symfony/options-resolver": "^4.4.30 || ^5 || ^6"
     },
     "require-dev": {
         "composer/installers": "^1.11",
