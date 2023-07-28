@@ -125,6 +125,10 @@ trait FacetManipulationTrait {
    */
   protected function rebuildFacet(FacetInterface $facet, array $values): void {
     $facet->setActiveItems($values);
+    \Drupal::service('facets.manager')->updateResults($facet->getFacetSourceId());
+    \Drupal::service('facets.manager')->build($facet);
+    return;
+
     $configuration = [
       'query' => NULL,
       'facet' => $facet,
