@@ -215,7 +215,13 @@ class ListBuilder implements ListBuilderInterface {
     // Build the entities.
     $builder = $this->entityTypeManager->getViewBuilder($configuration->getEntityType());
     foreach ($result->getResultItems() as $item) {
-      $entity = $item->getOriginalObject()->getEntity();
+      try {
+        $entity = $item->getOriginalObject()->getEntity();
+      }
+      catch (\Exception $exception) {
+        continue;
+      }
+
       $cache->addCacheableDependency($entity);
       $entity = $this->entityRepository->getTranslationFromContext($entity);
       $items[] = $builder->view($entity, $view_mode);
