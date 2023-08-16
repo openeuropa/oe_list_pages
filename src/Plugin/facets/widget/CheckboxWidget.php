@@ -25,6 +25,9 @@ class CheckboxWidget extends FacetsCheckboxWidget implements ListPagesWidgetInte
    * {@inheritdoc}
    */
   public function prepareValueForUrl(FacetInterface $facet, array &$form, FormStateInterface $form_state): array {
+    if (empty($form_state->getValue($facet->id()))) {
+      return [];
+    }
     return parent::prepareValueForUrl($facet, $form, $form_state);
   }
 
