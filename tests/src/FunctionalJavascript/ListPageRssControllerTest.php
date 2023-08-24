@@ -115,7 +115,7 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     $node = Node::create($values);
     $node->save();
 
-    for ($i = 1; $i <= 25; $i++) {
+    for ($i = 1; $i <= 30; $i++) {
       $earlier_date->modify('-1 day');
       $values = [
         'title' => 'test node ' . $i,
@@ -200,8 +200,8 @@ class ListPageRssControllerTest extends WebDriverTestBase {
 
     // Assert contents of items.
     $items = $channel->filterXPath('//item');
-    // Assert only the first 25 items are shown.
-    $this->assertEquals(25, $items->count());
+    // Assert only the first 30 items are shown (32 in total).
+    $this->assertEquals(30, $items->count());
     $first_item = $items->eq(0);
     $this->assertEquals('that yellow fruit', $first_item->filterXpath('//title')->text());
     $this->assertEquals('&lt;p&gt;this is a banana&lt;/p&gt; ', $first_item->filterXpath('//description')->html());
@@ -224,8 +224,8 @@ class ListPageRssControllerTest extends WebDriverTestBase {
 
     // Assert the last item title to make sure we order
     // and limit the list correctly.
-    $last_item = $items->eq(24);
-    $this->assertEquals('test node 23', $last_item->filterXpath('//title')->text());
+    $last_item = $items->eq(29);
+    $this->assertEquals('test node 28', $last_item->filterXpath('//title')->text());
 
     // Assert that even if we pass pager options these are ignored.
     $this->drupalGet(Url::fromRoute('entity.node.list_page_rss', ['node' => $node->id()], ['query' => ['page' => '1']]));
@@ -234,12 +234,12 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     $channel = $crawler->filterXPath('//rss[@version=2.0]/channel');
     // Assert contents of items.
     $items = $channel->filterXPath('//item');
-    // Assert only the first 25 items are shown.
-    $this->assertEquals(25, $items->count());
+    // Assert only the first 30 items are shown (32 in total).
+    $this->assertEquals(30, $items->count());
     $first_item = $items->eq(0);
     $this->assertEquals('that yellow fruit', $first_item->filterXpath('//title')->text());
-    $last_item = $items->eq(24);
-    $this->assertEquals('test node 23', $last_item->filterXpath('//title')->text());
+    $last_item = $items->eq(29);
+    $this->assertEquals('test node 28', $last_item->filterXpath('//title')->text());
 
     // Change the node title and assert the response has changed.
     $node->set('title', 'List page test updated');
