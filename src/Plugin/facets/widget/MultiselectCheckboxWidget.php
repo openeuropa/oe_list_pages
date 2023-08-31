@@ -57,10 +57,7 @@ class MultiselectCheckboxWidget extends MultiselectWidget implements ContainerFa
    * {@inheritdoc}
    */
   public function build(FacetInterface $facet) {
-    $results = $facet->getResults();
-    $results = array_filter($results, function (Result $result) {
-      return $result->getDisplayValue() !== "";
-    });
+    $results = $this->prepareResults($facet->getResults());
 
     $options = $this->transformResultsToOptions($results);
 
