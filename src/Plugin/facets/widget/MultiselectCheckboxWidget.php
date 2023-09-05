@@ -82,10 +82,11 @@ class MultiselectCheckboxWidget extends MultiselectWidget implements ContainerFa
    * {@inheritdoc}
    */
   public function prepareValueForUrl(FacetInterface $facet, array &$form, FormStateInterface $form_state): array {
-    $values = $form_state->getValue($facet->id());
-    // Remove "0" values, unchecked checkboxes.
-    $values = array_filter($values);
-    return $values;
+    return array_filter($form_state->getValue($facet->id()), function ($value) {
+      // Remove 0 (integer) values, that are unchecked checkboxes.
+      // "0" (string) can be a value (for boolean fields).
+      return $value !== 0;
+    });
   }
 
 }
