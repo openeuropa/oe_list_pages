@@ -176,7 +176,15 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
     }
 
     foreach ($results->getResultItems() as $item) {
-      $entity = $item->getOriginalObject()->getEntity();
+      try {
+        // Do not crash the application in case the index still has an item in
+        // it pointing to an entity that got deleted.
+        $entity = $item->getOriginalObject()->getEntity();
+      }
+      catch (\Exception $exception) {
+        continue;
+      }
+
       /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
       $entity = $this->entityRepository->getTranslationFromContext($entity);
       /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
