@@ -249,7 +249,7 @@ class ListPageRssController extends ControllerBase {
       'direction' => 'DESC',
     ]);
     // Always limit the rss to the last 25 results.
-    $configuration->setLimit(25);
+    $configuration->setLimit(30);
     // Always use the first page to calculate the offset.
     $configuration->setPage(0);
     $execution_result = $this->listExecutionManager->executeList($configuration);
