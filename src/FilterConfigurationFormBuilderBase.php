@@ -117,7 +117,7 @@ abstract class FilterConfigurationFormBuilderBase implements TrustedCallbackInte
    */
   protected function buildSummaryPresetFilters(array $form, FormStateInterface $form_state, ListSourceInterface $list_source, array $available_filters = []): array {
     $ajax_wrapper_id = $this->getAjaxWrapperId($form);
-    $current_filters = static::getCurrentValues($form_state, $list_source);
+    $current_filters = static::getCurrentValues($form_state, $list_source, $ajax_wrapper_id);
 
     $header = [
       ['data' => $this->t('Filter')],
@@ -152,7 +152,7 @@ abstract class FilterConfigurationFormBuilderBase implements TrustedCallbackInte
       $form['wrapper']['buttons'][$filter_id]['edit-' . $filter_id] = [
         '#type' => 'button',
         '#value' => $this->t('Edit'),
-        '#name' => static::getFilterType() . '-edit-' . $filter_id,
+        '#name' => static::getFilterType() . '-edit-' . $filter_id . '-' . $ajax_wrapper_id,
         '#filter_id' => $filter_id,
         '#facet_id' => $filter->getFacetId(),
         '#limit_validation_errors' => [
@@ -160,7 +160,7 @@ abstract class FilterConfigurationFormBuilderBase implements TrustedCallbackInte
             'wrapper',
             'edit',
             $filter_id,
-            static::getFilterType() . '-edit-' . $filter_id,
+            static::getFilterType() . '-edit-' . $filter_id . '-' . $ajax_wrapper_id,
           ]),
         ],
         '#ajax' => [
@@ -174,7 +174,7 @@ abstract class FilterConfigurationFormBuilderBase implements TrustedCallbackInte
       $form['wrapper']['buttons'][$filter_id]['delete-' . $filter_id] = [
         '#type' => 'button',
         '#value' => $this->t('Delete'),
-        '#name' => static::getFilterType() . '-delete-' . $filter_id,
+        '#name' => static::getFilterType() . '-delete-' . $filter_id . '-' . $ajax_wrapper_id,
         '#filter_id' => $filter_id,
         '#facet_id' => $filter->getFacetId(),
         '#limit_validation_errors' => [
@@ -182,7 +182,7 @@ abstract class FilterConfigurationFormBuilderBase implements TrustedCallbackInte
             'wrapper',
             'edit',
             $filter_id,
-            static::getFilterType() . '-delete-' . $filter_id,
+            static::getFilterType() . '-delete-' . $filter_id . '-' . $ajax_wrapper_id,
           ]),
         ],
         '#ajax' => [
@@ -293,8 +293,10 @@ abstract class FilterConfigurationFormBuilderBase implements TrustedCallbackInte
    */
   public function addFacetSubmit(array &$form, FormStateInterface $form_state): void {
     $triggering_element = $form_state->getTriggeringElement();
+    $element = NestedArray::getValue($form, array_slice($triggering_element['#array_parents'], 0, -3));
+    $ajax_wrapper_id = $this->getAjaxWrapperId($element);
     $filter_type = static::getFilterType();
-    $key = $filter_type . '_facet_id';
+    $key = $filter_type . '_facet_id_' . $ajax_wrapper_id;
     $form_state->set($key, $triggering_element['#value']);
     $form_state->setRebuild(TRUE);
   }
@@ -343,8 +345,10 @@ abstract class FilterConfigurationFormBuilderBase implements TrustedCallbackInte
    */
   public function editFilterSubmit(array &$form, FormStateInterface $form_state): void {
     $triggering_element = $form_state->getTriggeringElement();
-    $form_state->set(static::getFilterType() . '_facet_id', $triggering_element['#facet_id']);
-    $form_state->set(static::getFilterType() . '_filter_id', $triggering_element['#filter_id']);
+    $element = NestedArray::getValue($form, array_slice($triggering_element['#array_parents'], 0, -4));
+    $ajax_wrapper_id = $this->getAjaxWrapperId($element);
+    $form_state->set(static::getFilterType() . '_facet_id_' . $ajax_wrapper_id, $triggering_element['#facet_id']);
+    $form_state->set(static::getFilterType() . '_filter_id_' . $ajax_wrapper_id, $triggering_element['#filter_id']);
     $form_state->setRebuild(TRUE);
   }
 
@@ -357,8 +361,11 @@ abstract class FilterConfigurationFormBuilderBase implements TrustedCallbackInte
    *   The form state.
    */
   public function cancelValueSubmit(array &$form, FormStateInterface $form_state): void {
-    $form_state->set(static::getFilterType() . '_facet_id', NULL);
-    $form_state->set(static::getFilterType() . '_filter_id', NULL);
+    $triggering_element = $form_state->getTriggeringElement();
+    $element = NestedArray::getValue($form, array_slice($triggering_element['#array_parents'], 0, -4));
+    $ajax_wrapper_id = $this->getAjaxWrapperId($element);
+    $form_state->set(static::getFilterType() . '_facet_id_' . $ajax_wrapper_id, NULL);
+    $form_state->set(static::getFilterType() . '_filter_id_' . $ajax_wrapper_id, NULL);
     // Clear also any filter specific storage information plugins may set.
     $form_state->set(static::getFilterType() . '_filter_storage', NULL);
     $form_state->setRebuild(TRUE);
@@ -373,9 +380,11 @@ abstract class FilterConfigurationFormBuilderBase implements TrustedCallbackInte
    *   The list source the filter values belong to.
    * @param array $current_filter_values
    *   The filter values.
+   * @param string $ajax_wrapper_id
+   *   The element Ajax wrapper ID.
    */
-  protected static function setCurrentValues(FormStateInterface $form_state, ListSourceInterface $list_source, array $current_filter_values): void {
-    $key = 'current_values_' . static::getFilterType();
+  protected static function setCurrentValues(FormStateInterface $form_state, ListSourceInterface $list_source, array $current_filter_values, string $ajax_wrapper_id): void {
+    $key = 'current_values_' . $ajax_wrapper_id . '_' . static::getFilterType();
     $storage = &$form_state->getStorage();
     NestedArray::setValue($storage, [$key, $list_source->getSearchId()], $current_filter_values);
   }
@@ -387,13 +396,15 @@ abstract class FilterConfigurationFormBuilderBase implements TrustedCallbackInte
    *   The form state.
    * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
    *   The list source the filter values belong to.
+   * @param string $ajax_wrapper_id
+   *   The element Ajax wrapper ID.
    *
    * @return ListPresetFilter[]
    *   The filter values.
    */
-  protected static function getCurrentValues(FormStateInterface $form_state, ListSourceInterface $list_source): array {
+  protected static function getCurrentValues(FormStateInterface $form_state, ListSourceInterface $list_source, string $ajax_wrapper_id): array {
     $storage = $form_state->getStorage();
-    $key = 'current_values_' . static::getFilterType();
+    $key = 'current_values_' . $ajax_wrapper_id . '_' . static::getFilterType();
     $current_filter_values = NestedArray::getValue($storage, [
       $key,
       $list_source->getSearchId(),
@@ -412,13 +423,15 @@ abstract class FilterConfigurationFormBuilderBase implements TrustedCallbackInte
    *   The form state.
    * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
    *   The list source the filter values belong to.
+   * @param string $ajax_wrapper_id
+   *   The element Ajax wrapper ID.
    *
    * @return bool
    *   Whether the values have been emptied..
    */
-  protected static function areCurrentValuesEmpty(FormStateInterface $form_state, ListSourceInterface $list_source): bool {
+  protected static function areCurrentValuesEmpty(FormStateInterface $form_state, ListSourceInterface $list_source, string $ajax_wrapper_id): bool {
     $storage = $form_state->getStorage();
-    $key = 'current_values_' . static::getFilterType();
+    $key = 'current_values_' . $ajax_wrapper_id . '_' . static::getFilterType();
     $values = NestedArray::getValue($storage, [
       $key,
       $list_source->getSearchId(),

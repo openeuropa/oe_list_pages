@@ -98,7 +98,7 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
     $this->drupalGet('/node/add/oe_list_page');
     $this->getSession()->getPage()->fillField('Title', 'List page for ct1');
     $this->clickLink('List Page');
-    $this->assertListPagePresetFilters('emr_plugins_oe_list_page[wrapper][default_filter_values]');
+    $this->assertListPagePresetFilters('emr_plugins_oe_list_page[wrapper][default_filter_values]', 'list-page-default_filter_values--emr_plugins_oe_list_page-wrapper-default_filter_values');
   }
 
   /**
@@ -110,6 +110,7 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
   public function testListPageDefaultStatusPresetFilters(): void {
     // Create the configured facet.
     $list_id = ListSourceFactory::generateFacetSourcePluginId('node', 'content_type_one');
+    $ajax_wrapper_id = 'list-page-default_filter_values--emr_plugins_oe_list_page-wrapper-default_filter_values';
 
     $processor_options = [
       'default_status' => DateStatus::PAST,
@@ -211,7 +212,7 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
     // Include both upcoming and past.
     $this->drupalGet($node->toUrl('edit-form'));
     $this->clickLink('List Page');
-    $this->getSession()->getPage()->pressButton('default-edit-' . $filter_id);
+    $this->getSession()->getPage()->pressButton('default-edit-' . $filter_id . '-' . $ajax_wrapper_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->selectFieldOption('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $filter_id . '][oe_list_pages_filter_operator]', 'Any of');
     $this->getSession()->getPage()->selectFieldOption($filter_selector . '[' . $facet->id() . '][1][list]', DateStatus::PAST);

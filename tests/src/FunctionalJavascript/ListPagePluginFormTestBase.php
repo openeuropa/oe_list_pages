@@ -190,11 +190,13 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
    *
    * @param string $default_value_name_prefix
    *   The prefix of the preset filter element names.
+   * @param string $ajax_wrapper_id
+   *   The ajax wrapper ID.
    *
    * @SuppressWarnings(PHPMD.CyclomaticComplexity)
    * @SuppressWarnings(PHPMD.NPathComplexity)
    */
-  public function assertListPagePresetFilters(string $default_value_name_prefix): void {
+  public function assertListPagePresetFilters(string $default_value_name_prefix, string $ajax_wrapper_id): void {
     // Set tabs.
     $this->drupalPlaceBlock('local_tasks_block', ['primary' => TRUE]);
 
@@ -326,9 +328,9 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->assertDefaultValueForFilters($expected_set_filters);
 
     // Assert the Edit and Remove buttons are in the right place.
-    $edit = $this->getSession()->getPage()->find('css', '.default-filters-table td input[name="default-edit-' . $body_filter_id . '"]');
+    $edit = $this->getSession()->getPage()->find('css', '.default-filters-table td input[name="default-edit-' . $body_filter_id . '-' . $ajax_wrapper_id . '"]');
     $this->assertEquals('Edit', $edit->getValue());
-    $delete = $this->getSession()->getPage()->find('css', '.default-filters-table td input[name="default-delete-' . $body_filter_id . '"]');
+    $delete = $this->getSession()->getPage()->find('css', '.default-filters-table td input[name="default-delete-' . $body_filter_id . '-' . $ajax_wrapper_id . '"]');
     $this->assertEquals('Delete', $delete->getValue());
 
     // Set preset filter for Created.
@@ -378,7 +380,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
 
     // Switch content type again, but this time while on the edit form of a
     // default filter.
-    $page->pressButton('default-edit-' . $created_filter_id);
+    $page->pressButton('default-edit-' . $created_filter_id . '-' . $ajax_wrapper_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert->pageTextContains('Set default value for Created');
     $page->selectFieldOption('Source bundle', 'Content type two');
@@ -392,7 +394,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
       ],
     ]);
     // Try to edit and make sure that works.
-    $page->pressButton('default-edit-' . $select_two_filter_id);
+    $page->pressButton('default-edit-' . $select_two_filter_id . '-' . $ajax_wrapper_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert->pageTextContains('Set default value for Select two');
     // Switch back to content type one.
@@ -432,7 +434,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->assertDefaultValueForFilters($expected_set_filters);
 
     // Set additional value for reference.
-    $page->pressButton('default-edit-' . $reference_filter_id);
+    $page->pressButton('default-edit-' . $reference_filter_id . '-' . $ajax_wrapper_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert = $this->assertSession();
     $assert->pageTextContains('Set default value for Reference');
@@ -448,7 +450,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->assertDefaultValueForFilters($expected_set_filters);
 
     // Remove the yellow animal.
-    $page->pressButton('default-edit-' . $reference_filter_id);
+    $page->pressButton('default-edit-' . $reference_filter_id . '-' . $ajax_wrapper_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert = $this->assertSession();
     $assert->pageTextContains('Set default value for Reference');
@@ -485,7 +487,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
 
     // Remove preset filter for Published.
     $this->assertSession()->elementTextContains('css', 'table.default-filters-table', 'Published');
-    $page->pressButton('default-delete-' . $published_filter_id);
+    $page->pressButton('default-delete-' . $published_filter_id . '-' . $ajax_wrapper_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     unset($expected_set_filters['published']);
     $this->assertDefaultValueForFilters($expected_set_filters);
@@ -493,7 +495,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
 
     // Remove preset filter for Reference.
     $this->assertSession()->elementTextContains('css', 'table.default-filters-table', 'Reference');
-    $page->pressButton('default-delete-' . $reference_filter_id);
+    $page->pressButton('default-delete-' . $reference_filter_id . '-' . $ajax_wrapper_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     unset($expected_set_filters['reference']);
     $this->assertDefaultValueForFilters($expected_set_filters);
@@ -501,14 +503,14 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
 
     // Remove preset filter for select one.
     $this->assertSession()->elementTextContains('css', 'table.default-filters-table', 'Select one');
-    $page->pressButton('default-delete-' . $select_one_filter_id);
+    $page->pressButton('default-delete-' . $select_one_filter_id . '-' . $ajax_wrapper_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     unset($expected_set_filters['select_one']);
     $this->assertDefaultValueForFilters($expected_set_filters);
     $this->assertSession()->elementTextNotContains('css', 'table.default-filters-table', 'Select one');
 
     // Edit preset filter for Body and cancel.
-    $page->pressButton('default-edit-' . $body_filter_id);
+    $page->pressButton('default-edit-' . $body_filter_id . '-' . $ajax_wrapper_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->assertSession()->pageTextContains('Set default value for Body');
     $page = $this->getSession()->getPage();
@@ -520,7 +522,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->assertDefaultValueForFilters($expected_set_filters);
 
     // Edit preset filter for Body.
-    $page->pressButton('default-edit-' . $body_filter_id);
+    $page->pressButton('default-edit-' . $body_filter_id . '-' . $ajax_wrapper_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->assertSession()->pageTextContains('Set default value for Body');
     $page = $this->getSession()->getPage();
@@ -535,7 +537,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->assertDefaultValueForFilters($expected_set_filters);
 
     // Edit preset filter for Created.
-    $page->pressButton('default-edit-' . $created_filter_id);
+    $page->pressButton('default-edit-' . $created_filter_id . '-' . $ajax_wrapper_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert = $this->assertSession();
     $assert->pageTextContains('Set default value for Created');
@@ -567,7 +569,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     if ($link) {
       $link->click();
     }
-    $page->pressButton('default-edit-' . $body_filter_id);
+    $page->pressButton('default-edit-' . $body_filter_id . '-' . $ajax_wrapper_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert = $this->assertSession();
     $assert->pageTextContains(' Set default value for Body');
@@ -593,7 +595,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     if ($link) {
       $link->click();
     }
-    $page->pressButton('default-delete-' . $body_filter_id);
+    $page->pressButton('default-delete-' . $body_filter_id . '-' . $ajax_wrapper_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     unset($expected_set_filters['body']);
     $this->assertDefaultValueForFilters($expected_set_filters);
@@ -609,7 +611,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     if ($link) {
       $link->click();
     }
-    $page->pressButton('default-edit-' . $created_filter_id);
+    $page->pressButton('default-edit-' . $created_filter_id . '-' . $ajax_wrapper_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert = $this->assertSession();
     $assert->pageTextContains('Set default value for Created');
@@ -658,7 +660,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     if ($link) {
       $link->click();
     }
-    $page->pressButton('default-edit-' . $reference_filter_id);
+    $page->pressButton('default-edit-' . $reference_filter_id . '-' . $ajax_wrapper_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $assert->pageTextContains('Set default value for Reference');
     $this->getSession()->getPage()->fillField($default_value_name_prefix . '[wrapper][edit][' . $reference_filter_id . '][reference][0][entity_reference]', 'Red (1)');
@@ -682,9 +684,9 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     if ($link) {
       $link->click();
     }
-    $page->pressButton('default-delete-' . $created_filter_id);
+    $page->pressButton('default-delete-' . $created_filter_id . '-' . $ajax_wrapper_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $page->pressButton('default-delete-' . $reference_filter_id);
+    $page->pressButton('default-delete-' . $reference_filter_id . '-' . $ajax_wrapper_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
 
     // Add a Link filter.
@@ -711,7 +713,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     if ($link) {
       $link->click();
     }
-    $page->pressButton('default-edit-' . $link_filter_id);
+    $page->pressButton('default-edit-' . $link_filter_id . '-' . $ajax_wrapper_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $nodes = \Drupal::entityTypeManager()->getStorage('node')->loadByProperties(['title' => 'Sun title']);
     $sun_title = reset($nodes);
@@ -730,7 +732,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     if ($link) {
       $link->click();
     }
-    $page->pressButton('default-delete-' . $link_filter_id);
+    $page->pressButton('default-delete-' . $link_filter_id . '-' . $ajax_wrapper_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
 
     // Test an OR filter.
@@ -764,7 +766,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     if ($link) {
       $link->click();
     }
-    $page->pressButton('default-edit-' . $reference_filter_id);
+    $page->pressButton('default-edit-' . $reference_filter_id . '-' . $ajax_wrapper_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $page->selectFieldOption($default_value_name_prefix . '[wrapper][edit][' . $reference_filter_id . '][oe_list_pages_filter_operator]', 'All of');
     $this->assertSession()->assertWaitOnAjaxRequest();
@@ -790,7 +792,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     if ($link) {
       $link->click();
     }
-    $page->pressButton('default-edit-' . $reference_filter_id);
+    $page->pressButton('default-edit-' . $reference_filter_id . '-' . $ajax_wrapper_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $page->selectFieldOption($default_value_name_prefix . '[wrapper][edit][' . $reference_filter_id . '][oe_list_pages_filter_operator]', 'None of');
     $this->assertSession()->assertWaitOnAjaxRequest();
@@ -815,7 +817,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     if ($link) {
       $link->click();
     }
-    $page->pressButton('default-edit-' . $reference_filter_id);
+    $page->pressButton('default-edit-' . $reference_filter_id . '-' . $ajax_wrapper_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->fillField($default_value_name_prefix . '[wrapper][edit][' . $reference_filter_id . '][reference][1][entity_reference]', '');
     $page->selectFieldOption($default_value_name_prefix . '[wrapper][edit][' . $reference_filter_id . '][oe_list_pages_filter_operator]', 'Any of');
@@ -859,7 +861,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     if ($link) {
       $link->click();
     }
-    $page->pressButton('default-edit-' . $second_reference_filter_id);
+    $page->pressButton('default-edit-' . $second_reference_filter_id . '-' . $ajax_wrapper_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->fillField($default_value_name_prefix . '[wrapper][edit][' . $second_reference_filter_id . '][reference][0][entity_reference]', 'Yellow (2)');
     $page->selectFieldOption($default_value_name_prefix . '[wrapper][edit][' . $second_reference_filter_id . '][oe_list_pages_filter_operator]', 'Any of');
@@ -892,9 +894,9 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
       $link->click();
     }
 
-    $page->pressButton('default-delete-' . $reference_filter_id);
+    $page->pressButton('default-delete-' . $reference_filter_id . '-' . $ajax_wrapper_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $page->pressButton('default-delete-' . $second_reference_filter_id);
+    $page->pressButton('default-delete-' . $second_reference_filter_id . '-' . $ajax_wrapper_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $page->pressButton('Save');
 
@@ -963,7 +965,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     }
 
     // Fill in the country code.
-    $this->getSession()->getPage()->pressButton('default-edit-' . $country_filter_id);
+    $this->getSession()->getPage()->pressButton('default-edit-' . $country_filter_id . '-' . $ajax_wrapper_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->fillField($filter_selector, 'BE');
     $this->getSession()->getPage()->pressButton('Set default value');
@@ -986,7 +988,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     if ($link) {
       $link->click();
     }
-    $this->getSession()->getPage()->pressButton('default-delete-' . $country_filter_id);
+    $this->getSession()->getPage()->pressButton('default-delete-' . $country_filter_id . '-' . $ajax_wrapper_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->selectFieldOption('Add default value for', 'Foo');
     $this->assertSession()->assertWaitOnAjaxRequest();

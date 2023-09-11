@@ -61,15 +61,15 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
       '#type' => 'label',
     ];
 
-    $this->initializeCurrentContextualFilterValues($form_state, $configuration, $list_source);
-    $current_filters = static::getCurrentValues($form_state, $list_source);
+    $this->initializeCurrentContextualFilterValues($form, $form_state, $configuration, $list_source);
+    $current_filters = static::getCurrentValues($form_state, $list_source, $ajax_wrapper_id);
     // Set the current filters on the form so they can be used in the submit.
     $form['current_filters'] = [
       '#type' => 'value',
       '#value' => $current_filters,
     ];
 
-    $facet_id = $form_state->get('contextual_facet_id');
+    $facet_id = $form_state->get('contextual_facet_id_' . $ajax_wrapper_id);
 
     // If we could not determine a facet ID, we default to showing the summary
     // of default values.
@@ -77,7 +77,7 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
       return $this->buildSummaryPresetFilters($form, $form_state, $list_source, $this->getAvailableFilters($list_source));
     }
 
-    $filter_id = $form_state->get('contextual_filter_id');
+    $filter_id = $form_state->get('contextual_filter_id_' . $ajax_wrapper_id);
     if (!isset($filter_id)) {
       $filter_id = static::generateFilterId($facet_id, array_keys($current_filters));
     }
@@ -93,7 +93,7 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
   protected function buildSummaryPresetFilters(array $form, FormStateInterface $form_state, ListSourceInterface $list_source, array $available_filters = []): array {
     $form = parent::buildSummaryPresetFilters($form, $form_state, $list_source, $available_filters);
     /** @var \Drupal\oe_list_pages_link_list_source\ContextualPresetFilter[] $current_filters */
-    $current_filters = static::getCurrentValues($form_state, $list_source);
+    $current_filters = static::getCurrentValues($form_state, $list_source, $this->getAjaxWrapperId($form));
 
     $form['wrapper']['summary']['table']['#header'][1]['data'] = $this->t('Operator');
     foreach ($form['wrapper']['summary']['table']['#rows'] as $key => &$row) {
@@ -142,7 +142,7 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
     $ajax_wrapper_id = $this->getAjaxWrapperId($form);
 
     /** @var \Drupal\oe_list_pages_link_list_source\ContextualPresetFilter[] $current_filters */
-    $current_filters = static::getCurrentValues($form_state, $list_source);
+    $current_filters = static::getCurrentValues($form_state, $list_source, $ajax_wrapper_id);
     $available_filters = $this->getAvailableFilters($list_source);
 
     $form['wrapper']['edit'] = [
@@ -152,7 +152,7 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
 
     // Store the filter IDs on the form state in case we need to rebuild the
     // form.
-    $form_state->set(static::getFilterType() . '_filter_id', $filter_id);
+    $form_state->set(static::getFilterType() . '_filter_id_' . $ajax_wrapper_id, $filter_id);
 
     $facet = $this->getFacetById($list_source, $facet_id);
     if (!empty($facet) && ($widget = $facet->getWidgetInstance()) && ($widget instanceof MultiselectWidget)) {
@@ -202,13 +202,14 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
         '#facet_id' => $facet_id,
         '#executes_submit_callback' => TRUE,
         '#submit' => [[$this, 'setContextualOptionsSubmit']],
+        '#name' => static::getFilterType() . '-set-' . $filter_id . '-' . $ajax_wrapper_id,
       ];
 
       $form['wrapper']['edit'][$filter_id]['cancel_value'] = [
         '#value' => $this->t('Cancel'),
         '#type' => 'button',
         '#op' => 'cancel-contextual-filter',
-        '#name' => static::getFilterType() . '-cancel-' . $filter_id,
+        '#name' => static::getFilterType() . '-cancel-' . $filter_id . '-' . $ajax_wrapper_id,
         '#limit_validation_errors' => [
           array_merge($form['#parents'], [
             'wrapper',
@@ -229,6 +230,8 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
   /**
    * Initialize the form state with the values of the current list source.
    *
+   * @param array $form
+   *   The form.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The form state.
    * @param array $configuration
@@ -236,10 +239,11 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
    * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
    *   The list source.
    */
-  protected function initializeCurrentContextualFilterValues(FormStateInterface $form_state, array $configuration, ListSourceInterface $list_source): void {
+  protected function initializeCurrentContextualFilterValues(array $form, FormStateInterface $form_state, array $configuration, ListSourceInterface $list_source): void {
     // If we have current values for this list source, we can keep them going
     // forward.
-    $values = static::getCurrentValues($form_state, $list_source);
+    $ajax_wrapper_id = $this->getAjaxWrapperId($form);
+    $values = static::getCurrentValues($form_state, $list_source, $ajax_wrapper_id);
     if ($values) {
       return;
     }
@@ -248,13 +252,13 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
     // passed configuration and set the ones from the configuration if they do.
     // We also check if the values have not been emptied in the current
     // "session".
-    if ($list_source->getEntityType() === $configuration['entity_type'] && $list_source->getBundle() === $configuration['bundle'] && !static::areCurrentValuesEmpty($form_state, $list_source)) {
+    if ($list_source->getEntityType() === $configuration['entity_type'] && $list_source->getBundle() === $configuration['bundle'] && !static::areCurrentValuesEmpty($form_state, $list_source, $ajax_wrapper_id)) {
       $values = $configuration['contextual_filters'] ?? [];
-      static::setCurrentValues($form_state, $list_source, $values);
+      static::setCurrentValues($form_state, $list_source, $values, $ajax_wrapper_id);
       return;
     }
 
-    static::setCurrentValues($form_state, $list_source, []);
+    static::setCurrentValues($form_state, $list_source, [], $ajax_wrapper_id);
   }
 
   /**
@@ -285,8 +289,11 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
   public function setContextualOptionsSubmit(array &$form, FormStateInterface $form_state): void {
     /** @var \Drupal\oe_list_pages\ListSourceInterface $list_source */
     $list_source = $form_state->get('list_source');
-    $current_filters = static::getCurrentValues($form_state, $list_source);
     $triggering_element = $form_state->getTriggeringElement();
+    $element = NestedArray::getValue($form, array_slice($triggering_element['#array_parents'], 0, -4));
+    $ajax_wrapper_id = $this->getAjaxWrapperId($element);
+    $current_filters = static::getCurrentValues($form_state, $list_source, $ajax_wrapper_id);
+
     $facet_id = $triggering_element['#facet_id'];
     $filter_id = $triggering_element['#filter_id'];
 
@@ -302,9 +309,9 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
     $current_filters[$filter_id]->setFilterSource($filter_source);
 
     // Set the current filters on the form state so they can be used elsewhere.
-    static::setCurrentValues($form_state, $list_source, $current_filters);
-    $form_state->set('contextual_facet_id', NULL);
-    $form_state->set('contextual_filter_id', NULL);
+    static::setCurrentValues($form_state, $list_source, $current_filters, $ajax_wrapper_id);
+    $form_state->set('contextual_facet_id_' . $ajax_wrapper_id, NULL);
+    $form_state->set('contextual_filter_id_' . $ajax_wrapper_id, NULL);
     $form_state->setRebuild(TRUE);
   }
 
@@ -314,8 +321,11 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
   public function deleteFilterValueSubmit(array &$form, FormStateInterface $form_state): void {
     /** @var \Drupal\oe_list_pages\ListSourceInterface $list_source */
     $list_source = $form_state->get('list_source');
-    $current_filters = static::getCurrentValues($form_state, $list_source);
     $triggering_element = $form_state->getTriggeringElement();
+    $element = NestedArray::getValue($form, array_slice($triggering_element['#array_parents'], 0, -4));
+    $ajax_wrapper_id = $this->getAjaxWrapperId($element);
+    $current_filters = static::getCurrentValues($form_state, $list_source, $ajax_wrapper_id);
+
     $facet_id = $triggering_element['#facet_id'];
     $filter_id = $triggering_element['#filter_id'];
 
@@ -324,9 +334,9 @@ class ContextualFiltersConfigurationBuilder extends FilterConfigurationFormBuild
     }
 
     unset($current_filters[$filter_id]);
-    static::setCurrentValues($form_state, $list_source, $current_filters);
-    $form_state->set('contextual_facet_id', NULL);
-    $form_state->set('contextual_filter_id', NULL);
+    static::setCurrentValues($form_state, $list_source, $current_filters, $ajax_wrapper_id);
+    $form_state->set('contextual_facet_id_' . $ajax_wrapper_id, NULL);
+    $form_state->set('contextual_filter_id_' . $ajax_wrapper_id, NULL);
 
     $form_state->setRebuild(TRUE);
   }

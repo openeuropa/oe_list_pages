@@ -1,0 +1,29 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.content_type_three.field_link_lists
+    - node.type.content_type_three
+  module:
+    - user
+id: node.content_type_three.default
+targetEntityType: node
+bundle: content_type_three
+mode: default
+content:
+  field_link_lists:
+    type: entity_reference_entity_view
+    label: hidden
+    settings:
+      view_mode: default
+      link: true
+    third_party_settings: {  }
+    weight: 101
+    region: content
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 100
+    region: content
+hidden:
+  search_api_excerpt: true

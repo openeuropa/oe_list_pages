@@ -62,16 +62,16 @@ class DefaultFilterConfigurationBuilder extends FilterConfigurationFormBuilderBa
       '#type' => 'label',
     ];
 
-    $this->initializeCurrentFilterValues($form_state, $configuration);
+    $this->initializeCurrentFilterValues($form_state, $configuration, $ajax_wrapper_id);
 
-    $current_filters = static::getCurrentValues($form_state, $list_source);
+    $current_filters = static::getCurrentValues($form_state, $list_source, $ajax_wrapper_id);
     // Set the current filters on the form so they can be used in the submit.
     $form['current_filters'] = [
       '#type' => 'value',
       '#value' => $current_filters,
     ];
 
-    $facet_id = $form_state->get('default_facet_id');
+    $facet_id = $form_state->get('default_facet_id_' . $ajax_wrapper_id);
 
     // If we could not determine a facet ID, we default to showing the
     // summary of default values.
@@ -79,7 +79,7 @@ class DefaultFilterConfigurationBuilder extends FilterConfigurationFormBuilderBa
       return $this->buildSummaryPresetFilters($form, $form_state, $list_source, $list_source->getAvailableFilters());
     }
 
-    $filter_id = $form_state->get('default_filter_id');
+    $filter_id = $form_state->get('default_filter_id_' . $ajax_wrapper_id);
     if (!isset($filter_id)) {
       $filter_id = static::generateFilterId($facet_id, array_keys($current_filters));
     }
@@ -109,7 +109,7 @@ class DefaultFilterConfigurationBuilder extends FilterConfigurationFormBuilderBa
 
     /** @var \Drupal\oe_list_pages\ListSourceInterface $list_source */
     $list_source = $form_state->get('list_source');
-    $current_filters = static::getCurrentValues($form_state, $list_source);
+    $current_filters = static::getCurrentValues($form_state, $list_source, $ajax_wrapper_id);
     $available_filters = $list_source->getAvailableFilters();
 
     $form['wrapper']['edit'] = [
@@ -119,7 +119,7 @@ class DefaultFilterConfigurationBuilder extends FilterConfigurationFormBuilderBa
 
     // Store the filter IDs on the form state in case we need to rebuild the
     // form.
-    $form_state->set(static::getFilterType() . '_filter_id', $filter_id);
+    $form_state->set(static::getFilterType() . '_filter_id_' . $ajax_wrapper_id, $filter_id);
 
     $facet = $this->getFacetById($list_source, $facet_id);
     if (!empty($facet) && ($widget = $facet->getWidgetInstance()) && ($widget instanceof ListPagesWidgetInterface)) {
@@ -151,6 +151,7 @@ class DefaultFilterConfigurationBuilder extends FilterConfigurationFormBuilderBa
         '#limit_validation_errors' => [
           array_merge($form['#parents'], ['wrapper', 'edit']),
         ],
+        '#name' => static::getFilterType() . '-set-' . $filter_id . '-' . $ajax_wrapper_id,
         '#ajax' => $ajax_definition,
         '#filter_id' => $filter_id,
         '#facet_id' => $facet_id,
@@ -161,7 +162,7 @@ class DefaultFilterConfigurationBuilder extends FilterConfigurationFormBuilderBa
       $form['wrapper']['edit'][$filter_id]['cancel_value'] = [
         '#value' => $this->t('Cancel'),
         '#type' => 'button',
-        '#name' => static::getFilterType() . '-cancel-' . $filter_id,
+        '#name' => static::getFilterType() . '-cancel-' . $filter_id . '-' . $ajax_wrapper_id,
         '#limit_validation_errors' => [
           array_merge($form['#parents'], [
             'wrapper',
@@ -190,8 +191,10 @@ class DefaultFilterConfigurationBuilder extends FilterConfigurationFormBuilderBa
   public function setDefaultValueSubmit(array &$form, FormStateInterface $form_state): void {
     /** @var \Drupal\oe_list_pages\ListSourceInterface $list_source */
     $list_source = $form_state->get('list_source');
-    $current_filters = static::getCurrentValues($form_state, $list_source);
     $triggering_element = $form_state->getTriggeringElement();
+    $element = NestedArray::getValue($form, array_slice($triggering_element['#array_parents'], 0, -4));
+    $ajax_wrapper_id = $this->getAjaxWrapperId($element);
+    $current_filters = static::getCurrentValues($form_state, $list_source, $ajax_wrapper_id);
     $facet_id = $triggering_element['#facet_id'];
     $filter_id = $triggering_element['#filter_id'];
 
@@ -200,7 +203,7 @@ class DefaultFilterConfigurationBuilder extends FilterConfigurationFormBuilderBa
     }
 
     $facet = $this->getFacetById($list_source, $facet_id);
-    $element = NestedArray::getValue($form, array_slice($triggering_element['#array_parents'], 0, -4));
+
     $current_filters[$filter_id] = [
       '#parents' => array_merge($element['#parents'], [
         'wrapper',
@@ -221,10 +224,10 @@ class DefaultFilterConfigurationBuilder extends FilterConfigurationFormBuilderBa
     $current_filters[$filter_id] = new ListPresetFilter($facet_id, $preset_filter['values'], $preset_filter['operator']);
 
     // Set the current filters on the form state so they can be used elsewhere.
-    static::setCurrentValues($form_state, $list_source, $current_filters);
-    $form_state->set('default_facet_id', NULL);
-    $form_state->set('default_filter_id', NULL);
-    $form_state->set('default_filter_storage', NULL);
+    static::setCurrentValues($form_state, $list_source, $current_filters, $ajax_wrapper_id);
+    $form_state->set('default_facet_id_' . $ajax_wrapper_id, NULL);
+    $form_state->set('default_filter_id_' . $ajax_wrapper_id, NULL);
+    $form_state->set('default_filter_storage_' . $ajax_wrapper_id, NULL);
     $form_state->setRebuild(TRUE);
   }
 
@@ -251,8 +254,11 @@ class DefaultFilterConfigurationBuilder extends FilterConfigurationFormBuilderBa
   public function deleteFilterValueSubmit(array &$form, FormStateInterface $form_state): void {
     /** @var \Drupal\oe_list_pages\ListSourceInterface $list_source */
     $list_source = $form_state->get('list_source');
-    $current_filters = static::getCurrentValues($form_state, $list_source);
     $triggering_element = $form_state->getTriggeringElement();
+    $element = NestedArray::getValue($form, array_slice($triggering_element['#array_parents'], 0, -4));
+    $ajax_wrapper_id = $this->getAjaxWrapperId($element);
+    $current_filters = static::getCurrentValues($form_state, $list_source, $ajax_wrapper_id);
+
     $facet_id = $triggering_element['#facet_id'];
     $filter_id = $triggering_element['#filter_id'];
 
@@ -261,7 +267,6 @@ class DefaultFilterConfigurationBuilder extends FilterConfigurationFormBuilderBa
     }
 
     $facet = $this->getFacetById($list_source, $facet_id);
-    $element = NestedArray::getValue($form, array_slice($triggering_element['#array_parents'], 0, -4));
     $current_filters[$filter_id] = [
       '#parents' => array_merge($element['#parents'], [
         'wrapper',
@@ -280,11 +285,11 @@ class DefaultFilterConfigurationBuilder extends FilterConfigurationFormBuilderBa
 
     $widget->prepareDefaultFilterValue($facet, $current_filters[$filter_id], $subform_state);
     unset($current_filters[$filter_id]);
-    static::setCurrentValues($form_state, $list_source, $current_filters);
-    $form_state->set('default_filter_id', NULL);
+    static::setCurrentValues($form_state, $list_source, $current_filters, $ajax_wrapper_id);
+    $form_state->set('default_filter_id_' . $ajax_wrapper_id, NULL);
     // Clear also the storage that plugins may use for this filter.
-    $form_state->set('default_filter_storage', NULL);
-    $form_state->set('default_facet_id', NULL);
+    $form_state->set('default_filter_storage_' . $ajax_wrapper_id, NULL);
+    $form_state->set('default_facet_id_' . $ajax_wrapper_id, NULL);
 
     $form_state->setRebuild(TRUE);
   }
@@ -296,14 +301,16 @@ class DefaultFilterConfigurationBuilder extends FilterConfigurationFormBuilderBa
    *   The form state.
    * @param \Drupal\oe_list_pages\ListPageConfiguration $configuration
    *   The current configuration.
+   * @param string $ajax_wrapper_id
+   *   The element Ajax wrapper ID.
    */
-  protected function initializeCurrentFilterValues(FormStateInterface $form_state, ListPageConfiguration $configuration): void {
+  protected function initializeCurrentFilterValues(FormStateInterface $form_state, ListPageConfiguration $configuration, string $ajax_wrapper_id): void {
     /** @var \Drupal\oe_list_pages\ListSourceInterface $list_source */
     $list_source = $form_state->get('list_source');
 
     // If we have current filter values for this list source, we can keep them
     // going forward.
-    $values = static::getCurrentValues($form_state, $list_source);
+    $values = static::getCurrentValues($form_state, $list_source, $ajax_wrapper_id);
     if ($values) {
       return;
     }
@@ -312,13 +319,13 @@ class DefaultFilterConfigurationBuilder extends FilterConfigurationFormBuilderBa
     // passed configuration and set the ones from the configuration if they do.
     // We also check if the values have not been emptied in the current
     // "session".
-    if ($list_source->getEntityType() === $configuration->getEntityType() && $list_source->getBundle() === $configuration->getBundle() && !static::areCurrentValuesEmpty($form_state, $list_source)) {
+    if ($list_source->getEntityType() === $configuration->getEntityType() && $list_source->getBundle() === $configuration->getBundle() && !static::areCurrentValuesEmpty($form_state, $list_source, $ajax_wrapper_id)) {
       $values = $configuration->getDefaultFiltersValues();
-      static::setCurrentValues($form_state, $list_source, $values);
+      static::setCurrentValues($form_state, $list_source, $values, $ajax_wrapper_id);
       return;
     }
 
-    static::setCurrentValues($form_state, $list_source, []);
+    static::setCurrentValues($form_state, $list_source, [], $ajax_wrapper_id);
   }
 
 }
