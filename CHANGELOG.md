@@ -1,14 +1,31 @@
-# Change Log
+# Changelog
+
+## [1.3.0](https://github.com/openeuropa/oe_list_pages/tree/1.3.0) (2023-09-15)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.2.0...1.3.0)
+
+**Closed issues:**
+
+- Cannot update to Drupal 10.1.1 due to Symphony validator. [\#186](https://github.com/openeuropa/oe_list_pages/issues/186)
+
+**Merged pull requests:**
+
+- EWPP-3533: Increase RSS limit to 30 items. [\#191](https://github.com/openeuropa/oe_list_pages/pull/191) ([22Alexandra](https://github.com/22Alexandra))
+- EWPP-0000: Preventing crashes if index item is missing the original. [\#190](https://github.com/openeuropa/oe_list_pages/pull/190) ([upchuk](https://github.com/upchuk))
+- EWPP-3209: Fixing form storage for default and contextual filters. [\#178](https://github.com/openeuropa/oe_list_pages/pull/178) ([upchuk](https://github.com/upchuk))
 
 ## [1.2.0](https://github.com/openeuropa/oe_list_pages/tree/1.2.0) (2023-07-26)
+
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.1.0...1.2.0)
 
 **Merged pull requests:**
 
+- Prepare changelog for release 1.2.0. [\#188](https://github.com/openeuropa/oe_list_pages/pull/188) ([brummbar](https://github.com/brummbar))
 - EWPP-3494: Remove restriction for symfony/validator. [\#187](https://github.com/openeuropa/oe_list_pages/pull/187) ([hernani](https://github.com/hernani))
 - EWPP-3343: Filtering out multiselect filter values that are missing a display value. [\#184](https://github.com/openeuropa/oe_list_pages/pull/184) ([upchuk](https://github.com/upchuk))
 
 ## [1.1.0](https://github.com/openeuropa/oe_list_pages/tree/1.1.0) (2023-06-30)
+
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.0.0...1.1.0)
 
 **Merged pull requests:**
@@ -17,6 +34,7 @@
 - EWPP-2570: Allow to alter facet creation. [\#155](https://github.com/openeuropa/oe_list_pages/pull/155) ([sergepavle](https://github.com/sergepavle))
 
 ## [1.0.0](https://github.com/openeuropa/oe_list_pages/tree/1.0.0) (2023-05-25)
+
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.24.0...1.0.0)
 
 **Merged pull requests:**
