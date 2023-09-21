@@ -8,6 +8,8 @@
 declare(strict_types = 1);
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\oe_list_pages\SkosConceptHierarchicalHandler;
+use Drupal\oe_list_pages\TaxonomyTermHierarchicalHandler;
 
 /**
  * Implements hook_facets_search_api_query_type_mapping_alter().
@@ -18,6 +20,7 @@ function oe_list_pages_facets_search_api_query_type_mapping_alter($backend_plugi
   $query_types['fulltext_comparison'] = 'fulltext_query_type';
   $query_types['date_comparison'] = 'date_query_type';
   $query_types['oe_list_pages_date_status_comparison'] = 'oe_list_pages_date_status_query_type';
+  $query_types['oe_list_pages_hierarchy_comparison'] = 'oe_list_pages_hierarchy_query_type';
 }
 
 /**
@@ -108,4 +111,16 @@ function oe_list_pages_preprocess_search_api_index(array &$variables) {
     ],
     'class' => ['list-pages-index'],
   ];
+}
+
+/**
+ * Implements hook_entity_type_build().
+ */
+function oe_list_pages_entity_type_build(array &$entity_types) {
+  if (isset($entity_types['taxonomy_term'])) {
+    $entity_types['taxonomy_term']->setHandlerClass('oe_list_pages_hierarchy', TaxonomyTermHierarchicalHandler::class);
+  }
+  if (isset($entity_types['skos_concept'])) {
+    $entity_types['skos_concept']->setHandlerClass('oe_list_pages_hierarchy', SkosConceptHierarchicalHandler::class);
+  }
 }

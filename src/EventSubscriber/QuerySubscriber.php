@@ -11,6 +11,7 @@ use Drupal\facets\QueryType\QueryTypePluginManager;
 use Drupal\oe_list_pages\DefaultFilterConfigurationBuilder;
 use Drupal\oe_list_pages\ListFacetManagerWrapper;
 use Drupal\oe_list_pages\ListPresetFilter;
+use Drupal\oe_list_pages\Plugin\facets\widget\HierarchicalMultiselectWidget;
 use Drupal\search_api\Event\QueryPreExecuteEvent;
 use Drupal\search_api\Event\SearchApiEvents;
 use Drupal\search_api\Query\ConditionGroupInterface;
@@ -231,10 +232,16 @@ class QuerySubscriber implements EventSubscriberInterface {
    */
   protected function applyPresetFilterValues(FacetInterface $facet, ListPresetFilter $preset_filter): void {
     $facet->setActiveItems($preset_filter->getValues());
-    if ($preset_filter->getOperator() === ListPresetFilter::NOT_OPERATOR) {
-      $facet->setQueryOperator(ListPresetFilter::AND_OPERATOR);
+    if (in_array($preset_filter->getOperator(), [
+      ListPresetFilter::NOT_OPERATOR,
+      HierarchicalMultiselectWidget::NONE_WITH_HIERARCHY_OPERATOR,
+    ])) {
+      $new_operator_map = [
+        ListPresetFilter::NOT_OPERATOR => ListPresetFilter::AND_OPERATOR,
+        HierarchicalMultiselectWidget::NONE_WITH_HIERARCHY_OPERATOR => HierarchicalMultiselectWidget::AND_WITH_HIERARCHY_OPERATOR,
+      ];
+      $facet->setQueryOperator($new_operator_map[$preset_filter->getOperator()]);
       $facet->setExclude(TRUE);
-
       return;
     }
 

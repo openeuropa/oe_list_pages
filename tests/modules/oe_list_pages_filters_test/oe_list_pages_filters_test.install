@@ -11,6 +11,13 @@ declare(strict_types = 1);
  * Implements hook_install().
  */
 function oe_list_pages_filters_test_install($is_syncing) {
+
+  // Configure the RDF SKOS graphs.
+  $graphs = [
+    'europa_digital_thesaurus' => 'http://data.europa.eu/uxp',
+  ];
+  \Drupal::service('rdf_skos.skos_graph_configurator')->addGraphs($graphs);
+
   // Clear the facets source cached definitions so the new ones can be found.
   \Drupal::service('plugin.manager.facets.facet_source')->clearCachedDefinitions();
 }

@@ -12,16 +12,28 @@ use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
 use Drupal\oe_list_pages\DefaultFilterConfigurationBuilder;
 use Drupal\search_api\Entity\Index;
+use Drupal\taxonomy\Entity\Term;
+use Drupal\Tests\sparql_entity_storage\Traits\SparqlConnectionTrait;
 
 /**
  * Base class for testing list page configuration forms.
  */
 abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
 
+  use SparqlConnectionTrait;
+
   /**
    * {@inheritdoc}
    */
   protected $defaultTheme = 'starterkit_theme';
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function bootEnvironment(): void {
+    parent::bootEnvironment();
+    $this->setUpSparql();
+  }
 
   /**
    * Runs assertions for the preset filters form level validations.
@@ -132,6 +144,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $expected_bundles = [
       'vocabulary_one' => 'Vocabulary one',
       'vocabulary_two' => 'Vocabulary two',
+      'vocabulary_hierarchy' => 'Vocabulary hierarchy',
       '' => '- Select -',
     ];
     $this->assertEquals($expected_bundles, $actual_bundles);
@@ -200,12 +213,30 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     // Set tabs.
     $this->drupalPlaceBlock('local_tasks_block', ['primary' => TRUE]);
 
+    // Create some taxonomy terms.
+    $values = [
+      'name' => 'Parent',
+      'vid' => 'vocabulary_hierarchy',
+    ];
+    $parent_term = Term::create($values);
+    $parent_term->save();
+
+    $values = [
+      'name' => 'Child',
+      'vid' => 'vocabulary_hierarchy',
+      'parent' => $parent_term->id(),
+    ];
+    $child_term = Term::create($values);
+    $child_term->save();
+
     // Create some test nodes of content type Two.
     $date = new DrupalDateTime('30-10-2020');
     $values = [
       'title' => 'Red',
       'type' => 'content_type_two',
       'body' => 'red color',
+      'field_hierarchy' => $parent_term->id(),
+      'field_subject' => 'http://data.europa.eu/uxp/2466',
       'field_select_one' => 'test2',
       'status' => NodeInterface::PUBLISHED,
       'created' => $date->getTimestamp(),
@@ -217,6 +248,8 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
       'title' => 'Yellow',
       'type' => 'content_type_two',
       'body' => 'yellow color',
+      'field_hierarchy' => $child_term->id(),
+      'field_subject' => 'http://data.europa.eu/uxp/2463',
       'field_select_one' => 'test2',
       'status' => NodeInterface::PUBLISHED,
       'created' => $date->getTimestamp(),
@@ -302,6 +335,8 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $created_filter_id = DefaultFilterConfigurationBuilder::generateFilterId('created');
     $published_filter_id = DefaultFilterConfigurationBuilder::generateFilterId('list_facet_source_node_content_type_onestatus');
     $reference_filter_id = DefaultFilterConfigurationBuilder::generateFilterId('reference');
+    $hierarchy_filter_id = DefaultFilterConfigurationBuilder::generateFilterId('list_facet_source_node_content_type_twohierarchy');
+    $subject_filter_id = DefaultFilterConfigurationBuilder::generateFilterId('list_facet_source_node_content_type_twosubject');
     $link_filter_id = DefaultFilterConfigurationBuilder::generateFilterId('link');
 
     $page = $this->getSession()->getPage();
@@ -1003,6 +1038,98 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
       'value' => 'Two',
     ];
     $this->getSession()->getPage()->pressButton('Save');
+
+    // Test Hierarchy field.
+    $this->clickLink('Edit');
+    $link = $this->getSession()->getPage()->findLink('List Page');
+    if ($link) {
+      $link->click();
+    }
+
+    $page->pressButton('default-delete-' . $foo_filter_id . '-' . $ajax_wrapper_id);
+    $this->assertSession()->assertWaitOnAjaxRequest();
+
+    $page->selectFieldOption('Source bundle', 'Content type two');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->selectFieldOption('Add default value for', 'Facet for hierarchy');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $filter_selector = $default_value_name_prefix . '[wrapper][edit][' . $hierarchy_filter_id . '][list_facet_source_node_content_type_twohierarchy][0][entity_reference]';
+    $this->getSession()->getPage()->fillField($filter_selector, 'Parent (' . $parent_term->id() . ')');
+    $this->getSession()->getPage()->pressButton('Set default value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $expected_set_filters = [];
+    $expected_set_filters['list_facet_source_node_content_type_twohierarchy'] = [
+      'key' => 'Facet for hierarchy',
+      'value' => 'Any of (with hierarchy): Parent',
+    ];
+    $this->assertDefaultValueForFilters($expected_set_filters);
+
+    $this->getSession()->getPage()->pressButton('Save');
+
+    // We have results for parent and child.
+    $this->assertSession()->pageTextContains('Red');
+    $this->assertSession()->pageTextContains('Yellow');
+    $this->assertSession()->pageTextNotContains('Green');
+
+    // Change operator and check results are different.
+    $this->clickLink('Edit');
+    $link = $this->getSession()->getPage()->findLink('List Page');
+    if ($link) {
+      $link->click();
+    }
+    $page->pressButton('default-edit-' . $hierarchy_filter_id . '-' . $ajax_wrapper_id);
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $page->selectFieldOption($default_value_name_prefix . '[wrapper][edit][' . $hierarchy_filter_id . '][oe_list_pages_filter_operator]', 'Any of');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $page->pressButton('Set default value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->pressButton('Save');
+    $this->assertSession()->pageTextContains('Red');
+    $this->assertSession()->pageTextNotContains('Yellow');
+    $this->assertSession()->pageTextNotContains('Green');
+
+    $this->clickLink('Edit');
+    $link = $this->getSession()->getPage()->findLink('List Page');
+    if ($link) {
+      $link->click();
+    }
+    $page->pressButton('default-delete-' . $hierarchy_filter_id . '-' . $ajax_wrapper_id);
+    $this->assertSession()->assertWaitOnAjaxRequest();
+
+    // Same test for SKOS Terms.
+    $this->getSession()->getPage()->selectFieldOption('Add default value for', 'Facet for subject');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $filter_selector = $default_value_name_prefix . '[wrapper][edit][' . $subject_filter_id . '][list_facet_source_node_content_type_twosubject][0][entity_reference]';
+    $this->getSession()->getPage()->fillField($filter_selector, 'financing policy (http://data.europa.eu/uxp/2466)');
+    $this->getSession()->getPage()->pressButton('Set default value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $expected_set_filters = [];
+    $expected_set_filters['list_facet_source_node_content_type_twohierarchy'] = [
+      'key' => 'Facet for subject',
+      'value' => 'Any of (with hierarchy): financing policy',
+    ];
+    $this->assertDefaultValueForFilters($expected_set_filters);
+    $this->getSession()->getPage()->pressButton('Save');
+    // We have results for parent and child.
+    $this->assertSession()->pageTextContains('Red');
+    $this->assertSession()->pageTextContains('Yellow');
+    $this->assertSession()->pageTextNotContains('Green');
+
+    $this->clickLink('Edit');
+    $link = $this->getSession()->getPage()->findLink('List Page');
+    if ($link) {
+      $link->click();
+    }
+    $page->pressButton('default-edit-' . $subject_filter_id . '-' . $ajax_wrapper_id);
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $page->selectFieldOption($default_value_name_prefix . '[wrapper][edit][' . $subject_filter_id . '][oe_list_pages_filter_operator]', 'Any of');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $page->pressButton('Set default value');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getPage()->pressButton('Save');
+    $this->assertSession()->pageTextContains('Red');
+    $this->assertSession()->pageTextNotContains('Yellow');
+    $this->assertSession()->pageTextNotContains('Green');
   }
 
   /**

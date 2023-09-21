@@ -25,6 +25,7 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
     'node',
     'emr',
     'emr_node',
+    'rdf_skos',
     'search_api',
     'search_api_db',
   ];

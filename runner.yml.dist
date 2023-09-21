@@ -10,6 +10,9 @@ drupal:
     name: "oe_list_pages"
     user: "root"
     password: ""
+  sparql:
+    host: "sparql"
+    port: "8890"
   post_install:
     # Prepare the instance.
     - "./vendor/bin/drush en toolbar -y"
@@ -29,7 +32,14 @@ drupal:
         - "bower_components"
         - "vendor"
         - "${drupal.root}"
-
+    databases:
+      sparql_default:
+        default:
+          prefix: ""
+          host: ${drupal.sparql.host}
+          port: ${drupal.sparql.port}
+          namespace: 'Drupal\sparql_entity_storage\Driver\Database\sparql'
+          driver: 'sparql'
 
 selenium:
   host: "http://selenium"

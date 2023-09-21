@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+name: 'Vocabulary hierarchy'
+vid: vocabulary_hierarchy
+description: ''
+weight: 0

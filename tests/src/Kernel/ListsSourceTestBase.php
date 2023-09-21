@@ -8,6 +8,7 @@ use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\oe_list_pages\ListSourceFactory;
 use Drupal\search_api\Entity\Index;
 use Drupal\Tests\oe_list_pages\Traits\FacetsTestTrait;
+use Drupal\Tests\sparql_entity_storage\Traits\SparqlConnectionTrait;
 
 /**
  * Tests the List sources and their properties.
@@ -15,6 +16,7 @@ use Drupal\Tests\oe_list_pages\Traits\FacetsTestTrait;
 abstract class ListsSourceTestBase extends EntityKernelTestBase {
 
   use FacetsTestTrait;
+  use SparqlConnectionTrait;
 
   /**
    * {@inheritdoc}
@@ -28,11 +30,16 @@ abstract class ListsSourceTestBase extends EntityKernelTestBase {
     'language',
     'emr',
     'emr_node',
+    'rdf_skos',
     'search_api',
     'search_api_db',
     'search_api_test_db',
     'search_api_test_example_content',
+    'sparql_entity_storage',
+    'sparql_test',
     'system',
+    'user',
+    'taxonomy',
   ];
 
   /**
@@ -66,8 +73,17 @@ abstract class ListsSourceTestBase extends EntityKernelTestBase {
   /**
    * {@inheritdoc}
    */
+  protected function bootEnvironment(): void {
+    parent::bootEnvironment();
+    $this->setUpSparql();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     parent::setUp();
+    $this->installConfig(['sparql_entity_storage', 'sparql_test']);
 
     $this->installEntitySchema('facets_facet');
     $this->installEntitySchema('search_api_task');
@@ -77,6 +93,7 @@ abstract class ListsSourceTestBase extends EntityKernelTestBase {
     $this->installEntitySchema('node');
     $this->installEntitySchema('entity_meta');
     $this->installEntitySchema('entity_meta_relation');
+    $this->installEntitySchema('taxonomy_term');
     $this->installSchema('emr', ['entity_meta_default_revision']);
 
     \Drupal::state()->set('search_api_use_tracking_batch', FALSE);

@@ -26,6 +26,7 @@
         "openeuropa/code-review": "^2.0",
         "openeuropa/oe_link_lists": "^0.22",
         "openeuropa/open_vocabularies": "^1.0.0-alpha12",
+        "openeuropa/rdf_skos": "^1.0.0-alpha10",
         "openeuropa/task-runner-drupal-project-symlink": "^1.0.0-beta5",
         "phpspec/prophecy-phpunit": "^2"
     },
@@ -67,6 +68,13 @@
         "drupal-scaffold": {
             "locations": {
                 "web-root": "./build"
+            }
+        },
+        "patches-ignore": {
+            "openeuropa/open_vocabularies": {
+                "drupal/core": {
+                    "Entity display entities are incorrectly unserialized @see https://www.drupal.org/project/drupal/issues/3171333": "https://www.drupal.org/files/issues/2020-09-17/3171333-6.patch"
+                }
             }
         }
     },

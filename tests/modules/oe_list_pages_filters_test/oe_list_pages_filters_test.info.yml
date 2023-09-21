@@ -15,6 +15,7 @@ dependencies:
   - oe_list_pages:oe_list_pages
   - oe_list_pages:oe_list_page_content_type
   - oe_list_pages:oe_list_pages_link_list_source
+  - rdf_skos:rdf_skos
   - search_api:search_api_db
 
 config_devel:
@@ -42,9 +43,11 @@ config_devel:
     - field.field.node.content_type_one.field_select_one
     - field.field.node.content_type_one.field_test_boolean
     - field.field.node.content_type_two.body
+    - field.field.node.content_type_two.field_hierarchy
     - field.field.node.content_type_two.field_select_two
     - field.storage.node.field_country_code
     - field.storage.node.field_date_range
+    - field.storage.node.field_hierarchy
     - field.storage.node.field_link
     - field.storage.node.field_reference
     - field.storage.node.field_select_one
@@ -55,5 +58,6 @@ config_devel:
     - search_api.index.node
     - search_api.index.taxonomy
     - search_api.server.database_server
+    - taxonomy.vocabulary.vocabulary_hierarchy.yml
     - taxonomy.vocabulary.vocabulary_one
     - taxonomy.vocabulary.vocabulary_two
