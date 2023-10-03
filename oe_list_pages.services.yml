@@ -4,7 +4,7 @@ services:
     arguments: ['@facets.manager']
   oe_list_pages.list_source.factory:
     class: Drupal\oe_list_pages\ListSourceFactory
-    arguments: ['@oe_list_pages.list_facet_manager_wrapper', '@entity_type.manager']
+    arguments: ['@oe_list_pages.list_facet_manager_wrapper', '@entity_type.manager', '@module_handler']
   oe_list_pages.query_event_subscriber:
     class: Drupal\oe_list_pages\EventSubscriber\QuerySubscriber
     arguments: ['@oe_list_pages.list_facet_manager_wrapper', '@plugin.manager.facets.query_type', '@plugin.manager.facets.facet_source']

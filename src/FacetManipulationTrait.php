@@ -108,8 +108,11 @@ trait FacetManipulationTrait {
     }
 
     $field_definitions = $this->entityFieldManager->getFieldDefinitions($list_source->getEntityType(), $list_source->getBundle());
+    if (isset($field_definitions[$field_name])) {
+      return $field_definitions[$field_name];
+    }
 
-    return $field_definitions[$field_name] ?? NULL;
+    return $field_definitions[$property_path] ?? NULL;
   }
 
   /**
