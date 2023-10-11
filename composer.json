@@ -52,7 +52,8 @@
         "psr-4": {
             "Drupal\\Tests\\oe_list_pages\\": "./tests/src",
             "Drupal\\Tests\\oe_link_lists\\": "./build/modules/contrib/oe_link_lists/tests/src",
-            "Drupal\\Tests\\oe_list_pages_link_list_source\\": "./modules/oe_list_pages_link_list_source/tests/src"
+            "Drupal\\Tests\\oe_list_pages_link_list_source\\": "./modules/oe_list_pages_link_list_source/tests/src",
+            "Drupal\\Tests\\oe_list_pages_link_list_displays\\": "./modules/oe_list_pages_link_list_displays/tests/src"
         }
     },
     "extra": {

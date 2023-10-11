@@ -1164,8 +1164,8 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
       $key = $filter['key'];
       $default_value = $filter['value'];
 
-      $assert->elementTextContains('css', 'table.default-filters-table', $key);
-      $assert->elementTextContains('css', 'table.default-filters-table', $default_value);
+      $assert->elementTextContains('css', 'table.default-filters-table', (string) $key);
+      $assert->elementTextContains('css', 'table.default-filters-table', (string) $default_value);
     }
   }
 

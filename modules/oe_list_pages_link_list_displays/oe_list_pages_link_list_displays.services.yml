@@ -1,0 +1,4 @@
+services:
+  oe_list_pages_link_list_displays.list_display_selection_builder:
+    class: Drupal\oe_list_pages_link_list_displays\ListDisplaySelectionBuilder
+    arguments: ['@plugin.manager.oe_link_lists.link_display']

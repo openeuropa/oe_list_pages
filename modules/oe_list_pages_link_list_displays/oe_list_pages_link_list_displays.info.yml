@@ -1,0 +1,8 @@
+name: List page displays from link lists
+description: Exposes the link list displays on list pages
+type: module
+core_version_requirement: ^9.4 || ^10
+
+dependencies:
+  - oe_list_pages:oe_list_pages
+  - oe_link_lists:oe_link_lists

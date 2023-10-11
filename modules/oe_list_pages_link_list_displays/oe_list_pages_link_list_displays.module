@@ -1,0 +1,28 @@
+<?php
+
+/**
+ * @file
+ * The OpenEuropa List Pages Link List Displays module.
+ */
+
+declare(strict_types = 1);
+
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_list_page_entity_meta_form_alter().
+ */
+function oe_list_pages_link_list_displays_list_page_entity_meta_form_alter(array &$form, FormStateInterface $form_state) {
+  $entity_meta_bundle = $form_state->get('entity_meta_bundle');
+  /** @var \Drupal\emr\Entity\EntityMetaInterface $entity_meta */
+  $entity_meta = $form_state->get($entity_meta_bundle . '_entity_meta');
+  \Drupal::service('oe_list_pages_link_list_displays.list_display_selection_builder')->form($form, $form_state, $entity_meta);
+}
+
+/**
+ * Implements hook_list_page_entity_meta_form_submit_alter().
+ */
+function oe_list_pages_link_list_displays_list_page_entity_meta_form_submit_alter(array &$form, FormStateInterface $form_state, array &$configuration) {
+  $display_configuration = \Drupal::service('oe_list_pages_link_list_displays.list_display_selection_builder')->extractPluginConfiguration('display', $form, $form_state);
+  $configuration['extra']['oe_list_pages_link_list_displays']['display'] = $display_configuration;
+}
