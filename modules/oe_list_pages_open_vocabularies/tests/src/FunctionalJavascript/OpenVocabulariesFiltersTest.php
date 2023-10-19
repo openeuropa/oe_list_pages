@@ -40,6 +40,7 @@ class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
     'node',
     'emr',
     'emr_node',
+    'rdf_skos',
     'search_api',
     'search_api_db',
   ];

@@ -32,6 +32,7 @@ class ListPageLinkSourceTranslationTest extends ListPagePluginFormTestBase {
     'oe_list_pages_filters_test',
     'emr',
     'emr_node',
+    'rdf_skos',
     'search_api',
     'search_api_db',
     'content_translation',

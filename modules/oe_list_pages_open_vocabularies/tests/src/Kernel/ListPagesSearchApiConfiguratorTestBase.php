@@ -6,11 +6,14 @@ namespace Drupal\Tests\oe_list_pages_open_vocabularies\Kernel;
 
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\open_vocabularies\Entity\OpenVocabulary;
+use Drupal\Tests\sparql_entity_storage\Traits\SparqlConnectionTrait;
 
 /**
  * Base class for open vocabularies configurator.
  */
 abstract class ListPagesSearchApiConfiguratorTestBase extends EntityKernelTestBase {
+
+  use SparqlConnectionTrait;
 
   /**
    * {@inheritdoc}
@@ -33,13 +36,23 @@ abstract class ListPagesSearchApiConfiguratorTestBase extends EntityKernelTestBa
     'oe_list_pages_open_vocabularies_test',
     'open_vocabularies',
     'options',
+    'rdf_skos',
     'search_api',
     'search_api_db',
     'search_api_test_db',
+    'sparql_entity_storage',
     'taxonomy',
     'text',
     'facets',
   ];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function bootEnvironment(): void {
+    parent::bootEnvironment();
+    $this->setUpSparql();
+  }
 
   /**
    * {@inheritdoc}
