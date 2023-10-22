@@ -126,6 +126,8 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
     // Set the entity meta so we use it in the submit handler.
     $form_state->set($entity_meta_bundle . '_entity_meta', $entity_meta);
 
+    \Drupal::service('module_handler')->alter('list_page_entity_meta_form', $form[$key], $subform_state);
+
     return $form;
   }
 
@@ -169,7 +171,11 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
     ]);
     $entity_meta_configuration['sort'] = $configuration->getSort();
     $entity_meta_configuration['exposed_sort'] = $configuration->isExposedSort();
+
+    \Drupal::service('module_handler')->alter('list_page_entity_meta_form_submit', $form[$key], $subform_state, $entity_meta_configuration);
+
     $entity_meta_wrapper->setConfiguration($entity_meta_configuration);
+
     $host_entity->get('emr_entity_metas')->attach($entity_meta);
   }
 
