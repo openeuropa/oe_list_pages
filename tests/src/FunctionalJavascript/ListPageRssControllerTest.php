@@ -205,6 +205,7 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     $this->assertEquals(30, $items->count());
     $first_item = $items->eq(0);
     $this->assertEquals('that yellow fruit', $first_item->filterXpath('//title')->text());
+    $this->assertEquals('http://web:8080/build/node/2', $first_item->filterXpath('//atom:id')->text());
     $this->assertEquals('&lt;p&gt;this is a banana&lt;/p&gt; ', $first_item->filterXpath('//description')->html());
     $this->assertEquals('http://web:8080/build/node/2', $first_item->filterXpath('//link')->text());
     $this->assertEquals('http://web:8080/build/node/2', $first_item->filterXpath('//guid')->text());
@@ -215,6 +216,7 @@ class ListPageRssControllerTest extends WebDriverTestBase {
 
     $second_item = $items->eq(1);
     $this->assertEquals('that red fruit', $second_item->filterXpath('//title')->text());
+    $this->assertEquals('http://web:8080/build/node/3', $second_item->filterXpath('//atom:id')->text());
     $this->assertEquals('&lt;p&gt;this is a cherry&lt;/p&gt; ', $second_item->filterXpath('//description')->html());
     $this->assertEquals('http://web:8080/build/node/3', $second_item->filterXpath('//link')->text());
     $this->assertEquals('http://web:8080/build/node/3', $second_item->filterXpath('//guid')->text());
@@ -306,8 +308,9 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     $this->assertEquals('http://web:8080/build/es/node/1', $channel->filterXPath('//image/link')->text());
     // Assert the date is not translated.
     $items = $channel->filterXPath('//item');
-    $first_item = $items->eq(1);
-    $this->assertEquals('Thu, 20 Aug 2020 00:00:00 +1000', $first_item->filterXpath('//pubDate')->text());
+    $second_item = $items->eq(1);
+    $this->assertEquals('Thu, 20 Aug 2020 00:00:00 +1000', $second_item->filterXpath('//pubDate')->text());
+    $this->assertEquals('http://web:8080/build/node/3', $second_item->filterXpath('//atom:id')->text());
   }
 
 }

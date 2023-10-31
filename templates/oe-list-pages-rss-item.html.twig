@@ -5,6 +5,7 @@
  *
  * Available variables:
  * - title: RSS item title.
+ * - id: RSS item id.
  * - link: RSS item link.
  * - guid: RSS item global unique identifier.
  * - item_description: RSS body text.
@@ -13,6 +14,7 @@
 #}
 <item>
   <title>{{ title }}</title>
+  <atom:id>{{ id }}</atom:id>
   <link>{{ link }}</link>
   <guid>{{ guid }}</guid>
   <description>{{ item_description }}</description>
