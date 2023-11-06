@@ -160,10 +160,14 @@ class ListSource implements ListSourceInterface {
 
     /** @var \Drupal\search_api\IndexInterface $index */
     $index = $this->getIndex();
-    $fields = $index->getFields();
+    $index_fields = $index->getFields();
+    $field_property_path_map = [];
+    foreach ($index_fields as $field) {
+      $field_property_path_map[$field->getPropertyPath()] = $field;
+    }
 
     // Handle multilingual language fallback.
-    if ($resolved_options['language'] && in_array('language_with_fallback', array_keys($fields))) {
+    if ($resolved_options['language'] && in_array('language_with_fallback', array_keys($index_fields))) {
       $query->addCondition('language_with_fallback', $resolved_options['language']);
     }
 
@@ -172,8 +176,9 @@ class ListSource implements ListSourceInterface {
     $query->setSearchId($this->getSearchId());
 
     // Limit search to bundle.
-    if (in_array($this->getBundleKey(), array_keys($fields))) {
-      $query->addCondition($this->getBundleKey(), $this->getBundle());
+    if (isset($field_property_path_map[$this->getBundleKey()])) {
+      $bundle_field = $field_property_path_map[$this->getBundleKey()];
+      $query->addCondition($bundle_field->getFieldIdentifier(), $this->getBundle());
     }
     $query->addCondition('search_api_datasource', 'entity:' . $this->getEntityType());
 

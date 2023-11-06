@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\oe_list_pages;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\facets\Exception\InvalidQueryTypeException;
 use Drupal\search_api\Datasource\DatasourceInterface;
@@ -37,16 +38,26 @@ class ListSourceFactory implements ListSourceFactoryInterface {
   protected $listsSources;
 
   /**
+   * The module handler.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
    * ListSourceFactory constructor.
    *
    * @param \Drupal\oe_list_pages\ListFacetManagerWrapper $facetsManager
    *   The facets manager.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The entity type manager.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
+   *   The module handler.
    */
-  public function __construct(ListFacetManagerWrapper $facetsManager, EntityTypeManagerInterface $entityTypeManager) {
+  public function __construct(ListFacetManagerWrapper $facetsManager, EntityTypeManagerInterface $entityTypeManager, ModuleHandlerInterface $moduleHandler) {
     $this->facetsManager = $facetsManager;
     $this->entityTypeManager = $entityTypeManager;
+    $this->moduleHandler = $moduleHandler;
   }
 
   /**
@@ -98,6 +109,11 @@ class ListSourceFactory implements ListSourceFactoryInterface {
 
     // Loop through all available data sources from enabled indexes.
     $indexes = $index_storage->loadByProperties(['status' => 1]);
+
+    // Allow other sites, in rare cases, to remove items from the list of
+    // elligible indexes.
+    $this->moduleHandler->alter('oe_list_pages_list_source_indexes', $indexes);
+
     $lists_sources = [];
 
     /** @var \Drupal\search_api\Entity\Index $index */
