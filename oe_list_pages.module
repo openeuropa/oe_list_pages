@@ -50,6 +50,7 @@ function oe_list_pages_theme($existing, $type, $theme, $path) {
     'oe_list_pages_rss_item' => [
       'variables' => [
         'title' => '',
+        'id' => '',
         'link' => '',
         'guid' => '',
         'item_description' => '',
