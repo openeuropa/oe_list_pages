@@ -1,6 +1,16 @@
 # Changelog
 
-## [1.3.0](https://github.com/openeuropa/oe_list_pages/tree/1.3.0) (2023-09-15)
+## [1.4.0](https://github.com/openeuropa/oe_list_pages/tree/1.4.0) (2023-11-21)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.3.0...1.4.0)
+
+**Merged pull requests:**
+
+- EWPP-3696: Add atom:id element for RSS generation for list pages. [\#197](https://github.com/openeuropa/oe_list_pages/pull/197) ([sergepavle](https://github.com/sergepavle))
+- EWPP-3280: Minor refactor to allow for index field names not being the same with Drupal field names. [\#194](https://github.com/openeuropa/oe_list_pages/pull/194) ([upchuk](https://github.com/upchuk))
+- EWPP-3608: Support for hierarchical filters. [\#193](https://github.com/openeuropa/oe_list_pages/pull/193) ([hernani](https://github.com/hernani))
+
+## [1.3.0](https://github.com/openeuropa/oe_list_pages/tree/1.3.0) (2023-09-18)
 
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.2.0...1.3.0)
 
@@ -10,6 +20,7 @@
 
 **Merged pull requests:**
 
+- Prepare release 1.3.0. [\#192](https://github.com/openeuropa/oe_list_pages/pull/192) ([imanoleguskiza](https://github.com/imanoleguskiza))
 - EWPP-3533: Increase RSS limit to 30 items. [\#191](https://github.com/openeuropa/oe_list_pages/pull/191) ([22Alexandra](https://github.com/22Alexandra))
 - EWPP-0000: Preventing crashes if index item is missing the original. [\#190](https://github.com/openeuropa/oe_list_pages/pull/190) ([upchuk](https://github.com/upchuk))
 - EWPP-3209: Fixing form storage for default and contextual filters. [\#178](https://github.com/openeuropa/oe_list_pages/pull/178) ([upchuk](https://github.com/upchuk))
