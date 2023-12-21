@@ -85,7 +85,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->assertDefaultValueForFilters([
       [
         'key' => '',
-        'value' => t('No default values set'),
+        'value' => 'No default values set',
       ],
     ]);
 
@@ -390,7 +390,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->assertDefaultValueForFilters([
       [
         'key' => '',
-        'value' => t('No default values set'),
+        'value' => 'No default values set',
       ],
     ]);
     // Set a preset filter for Select two.

@@ -6,6 +6,7 @@ namespace Drupal\oe_list_pages;
 
 use Drupal\Component\Utility\SortArray;
 use Drupal\Core\Cache\CacheBackendInterface;
+use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
 use Drupal\facets\FacetInterface;
@@ -17,6 +18,13 @@ use Drupal\oe_list_pages\Annotation\MultiselectFilterField;
 class MultiselectFilterFieldPluginManager extends DefaultPluginManager {
 
   use FacetManipulationTrait;
+
+  /**
+   * The entity field manager.
+   *
+   * @var \Drupal\Core\Entity\EntityFieldManagerInterface
+   */
+  protected EntityFieldManagerInterface $entityFieldManager;
 
   /**
    * Constructs a new multiselect filter field plugin manager.
