@@ -1,17 +1,23 @@
-# Changelog
+# Change Log
+
+## [1.5.0](https://github.com/openeuropa/oe_list_pages/tree/1.5.0) (2023-12-21)
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.4.0...1.5.0)
+
+**Merged pull requests:**
+
+- OEL-2782: Update to use PHP 8.1/8.2 and Drupal 10.0.x/10.1.x. [\#200](https://github.com/openeuropa/oe_list_pages/pull/200) ([brummbar](https://github.com/brummbar))
 
 ## [1.4.0](https://github.com/openeuropa/oe_list_pages/tree/1.4.0) (2023-11-21)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.3.0...1.4.0)
 
 **Merged pull requests:**
 
+- Prepare release 1.4.0 [\#198](https://github.com/openeuropa/oe_list_pages/pull/198) ([imanoleguskiza](https://github.com/imanoleguskiza))
 - EWPP-3696: Add atom:id element for RSS generation for list pages. [\#197](https://github.com/openeuropa/oe_list_pages/pull/197) ([sergepavle](https://github.com/sergepavle))
 - EWPP-3280: Minor refactor to allow for index field names not being the same with Drupal field names. [\#194](https://github.com/openeuropa/oe_list_pages/pull/194) ([upchuk](https://github.com/upchuk))
 - EWPP-3608: Support for hierarchical filters. [\#193](https://github.com/openeuropa/oe_list_pages/pull/193) ([hernani](https://github.com/hernani))
 
 ## [1.3.0](https://github.com/openeuropa/oe_list_pages/tree/1.3.0) (2023-09-18)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.2.0...1.3.0)
 
 **Closed issues:**
