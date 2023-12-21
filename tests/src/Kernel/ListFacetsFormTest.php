@@ -18,14 +18,14 @@ class ListFacetsFormTest extends ListsSourceTestBase {
    */
   public function testFacetCacheTags(): void {
     $default_list_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'item');
-    $this->facet = $this->createFacet('created', $default_list_id, '', 'oe_list_pages_multiselect', []);
-    $this->facet->addProcessor([
+    $facet = $this->createFacet('created', $default_list_id, '', 'oe_list_pages_multiselect', []);
+    $facet->addProcessor([
       'processor_id' => 'oe_list_pages_date_status_processor',
       'weights' => [],
       'settings' => [],
     ]);
 
-    $this->facet->save();
+    $facet->save();
 
     $list = $this->listFactory->get('entity_test_mulrev_changed', 'item');
 
