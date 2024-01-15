@@ -1,13 +1,24 @@
-# Change Log
+# Changelog
+
+## [1.6.0](https://github.com/openeuropa/oe_list_pages/tree/1.6.0) (2024-01-15)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.5.0...1.6.0)
+
+**Merged pull requests:**
+
+- EWPP-3658: Link list display plugin integration. [\#196](https://github.com/openeuropa/oe_list_pages/pull/196) ([upchuk](https://github.com/upchuk))
 
 ## [1.5.0](https://github.com/openeuropa/oe_list_pages/tree/1.5.0) (2023-12-21)
+
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.4.0...1.5.0)
 
 **Merged pull requests:**
 
+- Prepare changelog for release 1.5.0. [\#201](https://github.com/openeuropa/oe_list_pages/pull/201) ([brummbar](https://github.com/brummbar))
 - OEL-2782: Update to use PHP 8.1/8.2 and Drupal 10.0.x/10.1.x. [\#200](https://github.com/openeuropa/oe_list_pages/pull/200) ([brummbar](https://github.com/brummbar))
 
 ## [1.4.0](https://github.com/openeuropa/oe_list_pages/tree/1.4.0) (2023-11-21)
+
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.3.0...1.4.0)
 
 **Merged pull requests:**
@@ -18,6 +29,7 @@
 - EWPP-3608: Support for hierarchical filters. [\#193](https://github.com/openeuropa/oe_list_pages/pull/193) ([hernani](https://github.com/hernani))
 
 ## [1.3.0](https://github.com/openeuropa/oe_list_pages/tree/1.3.0) (2023-09-18)
+
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.2.0...1.3.0)
 
 **Closed issues:**
