@@ -9,6 +9,7 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\SubformState;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -58,12 +59,20 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
   protected $subformFactory;
 
   /**
+   * The module handler.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityFieldManagerInterface $entity_field_manager, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, ListPageConfigurationSubformFactory $subformFactory) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityFieldManagerInterface $entity_field_manager, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, ListPageConfigurationSubformFactory $subformFactory, ModuleHandlerInterface $moduleHandler) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_field_manager, $entity_type_manager);
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
     $this->subformFactory = $subformFactory;
+    $this->moduleHandler = $moduleHandler;
   }
 
   /**
@@ -77,7 +86,8 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
       $container->get('entity_field.manager'),
       $container->get('entity_type.manager'),
       $container->get('entity_type.bundle.info'),
-      $container->get('oe_list_pages.list_page_configuration_subform_factory')
+      $container->get('oe_list_pages.list_page_configuration_subform_factory'),
+      $container->get('module_handler')
     );
   }
 
@@ -126,6 +136,10 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
     // Set the entity meta so we use it in the submit handler.
     $form_state->set($entity_meta_bundle . '_entity_meta', $entity_meta);
 
+    // Allow other modules to alter the final form elements.
+    $form_state->set('entity_meta_bundle', $entity_meta_bundle);
+    $this->moduleHandler->alter('list_page_entity_meta_form', $form[$key]['wrapper'], $form_state);
+
     return $form;
   }
 
@@ -169,6 +183,10 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
     ]);
     $entity_meta_configuration['sort'] = $configuration->getSort();
     $entity_meta_configuration['exposed_sort'] = $configuration->isExposedSort();
+
+    // Allow other modules to intercept the submission and handle custom
+    // things.
+    $this->moduleHandler->alter('list_page_entity_meta_form_submit', $form[$key]['wrapper'], $form_state, $entity_meta_configuration);
     $entity_meta_wrapper->setConfiguration($entity_meta_configuration);
     $host_entity->get('emr_entity_metas')->attach($entity_meta);
   }
