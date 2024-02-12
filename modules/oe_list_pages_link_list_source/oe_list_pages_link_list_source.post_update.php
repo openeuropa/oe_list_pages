@@ -5,7 +5,7 @@
  * OE List Pages Link List Source post updates.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 use Drupal\oe_link_lists\Entity\LinkList;
 

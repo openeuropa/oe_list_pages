@@ -5,7 +5,7 @@
  * OE List Page content type install file.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 /**
  * Implements hook_install().
