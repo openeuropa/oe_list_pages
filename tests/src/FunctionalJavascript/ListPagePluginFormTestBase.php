@@ -42,14 +42,11 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
    *   The prefix of the preset filter element names.
    */
   public function assertListPagePresetFilterValidations(string $default_value_name_prefix): void {
-    $this->getSession()->getPage()->selectFieldOption('Source entity type', 'node');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-
-    $this->getSession()->getPage()->selectFieldOption('Source bundle', 'content_type_one');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert = $this->assertSession();
+    $this->assertTrue($assert->optionExists('Source entity type', 'node')->isSelected());
+    $this->assertTrue($assert->optionExists('Source bundle', 'content_type_one')->isSelected());
 
     $page = $this->getSession()->getPage();
-    $assert = $this->assertSession();
 
     // Filter ids.
     $body_filter_id = DefaultFilterConfigurationBuilder::generateFilterId('body');
@@ -57,29 +54,29 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
 
     // Do not fill in the title and assert the validation limiting works.
     $page->selectFieldOption('Add default value for', 'Body');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->assertWaitOnAjaxRequest();
     $page->pressButton('Set default value');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->assertWaitOnAjaxRequest();
     $assert->pageTextContains('Body field is required.');
     $assert->pageTextNotContains('Title field is required.');
 
     // Cancel and start over.
     $page->pressButton('Cancel');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->assertWaitOnAjaxRequest();
     $assert->pageTextNotContains('Title field is required.');
     $assert->pageTextNotContains('Body field is required.');
     $page->fillField('Title', 'List page for ct1');
 
     // Set preset filter for Body and cancel.
     $page->selectFieldOption('Add default value for', 'Body');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->assertWaitOnAjaxRequest();
 
     $assert->pageTextContains('Set default value for Body');
     $page = $this->getSession()->getPage();
     $filter_selector = $default_value_name_prefix . '[wrapper][edit][' . $body_filter_id . '][body]';
     $page->fillField($filter_selector, 'cherry');
     $page->pressButton('Cancel');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->assertWaitOnAjaxRequest();
     $assert->pageTextNotContains('Title field is required.');
     $assert->pageTextNotContains('Body field is required.');
     $this->assertDefaultValueForFilters([
@@ -91,24 +88,23 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
 
     // Set preset filter for Created.
     $page->selectFieldOption('Add default value for', 'Created');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $assert = $this->assertSession();
+    $assert->assertWaitOnAjaxRequest();
     $assert->pageTextContains('Set default value for Created');
     $filter_selector = $default_value_name_prefix . '[wrapper][edit][' . $created_filter_id . ']';
     // Assert validations.
     $page->pressButton('Set default value');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->assertWaitOnAjaxRequest();
     $assert->pageTextContains('Created field is required.');
-    $assert->pageTextContains('The date is required. Please enter a date in the format');
+    $assert->pageTextContains('The date is required.');
     $this->getSession()->getPage()->selectFieldOption($filter_selector . '[created_op]', 'In between');
     $page->pressButton('Set default value');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $assert->pageTextContains('The date is required. Please enter a date in the format');
+    $assert->assertWaitOnAjaxRequest();
+    $assert->pageTextContains('The date is required.');
     $assert->pageTextContains('The second date is required.');
     $this->getSession()->getPage()->fillField($filter_selector . '[created_first_date_wrapper][created_first_date][date]', '10/19/2019');
     $this->getSession()->getPage()->fillField($filter_selector . '[created_second_date_wrapper][created_second_date][date]', '10/17/2019');
     $page->pressButton('Set default value');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->assertWaitOnAjaxRequest();
     $assert->pageTextContains('The second date cannot be before the first date.');
   }
 
@@ -126,8 +122,16 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
       'taxonomy_term' => 'Taxonomy term',
     ];
     $this->assertEquals($expected_entity_types, $actual_entity_types);
-    $this->getSession()->getPage()->selectFieldOption('Source entity type', 'node');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+
+    $assert = $this->assertSession();
+    // The form behaves slightly differently when it's rendered as part of the
+    // link list source plugin. In that scenario, the entity type and bundle are
+    // not pre-selected.
+    $entity_type_select = $assert->selectExists('Source entity type');
+    if ($entity_type_select->getValue() !== 'node') {
+      $entity_type_select->selectOption('node');
+      $assert->assertWaitOnAjaxRequest();
+    }
 
     $actual_bundles = $this->getSelectOptions('Source bundle');
     $expected_bundles = [
@@ -139,7 +143,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
 
     // Switch to the taxonomy term and assert that we have different bundles.
     $this->getSession()->getPage()->selectFieldOption('Source entity type', 'taxonomy_term');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->assertWaitOnAjaxRequest();
     $actual_bundles = $this->getSelectOptions('Source bundle');
     $expected_bundles = [
       'vocabulary_one' => 'Vocabulary one',
@@ -152,11 +156,11 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     // Select a bundle, then change back to Node. Wait for all the Ajax
     // requests to complete to ensure the callbacks work work.
     $this->getSession()->getPage()->selectFieldOption('Source bundle', 'vocabulary_one');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->selectFieldOption('Source entity type', 'node');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->selectFieldOption('Source bundle', 'content_type_one');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->assertWaitOnAjaxRequest();
 
     // Set state values to trigger the test event subscriber and make some
     // limitations.
@@ -178,8 +182,11 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
       'taxonomy_term' => 'Taxonomy term',
     ];
     $this->assertEquals($expected_entity_types, $actual_entity_types);
-    $this->getSession()->getPage()->selectFieldOption('Source entity type', 'node');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $entity_type_select = $assert->selectExists('Source entity type');
+    if ($entity_type_select->getValue() !== 'node') {
+      $entity_type_select->selectOption('node');
+      $assert->assertWaitOnAjaxRequest();
+    }
     $actual_bundles = $this->getSelectOptions('Source bundle');
     $expected_bundles = [
       'content_type_one' => 'Content type one',
@@ -187,7 +194,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     ];
     $this->assertEquals($expected_bundles, $actual_bundles);
     $this->getSession()->getPage()->selectFieldOption('Source entity type', 'taxonomy_term');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->assertWaitOnAjaxRequest();
     $actual_bundles = $this->getSelectOptions('Source bundle');
     $expected_bundles = [
       'vocabulary_one' => 'Vocabulary one',
@@ -195,7 +202,7 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     ];
     $this->assertEquals($expected_bundles, $actual_bundles);
     $this->getSession()->getPage()->selectFieldOption('Source bundle', 'vocabulary_one');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->assertWaitOnAjaxRequest();
   }
 
   /**
@@ -342,10 +349,19 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $page = $this->getSession()->getPage();
     $assert = $this->assertSession();
 
-    $page->selectFieldOption('Source entity type', 'Content');
-    $assert->assertWaitOnAjaxRequest();
-    $page->selectFieldOption('Source bundle', 'Content type one');
-    $assert->assertWaitOnAjaxRequest();
+    // The form behaves slightly differently when it's rendered as part of the
+    // link list source plugin. In that scenario, the entity type and bundle are
+    // not pre-selected.
+    $entity_type_select = $assert->selectExists('Source entity type');
+    if ($entity_type_select->getValue() !== 'node') {
+      $entity_type_select->selectOption('node');
+      $assert->assertWaitOnAjaxRequest();
+    }
+    $bundle_select = $assert->selectExists('Source bundle');
+    if ($bundle_select->getValue() !== 'content_type_one') {
+      $bundle_select->selectOption('content_type_one');
+      $assert->assertWaitOnAjaxRequest();
+    }
 
     $expected_set_filters = [];
 

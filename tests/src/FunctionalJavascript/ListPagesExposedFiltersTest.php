@@ -63,7 +63,8 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
     ];
     $this->assertEquals($expected_entity_types, $actual_entity_types);
     // By default, Node is selected if there are no stored values.
-    $this->assertTrue($this->assertSession()->optionExists('Source entity type', 'Content')->isSelected());
+    $assert_session = $this->assertSession();
+    $this->assertTrue($assert_session->optionExists('Source entity type', 'Content')->isSelected());
 
     $actual_bundles = $this->getSelectOptions('Source bundle');
     $expected_bundles = [
@@ -73,14 +74,13 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
     ];
     $this->assertEquals($expected_bundles, $actual_bundles);
     $page = $this->getSession()->getPage();
-    $page->selectFieldOption('Source bundle', 'Content type one');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->assertTrue($assert_session->optionExists('Source bundle', 'Content type one')->isSelected());
     $page->checkField('Override default exposed filters');
     // By default, the CT exposed filters are Body and Status.
-    $this->assertSession()->checkboxChecked('Published');
-    $this->assertSession()->checkboxChecked('Body');
-    $this->assertSession()->checkboxNotChecked('Select one');
-    $this->assertSession()->checkboxNotChecked('Created');
+    $assert_session->checkboxChecked('Published');
+    $assert_session->checkboxChecked('Body');
+    $assert_session->checkboxNotChecked('Select one');
+    $assert_session->checkboxNotChecked('Created');
     $page->uncheckField('Body');
     $page->checkField('Select one');
     $page->fillField('Title', 'Node title');
@@ -103,7 +103,7 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
     $this->drupalGet($node->toUrl('edit-form'));
     $this->clickLink('List Page');
     $page->selectFieldOption('Source bundle', 'Content type two');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert_session->assertWaitOnAjaxRequest();
     $page->checkField('Select two');
     $page->pressButton('Save');
 
@@ -121,8 +121,8 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
 
     $this->drupalGet($node->toUrl('edit-form'));
     $this->clickLink('List Page');
-    $this->assertSession()->checkboxChecked('Select two');
-    $this->assertSession()->checkboxNotChecked('Facet for status');
+    $assert_session->checkboxChecked('Select two');
+    $assert_session->checkboxNotChecked('Facet for status');
 
     // Unselect all the exposed filters and assert that we have overridden
     // the list page to not show any exposed filters.
@@ -165,21 +165,21 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
     // Disable the overridden exposed filters to return back to the defaults.
     $this->drupalGet($node->toUrl('edit-form'));
     $this->clickLink('List Page');
-    $this->assertSession()->checkboxChecked('Override default exposed filters');
-    $this->assertSession()->checkboxChecked('Select two');
-    $this->assertSession()->checkboxChecked('Facet for status');
+    $assert_session->checkboxChecked('Override default exposed filters');
+    $assert_session->checkboxChecked('Select two');
+    $assert_session->checkboxChecked('Facet for status');
     // Switch to other ct and check overridden is maintained.
     $page->selectFieldOption('Source bundle', 'Content type one');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->assertSession()->checkboxChecked('Published');
-    $this->assertSession()->checkboxChecked('Body');
-    $this->assertSession()->checkboxNotChecked('Select one');
-    $this->assertSession()->checkboxNotChecked('Created');
+    $assert_session->assertWaitOnAjaxRequest();
+    $assert_session->checkboxChecked('Published');
+    $assert_session->checkboxChecked('Body');
+    $assert_session->checkboxNotChecked('Select one');
+    $assert_session->checkboxNotChecked('Created');
     // Switch back.
     $page->selectFieldOption('Source bundle', 'Content type two');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->assertSession()->checkboxChecked('Select two');
-    $this->assertSession()->checkboxNotChecked('Facet for status');
+    $assert_session->assertWaitOnAjaxRequest();
+    $assert_session->checkboxChecked('Select two');
+    $assert_session->checkboxNotChecked('Facet for status');
     $page->uncheckField('Override default exposed filters');
     $page->pressButton('Save');
 

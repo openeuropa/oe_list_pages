@@ -52,21 +52,21 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $this->drupalGet('/node/add/oe_list_page');
     $this->clickLink('List Page');
     $page = $this->getSession()->getPage();
-    $page->selectFieldOption('Source bundle', 'Content type one');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert = $this->assertSession();
+    $this->assertTrue($assert->optionExists('Source bundle', 'Content type one')->isSelected());
     $page->checkField('Override default exposed filters');
     $page->checkField('Select one');
     $page->checkField('Published');
     $page->fillField('Title', 'List page for ct1');
     $page->pressButton('Save');
-    $this->assertSession()->pageTextContains('List page for ct1');
+    $assert->pageTextContains('List page for ct1');
 
     // Create list for content type two.
     $this->drupalGet('/node/add/oe_list_page');
     $this->clickLink('List Page');
     $page = $this->getSession()->getPage();
     $page->selectFieldOption('Source bundle', 'Content type two');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->assertWaitOnAjaxRequest();
     $page->fillField('Title', 'List page for ct2');
     $page->pressButton('Save');
 
@@ -74,8 +74,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $this->drupalGet('/node/add/oe_list_page');
     $this->clickLink('List Page');
     $page = $this->getSession()->getPage();
-    $page->selectFieldOption('Source bundle', 'Content type one');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->assertTrue($assert->optionExists('Source bundle', 'Content type one')->isSelected());
     $page->checkField('Override default exposed filters');
     $page->uncheckField('Body');
     $page->uncheckField('Published');
@@ -112,25 +111,23 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     // Check fields are visible in list nodes.
     $node = $this->drupalGetNodeByTitle('List page for ct1');
     $this->drupalGet($node->toUrl());
-    $this->assertSession()->fieldExists('Select one');
-    $this->assertSession()->fieldExists('Published');
-    $this->assertSession()->fieldNotExists('Created');
-    $assert = $this->assertSession();
+    $assert->fieldExists('Select one');
+    $assert->fieldExists('Published');
+    $assert->fieldNotExists('Created');
     $assert->pageTextContains('that yellow fruit');
     $assert->pageTextNotContains('that red fruit');
     $node = $this->drupalGetNodeByTitle('List page for ct2');
     $this->drupalGet($node->toUrl());
-    $this->assertSession()->fieldExists('Select two');
-    $this->assertSession()->fieldNotExists('Published');
-    $this->assertSession()->fieldNotExists('Created');
+    $assert->fieldExists('Select two');
+    $assert->fieldNotExists('Published');
+    $assert->fieldNotExists('Created');
     $assert->pageTextContains('that red fruit');
     $assert->pageTextNotContains('that yellow fruit');
     $node = $this->drupalGetNodeByTitle('Another List page for ct1');
     $this->drupalGet($node->toUrl());
-    $this->assertSession()->fieldNotExists('Select one');
-    $this->assertSession()->fieldNotExists('Published');
-    $this->assertSession()->fieldNotExists('Created');
-    $assert = $this->assertSession();
+    $assert->fieldNotExists('Select one');
+    $assert->fieldNotExists('Published');
+    $assert->fieldNotExists('Created');
     $assert->pageTextContains('that yellow fruit');
     $assert->pageTextNotContains('that red fruit');
   }
@@ -224,8 +221,8 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $this->drupalGet('/node/add/oe_list_page');
     $this->clickLink('List Page');
     $page = $this->getSession()->getPage();
-    $page->selectFieldOption('Source bundle', 'Content type one');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert_session = $this->assertSession();
+    $this->assertTrue($assert_session->optionExists('Source bundle', 'Content type one')->isSelected());
     $page->checkField('Override default exposed filters');
     $page->checkField('Select one');
     $page->checkField('Published');
@@ -238,14 +235,14 @@ class ListPagesFiltersTest extends WebDriverTestBase {
 
     $node = $this->drupalGetNodeByTitle('List page for ct1');
     $this->drupalGet($node->toUrl());
-    $this->assertSession()->pageTextContains('one yellow fruit');
-    $this->assertSession()->pageTextContains('another yellow fruit');
-    $this->assertSession()->linkNotExistsExact('Yes');
-    $this->assertSession()->linkNotExistsExact('test1');
-    $this->assertSession()->linkNotExistsExact('test2');
-    $this->assertSession()->linkNotExistsExact('Future');
+    $assert_session->pageTextContains('one yellow fruit');
+    $assert_session->pageTextContains('another yellow fruit');
+    $assert_session->linkNotExistsExact('Yes');
+    $assert_session->linkNotExistsExact('test1');
+    $assert_session->linkNotExistsExact('test2');
+    $assert_session->linkNotExistsExact('Future');
     // Past is showing up but it's not a link.
-    $this->assertSession()->linkNotExistsExact('Past');
+    $assert_session->linkNotExistsExact('Past');
     // We have a default status facet, configured to show Past items.
     $spans = $this->getSession()->getPage()->findAll('css', '.field--name-extra-field-oe-list-page-selected-filtersnodeoe-list-page span');
     $this->assertCount(2, $spans);
@@ -260,44 +257,44 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $this->getSession()->getPage()->selectFieldOption('Select one', 'test1', TRUE);
     $this->getSession()->getPage()->selectFieldOption('Select one', 'test2', TRUE);
     $this->getSession()->getPage()->pressButton('Search');
-    $this->assertSession()->pageTextContains('one yellow fruit');
-    $this->assertSession()->pageTextContains('another yellow fruit');
-    $this->assertSession()->elementExists('css', '.field--name-extra-field-oe-list-page-selected-filtersnodeoe-list-page');
-    $this->assertTrue($this->assertSession()->optionExists('Published', 'Yes')->isSelected());
-    $this->assertTrue($this->assertSession()->optionExists('Select one', 'test1')->isSelected());
-    $this->assertTrue($this->assertSession()->optionExists('Select one', 'test2')->isSelected());
-    $this->assertSession()->linkExistsExact('Yes');
-    $this->assertSession()->linkExistsExact('test1');
-    $this->assertSession()->linkExistsExact('test2');
-    $this->assertSession()->linkNotExistsExact('Future');
+    $assert_session->pageTextContains('one yellow fruit');
+    $assert_session->pageTextContains('another yellow fruit');
+    $assert_session->elementExists('css', '.field--name-extra-field-oe-list-page-selected-filtersnodeoe-list-page');
+    $this->assertTrue($assert_session->optionExists('Published', 'Yes')->isSelected());
+    $this->assertTrue($assert_session->optionExists('Select one', 'test1')->isSelected());
+    $this->assertTrue($assert_session->optionExists('Select one', 'test2')->isSelected());
+    $assert_session->linkExistsExact('Yes');
+    $assert_session->linkExistsExact('test1');
+    $assert_session->linkExistsExact('test2');
+    $assert_session->linkNotExistsExact('Future');
     // Since we have other filters now, the Past status becomes a link as it
     // can be removed.
-    $this->assertSession()->linkExistsExact('Past');
+    $assert_session->linkExistsExact('Past');
 
     $this->assertSelectedFiltersLabels(['Period', 'Select one', 'Published']);
 
     // Remove test2 from the selected filters.
     $this->getSession()->getPage()->clickLink('test2');
-    $this->assertSession()->pageTextContains('one yellow fruit');
+    $assert_session->pageTextContains('one yellow fruit');
     // The filter was removed, so we should only see the first node.
-    $this->assertSession()->pageTextNotContains('another yellow fruit');
-    $this->assertSession()->linkExistsExact('Yes');
-    $this->assertSession()->linkExistsExact('test1');
-    $this->assertSession()->linkNotExistsExact('test2');
-    $this->assertSession()->linkNotExistsExact('Future');
-    $this->assertSession()->linkExistsExact('Past');
+    $assert_session->pageTextNotContains('another yellow fruit');
+    $assert_session->linkExistsExact('Yes');
+    $assert_session->linkExistsExact('test1');
+    $assert_session->linkNotExistsExact('test2');
+    $assert_session->linkNotExistsExact('Future');
+    $assert_session->linkExistsExact('Past');
 
     $this->assertSelectedFiltersLabels(['Period', 'Select one', 'Published']);
 
     // Remove test1 as well.
     $this->getSession()->getPage()->clickLink('test1');
     // Both nodes should now be shown as they are both published.
-    $this->assertSession()->pageTextContains('one yellow fruit');
-    $this->assertSession()->pageTextContains('another yellow fruit');
-    $this->assertSession()->linkNotExistsExact('test1');
-    $this->assertSession()->linkNotExistsExact('test2');
-    $this->assertSession()->linkNotExistsExact('Future');
-    $this->assertSession()->linkExistsExact('Past');
+    $assert_session->pageTextContains('one yellow fruit');
+    $assert_session->pageTextContains('another yellow fruit');
+    $assert_session->linkNotExistsExact('test1');
+    $assert_session->linkNotExistsExact('test2');
+    $assert_session->linkNotExistsExact('Future');
+    $assert_session->linkExistsExact('Past');
     $this->assertSelectedFiltersLabels(['Period', 'Published']);
 
     // Filter by date.
@@ -306,30 +303,30 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $this->getSession()->getPage()->selectFieldOption('Created', 'After');
     $this->getSession()->getPage()->fillField('created_first_date_wrapper[created_first_date][date]', '10/19/2019');
     $this->getSession()->getPage()->pressButton('Search');
-    $this->assertSession()->pageTextContains('one yellow fruit');
-    $this->assertSession()->pageTextContains('another yellow fruit');
-    $this->assertSession()->linkExistsExact('After 19 October 2019');
-    $this->assertSession()->linkExistsExact('Past');
+    $assert_session->pageTextContains('one yellow fruit');
+    $assert_session->pageTextContains('another yellow fruit');
+    $assert_session->linkExistsExact('After 19 October 2019');
+    $assert_session->linkExistsExact('Past');
 
     $this->getSession()->getPage()->fillField('created_first_date_wrapper[created_first_date][date]', '10/22/2019');
     $this->getSession()->getPage()->pressButton('Search');
-    $this->assertSession()->pageTextNotContains('one yellow fruit');
-    $this->assertSession()->pageTextContains('another yellow fruit');
-    $this->assertSession()->linkExistsExact('After 22 October 2019');
-    $this->assertSession()->linkExistsExact('Past');
+    $assert_session->pageTextNotContains('one yellow fruit');
+    $assert_session->pageTextContains('another yellow fruit');
+    $assert_session->linkExistsExact('After 22 October 2019');
+    $assert_session->linkExistsExact('Past');
     $this->getSession()->getPage()->selectFieldOption('Created', 'Before');
     $this->getSession()->getPage()->pressButton('Search');
-    $this->assertSession()->pageTextContains('one yellow fruit');
-    $this->assertSession()->pageTextNotContains('another yellow fruit');
-    $this->assertSession()->linkExistsExact('Before 22 October 2019');
-    $this->assertSession()->linkExistsExact('Past');
+    $assert_session->pageTextContains('one yellow fruit');
+    $assert_session->pageTextNotContains('another yellow fruit');
+    $assert_session->linkExistsExact('Before 22 October 2019');
+    $assert_session->linkExistsExact('Past');
     $this->getSession()->getPage()->selectFieldOption('Created', 'In between');
     $this->getSession()->getPage()->fillField('created_first_date_wrapper[created_first_date][date]', '10/19/2019');
     $this->getSession()->getPage()->fillField('created_second_date_wrapper[created_second_date][date]', '10/26/2019');
     $this->getSession()->getPage()->pressButton('Search');
-    $this->assertSession()->pageTextContains('one yellow fruit');
-    $this->assertSession()->pageTextContains('another yellow fruit');
-    $this->assertSession()->linkExistsExact('Between 19 October 2019 and 26 October 2019');
+    $assert_session->pageTextContains('one yellow fruit');
+    $assert_session->pageTextContains('another yellow fruit');
+    $assert_session->linkExistsExact('Between 19 October 2019 and 26 October 2019');
 
     // Test that the full text widget-based filter shows also the selected
     // value.
@@ -338,51 +335,51 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $this->getSession()->getPage()->selectFieldOption('Select one', 'test1', TRUE);
     $this->getSession()->getPage()->pressButton('Search');
     $this->assertSelectedFiltersLabels(['Period', 'Body', 'Select one']);
-    $this->assertSession()->linkExistsExact('banana');
-    $this->assertSession()->linkExistsExact('test1');
-    $this->assertSession()->pageTextContains('one yellow fruit');
-    $this->assertSession()->pageTextNotContains('another yellow fruit');
+    $assert_session->linkExistsExact('banana');
+    $assert_session->linkExistsExact('test1');
+    $assert_session->pageTextContains('one yellow fruit');
+    $assert_session->pageTextNotContains('another yellow fruit');
     // Remove the select field and assert we still show the link with the
     // text filter.
     $this->getSession()->getPage()->clickLink('test1');
     $this->assertSelectedFiltersLabels(['Period', 'Body']);
-    $this->assertSession()->linkExistsExact('banana');
-    $this->assertSession()->linkNotExistsExact('test1');
-    $this->assertSession()->pageTextContains('one yellow fruit');
-    $this->assertSession()->pageTextNotContains('another yellow fruit');
+    $assert_session->linkExistsExact('banana');
+    $assert_session->linkNotExistsExact('test1');
+    $assert_session->pageTextContains('one yellow fruit');
+    $assert_session->pageTextNotContains('another yellow fruit');
     // Add back the select and remove the text filter.
     $this->getSession()->getPage()->selectFieldOption('Select one', 'test1', TRUE);
     $this->getSession()->getPage()->pressButton('Search');
     $this->assertSelectedFiltersLabels(['Period', 'Body', 'Select one']);
-    $this->assertSession()->linkExistsExact('banana');
-    $this->assertSession()->linkExistsExact('test1');
-    $this->assertSession()->pageTextContains('one yellow fruit');
-    $this->assertSession()->pageTextNotContains('another yellow fruit');
+    $assert_session->linkExistsExact('banana');
+    $assert_session->linkExistsExact('test1');
+    $assert_session->pageTextContains('one yellow fruit');
+    $assert_session->pageTextNotContains('another yellow fruit');
     $this->getSession()->getPage()->clickLink('banana');
     $this->assertSelectedFiltersLabels(['Period', 'Select one']);
-    $this->assertSession()->linkNotExistsExact('banana');
-    $this->assertSession()->linkExistsExact('test1');
-    $this->assertSession()->pageTextContains('one yellow fruit');
-    $this->assertSession()->pageTextNotContains('another yellow fruit');
+    $assert_session->linkNotExistsExact('banana');
+    $assert_session->linkExistsExact('test1');
+    $assert_session->pageTextContains('one yellow fruit');
+    $assert_session->pageTextNotContains('another yellow fruit');
 
     // Test the period filter with a default status.
     $this->getSession()->getPage()->pressButton('Clear filters');
     $this->getSession()->getPage()->selectFieldOption('Published', 'Yes', TRUE);
     $this->getSession()->getPage()->pressButton('Search');
-    $this->assertSession()->linkNotExistsExact('Future');
-    $this->assertSession()->linkExistsExact('Past');
+    $assert_session->linkNotExistsExact('Future');
+    $assert_session->linkExistsExact('Past');
     $this->getSession()->getPage()->selectFieldOption('Period', 'Future', TRUE);
     $this->getSession()->getPage()->selectFieldOption('Period', 'Past', TRUE);
     $this->getSession()->getPage()->pressButton('Search');
     // Now both default status values are links.
-    $this->assertSession()->linkExistsExact('Future');
-    $this->assertSession()->linkExistsExact('Past');
+    $assert_session->linkExistsExact('Future');
+    $assert_session->linkExistsExact('Past');
     // Remove Past and assert that Future remains a link because it is not
     // configured as the default status.
     $this->clickLink('Past');
-    $this->assertSession()->linkExistsExact('Future');
+    $assert_session->linkExistsExact('Future');
     // The Past link is gone, and also as a simple string.
-    $this->assertSession()->linkNotExistsExact('Past');
+    $assert_session->linkNotExistsExact('Past');
     $spans = $this->getSession()->getPage()->findAll('css', '.field--name-extra-field-oe-list-page-selected-filtersnodeoe-list-page span');
     $this->assertCount(2, $spans);
     $this->assertEquals('Period', $spans[0]->getText());
@@ -393,28 +390,28 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $this->getSession()->getPage()->selectFieldOption('Select one', 'test1', TRUE);
     $this->getSession()->getPage()->fillField('Body', 'no results');
     $this->getSession()->getPage()->pressButton('Search');
-    $this->assertSession()->pageTextNotContains('one yellow fruit');
-    $this->assertSession()->pageTextNotContains('another yellow fruit');
+    $assert_session->pageTextNotContains('one yellow fruit');
+    $assert_session->pageTextNotContains('another yellow fruit');
     $this->assertSelectedFiltersLabels(['Period', 'Body', 'Select one']);
 
     // Test that processors are used in building the selected filters.
     $this->drupalGet($node->toUrl());
     $this->getSession()->getPage()->selectFieldOption('Country', 'Belgium');
     $this->getSession()->getPage()->pressButton('Search');
-    $this->assertSession()->pageTextContains('one yellow fruit');
-    $this->assertSession()->pageTextNotContains('another yellow fruit');
-    $this->assertSession()->linkNotExistsExact('BE');
-    $this->assertSession()->linkExistsExact('Belgium');
+    $assert_session->pageTextContains('one yellow fruit');
+    $assert_session->pageTextNotContains('another yellow fruit');
+    $assert_session->linkNotExistsExact('BE');
+    $assert_session->linkExistsExact('Belgium');
     $this->assertSelectedFiltersLabels(['Period', 'Country']);
 
     // Test that even without results, the processors are used for the selected
     // filters.
     $this->getSession()->getPage()->fillField('Body', 'no results');
     $this->getSession()->getPage()->pressButton('Search');
-    $this->assertSession()->pageTextNotContains('one yellow fruit');
-    $this->assertSession()->pageTextNotContains('another yellow fruit');
-    $this->assertSession()->linkNotExistsExact('BE');
-    $this->assertSession()->linkExistsExact('Belgium');
+    $assert_session->pageTextNotContains('one yellow fruit');
+    $assert_session->pageTextNotContains('another yellow fruit');
+    $assert_session->linkNotExistsExact('BE');
+    $assert_session->linkExistsExact('Belgium');
     $this->assertSelectedFiltersLabels(['Period', 'Body', 'Country']);
   }
 
@@ -447,19 +444,19 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $this->drupalGet('/node/add/oe_list_page');
     $this->clickLink('List Page');
     $page = $this->getSession()->getPage();
-    $page->selectFieldOption('Source bundle', 'Content type one');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert_session = $this->assertSession();
+    $this->assertTrue($assert_session->optionExists('Source bundle', 'Content type one')->isSelected());
     $page->fillField('Title', 'List page for ct1');
     $page->pressButton('Save');
 
     // By default we show only 10 results.
     $this->assertCount(10, $this->getSession()->getPage()->findAll('css', '.node--type-content-type-one'));
 
-    $this->assertSession()->pageTextContains('Showing results 1 to 10');
+    $assert_session->pageTextContains('Showing results 1 to 10');
     $this->getSession()->getPage()->clickLink('Next');
-    $this->assertSession()->pageTextContains('Showing results 10 to 20');
+    $assert_session->pageTextContains('Showing results 10 to 20');
     $this->getSession()->getPage()->clickLink('Next');
-    $this->assertSession()->pageTextContains('Showing results 20 to 23');
+    $assert_session->pageTextContains('Showing results 20 to 23');
 
     // Update the node to show 20 results.
     $node = $this->drupalGetNodeByTitle('List page for ct1');
@@ -468,15 +465,15 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $this->getSession()->getPage()->selectFieldOption('The number of items to show per page', '20');
     $page->pressButton('Save');
     $this->assertCount(20, $this->getSession()->getPage()->findAll('css', '.node--type-content-type-one'));
-    $this->assertSession()->pageTextContains('Showing results 1 to 20');
+    $assert_session->pageTextContains('Showing results 1 to 20');
     $this->getSession()->getPage()->clickLink('Next');
-    $this->assertSession()->pageTextContains('Showing results 20 to 23');
+    $assert_session->pageTextContains('Showing results 20 to 23');
 
     // Search to trigger no results.
     $this->getSession()->getPage()->fillField('Body', 'not going to find anything');
     $this->getSession()->getPage()->pressButton('Search');
-    $this->assertSession()->pageTextContains('No results have been found');
-    $this->assertSession()->pageTextNotContains('Showing results');
+    $assert_session->pageTextContains('No results have been found');
+    $assert_session->pageTextNotContains('Showing results');
   }
 
   /**

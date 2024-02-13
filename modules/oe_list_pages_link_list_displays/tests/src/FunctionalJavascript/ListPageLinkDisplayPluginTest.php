@@ -77,9 +77,9 @@ class ListPageLinkDisplayPluginTest extends ListPagePluginFormTestBase {
 
     $page = $this->getSession()->getPage();
     $page->fillField('Title', 'List page for ct1');
-    $page->selectFieldOption('Source bundle', 'Content type one');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $display = $this->assertSession()->selectExists('Display');
+    $assert_session = $this->assertSession();
+    $this->assertTrue($assert_session->optionExists('Source bundle', 'Content type one')->isSelected());
+    $display = $assert_session->selectExists('Display');
     $this->assertEquals('required', $display->getAttribute('required'));
     $this->assertFieldSelectOptions('Display', [
       'same_configuration_display_one',
@@ -94,8 +94,8 @@ class ListPageLinkDisplayPluginTest extends ListPagePluginFormTestBase {
 
     // Pick a display with no configuration.
     $page->selectFieldOption('Display', 'Title');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->assertSession()->pageTextContains('This plugin does not have any configuration options.');
+    $assert_session->assertWaitOnAjaxRequest();
+    $assert_session->pageTextContains('This plugin does not have any configuration options.');
     $page->pressButton('Save');
 
     // Assert we see the results as just titles.
@@ -116,18 +116,18 @@ class ListPageLinkDisplayPluginTest extends ListPagePluginFormTestBase {
     $this->clickLink('List Page');
     $this->assertEquals('title', $page->findField('Display')->find('css', 'option[selected="selected"]')->getValue());
     $page->selectFieldOption('Display', 'Titles with optional link');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->assertSession()->pageTextNotContains('This plugin does not have any configuration options.');
+    $assert_session->assertWaitOnAjaxRequest();
+    $assert_session->pageTextNotContains('This plugin does not have any configuration options.');
     // By default, the Link checkbox is checked.
     $checkbox = $page->find('css', '.form-item-emr-plugins-oe-list-page-wrapper-display-plugin-configuration-wrapper-test-configurable-title-link input');
     $this->assertTrue($checkbox->isChecked());
     // Switch again to another plugin for testing.
     $page->selectFieldOption('Display', 'Same configuration display one.');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->assertSession()->fieldExists('The value');
+    $assert_session->assertWaitOnAjaxRequest();
+    $assert_session->fieldExists('The value');
     // Switch back and save.
     $page->selectFieldOption('Display', 'Titles with optional link');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert_session->assertWaitOnAjaxRequest();
     $page->pressButton('Save');
     // We should see the titles in the same way: linked.
     $links = $page->findAll('css', '.field--name-extra-field-oe-list-page-resultsnodeoe-list-page ul li a');
@@ -221,17 +221,16 @@ class ListPageLinkDisplayPluginTest extends ListPagePluginFormTestBase {
     $this->goToListPageConfiguration();
 
     // Select node.
-    $this->getSession()->getPage()->selectFieldOption('Source entity type', 'node');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->getSession()->getPage()->selectFieldOption('Source bundle', 'content_type_one');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->assertSession()->selectExists('Sort');
-    $this->assertTrue($this->assertSession()->optionExists('Sort', 'Default')->isSelected());
+    $assert_session = $this->assertSession();
+    $this->assertTrue($assert_session->optionExists('Source entity type', 'node')->isSelected());
+    $this->assertTrue($assert_session->optionExists('Source bundle', 'content_type_one')->isSelected());
+    $assert_session->selectExists('Sort');
+    $this->assertTrue($assert_session->optionExists('Sort', 'Default')->isSelected());
     $this->getSession()->getPage()->selectFieldOption('Display', 'Title');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert_session->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->fillField('Title', 'Node title');
     $this->getSession()->getPage()->pressButton('Save');
-    $this->assertSession()->pageTextContains('List page Node title has been created.');
+    $assert_session->pageTextContains('List page Node title has been created.');
     // The sorting is by the default sort.
     $this->assertResultsAreInCorrectOrder([
       'First by created',
@@ -284,15 +283,14 @@ class ListPageLinkDisplayPluginTest extends ListPagePluginFormTestBase {
     $this->goToListPageConfiguration();
 
     // Select node.
-    $this->getSession()->getPage()->selectFieldOption('Source entity type', 'node');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->getSession()->getPage()->selectFieldOption('Source bundle', 'content_type_one');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert_session = $this->assertSession();
+    $this->assertTrue($assert_session->optionExists('Source entity type', 'node')->isSelected());
+    $this->assertTrue($assert_session->optionExists('Source bundle', 'content_type_one')->isSelected());
     $this->getSession()->getPage()->selectFieldOption('Display', 'Title');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert_session->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->fillField('Title', 'Node title');
     $this->getSession()->getPage()->pressButton('Save');
-    $this->assertSession()->pageTextContains('List page Node title has been created.');
+    $assert_session->pageTextContains('List page Node title has been created.');
 
     // The sorting is by the default sort.
     $first_ten = array_splice($expected_order, 0, 10);

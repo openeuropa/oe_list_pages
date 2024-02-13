@@ -123,6 +123,13 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     $this->drupalLogin($admin);
 
     $this->goToListPageConfiguration();
+
+    $assert_session = $this->assertSession();
+    $page = $this->getSession()->getPage();
+    $page->selectFieldOption('Source entity type', 'Content');
+    $assert_session->assertWaitOnAjaxRequest();
+    $page->selectFieldOption('Source bundle', 'Content type one');
+    $assert_session->assertWaitOnAjaxRequest();
     $this->assertListPagePresetFilterValidations('configuration[0][link_source][plugin_configuration_wrapper][list_pages][list_page_configuration][wrapper][default_filter_values]');
   }
 
@@ -1218,7 +1225,7 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
    */
   protected function goToListPageConfiguration(): void {
     $this->drupalGet('link_list/add/dynamic');
-    $this->getSession()->getPage()->selectFieldOption('Link source', 'List page');
+    $this->getSession()->getPage()->selectFieldOption('Link source', 'List pages');
     $this->assertSession()->assertWaitOnAjaxRequest();
   }
 

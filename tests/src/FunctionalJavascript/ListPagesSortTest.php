@@ -109,39 +109,35 @@ class ListPagesSortTest extends ListPagePluginFormTestBase {
     $this->goToListPageConfiguration();
 
     // No sort field visible.
-    $this->assertSession()->fieldNotExists('Sort');
-
-    // Select node.
-    $this->getSession()->getPage()->selectFieldOption('Source entity type', 'node');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->assertSession()->fieldNotExists('Sort');
+    $assert_session = $this->assertSession();
+    $this->assertTrue($assert_session->optionExists('Source entity type', 'node')->isSelected());
+    $assert_session->fieldNotExists('Sort');
 
     // Select a bundle with no default sort (normally this should not happen
     // but in case the bundle is not fully configured).
     $this->getSession()->getPage()->selectFieldOption('Source bundle', 'content_type_two');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->assertSession()->fieldNotExists('Sort');
+    $assert_session->assertWaitOnAjaxRequest();
+    $assert_session->fieldNotExists('Sort');
 
     // Select a bundle that has the sort configured and assert we don't see the
     // sort field (as we only have 1 sort option).
     $this->getSession()->getPage()->selectFieldOption('Source bundle', 'content_type_one');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->assertSession()->fieldNotExists('Sort');
+    $assert_session->assertWaitOnAjaxRequest();
+    $assert_session->fieldNotExists('Sort');
 
     // Subscribe to the event and provide another sort option.
     \Drupal::state()->set('oe_list_pages_test.alter_sort_options', TRUE);
     $this->goToListPageConfiguration();
-    $this->getSession()->getPage()->selectFieldOption('Source entity type', 'node');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->assertTrue($assert_session->optionExists('Source entity type', 'node')->isSelected());
     // This bundle only has the event subscriber sort so no Sort select should
     // show up.
     $this->getSession()->getPage()->selectFieldOption('Source bundle', 'content_type_two');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->assertSession()->fieldNotExists('Sort');
+    $assert_session->assertWaitOnAjaxRequest();
+    $assert_session->fieldNotExists('Sort');
     // Save the node and assert we have no sort info in the entity meta.
     $this->getSession()->getPage()->fillField('Title', 'Node title');
     $this->getSession()->getPage()->pressButton('Save');
-    $this->assertSession()->pageTextContains('List page Node title has been created.');
+    $assert_session->pageTextContains('List page Node title has been created.');
     $this->assertEmpty($this->getSortInformationFromNodeMeta('Node title'));
 
     // Edit the node and switch to the content type which has more options due
@@ -150,8 +146,8 @@ class ListPagesSortTest extends ListPagePluginFormTestBase {
     $this->drupalGet($node->toUrl('edit-form'));
     $this->clickLink('List Page');
     $this->getSession()->getPage()->selectFieldOption('Source bundle', 'content_type_one');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->assertSession()->selectExists('Sort');
+    $assert_session->assertWaitOnAjaxRequest();
+    $assert_session->selectExists('Sort');
     $actual_options = $this->getSelectOptions('Sort');
     $expected_options = [
       'created__DESC' => 'Default',
@@ -159,7 +155,7 @@ class ListPagesSortTest extends ListPagePluginFormTestBase {
     ];
     $this->assertEquals($expected_options, $actual_options);
     // Assert also that the Default option is selected.
-    $this->assertTrue($this->assertSession()->optionExists('Sort', 'Default')->isSelected());
+    $this->assertTrue($assert_session->optionExists('Sort', 'Default')->isSelected());
 
     // Save the node with the default sort selected and assert that again, no
     // sort has been saved in the meta because the defaults should not be saved.
@@ -194,7 +190,7 @@ class ListPagesSortTest extends ListPagePluginFormTestBase {
     // Switch back to the default sort.
     $this->drupalGet($node->toUrl('edit-form'));
     $this->clickLink('List Page');
-    $this->assertTrue($this->assertSession()->optionExists('Sort', 'Boolean')->isSelected());
+    $this->assertTrue($assert_session->optionExists('Sort', 'Boolean')->isSelected());
     $this->getSession()->getPage()->selectFieldOption('Sort', 'created__DESC');
     $this->getSession()->getPage()->pressButton('Save');
     $this->assertEmpty($this->getSortInformationFromNodeMeta('Node title'));
@@ -214,15 +210,14 @@ class ListPagesSortTest extends ListPagePluginFormTestBase {
     $admin = $this->createUser([], NULL, TRUE);
     $this->drupalLogin($admin);
     $this->goToListPageConfiguration();
-    $this->getSession()->getPage()->selectFieldOption('Source entity type', 'node');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->getSession()->getPage()->selectFieldOption('Source bundle', 'content_type_one');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert_session = $this->assertSession();
+    $this->assertTrue($assert_session->optionExists('Source entity type', 'node')->isSelected());
+    $this->assertTrue($assert_session->optionExists('Source bundle', 'content_type_one')->isSelected());
     // Since we don't disallow the sort exposing, assert the checkbox is there.
-    $this->assertSession()->checkboxNotChecked('Expose sort');
+    $assert_session->checkboxNotChecked('Expose sort');
     $this->getSession()->getPage()->fillField('Title', 'Node title');
     $this->getSession()->getPage()->pressButton('Save');
-    $this->assertSession()->pageTextContains('List page Node title has been created.');
+    $assert_session->pageTextContains('List page Node title has been created.');
     $this->assertResultsAreInCorrectOrder([
       'First by created',
       'Second by created',
@@ -233,30 +228,30 @@ class ListPagesSortTest extends ListPagePluginFormTestBase {
 
     // Since we don't have any other sort options and the sort is not even
     // exposed, we shouldn't see the sort element.
-    $this->assertSession()->fieldNotExists('Sort by');
+    $assert_session->fieldNotExists('Sort by');
 
     // Disallow the sort exposing, assert the form checkbox is gone, then allow
     // back to expose the sort.
     \Drupal::state()->set('oe_list_pages_test.disallow_frontend_sort', TRUE);
     $node = $this->drupalGetNodeByTitle('Node title');
     $this->drupalGet($node->toUrl('edit-form'));
-    $this->assertSession()->fieldNotExists('Expose sort');
+    $assert_session->fieldNotExists('Expose sort');
     \Drupal::state()->set('oe_list_pages_test.disallow_frontend_sort', FALSE);
     $this->getSession()->reload();
-    $this->assertSession()->fieldExists('Expose sort');
+    $assert_session->fieldExists('Expose sort');
     $this->clickLink('List Page');
     $this->getSession()->getPage()->checkField('Expose sort');
     $this->getSession()->getPage()->pressButton('Save');
-    $this->assertSession()->pageTextContains('List page Node title has been updated.');
+    $assert_session->pageTextContains('List page Node title has been updated.');
 
     $this->drupalGet($node->toUrl());
     // Still no exposed sort as we only have 1 sort option.
-    $this->assertSession()->fieldNotExists('Sort by');
+    $assert_session->fieldNotExists('Sort by');
 
     // Implement the subscriber and provide another sort option.
     \Drupal::state()->set('oe_list_pages_test.alter_sort_options', TRUE);
     $this->getSession()->reload();
-    $this->assertSession()->fieldExists('Sort by');
+    $assert_session->fieldExists('Sort by');
     $this->assertEquals([
       'created__DESC' => 'Default',
       'field_test_boolean__DESC' => 'From 1 to 0',
@@ -265,15 +260,16 @@ class ListPagesSortTest extends ListPagePluginFormTestBase {
     // Disallow the sort and reload to assert the exposed sort is gone.
     \Drupal::state()->set('oe_list_pages_test.disallow_frontend_sort', TRUE);
     $this->getSession()->reload();
-    $this->assertSession()->fieldNotExists('Sort by');
+    $assert_session->fieldNotExists('Sort by');
 
     \Drupal::state()->set('oe_list_pages_test.disallow_frontend_sort', FALSE);
     $this->getSession()->reload();
-    $this->assertSession()->fieldExists('Sort by');
+    $assert_session->fieldExists('Sort by');
 
     // Change the sort.
+    $this->markPageToDetectReload();
     $this->getSession()->getPage()->selectFieldOption('Sort by', 'From 1 to 0');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->waitForPageReload();
     $this->assertResultsAreInCorrectOrder([
       'First by boolean field',
       'First by created',
@@ -361,6 +357,30 @@ class ListPagesSortTest extends ListPagePluginFormTestBase {
   protected function goToListPageConfiguration(): void {
     $this->drupalGet('node/add/oe_list_page');
     $this->clickLink('List Page');
+  }
+
+  /**
+   * Marks a page so that we can detect when a reload has been completed.
+   *
+   * The class will not be present upon reload.
+   */
+  protected function markPageToDetectReload(): void {
+    $script = <<<JS
+(function() {
+  document.body.classList.add('marked-for-reload');
+}())
+JS;
+    $this->getSession()->executeScript($script);
+    $this->assertTrue($this->assertSession()->elementExists('css', 'body')->hasClass('marked-for-reload'));
+  }
+
+  /**
+   * Waits until the page has been reloaded.
+   *
+   * Must be preceded by ::markPageToDetectReload() or it won't have any effect.
+   */
+  protected function waitForPageReload(): void {
+    $this->assertNotNull($this->assertSession()->waitForElement('css', 'body:not(.marked-for-reload)'));
   }
 
 }
