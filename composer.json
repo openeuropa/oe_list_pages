@@ -67,13 +67,6 @@
             "locations": {
                 "web-root": "./build"
             }
-        },
-        "patches-ignore": {
-            "openeuropa/open_vocabularies": {
-                "drupal/core": {
-                    "Entity display entities are incorrectly unserialized @see https://www.drupal.org/project/drupal/issues/3171333": "https://www.drupal.org/files/issues/2020-09-17/3171333-6.patch"
-                }
-            }
         }
     },
     "config": {
