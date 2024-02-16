@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\oe_list_pages_open_vocabularies\FunctionalJavascript;
 
@@ -191,17 +191,17 @@ class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
     $this->drupalLogin($admin);
     $this->goToListPageConfiguration();
     $page = $this->getSession()->getPage();
-    $page->selectFieldOption('Source bundle', 'Content type one');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert = $this->assertSession();
+    $this->assertTrue($assert->optionExists('Source bundle', 'Content type one')->isSelected());
     $page->checkField('Override default exposed filters');
 
     // By default, the CT exposed filters are Body and Status.
-    $this->assertSession()->checkboxChecked('Published');
-    $this->assertSession()->checkboxChecked('Body');
-    $this->assertSession()->checkboxNotChecked('Select one');
-    $this->assertSession()->checkboxNotChecked('Created');
-    $this->assertSession()->checkboxNotChecked($this->firstAssociation->label());
-    $this->assertSession()->checkboxNotChecked($this->secondAssociation->label());
+    $assert->checkboxChecked('Published');
+    $assert->checkboxChecked('Body');
+    $assert->checkboxNotChecked('Select one');
+    $assert->checkboxNotChecked('Created');
+    $assert->checkboxNotChecked($this->firstAssociation->label());
+    $assert->checkboxNotChecked($this->secondAssociation->label());
 
     // Expose the associations fields.
     $page->checkField($this->firstAssociation->label());
@@ -209,8 +209,8 @@ class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
     $page->fillField('Title', 'Node title');
     $page->pressButton('Save');
 
-    $this->assertSession()->pageTextContains('one yellow fruit');
-    $this->assertSession()->pageTextContains('a green fruit');
+    $assert->pageTextContains('one yellow fruit');
+    $assert->pageTextContains('a green fruit');
     $actual_bundles = $this->getSelectOptions($this->firstAssociation->label());
     $expected_bundles = [
       '1' => 'yellow color',
@@ -228,29 +228,29 @@ class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
     // Search on the first association field.
     $this->getSession()->getPage()->selectFieldOption($this->firstAssociation->label(), 'yellow color');
     $this->getSession()->getPage()->pressButton('Search');
-    $this->assertSession()->pageTextContains('one yellow fruit');
-    $this->assertSession()->pageTextNotContains('a green fruit');
-    $this->assertSession()->pageTextNotContains('Leaf');
+    $assert->pageTextContains('one yellow fruit');
+    $assert->pageTextNotContains('a green fruit');
+    $assert->pageTextNotContains('Leaf');
 
     // Reset search.
     $this->getSession()->getPage()->pressButton('Clear filters');
-    $this->assertSession()->pageTextContains('one yellow fruit');
-    $this->assertSession()->pageTextContains('a green fruit');
-    $this->assertSession()->pageTextContains('Leaf');
+    $assert->pageTextContains('one yellow fruit');
+    $assert->pageTextContains('a green fruit');
+    $assert->pageTextContains('Leaf');
 
     // Search on the other value of the first association.
     $this->getSession()->getPage()->selectFieldOption($this->firstAssociation->label(), 'green color');
     $this->getSession()->getPage()->pressButton('Search');
-    $this->assertSession()->pageTextNotContains('one yellow fruit');
-    $this->assertSession()->pageTextContains('a green fruit');
-    $this->assertSession()->pageTextContains('Leaf');
+    $assert->pageTextNotContains('one yellow fruit');
+    $assert->pageTextContains('a green fruit');
+    $assert->pageTextContains('Leaf');
 
     // Search on the second association.
     $this->getSession()->getPage()->selectFieldOption($this->secondAssociation->label(), 'yellow color');
     $this->getSession()->getPage()->pressButton('Search');
-    $this->assertSession()->pageTextNotContains('one yellow fruit');
-    $this->assertSession()->pageTextNotContains('a green fruit');
-    $this->assertSession()->pageTextContains('Leaf');
+    $assert->pageTextNotContains('one yellow fruit');
+    $assert->pageTextNotContains('a green fruit');
+    $assert->pageTextContains('Leaf');
 
     // Add default values for the first association.
     $node = $this->drupalGetNodeByTitle('Node title');
@@ -258,12 +258,11 @@ class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
     $this->clickLink('List Page');
 
     $page->selectFieldOption('Add default value for', $this->firstAssociation->label());
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $assert = $this->assertSession();
+    $assert->assertWaitOnAjaxRequest();
     $assert->pageTextContains('Set default value for ' . $this->firstAssociation->label());
     // Test required fields.
     $page->pressButton('Set default value');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->assertWaitOnAjaxRequest();
     $assert->pageTextContains($this->firstAssociation->label() . ' field is required.');
 
     $field_id = 'open_vocabularies_tags_vocabulary_tags_vocabulary_node_content_type_one_field_open_vocabularies';
@@ -272,7 +271,7 @@ class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
     $filter_selector = $default_value_name_prefix . '[wrapper][edit][' . $association_filter_id . ']';
     $this->getSession()->getPage()->fillField($filter_selector . '[' . $field_id . '][0][entity_reference]', 'green color (2)');
     $page->pressButton('Set default value');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->assertWaitOnAjaxRequest();
     $expected_set_filters = [
       [
         'key' => $this->firstAssociation->label(),
@@ -283,9 +282,9 @@ class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
     $page->pressButton('Save');
 
     // Results are correct and facet correctly filled.
-    $this->assertSession()->pageTextNotContains('one yellow fruit');
-    $this->assertSession()->pageTextContains('a green fruit');
-    $this->assertSession()->pageTextContains('Leaf');
+    $assert->pageTextNotContains('one yellow fruit');
+    $assert->pageTextContains('a green fruit');
+    $assert->pageTextContains('Leaf');
     $actual_bundles = $this->getSelectOptions($this->firstAssociation->label());
     $expected_bundles = [
       '2' => 'green color',
@@ -298,12 +297,11 @@ class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
 
     // Add another default value, for the second association.
     $page->selectFieldOption('Add default value for', $this->secondAssociation->label());
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $assert = $this->assertSession();
+    $assert->assertWaitOnAjaxRequest();
     $assert->pageTextContains('Set default value for ' . $this->secondAssociation->label());
     // Test required fields.
     $page->pressButton('Set default value');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->assertWaitOnAjaxRequest();
     $assert->pageTextContains($this->secondAssociation->label() . ' field is required.');
 
     $field_id = 'open_vocabularies_tags_vocabulary_two_tags_vocabulary_two_node_content_type_one_field_open_vocabularies';
@@ -312,7 +310,7 @@ class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
     $filter_selector = $default_value_name_prefix . '[wrapper][edit][' . $association_filter_id . ']';
     $this->getSession()->getPage()->fillField($filter_selector . '[' . $field_id . '][0][entity_reference]', 'yellow color (1)');
     $page->pressButton('Set default value');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert->assertWaitOnAjaxRequest();
     $expected_set_filters = [
       [
         'key' => $this->firstAssociation->label(),
@@ -327,9 +325,9 @@ class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
     $page->pressButton('Save');
 
     // Results are correct and facet correctly filled.
-    $this->assertSession()->pageTextNotContains('one yellow fruit');
-    $this->assertSession()->pageTextNotContains('a green fruit');
-    $this->assertSession()->pageTextContains('Leaf');
+    $assert->pageTextNotContains('one yellow fruit');
+    $assert->pageTextNotContains('a green fruit');
+    $assert->pageTextContains('Leaf');
     $actual_bundles = $this->getSelectOptions($this->firstAssociation->label());
     $expected_bundles = [
       '2' => 'green color',
@@ -347,19 +345,19 @@ class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
     $this->secondAssociation->delete();
     $node = $this->drupalGetNodeByTitle('Node title');
     $this->drupalGet($node->toUrl());
-    $this->assertSession()->pageTextContains('one yellow fruit');
-    $this->assertSession()->pageTextContains('a green fruit');
-    $this->assertSession()->pageTextContains('Leaf');
+    $assert->pageTextContains('one yellow fruit');
+    $assert->pageTextContains('a green fruit');
+    $assert->pageTextContains('Leaf');
 
     // Can be edited again.
     $this->drupalGet($node->toUrl('edit-form'));
     $this->clickLink('List Page');
-    $this->assertSession()->fieldNotExists('Tags association');
-    $this->assertSession()->fieldNotExists('Tags association two');
+    $assert->fieldNotExists('Tags association');
+    $assert->fieldNotExists('Tags association two');
     $page->pressButton('Save');
-    $this->assertSession()->pageTextContains('one yellow fruit');
-    $this->assertSession()->pageTextContains('a green fruit');
-    $this->assertSession()->pageTextContains('Leaf');
+    $assert->pageTextContains('one yellow fruit');
+    $assert->pageTextContains('a green fruit');
+    $assert->pageTextContains('Leaf');
   }
 
   /**
@@ -369,31 +367,29 @@ class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
     $admin = $this->createUser([], NULL, TRUE);
     $this->drupalLogin($admin);
     $this->drupalGet('link_list/add/dynamic');
-    $this->getSession()->getPage()->selectFieldOption('Link source', 'List page');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert_session = $this->assertSession();
+    $this->assertTrue($assert_session->optionExists('Link source', 'List pages')->isSelected());
     $contextual_filter_name_prefix = 'configuration[0][link_source][plugin_configuration_wrapper][list_pages][list_page_configuration][wrapper][contextual_filters]';
     $this->getSession()->getPage()->fillField('Administrative title', 'List page plugin test');
     $this->getSession()->getPage()->fillField('Title', 'List page list OpenVocabularies');
     $this->getSession()->getPage()->selectFieldOption('Link display', 'Title');
-    $this->assertSession()->assertWaitOnAjaxRequest();
     $page = $this->getSession()->getPage();
-    $assert = $this->assertSession();
     $page->selectFieldOption('Source entity type', 'Content');
-    $assert->assertWaitOnAjaxRequest();
+    $assert_session->assertWaitOnAjaxRequest();
     $page->selectFieldOption('Source bundle', 'Content type one');
-    $assert->assertWaitOnAjaxRequest();
+    $assert_session->assertWaitOnAjaxRequest();
 
     // Set a contextual filter for the association.
     $field_id = 'open_vocabularies_tags_vocabulary_tags_vocabulary_node_content_type_one_field_open_vocabularies';
     $association_filter_id = FilterConfigurationFormBuilderBase::generateFilterId($field_id);
     $expected_contextual_filters = [];
     $page->selectFieldOption('Add contextual value for', $this->firstAssociation->label());
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $assert->pageTextContains('Set contextual options for ' . $this->firstAssociation->label());
+    $assert_session->assertWaitOnAjaxRequest();
+    $assert_session->pageTextContains('Set contextual options for ' . $this->firstAssociation->label());
     $filter_selector = $contextual_filter_name_prefix . '[wrapper][edit][' . $association_filter_id . ']';
     $this->getSession()->getPage()->selectFieldOption($filter_selector . '[operator]', 'and');
     $page->pressButton('Set options');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $assert_session->assertWaitOnAjaxRequest();
     $expected_contextual_filters['reference'] = [
       'key' => $this->firstAssociation->label(),
       'value' => 'All of',
@@ -408,14 +404,14 @@ class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
     // Nodes from content type one with same terms appear.
     $node = $this->drupalGetNodeByTitle('Sun');
     $this->drupalGet($node->toUrl());
-    $this->assertSession()->pageTextContains('one yellow fruit');
-    $this->assertSession()->pageTextNotContains('a green fruit');
-    $this->assertSession()->pageTextNotContains('Leaf');
+    $assert_session->pageTextContains('one yellow fruit');
+    $assert_session->pageTextNotContains('a green fruit');
+    $assert_session->pageTextNotContains('Leaf');
     $node = $this->drupalGetNodeByTitle('Grass');
     $this->drupalGet($node->toUrl());
-    $this->assertSession()->pageTextContains('a green fruit');
-    $this->assertSession()->pageTextContains('Leaf');
-    $this->assertSession()->pageTextNotContains('one yellow fruit');
+    $assert_session->pageTextContains('a green fruit');
+    $assert_session->pageTextContains('Leaf');
+    $assert_session->pageTextNotContains('one yellow fruit');
   }
 
   /**

@@ -5,7 +5,7 @@
  * The OpenEuropa List Pages Open Vocabularies module.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 use Drupal\Core\Entity\EntityInterface;
 

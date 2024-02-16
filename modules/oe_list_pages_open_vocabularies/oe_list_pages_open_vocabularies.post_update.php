@@ -5,7 +5,7 @@
  * Post update functions for OE list page open vocabularies.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 use Drupal\open_vocabularies\Entity\OpenVocabularyAssociation;
 

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\oe_list_pages\FunctionalJavascript;
 
@@ -84,8 +84,7 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     $this->drupalGet('/node/add/oe_list_page');
     $this->clickLink('List Page');
     $page = $this->getSession()->getPage();
-    $page->selectFieldOption('Source bundle', 'Content type one');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->assertTrue($this->assertSession()->optionExists('Source bundle', 'Content type one')->isSelected());
     $page->fillField('Title', 'List page test');
     $page->pressButton('Save');
 

@@ -12,7 +12,7 @@
         "drupal/facets": "^2.0",
         "drupal/multivalue_form_element": "^1.0@beta",
         "drupal/search_api": "^1.27",
-        "symfony/options-resolver": "^4.4.30 || ^5 || ^6"
+        "symfony/options-resolver": "^6"
     },
     "require-dev": {
         "composer/installers": "^1.11",
@@ -22,17 +22,14 @@
         "drupal/core-dev": "^10",
         "drupal/extra_field": "^2.1",
         "drupal/inline_entity_form": "^1.0-rc15",
-        "drush/drush": "^11.1",
+        "drush/drush": "^12",
         "openeuropa/code-review": "^2.0",
-        "openeuropa/oe_link_lists": "^0.22",
-        "openeuropa/open_vocabularies": "^1.0.0-alpha12",
+        "openeuropa/oe_link_lists": "^1.0",
+        "openeuropa/open_vocabularies": "^1.0.0-beta2",
         "openeuropa/rdf_skos": "^1.0.0-alpha10",
         "openeuropa/task-runner-drupal-project-symlink": "^1.0.0-beta5",
         "phpspec/prophecy-phpunit": "^2"
     },
-    "_readme": [
-        "Using symfony/validator v6.2.5 for D10 like core-recommended does because 6.3 breaks BC with the signature changes to the ExecutionContextInterface. Can be removed when 6.3.1 comes out."
-    ],
     "scripts": {
         "post-install-cmd": "./vendor/bin/run drupal:site-setup",
         "post-update-cmd": "./vendor/bin/run drupal:site-setup"
@@ -69,13 +66,6 @@
         "drupal-scaffold": {
             "locations": {
                 "web-root": "./build"
-            }
-        },
-        "patches-ignore": {
-            "openeuropa/open_vocabularies": {
-                "drupal/core": {
-                    "Entity display entities are incorrectly unserialized @see https://www.drupal.org/project/drupal/issues/3171333": "https://www.drupal.org/files/issues/2020-09-17/3171333-6.patch"
-                }
             }
         }
     },

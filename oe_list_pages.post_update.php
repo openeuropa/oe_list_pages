@@ -5,7 +5,7 @@
  * OE List Pages post updates.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 use Drupal\facets\Entity\Facet;
 use Drupal\oe_list_pages\ListSourceFactory;
