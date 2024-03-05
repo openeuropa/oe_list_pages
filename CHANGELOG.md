@@ -1,11 +1,22 @@
 # Changelog
 
+## [1.8.0](https://github.com/openeuropa/oe_list_pages/tree/1.8.0) (2024-03-05)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.7.0...1.8.0)
+
+**Merged pull requests:**
+
+- EWPP-0000: Revert images on docker-compose.yml. [\#206](https://github.com/openeuropa/oe_list_pages/pull/206) ([hernani](https://github.com/hernani))
+- EWPP-0000: Change drone images. [\#205](https://github.com/openeuropa/oe_list_pages/pull/205) ([hernani](https://github.com/hernani))
+- EWPP-3632: List page rss controller helper methods. [\#199](https://github.com/openeuropa/oe_list_pages/pull/199) ([upchuk](https://github.com/upchuk))
+
 ## [1.7.0](https://github.com/openeuropa/oe_list_pages/tree/1.7.0) (2024-02-16)
 
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.6.0...1.7.0)
 
 **Merged pull requests:**
 
+- Release-1.7.0: Update changelog. [\#204](https://github.com/openeuropa/oe_list_pages/pull/204) ([nagyad](https://github.com/nagyad))
 - EWPP-3953: Add Drupal 10.2.x and PHP 8.2 to matrix. [\#203](https://github.com/openeuropa/oe_list_pages/pull/203) ([brummbar](https://github.com/brummbar))
 
 ## [1.6.0](https://github.com/openeuropa/oe_list_pages/tree/1.6.0) (2024-01-15)
