@@ -242,13 +242,9 @@ class ListPageRssController extends ControllerBase {
    *   Array of items to be rendered.
    */
   protected function getItemList(NodeInterface $node, CacheableMetadata $cache_metadata): array {
-    $configuration = ListPageConfiguration::fromEntity($node);
-    // Always sort by the updated date descending.
-    $configuration->setSort([
-      'name' => 'changed',
-      'direction' => 'DESC',
-    ]);
-    // Always limit the rss to the last 25 results.
+    $configuration = $this->getConfigurationFromNode($node);
+    $this->setSort($node, $configuration);
+    // Always limit the rss to the last 30 results.
     $configuration->setLimit(30);
     // Always use the first page to calculate the offset.
     $configuration->setPage(0);
@@ -279,7 +275,10 @@ class ListPageRssController extends ControllerBase {
       $result_item = [
         '#theme' => 'oe_list_pages_rss_item',
         '#title' => $entity->label(),
-        '#id' => $entity->toUrl('canonical', ['absolute' => TRUE, 'path_processing' => FALSE]),
+        '#id' => $entity->toUrl('canonical', [
+          'absolute' => TRUE,
+          'path_processing' => FALSE,
+        ]),
         '#link' => $entity->toUrl('canonical', ['absolute' => TRUE]),
         '#guid' => $entity->toUrl('canonical', ['absolute' => TRUE]),
         '#item_description' => (string) $description,
@@ -303,6 +302,35 @@ class ListPageRssController extends ControllerBase {
       $result_items[] = $event->getBuild();
     }
     return $result_items;
+  }
+
+  /**
+   * Returns the configuration from the node.
+   *
+   * @param \Drupal\node\NodeInterface $node
+   *   The node.
+   *
+   * @return \Drupal\oe_list_pages\ListPageConfiguration
+   *   The configuration.
+   */
+  protected function getConfigurationFromNode(NodeInterface $node): ListPageConfiguration {
+    return ListPageConfiguration::fromEntity($node);
+  }
+
+  /**
+   * Sets the sort onto the configuration.
+   *
+   * @param \Drupal\node\NodeInterface $node
+   *   The node.
+   * @param \Drupal\oe_list_pages\ListPageConfiguration $configuration
+   *   The configuration.
+   */
+  protected function setSort(NodeInterface $node, ListPageConfiguration $configuration): void {
+    // Always sort by the updated date descending.
+    $configuration->setSort([
+      'name' => 'changed',
+      'direction' => 'DESC',
+    ]);
   }
 
   /**
