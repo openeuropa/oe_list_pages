@@ -606,6 +606,7 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
       $event->setListSource($this->configuration->getListSource());
     }
     $this->eventDispatcher->dispatch($event, ListPageEvents::ALTER_BUNDLES);
+    asort($bundle_options);
     return array_intersect_key($bundle_options, array_combine($event->getBundles(), $event->getBundles()));
   }
 
