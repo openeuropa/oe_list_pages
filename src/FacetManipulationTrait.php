@@ -2,6 +2,7 @@
 
 namespace Drupal\oe_list_pages;
 
+use Drupal\Core\Entity\EntityFieldManager;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\facets\FacetInterface;
@@ -12,6 +13,13 @@ use Drupal\facets\Result\ResultInterface;
  * Provides helper methods to manipulate facets and results.
  */
 trait FacetManipulationTrait {
+
+  /**
+   * The entity field manager
+   *
+   * @var \Drupal\Core\Entity\EntityFieldManager
+   */
+  protected $entityFieldManager;
 
   /**
    * Processes and returns the results of a given facet.
