@@ -19,7 +19,7 @@ trait FacetManipulationTrait {
    *
    * @var \Drupal\Core\Entity\EntityFieldManager
    */
-  protected $entityFieldManager;
+  protected EntityFieldManagerInterface $entityFieldManager;
 
   /**
    * Processes and returns the results of a given facet.
