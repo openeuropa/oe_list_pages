@@ -1,0 +1,32 @@
+msgid ""
+msgstr ""
+
+msgid "Next"
+msgstr "次"
+
+msgid "Previous"
+msgstr "前"
+
+msgid "Go to previous page"
+msgstr "前のページ"
+
+msgid "Go to next page"
+msgstr "次のページに行く"
+
+msgid "First"
+msgstr "最初"
+
+msgid "Last"
+msgstr "最後"
+
+msgid "Clear filters"
+msgstr "絞り込み解除"
+
+msgid "Filter by"
+msgstr "絞り込む"
+
+msgid "Go to page @number"
+msgstr "@numberページに行く"
+
+msgid "Showing results @first to @last"
+msgstr "結果 @firstから@lastを表示しています"
