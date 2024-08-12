@@ -151,6 +151,9 @@ class ListFacetsForm extends FormBase {
     $current_url = Url::fromRoute('<current>');
     $triggering_element = $form_state->getTriggeringElement();
     if ($triggering_element['#op'] === 'reset') {
+      // Add a fragment to the URL to make sure the page gets reloaded at the
+      // same location on the viewport from where the filters were set.
+      $current_url->setOption('fragment', 'oe-list-pages-facets-form');
       $form_state->setRedirectUrl($current_url);
       return;
     }
@@ -169,6 +172,9 @@ class ListFacetsForm extends FormBase {
     $active_filters = array_filter($active_filters);
     if ($active_filters) {
       $url = $this->facetsUrlGenerator->getUrl($active_filters, FALSE);
+      // Add a fragment to the URL to make sure the page gets reloaded at the
+      // same location on the viewport from where the filters were set.
+      $url->setOption('fragment', 'oe-list-pages-facets-form');
       $form_state->setRedirectUrl($url);
       return;
     }
