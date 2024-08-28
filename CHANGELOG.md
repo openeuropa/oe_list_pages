@@ -1,11 +1,21 @@
 # Changelog
 
+## [1.9.0](https://github.com/openeuropa/oe_list_pages/tree/1.9.0) (2024-08-28)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.8.0...1.9.0)
+
+**Merged pull requests:**
+
+- EWPP-4526: Add Japanese translations. [\#211](https://github.com/openeuropa/oe_list_pages/pull/211) ([22Alexandra](https://github.com/22Alexandra))
+- OEL-3050: Update to Drupal 10.3 [\#209](https://github.com/openeuropa/oe_list_pages/pull/209) ([AaronGilMartinez](https://github.com/AaronGilMartinez))
+
 ## [1.8.0](https://github.com/openeuropa/oe_list_pages/tree/1.8.0) (2024-03-05)
 
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.7.0...1.8.0)
 
 **Merged pull requests:**
 
+- Release-1.8.0: Update changelog. [\#207](https://github.com/openeuropa/oe_list_pages/pull/207) ([nagyad](https://github.com/nagyad))
 - EWPP-0000: Revert images on docker-compose.yml. [\#206](https://github.com/openeuropa/oe_list_pages/pull/206) ([hernani](https://github.com/hernani))
 - EWPP-0000: Change drone images. [\#205](https://github.com/openeuropa/oe_list_pages/pull/205) ([hernani](https://github.com/hernani))
 - EWPP-3632: List page rss controller helper methods. [\#199](https://github.com/openeuropa/oe_list_pages/pull/199) ([upchuk](https://github.com/upchuk))
