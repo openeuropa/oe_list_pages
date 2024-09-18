@@ -26,6 +26,12 @@ class Fulltext extends QueryTypePluginBase {
       $field_identifier = $this->facet->getFieldIdentifier();
       // Add the filter to the query if there are active values.
       $active_items = $this->facet->getActiveItems();
+      // For unstemmed text fields, we can add the condition directly.
+      $field_type = $this->facet->getFacetSource()->getIndex()->getField($field_identifier)->getType();
+      if (!empty($active_items) && $field_type === 'solr_text_unstemmed') {
+        $query->addCondition($field_identifier, $active_items);
+        return;
+      }
       $widget_config = $this->facet->getWidgetInstance()->getConfiguration();
       foreach ($active_items as $value) {
         // To guarantee several facets can check for keywords.
