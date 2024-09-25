@@ -6,11 +6,11 @@ namespace Drupal\Tests\oe_list_pages\FunctionalJavascript;
 
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
+use Drupal\Tests\oe_list_pages\Traits\FacetsTestTrait;
 use Drupal\node\Entity\Node;
 use Drupal\oe_list_pages\ListSourceFactory;
 use Drupal\oe_list_pages\Plugin\facets\query_type\DateStatus;
 use Drupal\search_api\Entity\Index;
-use Drupal\Tests\oe_list_pages\Traits\FacetsTestTrait;
 
 /**
  * Tests the list facets form.

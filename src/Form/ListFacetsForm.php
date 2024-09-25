@@ -71,7 +71,7 @@ class ListFacetsForm extends FormBase {
    * @SuppressWarnings(PHPMD.CyclomaticComplexity)
    * @SuppressWarnings(PHPMD.NPathComplexity)
    */
-  public function buildForm(array $form, FormStateInterface $form_state, ListSourceInterface $list_source = NULL, array $ignored_filters = []) {
+  public function buildForm(array $form, FormStateInterface $form_state, ?ListSourceInterface $list_source = NULL, array $ignored_filters = []) {
     if (!$list_source) {
       return [];
     }

@@ -6,10 +6,10 @@ namespace Drupal\Tests\oe_list_pages_link_list_source\FunctionalJavascript;
 
 use Behat\Mink\Element\NodeElement;
 use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\Tests\oe_list_pages\FunctionalJavascript\ListPagePluginFormTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
 use Drupal\search_api\Entity\Index;
-use Drupal\Tests\oe_list_pages\FunctionalJavascript\ListPagePluginFormTestBase;
 
 /**
  * Tests the list pages with link list displays.

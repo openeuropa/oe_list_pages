@@ -40,7 +40,7 @@ class FulltextWidget extends ListPagesWidgetBase {
   /**
    * {@inheritdoc}
    */
-  public function buildDefaultValueForm(array $form, FormStateInterface $form_state, FacetInterface $facet, ListPresetFilter $preset_filter = NULL): array {
+  public function buildDefaultValueForm(array $form, FormStateInterface $form_state, FacetInterface $facet, ?ListPresetFilter $preset_filter = NULL): array {
     if ($preset_filter) {
       $facet->setActiveItems($preset_filter->getValues());
     }

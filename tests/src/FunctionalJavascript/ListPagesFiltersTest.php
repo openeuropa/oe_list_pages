@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Drupal\Tests\oe_list_pages\FunctionalJavascript;
 
 use Drupal\Core\Datetime\DrupalDateTime;
-use Drupal\facets\Entity\Facet;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
+use Drupal\facets\Entity\Facet;
 use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
 use Drupal\search_api\Entity\Index;

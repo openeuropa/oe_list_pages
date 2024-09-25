@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Drupal\Tests\oe_list_pages\Kernel;
 
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
-use Drupal\oe_list_pages\ListSourceFactory;
-use Drupal\search_api\Entity\Index;
 use Drupal\Tests\oe_list_pages\Traits\FacetsTestTrait;
 use Drupal\Tests\sparql_entity_storage\Traits\SparqlConnectionTrait;
+use Drupal\oe_list_pages\ListSourceFactory;
+use Drupal\search_api\Entity\Index;
 
 /**
  * Tests the List sources and their properties.

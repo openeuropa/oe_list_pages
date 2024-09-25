@@ -55,7 +55,7 @@ class ListFacetManagerWrapper {
    * @return array
    *   The facets.
    */
-  public function getFacetsByFacetSourceId(string $list_facet_source_id, IndexInterface $index = NULL): array {
+  public function getFacetsByFacetSourceId(string $list_facet_source_id, ?IndexInterface $index = NULL): array {
     $facets = $this->facetManager->getFacetsByFacetSourceId($list_facet_source_id);
     if (!$index instanceof IndexInterface) {
       return $facets;

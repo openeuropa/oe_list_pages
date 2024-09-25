@@ -32,7 +32,7 @@ class FooFakeField extends ProcessorPluginBase implements ContextualAwareProcess
   /**
    * {@inheritdoc}
    */
-  public function getPropertyDefinitions(DatasourceInterface $datasource = NULL) {
+  public function getPropertyDefinitions(?DatasourceInterface $datasource = NULL) {
     $properties = [];
 
     if (!$datasource) {

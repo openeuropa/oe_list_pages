@@ -31,7 +31,7 @@ class HierarchicalMultiselectWidget extends MultiselectWidget implements Contain
    * @SuppressWarnings(PHPMD.CyclomaticComplexity)
    * @SuppressWarnings(PHPMD.NPathComplexity)
    */
-  public function buildDefaultValueForm(array $form, FormStateInterface $form_state, FacetInterface $facet, ListPresetFilter $preset_filter = NULL): array {
+  public function buildDefaultValueForm(array $form, FormStateInterface $form_state, FacetInterface $facet, ?ListPresetFilter $preset_filter = NULL): array {
     $form = parent::buildDefaultValueForm($form, $form_state, $facet, $preset_filter);
     $form['oe_list_pages_filter_operator']['#options'] = $this->getOperators();
     $form['oe_list_pages_filter_operator']['#default_value'] = $preset_filter ? $preset_filter->getOperator() : self::OR_WITH_HIERARCHY_OPERATOR;

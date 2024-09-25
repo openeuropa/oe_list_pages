@@ -72,7 +72,7 @@ class LinkField extends MultiSelectFilterFieldPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function buildDefaultValueForm(array &$form = [], FormStateInterface $form_state = NULL, ListPresetFilter $preset_filter = NULL): array {
+  public function buildDefaultValueForm(array &$form = [], ?FormStateInterface $form_state = NULL, ?ListPresetFilter $preset_filter = NULL): array {
     $field_definition = $this->getFacetFieldDefinition($this->configuration['facet'], $this->configuration['list_source']);
     if (empty($field_definition)) {
       return [];

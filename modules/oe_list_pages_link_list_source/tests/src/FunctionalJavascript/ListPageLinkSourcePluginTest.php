@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\oe_list_pages_link_list_source\FunctionalJavascript;
 
+use Drupal\Tests\oe_link_lists\Traits\LinkListTestTrait;
+use Drupal\Tests\oe_list_pages\FunctionalJavascript\ListPagePluginFormTestBase;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\node\Entity\Node;
@@ -15,8 +17,6 @@ use Drupal\oe_list_pages_link_list_source\ContextualPresetFilter;
 use Drupal\search_api\Entity\Index;
 use Drupal\search_api\Item\Field;
 use Drupal\taxonomy\Entity\Term;
-use Drupal\Tests\oe_link_lists\Traits\LinkListTestTrait;
-use Drupal\Tests\oe_list_pages\FunctionalJavascript\ListPagePluginFormTestBase;
 use Drupal\user\Entity\Role;
 
 /**

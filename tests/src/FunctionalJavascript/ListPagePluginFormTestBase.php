@@ -6,14 +6,14 @@ namespace Drupal\Tests\oe_list_pages\FunctionalJavascript;
 
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\facets\Entity\Facet;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
+use Drupal\Tests\sparql_entity_storage\Traits\SparqlConnectionTrait;
+use Drupal\facets\Entity\Facet;
 use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
 use Drupal\oe_list_pages\DefaultFilterConfigurationBuilder;
 use Drupal\search_api\Entity\Index;
 use Drupal\taxonomy\Entity\Term;
-use Drupal\Tests\sparql_entity_storage\Traits\SparqlConnectionTrait;
 
 /**
  * Base class for testing list page configuration forms.

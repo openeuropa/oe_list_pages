@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Drupal\Tests\oe_list_pages_open_vocabularies\Kernel;
 
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
-use Drupal\open_vocabularies\Entity\OpenVocabulary;
 use Drupal\Tests\sparql_entity_storage\Traits\SparqlConnectionTrait;
+use Drupal\open_vocabularies\Entity\OpenVocabulary;
 
 /**
  * Base class for open vocabularies configurator.

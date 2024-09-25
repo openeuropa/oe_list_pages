@@ -4,10 +4,10 @@ namespace Drupal\Tests\oe_list_pages_address\Unit;
 
 use CommerceGuys\Addressing\Country\Country;
 use CommerceGuys\Addressing\Country\CountryRepositoryInterface;
+use Drupal\Tests\UnitTestCase;
 use Drupal\facets\Entity\Facet;
 use Drupal\facets\Result\Result;
 use Drupal\oe_list_pages_address\Plugin\facets\processor\FormatCountryCodeProcessor;
-use Drupal\Tests\UnitTestCase;
 
 /**
  * Unit test for processor.

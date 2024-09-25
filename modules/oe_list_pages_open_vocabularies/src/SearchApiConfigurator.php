@@ -85,7 +85,7 @@ class SearchApiConfigurator {
    * @param \Drupal\search_api\IndexInterface $index
    *   The index.
    */
-  public function updateConfig(OpenVocabularyAssociationInterface $association, string $field_id, IndexInterface $index = NULL): void {
+  public function updateConfig(OpenVocabularyAssociationInterface $association, string $field_id, ?IndexInterface $index = NULL): void {
     // Based on the list source, determine the correct index to create the
     // field in.
     $field_config = $this->entityTypeManager->getStorage('field_config')->load($field_id);

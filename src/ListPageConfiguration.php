@@ -181,7 +181,7 @@ class ListPageConfiguration {
    * @param string $entity_type
    *   The entity type.
    */
-  public function setEntityType(string $entity_type = NULL): void {
+  public function setEntityType(?string $entity_type = NULL): void {
     $this->entity_type = $entity_type;
   }
 
@@ -201,7 +201,7 @@ class ListPageConfiguration {
    * @param string $bundle
    *   The bundle.
    */
-  public function setBundle(string $bundle = NULL): void {
+  public function setBundle(?string $bundle = NULL): void {
     $this->bundle = $bundle;
   }
 
@@ -301,7 +301,7 @@ class ListPageConfiguration {
    * @param int $limit
    *   The limit.
    */
-  public function setLimit(int $limit = NULL): void {
+  public function setLimit(?int $limit = NULL): void {
     $this->limit = $limit;
   }
 
@@ -321,7 +321,7 @@ class ListPageConfiguration {
    * @param int $page
    *   The page.
    */
-  public function setPage(int $page = NULL): void {
+  public function setPage(?int $page = NULL): void {
     $this->page = $page;
   }
 

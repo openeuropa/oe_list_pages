@@ -140,7 +140,7 @@ class Date extends QueryTypePluginBase {
    * @param \Drupal\Component\Datetime\DateTimePlus|null $end_date
    *   The end date.
    */
-  protected function adaptDatesPerOperator(string $operator, DateTimePlus $start_date, DateTimePlus $end_date = NULL): void {
+  protected function adaptDatesPerOperator(string $operator, DateTimePlus $start_date, ?DateTimePlus $end_date = NULL): void {
     switch ($operator) {
       case 'gt':
         // Next day after selected day.

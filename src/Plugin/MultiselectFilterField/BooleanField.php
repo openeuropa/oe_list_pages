@@ -29,7 +29,7 @@ class BooleanField extends MultiSelectFilterFieldPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function buildDefaultValueForm(array &$form = [], FormStateInterface $form_state = NULL, ListPresetFilter $preset_filter = NULL): array {
+  public function buildDefaultValueForm(array &$form = [], ?FormStateInterface $form_state = NULL, ?ListPresetFilter $preset_filter = NULL): array {
     $facet = $this->configuration['facet'];
     // Create some dummy results for each boolean type (on/off) then process
     // the results to ensure we have display labels.
