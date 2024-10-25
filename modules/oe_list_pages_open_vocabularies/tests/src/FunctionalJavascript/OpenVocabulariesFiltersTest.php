@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Drupal\Tests\oe_list_pages_open_vocabularies\FunctionalJavascript;
 
 use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\Tests\oe_link_lists\Traits\LinkListTestTrait;
+use Drupal\Tests\oe_list_pages\FunctionalJavascript\ListPagePluginFormTestBase;
+use Drupal\Tests\oe_list_pages_open_vocabularies\Traits\OpenVocabularyTestTrait;
 use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
 use Drupal\oe_list_pages\FilterConfigurationFormBuilderBase;
 use Drupal\search_api\Entity\Index;
-use Drupal\Tests\oe_link_lists\Traits\LinkListTestTrait;
-use Drupal\Tests\oe_list_pages\FunctionalJavascript\ListPagePluginFormTestBase;
-use Drupal\Tests\oe_list_pages_open_vocabularies\Traits\OpenVocabularyTestTrait;
 
 /**
  * Tests the List pages open vocabularies filters.

@@ -60,7 +60,7 @@ class ListPageSortForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, ListPageConfiguration $configuration = NULL, ListSourceInterface $list_source = NULL, $current_sort = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, ?ListPageConfiguration $configuration = NULL, ?ListSourceInterface $list_source = NULL, $current_sort = NULL) {
     $options = $this->sortOptionsResolver->getSortOptions($list_source, ListPageSortOptionsResolver::SCOPE_USER);
     if (count($options) < 2 || !$this->sortOptionsResolver->isExposedSortAllowed($list_source) || !$configuration->isExposedSort()) {
       // We shouldn't show a select element with one option.

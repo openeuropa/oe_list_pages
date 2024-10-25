@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Drupal\Tests\oe_list_pages_link_list_source\Kernel;
 
 use Drupal\Core\Cache\Cache;
+use Drupal\KernelTests\KernelTestBase;
 use Drupal\entity_test\Entity\EntityTestBundle;
 use Drupal\entity_test\Entity\EntityTestWithBundle;
-use Drupal\KernelTests\KernelTestBase;
 use Drupal\search_api\Entity\Index;
 
 /**

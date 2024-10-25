@@ -59,7 +59,7 @@ class DateWidget extends ListPagesWidgetBase implements TrustedCallbackInterface
   /**
    * {@inheritdoc}
    */
-  public function buildDefaultValueForm(array $form, FormStateInterface $form_state, FacetInterface $facet, ListPresetFilter $preset_filter = NULL): array {
+  public function buildDefaultValueForm(array $form, FormStateInterface $form_state, FacetInterface $facet, ?ListPresetFilter $preset_filter = NULL): array {
     if ($preset_filter) {
       $facet->setActiveItems($preset_filter->getValues());
     }
@@ -130,7 +130,7 @@ class DateWidget extends ListPagesWidgetBase implements TrustedCallbackInterface
    * @return array
    *   The widget elements.
    */
-  protected function doBuildDateWidgetElements(FacetInterface $facet, array $form = [], FormStateInterface $form_state = NULL): array {
+  protected function doBuildDateWidgetElements(FacetInterface $facet, array $form = [], ?FormStateInterface $form_state = NULL): array {
     $date_type = $facet->getWidgetInstance()->getConfiguration()['date_type'];
 
     $operators = [

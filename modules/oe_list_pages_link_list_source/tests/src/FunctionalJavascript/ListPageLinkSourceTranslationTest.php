@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\oe_list_pages_link_list_source\FunctionalJavascript;
 
+use Drupal\Tests\oe_link_lists\Traits\LinkListTestTrait;
+use Drupal\Tests\oe_list_pages\FunctionalJavascript\ListPagePluginFormTestBase;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
 use Drupal\search_api\Entity\Index;
-use Drupal\Tests\oe_link_lists\Traits\LinkListTestTrait;
-use Drupal\Tests\oe_list_pages\FunctionalJavascript\ListPagePluginFormTestBase;
 
 /**
  * Tests the list page link source translation aspects..

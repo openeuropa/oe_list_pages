@@ -20,8 +20,8 @@ use Drupal\oe_list_pages\Form\ListPageConfigurationSubformFactory;
 use Drupal\oe_list_pages\ListExecutionManagerInterface;
 use Drupal\oe_list_pages\ListPageConfiguration;
 use Drupal\oe_list_pages\ListSourceInterface;
-use Drupal\oe_list_pages_link_list_source\ContextualFiltersConfigurationBuilder;
 use Drupal\oe_list_pages_link_list_source\ContextualFilterValuesProcessor;
+use Drupal\oe_list_pages_link_list_source\ContextualFiltersConfigurationBuilder;
 use Drupal\oe_list_pages_link_list_source\Exception\InapplicableContextualFilter;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -141,7 +141,7 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
   /**
    * {@inheritdoc}
    */
-  public function getLinks(int $limit = NULL, int $offset = 0): LinkCollectionInterface {
+  public function getLinks(?int $limit = NULL, int $offset = 0): LinkCollectionInterface {
     $links = new LinkCollection();
     $cache = new CacheableMetadata();
     try {

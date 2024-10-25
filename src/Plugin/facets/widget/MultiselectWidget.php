@@ -94,7 +94,7 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
    * @SuppressWarnings(PHPMD.CyclomaticComplexity)
    * @SuppressWarnings(PHPMD.NPathComplexity)
    */
-  public function buildDefaultValueForm(array $form, FormStateInterface $form_state, FacetInterface $facet, ListPresetFilter $preset_filter = NULL): array {
+  public function buildDefaultValueForm(array $form, FormStateInterface $form_state, FacetInterface $facet, ?ListPresetFilter $preset_filter = NULL): array {
     /** @var \Drupal\oe_list_pages\ListSourceInterface $list_source */
     $list_source = $form_state->get('list_source');
     $filter_values = $preset_filter ? $preset_filter->getValues() : [];

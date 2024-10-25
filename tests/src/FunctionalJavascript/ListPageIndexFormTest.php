@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\oe_list_pages\FunctionalJavascript;
 
-use Drupal\search_api\Entity\Index;
 use Drupal\Tests\BrowserTestBase;
+use Drupal\search_api\Entity\Index;
 
 /**
  * Tests the index alter form and saving of third party settings.
