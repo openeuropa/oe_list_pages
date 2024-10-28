@@ -1,11 +1,20 @@
 # Changelog
 
-## [1.9.0](https://github.com/openeuropa/oe_list_pages/tree/1.9.0) (2024-08-28)
+## [1.10.0](https://github.com/openeuropa/oe_list_pages/tree/1.10.0) (2024-10-28)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.9.0...1.10.0)
+
+**Merged pull requests:**
+
+- EWPP-4782: Update japanese translations. [\#215](https://github.com/openeuropa/oe_list_pages/pull/215) ([22Alexandra](https://github.com/22Alexandra))
+
+## [1.9.0](https://github.com/openeuropa/oe_list_pages/tree/1.9.0) (2024-08-29)
 
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.8.0...1.9.0)
 
 **Merged pull requests:**
 
+- Release-1.9.0: Update changelog. [\#213](https://github.com/openeuropa/oe_list_pages/pull/213) ([nagyad](https://github.com/nagyad))
 - EWPP-4526: Add Japanese translations. [\#211](https://github.com/openeuropa/oe_list_pages/pull/211) ([22Alexandra](https://github.com/22Alexandra))
 - OEL-3050: Update to Drupal 10.3 [\#209](https://github.com/openeuropa/oe_list_pages/pull/209) ([AaronGilMartinez](https://github.com/AaronGilMartinez))
 
