@@ -1,7 +1,13 @@
-# Changelog
+# Change Log
+
+## [1.11.0](https://github.com/openeuropa/oe_list_pages/tree/1.11.0) (2024-12-16)
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.10.0...1.11.0)
+
+**Merged pull requests:**
+
+- EWPP-4747: Add support of unstemmed fulltext fields. [\#214](https://github.com/openeuropa/oe_list_pages/pull/214) ([sergepavle](https://github.com/sergepavle))
 
 ## [1.10.0](https://github.com/openeuropa/oe_list_pages/tree/1.10.0) (2024-10-28)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.9.0...1.10.0)
 
 **Merged pull requests:**
