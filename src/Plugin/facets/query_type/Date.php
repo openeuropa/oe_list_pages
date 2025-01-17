@@ -51,6 +51,7 @@ class Date extends QueryTypePluginBase {
     $active_items = static::getActiveItems($this->facet);
 
     // Only alter the query when there's an actual query object to alter.
+    // @phpstan-ignore-next-line
     if (empty($query) || !$active_items) {
       return;
     }

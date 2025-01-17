@@ -270,7 +270,7 @@ class ListPageRssController extends ControllerBase {
         // We need to escape the results of renderPlain in order to maintain
         // all tags added by the renderer. If we don't do it, things like p tags
         // and linebreaks will be lost after they go through the twig template.
-        $description = $this->renderer->renderPlain($description[0]);
+        $description = $this->renderer->renderInIsolation($description[0]);
       }
       $result_item = [
         '#theme' => 'oe_list_pages_rss_item',

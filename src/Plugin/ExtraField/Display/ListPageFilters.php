@@ -52,6 +52,7 @@ class ListPageFilters extends ListPageExtraFieldBase {
    */
   public function viewElements(ContentEntityInterface $entity) {
     // We take over the main ::view() method so we don't need this.
+    return [];
   }
 
 }

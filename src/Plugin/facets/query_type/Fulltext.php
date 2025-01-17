@@ -22,6 +22,7 @@ class Fulltext extends QueryTypePluginBase {
   public function execute() {
     $query = $this->query;
     // Only alter the query when there's an actual query object to alter.
+    // @phpstan-ignore-next-line
     if (!empty($query)) {
       $field_identifier = $this->facet->getFieldIdentifier();
       // Add the filter to the query if there are active values.

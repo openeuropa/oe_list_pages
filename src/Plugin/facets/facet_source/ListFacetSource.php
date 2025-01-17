@@ -71,6 +71,7 @@ class ListFacetSource extends SearchApiBaseFacetSource implements SearchApiFacet
     $this->requestStack = $request_stack;
     $this->entityTypeManager = $entity_type_manager;
     // This needs to be loaded as search api doesn't rely on getIndex().
+    // @phpstan-ignore-next-line
     $this->index = $this->entityTypeManager->getStorage('search_api_index')->load($plugin_definition['index']);
     $this->displayPluginManager = $display_plugin_manager;
   }
@@ -96,6 +97,7 @@ class ListFacetSource extends SearchApiBaseFacetSource implements SearchApiFacet
    * {@inheritdoc}
    */
   public function getIndex() {
+    // @phpstan-ignore-next-line
     return $this->index;
   }
 
@@ -106,6 +108,7 @@ class ListFacetSource extends SearchApiBaseFacetSource implements SearchApiFacet
    *   The index.
    */
   public function setIndex(IndexInterface $index): void {
+    // @phpstan-ignore-next-line
     $this->index = $index;
   }
 

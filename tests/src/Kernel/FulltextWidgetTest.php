@@ -42,7 +42,7 @@ class FulltextWidgetTest extends ListsSourceTestBase {
     $this->assertEquals('message', $output['#default_value']);
 
     // Now without active result.
-    $default_list_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'entity_test_mulrev_changed', 'inactive');
+    $default_list_id = ListSourceFactory::generateFacetSourcePluginId('entity_test_mulrev_changed', 'entity_test_mulrev_changed');
     $facet_inactive = $this->createFacet('body', $default_list_id, 'inactive');
     $output = $this->widget->build($facet_inactive)[$facet_inactive->id()];
     $this->assertSame('array', gettype($output));
