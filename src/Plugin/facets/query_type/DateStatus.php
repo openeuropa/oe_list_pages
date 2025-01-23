@@ -79,6 +79,7 @@ class DateStatus extends QueryTypePluginBase implements ContainerFactoryPluginIn
   public function execute() {
     $query = $this->query;
     // Only alter the query when there's an actual query object to alter.
+    // @phpstan-ignore-next-line
     if (empty($query)) {
       return;
     }

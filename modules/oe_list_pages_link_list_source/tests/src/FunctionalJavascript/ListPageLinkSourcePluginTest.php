@@ -1188,6 +1188,7 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     // we created.
     $nid = $node_one->id();
     $tid = 0;
+    $term = NULL;
     while ($nid !== $tid) {
       $term = Term::create([
         'vid' => 'vocabulary_one',

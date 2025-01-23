@@ -87,6 +87,7 @@ class HierarchyQueryType extends SearchApiString implements ContainerFactoryPlug
     $query = $this->query;
 
     // Only alter the query when there's an actual query object to alter.
+    // @phpstan-ignore-next-line
     if (empty($query)) {
       return;
     }

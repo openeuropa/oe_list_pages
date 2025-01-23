@@ -99,6 +99,7 @@ class QuerySubscriber implements EventSubscriberInterface {
     /** @var \Drupal\oe_list_pages\ListQueryOptionsInterface $query_options */
     $query_options = $query->getOption('oe_list_page_query_options');
 
+    // @phpstan-ignore-next-line
     if (!empty($query_options)) {
       $ignored_filters = $query_options->getIgnoredFilters();
       $preset_filter_values = $query_options->getPresetFiltersValues();

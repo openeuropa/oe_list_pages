@@ -106,7 +106,6 @@ trait FacetManipulationTrait {
     if (count($parts) > 1) {
       $field_name = $parts[0];
     }
-
     $field_definitions = $this->entityFieldManager->getFieldDefinitions($list_source->getEntityType(), $list_source->getBundle());
     if (isset($field_definitions[$field_name])) {
       return $field_definitions[$field_name];

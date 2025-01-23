@@ -296,6 +296,7 @@ class ListBuilder implements ListBuilderInterface {
    */
   public function buildSelectedFilters(ListPageConfiguration $configuration): array {
     $build = [];
+    $urls = [];
     $cache = new CacheableMetadata();
     $cache->addCacheContexts(['url']);
 
