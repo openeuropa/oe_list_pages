@@ -1,10 +1,18 @@
 # Change Log
 
+## [1.12.0](https://github.com/openeuropa/oe_list_pages/tree/1.12.0) (2025-01-29)
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.11.0...1.12.0)
+
+**Merged pull requests:**
+
+- EWPP-4991: Ensure PHP8.3 compatibility. [\#218](https://github.com/openeuropa/oe_list_pages/pull/218) ([nagyad](https://github.com/nagyad))
+
 ## [1.11.0](https://github.com/openeuropa/oe_list_pages/tree/1.11.0) (2024-12-16)
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.10.0...1.11.0)
 
 **Merged pull requests:**
 
+- Release 1.11.0 changelog. [\#217](https://github.com/openeuropa/oe_list_pages/pull/217) ([22Alexandra](https://github.com/22Alexandra))
 - EWPP-4747: Add support of unstemmed fulltext fields. [\#214](https://github.com/openeuropa/oe_list_pages/pull/214) ([sergepavle](https://github.com/sergepavle))
 
 ## [1.10.0](https://github.com/openeuropa/oe_list_pages/tree/1.10.0) (2024-10-28)
@@ -12,10 +20,10 @@
 
 **Merged pull requests:**
 
+- Release-1.10.0: Update changelog. [\#216](https://github.com/openeuropa/oe_list_pages/pull/216) ([nagyad](https://github.com/nagyad))
 - EWPP-4782: Update japanese translations. [\#215](https://github.com/openeuropa/oe_list_pages/pull/215) ([22Alexandra](https://github.com/22Alexandra))
 
 ## [1.9.0](https://github.com/openeuropa/oe_list_pages/tree/1.9.0) (2024-08-29)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.8.0...1.9.0)
 
 **Merged pull requests:**
@@ -25,7 +33,6 @@
 - OEL-3050: Update to Drupal 10.3 [\#209](https://github.com/openeuropa/oe_list_pages/pull/209) ([AaronGilMartinez](https://github.com/AaronGilMartinez))
 
 ## [1.8.0](https://github.com/openeuropa/oe_list_pages/tree/1.8.0) (2024-03-05)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.7.0...1.8.0)
 
 **Merged pull requests:**
@@ -36,7 +43,6 @@
 - EWPP-3632: List page rss controller helper methods. [\#199](https://github.com/openeuropa/oe_list_pages/pull/199) ([upchuk](https://github.com/upchuk))
 
 ## [1.7.0](https://github.com/openeuropa/oe_list_pages/tree/1.7.0) (2024-02-16)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.6.0...1.7.0)
 
 **Merged pull requests:**
@@ -45,7 +51,6 @@
 - EWPP-3953: Add Drupal 10.2.x and PHP 8.2 to matrix. [\#203](https://github.com/openeuropa/oe_list_pages/pull/203) ([brummbar](https://github.com/brummbar))
 
 ## [1.6.0](https://github.com/openeuropa/oe_list_pages/tree/1.6.0) (2024-01-15)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.5.0...1.6.0)
 
 **Merged pull requests:**
@@ -53,7 +58,6 @@
 - EWPP-3658: Link list display plugin integration. [\#196](https://github.com/openeuropa/oe_list_pages/pull/196) ([upchuk](https://github.com/upchuk))
 
 ## [1.5.0](https://github.com/openeuropa/oe_list_pages/tree/1.5.0) (2023-12-21)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.4.0...1.5.0)
 
 **Merged pull requests:**
@@ -62,7 +66,6 @@
 - OEL-2782: Update to use PHP 8.1/8.2 and Drupal 10.0.x/10.1.x. [\#200](https://github.com/openeuropa/oe_list_pages/pull/200) ([brummbar](https://github.com/brummbar))
 
 ## [1.4.0](https://github.com/openeuropa/oe_list_pages/tree/1.4.0) (2023-11-21)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.3.0...1.4.0)
 
 **Merged pull requests:**
@@ -73,7 +76,6 @@
 - EWPP-3608: Support for hierarchical filters. [\#193](https://github.com/openeuropa/oe_list_pages/pull/193) ([hernani](https://github.com/hernani))
 
 ## [1.3.0](https://github.com/openeuropa/oe_list_pages/tree/1.3.0) (2023-09-18)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.2.0...1.3.0)
 
 **Closed issues:**
@@ -88,7 +90,6 @@
 - EWPP-3209: Fixing form storage for default and contextual filters. [\#178](https://github.com/openeuropa/oe_list_pages/pull/178) ([upchuk](https://github.com/upchuk))
 
 ## [1.2.0](https://github.com/openeuropa/oe_list_pages/tree/1.2.0) (2023-07-26)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.1.0...1.2.0)
 
 **Merged pull requests:**
@@ -98,7 +99,6 @@
 - EWPP-3343: Filtering out multiselect filter values that are missing a display value. [\#184](https://github.com/openeuropa/oe_list_pages/pull/184) ([upchuk](https://github.com/upchuk))
 
 ## [1.1.0](https://github.com/openeuropa/oe_list_pages/tree/1.1.0) (2023-06-30)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.0.0...1.1.0)
 
 **Merged pull requests:**
@@ -107,7 +107,6 @@
 - EWPP-2570: Allow to alter facet creation. [\#155](https://github.com/openeuropa/oe_list_pages/pull/155) ([sergepavle](https://github.com/sergepavle))
 
 ## [1.0.0](https://github.com/openeuropa/oe_list_pages/tree/1.0.0) (2023-05-25)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.24.0...1.0.0)
 
 **Merged pull requests:**
@@ -119,7 +118,6 @@
 - EWPP-2957: Minor timestamp generation refactor. [\#169](https://github.com/openeuropa/oe_list_pages/pull/169) ([upchuk](https://github.com/upchuk))
 
 ## [0.24.0](https://github.com/openeuropa/oe_list_pages/tree/0.24.0) (2023-04-21)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.23.0...0.24.0)
 
 **Merged pull requests:**
@@ -128,7 +126,6 @@
 - EWPP-2310: Increasing the options resolver dependency. [\#170](https://github.com/openeuropa/oe_list_pages/pull/170) ([upchuk](https://github.com/upchuk))
 
 ## [0.23.0](https://github.com/openeuropa/oe_list_pages/tree/0.23.0) (2023-03-21)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.22.0...0.23.0)
 
 **Merged pull requests:**
@@ -140,7 +137,6 @@
 - EWPP-2724: Bubble up facet cache. [\#163](https://github.com/openeuropa/oe_list_pages/pull/163) ([nagyad](https://github.com/nagyad))
 
 ## [0.22.0](https://github.com/openeuropa/oe_list_pages/tree/0.22.0) (2023-01-03)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.21.0...0.22.0)
 
 **Merged pull requests:**
@@ -150,7 +146,6 @@
 - EWPP-2632: Minor refactor for extensibility. [\#154](https://github.com/openeuropa/oe_list_pages/pull/154) ([upchuk](https://github.com/upchuk))
 
 ## [0.21.0](https://github.com/openeuropa/oe_list_pages/tree/0.21.0) (2022-11-04)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.20.0...0.21.0)
 
 **Merged pull requests:**
@@ -159,7 +154,6 @@
 - EWPP-2618: Change cache tag for lists. [\#159](https://github.com/openeuropa/oe_list_pages/pull/159) ([hernani](https://github.com/hernani))
 
 ## [0.20.0](https://github.com/openeuropa/oe_list_pages/tree/0.20.0) (2022-09-16)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.19.0...0.20.0)
 
 **Closed issues:**
@@ -178,7 +172,6 @@
 - OEL-1456: List pages sort capability. [\#137](https://github.com/openeuropa/oe_list_pages/pull/137) ([upchuk](https://github.com/upchuk))
 
 ## [0.19.0](https://github.com/openeuropa/oe_list_pages/tree/0.19.0) (2022-08-02)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.18.1...0.19.0)
 
 **Merged pull requests:**
@@ -189,7 +182,6 @@
 - EWPP-2234: Passing the contextual filter source to the ContextualAwareProcessorInterface [\#138](https://github.com/openeuropa/oe_list_pages/pull/138) ([upchuk](https://github.com/upchuk))
 
 ## [0.18.1](https://github.com/openeuropa/oe_list_pages/tree/0.18.1) (2022-06-29)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.18.0...0.18.1)
 
 **Merged pull requests:**
@@ -198,7 +190,6 @@
 - EWPP-2102: Fixing the form restricting the index to list pages. [\#140](https://github.com/openeuropa/oe_list_pages/pull/140) ([upchuk](https://github.com/upchuk))
 
 ## [0.18.0](https://github.com/openeuropa/oe_list_pages/tree/0.18.0) (2022-06-28)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.17.0...0.18.0)
 
 **Merged pull requests:**
@@ -208,7 +199,6 @@
 - OEL-1677: Add support for Address fields. [\#139](https://github.com/openeuropa/oe_list_pages/pull/139) ([drishu](https://github.com/drishu))
 
 ## [0.17.0](https://github.com/openeuropa/oe_list_pages/tree/0.17.0) (2022-04-11)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.16.0...0.17.0)
 
 **Merged pull requests:**
@@ -221,7 +211,6 @@
 - EWPP-1843: Query subscriber only kicks in for list pages source. [\#131](https://github.com/openeuropa/oe_list_pages/pull/131) ([upchuk](https://github.com/upchuk))
 
 ## [0.16.0](https://github.com/openeuropa/oe_list_pages/tree/0.16.0) (2022-03-07)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.15.0...0.16.0)
 
 **Merged pull requests:**
@@ -231,7 +220,6 @@
 - EWPP-2017: Fixing date filter second value initialization. [\#128](https://github.com/openeuropa/oe_list_pages/pull/128) ([upchuk](https://github.com/upchuk))
 
 ## [0.15.0](https://github.com/openeuropa/oe_list_pages/tree/0.15.0) (2022-02-17)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.14.0...0.15.0)
 
 **Merged pull requests:**
@@ -247,7 +235,6 @@
 - EWPP-1585: Make markup of Date facet label consistent with another facet labels [\#109](https://github.com/openeuropa/oe_list_pages/pull/109) ([yenyasinn](https://github.com/yenyasinn))
 
 ## [0.14.0](https://github.com/openeuropa/oe_list_pages/tree/0.14.0) (2021-12-06)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.13.0...0.14.0)
 
 **Merged pull requests:**
@@ -258,7 +245,6 @@
 - EWPP-1644: Open vocabulary association facet translations. [\#115](https://github.com/openeuropa/oe_list_pages/pull/115) ([upchuk](https://github.com/upchuk))
 
 ## [0.13.0](https://github.com/openeuropa/oe_list_pages/tree/0.13.0) (2021-10-25)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.12.1...0.13.0)
 
 **Merged pull requests:**
@@ -267,7 +253,6 @@
 - EWPP-1247: Do not take pager into account on RSS pages. [\#108](https://github.com/openeuropa/oe_list_pages/pull/108) ([imanoleguskiza](https://github.com/imanoleguskiza))
 
 ## [0.12.1](https://github.com/openeuropa/oe_list_pages/tree/0.12.1) (2021-09-29)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.12.0...0.12.1)
 
 **Merged pull requests:**
@@ -276,7 +261,6 @@
 - EWPP-1580: Restore dependency that was mistakenly deleted. [\#111](https://github.com/openeuropa/oe_list_pages/pull/111) ([brummbar](https://github.com/brummbar))
 
 ## [0.12.0](https://github.com/openeuropa/oe_list_pages/tree/0.12.0) (2021-09-27)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.11.0...0.12.0)
 
 **Merged pull requests:**
@@ -286,7 +270,6 @@
 - EWPP-1478: Add interface translations in non-eu languages. [\#105](https://github.com/openeuropa/oe_list_pages/pull/105) ([yenyasinn](https://github.com/yenyasinn))
 
 ## [0.11.0](https://github.com/openeuropa/oe_list_pages/tree/0.11.0) (2021-09-20)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.10.0...0.11.0)
 
 **Merged pull requests:**
@@ -295,7 +278,6 @@
 - OEL-70: Drupal 9 compatibility fixes. [\#94](https://github.com/openeuropa/oe_list_pages/pull/94) ([saidatom](https://github.com/saidatom))
 
 ## [0.10.0](https://github.com/openeuropa/oe_list_pages/tree/0.10.0) (2021-08-16)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.9.0...0.10.0)
 
 **Merged pull requests:**
@@ -306,7 +288,6 @@
 - EWPP-1289: Add missing interface translations. [\#97](https://github.com/openeuropa/oe_list_pages/pull/97) ([yenyasinn](https://github.com/yenyasinn))
 
 ## [0.9.0](https://github.com/openeuropa/oe_list_pages/tree/0.9.0) (2021-06-15)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.8.0...0.9.0)
 
 **Merged pull requests:**
@@ -317,7 +298,6 @@
 - EWPP-721: Update xdebug configuration. [\#75](https://github.com/openeuropa/oe_list_pages/pull/75) ([22Alexandra](https://github.com/22Alexandra))
 
 ## [0.8.0](https://github.com/openeuropa/oe_list_pages/tree/0.8.0) (2021-04-09)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.7.0...0.8.0)
 
 **Merged pull requests:**
@@ -326,7 +306,6 @@
 - EWPP-837: Refactoring the default filter values and results processing. [\#91](https://github.com/openeuropa/oe_list_pages/pull/91) ([upchuk](https://github.com/upchuk))
 
 ## [0.7.0](https://github.com/openeuropa/oe_list_pages/tree/0.7.0) (2021-03-11)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.6.0...0.7.0)
 
 **Merged pull requests:**
@@ -358,7 +337,6 @@
 - EWPP-452: Add RSS feeds for nodes based on list page metadata. [\#41](https://github.com/openeuropa/oe_list_pages/pull/41) ([imanoleguskiza](https://github.com/imanoleguskiza))
 
 ## [0.6.0](https://github.com/openeuropa/oe_list_pages/tree/0.6.0) (2021-01-25)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.5.0...0.6.0)
 
 **Merged pull requests:**
@@ -368,7 +346,6 @@
 - EWPP-491: Creating a link list source plugin. [\#59](https://github.com/openeuropa/oe_list_pages/pull/59) ([upchuk](https://github.com/upchuk))
 
 ## [0.5.0](https://github.com/openeuropa/oe_list_pages/tree/0.5.0) (2020-12-09)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.4.0...0.5.0)
 
 **Merged pull requests:**
@@ -377,7 +354,6 @@
 - EWPP-593: Ajax fixes on the list page config subform entity type and bundle selection. [\#57](https://github.com/openeuropa/oe_list_pages/pull/57) ([upchuk](https://github.com/upchuk))
 
 ## [0.4.0](https://github.com/openeuropa/oe_list_pages/tree/0.4.0) (2020-12-04)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.3.0...0.4.0)
 
 **Merged pull requests:**
@@ -394,7 +370,6 @@
 - EWPP-47: List page selection in plugin. [\#28](https://github.com/openeuropa/oe_list_pages/pull/28) ([hernani](https://github.com/hernani))
 
 ## [0.3.0](https://github.com/openeuropa/oe_list_pages/tree/0.3.0) (2020-11-03)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.2.0...0.3.0)
 
 **Merged pull requests:**
@@ -403,7 +378,6 @@
 - EWPP-0: Update facets module. [\#43](https://github.com/openeuropa/oe_list_pages/pull/43) ([imanoleguskiza](https://github.com/imanoleguskiza))
 
 ## [0.2.0](https://github.com/openeuropa/oe_list_pages/tree/0.2.0) (2020-10-07)
-
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/0.1.0...0.2.0)
 
 **Merged pull requests:**
@@ -433,7 +407,6 @@
 - EWPP-43: Installing the newly required dependencies. [\#13](https://github.com/openeuropa/oe_list_pages/pull/13) ([upchuk](https://github.com/upchuk))
 - EWPP-40: Date - Facet widget. [\#11](https://github.com/openeuropa/oe_list_pages/pull/11) ([sergepavle](https://github.com/sergepavle))
 - EWPP-40: List facet widget [\#10](https://github.com/openeuropa/oe_list_pages/pull/10) ([hernani](https://github.com/hernani))
-- EWPP-39: Fulltext - Facet widget [\#8](https://github.com/openeuropa/oe_list_pages/pull/8) ([sergepavle](https://github.com/sergepavle))
 - EPIC: Default content lists and filters [\#7](https://github.com/openeuropa/oe_list_pages/pull/7) ([hernani](https://github.com/hernani))
 - OPENEUROPA-3373: Add query functionality [\#6](https://github.com/openeuropa/oe_list_pages/pull/6) ([hernani](https://github.com/hernani))
 - OPENEUROPA-3276: Add configuration for exposed filters in the oe\_list\_pages meta plugin. [\#5](https://github.com/openeuropa/oe_list_pages/pull/5) ([sergepavle](https://github.com/sergepavle))
@@ -452,4 +425,4 @@
 
 
 
-\* *This Changelog was automatically generated by [github_changelog_generator](https://github.com/github-changelog-generator/github-changelog-generator)*
+\* *This Change Log was automatically generated by [github_changelog_generator](https://github.com/skywinder/Github-Changelog-Generator)*
