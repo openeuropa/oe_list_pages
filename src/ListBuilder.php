@@ -55,11 +55,18 @@ class ListBuilder implements ListBuilderInterface {
   protected $entityRepository;
 
   /**
+   * The entity field manager.
+   *
+   * @var \Drupal\Core\Entity\EntityFieldManagerInterface
+   */
+  protected $entityFieldManager;
+
+  /**
    * The facet manager wrapper.
    *
    * @var \Drupal\oe_list_pages\ListFacetManagerWrapper
    */
-  protected ListFacetManagerWrapper $facetManager;
+  protected $facetManager;
 
   /**
    * The form builder.

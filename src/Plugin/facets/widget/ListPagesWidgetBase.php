@@ -19,6 +19,20 @@ class ListPagesWidgetBase extends WidgetPluginBase implements ListPagesWidgetInt
   use FacetManipulationTrait;
 
   /**
+   * The entity field manager.
+   *
+   * @var \Drupal\Core\Entity\EntityFieldManagerInterface
+   */
+  protected $entityFieldManager;
+
+  /**
+   * The facet manager wrapper.
+   *
+   * @var \Drupal\oe_list_pages\ListFacetManagerWrapper
+   */
+  protected $facetManager;
+
+  /**
    * {@inheritdoc}
    */
   public function prepareValueForUrl(FacetInterface $facet, array &$form, FormStateInterface $form_state): array {

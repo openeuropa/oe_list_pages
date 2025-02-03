@@ -30,6 +30,13 @@ abstract class MultiSelectFilterFieldPluginBase extends PluginBase implements Co
   protected $entityFieldManager;
 
   /**
+   * The facet manager wrapper.
+   *
+   * @var \Drupal\oe_list_pages\ListFacetManagerWrapper
+   */
+  protected $facetManager;
+
+  /**
    * {@inheritdoc}
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityFieldManagerInterface $entity_field_manager) {
