@@ -24,7 +24,7 @@ use Drupal\oe_list_pages_link_list_source\ContextualFilterValuesProcessor;
 use Drupal\oe_list_pages_link_list_source\ContextualFiltersConfigurationBuilder;
 use Drupal\oe_list_pages_link_list_source\Exception\InapplicableContextualFilter;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Link source plugin that integrates with List Pages.
@@ -166,8 +166,6 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
     $query = $list_execution->getQuery();
     $cache->addCacheableDependency($query);
     $cache->addCacheTags([$configuration->getEntityType() . '_list:' . $configuration->getBundle()]);
-
-    $cache->addCacheTags($this->entityTypeManager->getDefinition($configuration->getEntityType())->getListCacheTags());
     $cache->addCacheContexts($this->entityTypeManager->getDefinition($configuration->getEntityType())->getListCacheContexts());
 
     if (!$results->getResultCount()) {
