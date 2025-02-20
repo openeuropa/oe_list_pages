@@ -20,13 +20,6 @@ class MultiselectFilterFieldPluginManager extends DefaultPluginManager {
   use FacetManipulationTrait;
 
   /**
-   * The entity field manager.
-   *
-   * @var \Drupal\Core\Entity\EntityFieldManagerInterface
-   */
-  protected EntityFieldManagerInterface $entityFieldManager;
-
-  /**
    * Constructs a new multiselect filter field plugin manager.
    *
    * @param \Traversable $namespaces
