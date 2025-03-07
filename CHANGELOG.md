@@ -1,10 +1,18 @@
 # Change Log
 
+## [1.12.1](https://github.com/openeuropa/oe_list_pages/tree/1.12.1) (2025-03-07)
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.12.0...1.12.1)
+
+**Merged pull requests:**
+
+- EWPP-5227: Remove needless list cache tag. [\#222](https://github.com/openeuropa/oe_list_pages/pull/222) ([upchuk](https://github.com/upchuk))
+
 ## [1.12.0](https://github.com/openeuropa/oe_list_pages/tree/1.12.0) (2025-01-29)
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.11.0...1.12.0)
 
 **Merged pull requests:**
 
+- Release-1.12.0: Update changelog. [\#219](https://github.com/openeuropa/oe_list_pages/pull/219) ([nagyad](https://github.com/nagyad))
 - EWPP-4991: Ensure PHP8.3 compatibility. [\#218](https://github.com/openeuropa/oe_list_pages/pull/218) ([nagyad](https://github.com/nagyad))
 
 ## [1.11.0](https://github.com/openeuropa/oe_list_pages/tree/1.11.0) (2024-12-16)
