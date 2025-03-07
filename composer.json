@@ -22,6 +22,7 @@
         "drupal/core-dev": "^10",
         "drupal/extra_field": "^2.1",
         "drupal/inline_entity_form": "^1.0-rc15",
+        "drupal/sparql_entity_storage": "2.0.0-alpha17",
         "drush/drush": "^12",
         "openeuropa/code-review-drupal": "^1.0.0-alpha",
         "openeuropa/oe_link_lists": "^1.0",
