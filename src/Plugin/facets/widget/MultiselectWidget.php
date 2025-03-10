@@ -42,13 +42,6 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
   protected $entityTypeManager;
 
   /**
-   * The entity field manager.
-   *
-   * @var \Drupal\Core\Entity\EntityFieldManagerInterface
-   */
-  protected $entityFieldManager;
-
-  /**
    * The multiselect filter field plugin manager.
    *
    * @var \Drupal\oe_list_pages\MultiselectFilterFieldPluginManager
