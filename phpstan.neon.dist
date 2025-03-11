@@ -1,7 +1,2 @@
 includes:
   - ./vendor/openeuropa/code-review-drupal/dist/phpstan.drupal.neon
-parameters:
-  ignoreErrors:
-    -
-    	identifier: property.notFound
-    	path: src/FacetManipulationTrait.php

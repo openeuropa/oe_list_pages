@@ -29,6 +29,20 @@ abstract class FilterConfigurationFormBuilderBase implements TrustedCallbackInte
   protected $facetsManager;
 
   /**
+   * The entity field manager.
+   *
+   * @var \Drupal\Core\Entity\EntityFieldManagerInterface
+   */
+  protected $entityFieldManager;
+
+  /**
+   * The facet manager wrapper.
+   *
+   * @var \Drupal\oe_list_pages\ListFacetManagerWrapper
+   */
+  protected $facetManager;
+
+  /**
    * {@inheritdoc}
    */
   public static function trustedCallbacks() {

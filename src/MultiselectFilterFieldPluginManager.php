@@ -6,7 +6,6 @@ namespace Drupal\oe_list_pages;
 
 use Drupal\Component\Utility\SortArray;
 use Drupal\Core\Cache\CacheBackendInterface;
-use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
 use Drupal\facets\FacetInterface;
@@ -24,7 +23,14 @@ class MultiselectFilterFieldPluginManager extends DefaultPluginManager {
    *
    * @var \Drupal\Core\Entity\EntityFieldManagerInterface
    */
-  protected EntityFieldManagerInterface $entityFieldManager;
+  protected $entityFieldManager;
+
+  /**
+   * The facet manager wrapper.
+   *
+   * @var \Drupal\oe_list_pages\ListFacetManagerWrapper
+   */
+  protected $facetManager;
 
   /**
    * Constructs a new multiselect filter field plugin manager.

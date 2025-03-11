@@ -95,7 +95,7 @@ trait FacetManipulationTrait {
    *   The field definition.
    */
   protected function getFacetFieldDefinition(FacetInterface $facet, ListSourceInterface $list_source): ?FieldDefinitionInterface {
-    if (!isset($this->entityFieldManager) || !$this->entityFieldManager instanceof EntityFieldManagerInterface) {
+    if (!property_exists($this, 'entityFieldManager') || !$this->entityFieldManager instanceof EntityFieldManagerInterface) {
       $this->entityFieldManager = \Drupal::service('entity_field.manager');
     }
 
@@ -172,7 +172,7 @@ trait FacetManipulationTrait {
    *   The facets manager.
    */
   protected function getFacetsManager(): ListFacetManagerWrapper {
-    if (!isset($this->facetManager)) {
+    if (!property_exists($this, 'facetManager') || !$this->facetManager instanceof ListFacetManagerWrapper) {
       $this->facetManager = \Drupal::service('oe_list_pages.list_facet_manager_wrapper');
     }
 
