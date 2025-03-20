@@ -142,7 +142,7 @@ class ListSource implements ListSourceInterface {
 
     $resolver->setAllowedTypes('limit', 'int');
     $resolver->setAllowedTypes('page', 'int');
-    $resolver->setAllowedTypes('language', ['string', 'null']);
+    $resolver->setAllowedTypes('language', ['string', 'array', 'null']);
     $resolver->setAllowedTypes('sort', 'array');
     $resolver->setAllowedTypes('ignored_filters', 'array');
     $resolver->setAllowedTypes('preset_filters', 'array');
@@ -167,8 +167,17 @@ class ListSource implements ListSourceInterface {
     }
 
     // Handle multilingual language fallback.
-    if ($resolved_options['language'] && in_array('language_with_fallback', array_keys($index_fields))) {
-      $query->addCondition('language_with_fallback', $resolved_options['language']);
+    if (!empty($resolved_options['language']) && in_array('language_with_fallback', array_keys($index_fields))) {
+      // Several languages.
+      if (is_array($resolved_options['language']) && count($resolved_options['language']) > 1) {
+        $query->addCondition('language_with_fallback', $resolved_options['language'], 'IN');
+      }
+      elseif (is_array($resolved_options['language'])) {
+        $query->addCondition('language_with_fallback', reset($resolved_options['language']));
+      }
+      else {
+        $query->addCondition('language_with_fallback', $resolved_options['language']);
+      }
     }
 
     $query_options = new ListQueryOptions($resolved_options['ignored_filters'], $resolved_options['preset_filters'], $resolved_options['extra']);
