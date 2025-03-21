@@ -109,6 +109,13 @@ class ListPageConfiguration {
   protected $listSource = NULL;
 
   /**
+   * The languages used in the list.
+   *
+   * @var array
+   */
+  protected $languages = [];
+
+  /**
    * ListPageConfiguration constructor.
    *
    * @param array $configuration
@@ -436,6 +443,26 @@ class ListPageConfiguration {
    */
   public function setListSource(ListSourceInterface $list_source): void {
     $this->listSource = $list_source;
+  }
+
+  /**
+   * Returns the languages.
+   *
+   * @return array
+   *   The languages.
+   */
+  public function getLanguages(): array {
+    return $this->languages;
+  }
+
+  /**
+   * Sets the language.
+   *
+   * @param array $languages
+   *   The languages.
+   */
+  public function setLanguages(array $languages): void {
+    $this->languages = $languages;
   }
 
 }

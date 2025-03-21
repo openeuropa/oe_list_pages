@@ -88,7 +88,7 @@ class ListExecutionManager implements ListExecutionManagerInterface {
     if ($current_page < 0) {
       $current_page = 0;
     }
-    $language = $this->languageManager->getCurrentLanguage()->getId();
+    $language = !empty($configuration->getLanguages()) ? $configuration->getLanguages() : $this->languageManager->getCurrentLanguage()->getId();
     $preset_filters = $configuration->getDefaultFiltersValues();
     // If there is a sort configured use it,
     // otherwise use the bundle's default sort if set.

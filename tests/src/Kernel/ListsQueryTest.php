@@ -118,11 +118,13 @@ class ListsQueryTest extends ListsSourceTestBase {
     $item_query_en = $item_list->getQuery(['language' => 'en']);
     $item_query_es = $item_list->getQuery(['language' => 'es']);
     $item_query_pt = $item_list->getQuery(['language' => 'pt-pt']);
+    $item_query_multiple = $item_list->getQuery(['language' => ['pt-pt', 'es']]);
 
     $item_query_no_lang->execute();
     $item_query_en->execute();
     $item_query_es->execute();
     $item_query_pt->execute();
+    $item_query_multiple->execute();
 
     /** @var \Drupal\search_api\Query\ResultSetInterface $item_results_no_lang */
     $item_results_no_lang = $item_query_no_lang->getResults();
@@ -132,6 +134,8 @@ class ListsQueryTest extends ListsSourceTestBase {
     $item_results_es = $item_query_es->getResults();
     /** @var \Drupal\search_api\Query\ResultSetInterface $item_results_pt */
     $item_results_pt = $item_query_pt->getResults();
+    /** @var \Drupal\search_api\Query\ResultSetInterface $item_results_multiple */
+    $item_results_multiple = $item_query_multiple->getResults();
 
     // Assert result counts.
     $this->assertEquals(6, $item_results_no_lang->getResultCount());
@@ -145,6 +149,9 @@ class ListsQueryTest extends ListsSourceTestBase {
 
     $this->assertEquals(4, $item_results_pt->getResultCount());
     $this->assertCount(4, $item_results_pt->getResultItems());
+
+    $this->assertEquals(6, $item_results_multiple->getResultCount());
+    $this->assertCount(6, $item_results_multiple->getResultItems());
 
     // Assert that the results are coming in the right languages.
     $expected_no_lang = [
@@ -212,6 +219,24 @@ class ListsQueryTest extends ListsSourceTestBase {
     }
 
     $this->assertEquals($expected_pt, $actual_pt);
+
+    $expected_multiple = [
+      ['en' => 'first'],
+      ['es' => 'primero'],
+      ['en' => 'second'],
+      ['es' => 'segundo'],
+      ['en' => 'third'],
+      ['pt-pt' => 'Portugues'],
+    ];
+    $actual_multiple = [];
+    foreach ($item_results_multiple->getResultItems() as $item) {
+      $entity = $item->getOriginalObject()->getEntity();
+      $actual_multiple[] = [
+        $entity->language()->getId() => $entity->label(),
+      ];
+    }
+
+    $this->assertEquals($expected_multiple, $actual_multiple);
 
     $facets_en = $item_results_en->getExtraData('search_api_facets');
     $facets_es = $item_results_es->getExtraData('search_api_facets');
@@ -450,7 +475,7 @@ class ListsQueryTest extends ListsSourceTestBase {
     $invalid = [
       'limit' => 'string',
       'page' => 'string',
-      'language' => [],
+      'language' => 10,
       'sort' => 'string',
       'ignored_filters' => 'string',
       'preset_filters' => 'string',
