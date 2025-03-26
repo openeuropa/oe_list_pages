@@ -1,10 +1,18 @@
 # Change Log
 
+## [1.14.0](https://github.com/openeuropa/oe_list_pages/tree/1.14.0) (2025-03-26)
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.13.0...1.14.0)
+
+**Merged pull requests:**
+
+- EWPP-5379: Allow to execute lists in different languages. [\#226](https://github.com/openeuropa/oe_list_pages/pull/226) ([hernani](https://github.com/hernani))
+
 ## [1.13.0](https://github.com/openeuropa/oe_list_pages/tree/1.13.0) (2025-03-11)
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.12.1...1.13.0)
 
 **Merged pull requests:**
 
+- Release-1.13.0: Update changelog. [\#225](https://github.com/openeuropa/oe_list_pages/pull/225) ([nagyad](https://github.com/nagyad))
 - EWPP-5357: Remove lock of sparql\_entity\_storage. [\#224](https://github.com/openeuropa/oe_list_pages/pull/224) ([nagyad](https://github.com/nagyad))
 - EWPP-5211: Allow dynamic properties in FacetManipulationTrait functions. [\#221](https://github.com/openeuropa/oe_list_pages/pull/221) ([nagyad](https://github.com/nagyad))
 
