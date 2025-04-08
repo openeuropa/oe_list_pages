@@ -30,7 +30,7 @@ class FormatAddressProcessorTest extends UnitTestCase {
     $country_repository->expects($this->any())
       ->method('get')
       ->with('GB')
-      ->will($this->returnValue($country));
+      ->willReturn($country);
 
     $facet = new Facet([], 'facets_facet');
     $processor = new FormatCountryCodeProcessor([], 'oe_list_pages_address_format_country_code', [], $country_repository);

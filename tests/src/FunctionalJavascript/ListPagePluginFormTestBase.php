@@ -812,7 +812,6 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $page->pressButton('default-edit-' . $reference_filter_id . '-' . $ajax_wrapper_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $page->selectFieldOption($default_value_name_prefix . '[wrapper][edit][' . $reference_filter_id . '][oe_list_pages_filter_operator]', 'All of');
-    $this->assertSession()->assertWaitOnAjaxRequest();
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $expected_set_filters = [
@@ -838,7 +837,6 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $page->pressButton('default-edit-' . $reference_filter_id . '-' . $ajax_wrapper_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $page->selectFieldOption($default_value_name_prefix . '[wrapper][edit][' . $reference_filter_id . '][oe_list_pages_filter_operator]', 'None of');
-    $this->assertSession()->assertWaitOnAjaxRequest();
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $expected_set_filters = [
@@ -864,7 +862,6 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->fillField($default_value_name_prefix . '[wrapper][edit][' . $reference_filter_id . '][reference][1][entity_reference]', '');
     $page->selectFieldOption($default_value_name_prefix . '[wrapper][edit][' . $reference_filter_id . '][oe_list_pages_filter_operator]', 'Any of');
-    $this->assertSession()->assertWaitOnAjaxRequest();
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $expected_set_filters = [
@@ -1088,7 +1085,6 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $page->pressButton('default-edit-' . $hierarchy_filter_id . '-' . $ajax_wrapper_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $page->selectFieldOption($default_value_name_prefix . '[wrapper][edit][' . $hierarchy_filter_id . '][oe_list_pages_filter_operator]', 'Any of');
-    $this->assertSession()->assertWaitOnAjaxRequest();
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->pressButton('Save');
@@ -1131,7 +1127,6 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
     $page->pressButton('default-edit-' . $subject_filter_id . '-' . $ajax_wrapper_id);
     $this->assertSession()->assertWaitOnAjaxRequest();
     $page->selectFieldOption($default_value_name_prefix . '[wrapper][edit][' . $subject_filter_id . '][oe_list_pages_filter_operator]', 'Any of');
-    $this->assertSession()->assertWaitOnAjaxRequest();
     $page->pressButton('Set default value');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->pressButton('Save');

@@ -66,7 +66,7 @@ class ListPageRssAccessTest extends ListsEntityMetaTestBase {
 
     // Assert we can access an RSS route for a node that has list page
     // metadata assigned to it and a user with appropriate permissions.
-    $user = $this->createUser([], ['access content']);
+    $user = $this->createUser(['access content']);
     $this->assertTrue($route->access($user));
 
     // Assert we can not access an RSS route for a node that does not have

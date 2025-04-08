@@ -242,15 +242,11 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     $this->getSession()->getPage()->fillField('Administrative title', 'First link list');
 
     $this->getSession()->getPage()->selectFieldOption('Link source', 'List page');
-    $this->assertSession()->assertWaitOnAjaxRequest();
     $page->selectFieldOption('Source entity type', 'Content');
-    $assert->assertWaitOnAjaxRequest();
     $page->selectFieldOption('Source bundle', 'Content type one');
     $assert->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->selectFieldOption('Link display', 'Title');
-    $this->assertSession()->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->selectFieldOption('No results behaviour', 'Hide');
-    $this->assertSession()->assertWaitOnAjaxRequest();
 
     $expected_set_filters_two = [];
     $expected_contextual_filters_two = [];
