@@ -94,10 +94,11 @@ class ListExecutionManager implements ListExecutionManagerInterface {
     // otherwise use the bundle's default sort if set.
     $sort = $configuration->getSort();
     $bundle_sort = $this->getBundleDefaultSort($list_source);
+    $sort_is_bundle = $sort && $sort['name'] === $bundle_sort['name'];
     // If we have a specific sort, we use that first, followed by the default
     // bundle sort. Otherwise, just the bundle sort.
     $sort = $sort ? [$sort['name'] => $sort['direction']] : [];
-    if ($bundle_sort) {
+    if ($bundle_sort && !$sort_is_bundle) {
       $sort[$bundle_sort['name']] = $bundle_sort['direction'];
     }
 
