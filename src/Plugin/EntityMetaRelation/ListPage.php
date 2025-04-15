@@ -124,12 +124,9 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
     $form[$key] = $subform->buildForm($form[$key], $subform_state);
 
     $form[$key]['limit'] = [
-      '#type' => 'select',
+      '#type' => 'number',
+      '#min' => '0',
       '#title' => $this->t('The number of items to show per page'),
-      '#options' => [
-        10 => '10',
-        20 => '20',
-      ],
       '#default_value' => $entity_meta_wrapper->getConfiguration()['limit'] ?? 10,
     ];
 

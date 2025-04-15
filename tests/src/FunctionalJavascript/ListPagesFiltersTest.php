@@ -462,7 +462,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $node = $this->drupalGetNodeByTitle('List page for ct1');
     $this->drupalGet($node->toUrl('edit-form'));
     $this->clickLink('List Page');
-    $this->getSession()->getPage()->selectFieldOption('The number of items to show per page', '20');
+    $this->getSession()->getPage()->fillField('The number of items to show per page', '20');
     $page->pressButton('Save');
     $this->assertCount(20, $this->getSession()->getPage()->findAll('css', '.node--type-content-type-one'));
     $assert_session->pageTextContains('Showing results 1 to 20');
