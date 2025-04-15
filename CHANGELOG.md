@@ -1,10 +1,18 @@
 # Change Log
 
+## [1.15.0](https://github.com/openeuropa/oe_list_pages/tree/1.15.0) (2025-04-15)
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.14.0...1.15.0)
+
+**Merged pull requests:**
+
+- EWPP-4647: Update to Drupal 11. [\#230](https://github.com/openeuropa/oe_list_pages/pull/230) ([kp77](https://github.com/kp77))
+
 ## [1.14.0](https://github.com/openeuropa/oe_list_pages/tree/1.14.0) (2025-03-26)
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.13.0...1.14.0)
 
 **Merged pull requests:**
 
+- Release-1.14.0: Update changelog. [\#227](https://github.com/openeuropa/oe_list_pages/pull/227) ([nagyad](https://github.com/nagyad))
 - EWPP-5379: Allow to execute lists in different languages. [\#226](https://github.com/openeuropa/oe_list_pages/pull/226) ([hernani](https://github.com/hernani))
 
 ## [1.13.0](https://github.com/openeuropa/oe_list_pages/tree/1.13.0) (2025-03-11)
