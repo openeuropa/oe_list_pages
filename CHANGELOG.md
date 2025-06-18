@@ -1,10 +1,20 @@
-# Change Log
+# Changelog
 
-## [1.15.1](https://github.com/openeuropa/oe_list_pages/tree/1.15.1) (2025-05-02)
+## [1.15.2](https://github.com/openeuropa/oe_list_pages/tree/1.15.2) (2025-06-18)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.15.1...1.15.2)
+
+**Merged pull requests:**
+
+- EWPP-5553: Update sparql image in docker-compose.yml and .drone.yml. [\#235](https://github.com/openeuropa/oe_list_pages/pull/235) ([sergepavle](https://github.com/sergepavle))
+
+## [1.15.1](https://github.com/openeuropa/oe_list_pages/tree/1.15.1) (2025-05-05)
+
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.15.0...1.15.1)
 
 **Merged pull requests:**
 
+- 1.15.1: Update changelog. [\#234](https://github.com/openeuropa/oe_list_pages/pull/234) ([nagyad](https://github.com/nagyad))
 - EWPP-5461: Update sparql image in docker-compose.yml and for drone.yml. [\#231](https://github.com/openeuropa/oe_list_pages/pull/231) ([sergepavle](https://github.com/sergepavle))
 
 ## [1.15.0](https://github.com/openeuropa/oe_list_pages/tree/1.15.0) (2025-04-15)
