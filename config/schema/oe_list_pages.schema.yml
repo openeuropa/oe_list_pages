@@ -6,11 +6,13 @@ plugin.plugin_configuration.facets_processor.oe_list_pages_date_status_processor
       type: string
       label: 'Default status'
     upcoming_label:
-      type: string
+      type: label
       label: 'Upcoming label'
+      translatable: true
     past_label:
-      type: string
+      type: label
       label: 'Past label'
+      translatable: true
     sort_alter_field_identifier:
       type: string
       label: 'Sort alter field identifier'
