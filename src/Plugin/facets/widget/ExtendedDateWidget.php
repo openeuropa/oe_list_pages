@@ -402,4 +402,136 @@ class ExtendedDateWidget extends ListPagesWidgetBase implements TrustedCallbackI
     ];
   }
 
+  /**
+   * Get definition for quick pickers.
+   *
+   * @return array[]
+   *   Array of values to define quick pickers.
+   */
+  private function getQuickPickersDefinition(): array {
+    $date_format_pattern = $this->getDatePattern();
+    return [
+      'this_week' => [
+        'label' => $this->t('This week'),
+        'min' => (new DrupalDateTime('monday this week midnight'))->format($date_format_pattern),
+        'max' => (new DrupalDateTime('sunday this week midnight'))->format($date_format_pattern),
+      ],
+      'this_month' => [
+        'label' => $this->t('This month'),
+        'min' => (new DrupalDateTime('first day of this month midnight'))->format($date_format_pattern),
+        'max' => (new DrupalDateTime('last day of this month midnight'))->format($date_format_pattern),
+      ],
+      'last_week' => [
+        'label' => $this->t('Last week'),
+        'min' => (new DrupalDateTime('monday last week midnight'))->format($date_format_pattern),
+        'max' => (new DrupalDateTime('sunday last week midnight'))->format($date_format_pattern),
+      ],
+      'last_month' => [
+        'label' => $this->t('Last month'),
+        'min' => (new DrupalDateTime('first day of last month midnight'))->format($date_format_pattern),
+        'max' => (new DrupalDateTime('last day of last month midnight'))->format($date_format_pattern),
+      ],
+    ];
+  }
+
+  /**
+   * Helper function: Get a date pattern to be used in the widget.
+   *
+   * @return string
+   *   Date format pattern.
+   */
+  private function getDatePattern(): string {
+    $format_storage = $this->entityTypeManager->getStorage('date_format');
+
+    $date_format = $format_storage->load('html_date');
+
+    return $date_format->getPattern();
+  }
+
+  /**
+   * Helper function: Include extended filters grid when enabled.
+   *
+   * @param array $build
+   *   The widget array.
+   * @param \Drupal\facets\FacetInterface $facet
+   *   The facet.
+   *
+   * @return void
+   *   Return the $build array.
+   */
+  protected function buildExtendedDateFilters(array &$build, FacetInterface $facet): void {
+
+    $config = $this->getConfiguration();
+    $is_date_range_enabled = $config['extended_filters'];
+    if ($is_date_range_enabled) {
+      // Get the active items to retrieve the date range from active filters.
+      $active_filters = Date::getActiveItems($facet);
+      $date_range_value = NULL;
+      $facet_name = $facet->id() . '_date_range';
+
+      if (!empty($active_filters)) {
+        foreach ($active_filters as $filter) {
+          if (strpos($filter, 'date_range:') !== FALSE) {
+            $parts = explode(':', $filter);
+            if (isset($parts[1])) {
+              $date_range_value = $parts[1];
+            }
+          }
+        }
+      }
+
+      // Add the radio button field for custom date ranges.
+      $option_attributes = [
+        '#wrapper_attributes' => [
+          'class' => [
+            'filter-row',
+            'list-group-item',
+            'border-0',
+            'mb-0',
+            'pb-0',
+            'pe-0',
+          ],
+        ],
+      ];
+
+      $filters = $this->getQuickPickersDefinition();
+
+      if (empty($filters)) {
+        return;
+      }
+
+      $build[$facet_name] = [
+        '#type' => 'radios',
+        '#options' => [],
+        '#default_value' => $date_range_value,
+        '#states' => [
+          'visible' => [
+            ':input[name="' . $facet->id() . '_op"]' => ['value' => 'bt'],
+          ],
+        ],
+        '#wrapper_attributes' => [
+          'class' => [
+            'extended-filters',
+            'filters-list',
+            'list-group',
+            'list-group-flush',
+            'flex-xl-row',
+            'flex-wrap',
+            'w-100',
+            'pb-3',
+          ],
+        ],
+        '#prefix' => '<div class="ema-news-date-range-wrapper js-form-wrapper form-wrapper">',
+        '#suffix' => '</div>',
+      ];
+
+      foreach ($filters as $key => $filter) {
+        $build[$facet_name]['#options'][$key] = $filter['label'];
+        $build[$facet_name][$key] = $option_attributes;
+        $build[$facet_name][$key]['#attributes']['data-date-range-min'] = $filter['min'];
+        $build[$facet_name][$key]['#attributes']['data-date-range-max'] = $filter['max'];
+      }
+    }
+  }
+
 }
