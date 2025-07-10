@@ -74,6 +74,7 @@ class ExtendedDateWidget extends ListPagesWidgetBase implements TrustedCallbackI
   public function defaultConfiguration() {
     return [
       'date_type' => Date::DATETIME_TYPE_DATE,
+      'extended_filters' => FALSE,
     ] + parent::defaultConfiguration();
   }
 
@@ -90,6 +91,12 @@ class ExtendedDateWidget extends ListPagesWidgetBase implements TrustedCallbackI
       ],
       '#description' => $this->t('Choose the type of date to filter.'),
       '#default_value' => $this->getConfiguration()['date_type'],
+    ];
+
+    $form['extended_filters'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable extended date filters'),
+      '#default_value' => $this->getConfiguration()['extended_filters'],
     ];
 
     return $form;
