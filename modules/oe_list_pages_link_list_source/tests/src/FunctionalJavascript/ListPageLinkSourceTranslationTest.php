@@ -12,7 +12,7 @@ use Drupal\node\NodeInterface;
 use Drupal\search_api\Entity\Index;
 
 /**
- * Tests the list page link source translation aspects..
+ * Tests the list page link source translation aspects.
  */
 class ListPageLinkSourceTranslationTest extends ListPagePluginFormTestBase {
 
