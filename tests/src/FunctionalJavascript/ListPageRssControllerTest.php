@@ -120,7 +120,7 @@ class ListPageRssControllerTest extends WebDriverTestBase {
       $values = [
         'title' => 'test node ' . $i,
         'type' => 'content_type_one',
-        'body' => 'test node ' . $i,
+        'body' => ($i == 5) ? '' : 'test node ' . $i,
         'field_select_one' => 'test2',
         'status' => NodeInterface::PUBLISHED,
         'created' => $earlier_date->getTimestamp(),

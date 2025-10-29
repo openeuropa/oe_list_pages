@@ -28,6 +28,17 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
   protected $defaultTheme = 'starterkit_theme';
 
   /**
+   * {@inheritdoc}
+   */
+  protected function setUp(): void {
+    parent::setUp();
+
+    // Rebuild all containers to ensure services are properly initialized after
+    // enabling all required modules.
+    $this->rebuildAll();
+  }
+
+  /**
    * Runs assertions for the preset filters form level validations.
    *
    * @param string $default_value_name_prefix

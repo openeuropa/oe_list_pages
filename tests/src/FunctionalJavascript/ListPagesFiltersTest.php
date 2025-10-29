@@ -43,6 +43,17 @@ class ListPagesFiltersTest extends WebDriverTestBase {
   protected $defaultTheme = 'starterkit_theme';
 
   /**
+   * {@inheritdoc}
+   */
+  protected function setUp(): void {
+    parent::setUp();
+
+    // Rebuild all containers to ensure services are properly initialized after
+    // enabling all required modules.
+    $this->rebuildAll();
+  }
+
+  /**
    * Test fields in a list page content type.
    */
   public function testListPageFilters(): void {
