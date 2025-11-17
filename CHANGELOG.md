@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.16.0](https://github.com/openeuropa/oe_list_pages/tree/1.16.0) (2025-11-17)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.15.2...1.16.0)
+
+**Implemented enhancements:**
+
+- Processor oe\_list\_pages\_date\_status\_processor not translatable. [\#228](https://github.com/openeuropa/oe_list_pages/issues/228)
+
+**Merged pull requests:**
+
+- EWPP-6078: Upgrade to Drupal 11.2. [\#241](https://github.com/openeuropa/oe_list_pages/pull/241) ([sergepavle](https://github.com/sergepavle))
+- EWPP-6042: Support Gitlab CI. [\#240](https://github.com/openeuropa/oe_list_pages/pull/240) ([hernani](https://github.com/hernani))
+- EWPP-5768: Update Drupal to 10.5. [\#239](https://github.com/openeuropa/oe_list_pages/pull/239) ([intelektron](https://github.com/intelektron))
+- EPHEH-625: Make upcoming and past labels translatable. [\#229](https://github.com/openeuropa/oe_list_pages/pull/229) ([Aporie](https://github.com/Aporie))
+
 ## [1.15.2](https://github.com/openeuropa/oe_list_pages/tree/1.15.2) (2025-06-18)
 
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.15.1...1.15.2)
