@@ -66,7 +66,8 @@ class ListPageSortOptionsResolver {
   public function getSortOptions(ListSourceInterface $list_source, string $scope = self::SCOPE_CONFIGURATION): array {
     $options = [];
 
-    // Get the default sort option.
+    // Get the default sort option from config :
+    // third_party_settings:oe_list_pages:default_sort.
     $sort = $this->getBundleDefaultSort($list_source);
     if ($sort) {
       $options[static::generateSortMachineName($sort)] = $this->t('Default');
