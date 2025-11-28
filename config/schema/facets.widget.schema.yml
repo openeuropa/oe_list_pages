@@ -13,3 +13,14 @@ facet.widget.config.oe_list_pages_date:
     date_type:
       type: string
       label: 'Date type of date facet widget'
+
+facet.widget.config.oe_list_pages_extended_date_filter:
+  type: facet.widget.default_config
+  label: 'Extended date widget configuration'
+  mapping:
+    date_type:
+      type: string
+      label: 'Date type of date facet widget'
+    extended_filters:
+      type: boolean
+      label: 'Enable extended filters with quick pickers'
