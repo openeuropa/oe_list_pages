@@ -269,6 +269,8 @@ class ExtendedDateWidget extends ListPagesWidgetBase implements TrustedCallbackI
       'url.path',
     ];
 
+    $this->buildExtendedDateFilters($build, $facet);
+
     return $build;
   }
 
@@ -313,6 +315,22 @@ class ExtendedDateWidget extends ListPagesWidgetBase implements TrustedCallbackI
       $values[] = $value->format(\DateTimeInterface::ATOM);
     }
 
+    $config = $facet->getWidgetInstance()->getConfiguration();
+    $date_range_selection = NULL;
+    if (!empty($config['extended_filters']) && $operator === 'bt') {
+      $date_range_value = $form_state->getValue($facet->id() . '_date_range');
+      $quick_pickers = $this->getQuickPickersDefinition();
+      if ($date_range_value && isset($quick_pickers[$date_range_value])) {
+        $date_range_selection = $date_range_value;
+        if (count($values) === 1) {
+          foreach (['min', 'max'] as $limit) {
+            $date = new DrupalDateTime($quick_pickers[$date_range_selection][$limit]);
+            $values[] = $date->format(\DateTimeInterface::ATOM);
+          }
+        }
+      }
+    }
+
     if (count($values) === 1) {
       // If we only have the operator, it means no dates have been specified.
       return [];
@@ -322,6 +340,10 @@ class ExtendedDateWidget extends ListPagesWidgetBase implements TrustedCallbackI
       // If we are missing one of the date values, we cannot do a BETWEEN
       // filter.
       return [];
+    }
+
+    if ($date_range_selection) {
+      $values[] = Date::DATE_RANGE_PREFIX . $date_range_selection;
     }
 
     return [implode('|', $values)];
@@ -466,19 +488,8 @@ class ExtendedDateWidget extends ListPagesWidgetBase implements TrustedCallbackI
     if ($is_date_range_enabled) {
       // Get the active items to retrieve the date range from active filters.
       $active_filters = Date::getActiveItems($facet);
-      $date_range_value = NULL;
+      $date_range_value = $active_filters['date_range'] ?? NULL;
       $facet_name = $facet->id() . '_date_range';
-
-      if (!empty($active_filters)) {
-        foreach ($active_filters as $filter) {
-          if (strpos($filter, 'date_range:') !== FALSE) {
-            $parts = explode(':', $filter);
-            if (isset($parts[1])) {
-              $date_range_value = $parts[1];
-            }
-          }
-        }
-      }
 
       // Add the radio button field for custom date ranges.
       $option_attributes = [
