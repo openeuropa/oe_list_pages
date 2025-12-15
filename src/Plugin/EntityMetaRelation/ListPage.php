@@ -146,6 +146,16 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
   /**
    * {@inheritdoc}
    */
+  public function validate(array $form, FormStateInterface $form_state): void {
+    // Nothing to validate but we allow other modules to intercept
+    // and handle custom things.
+    $key = $this->getFormKey();
+    $this->moduleHandler->invokeAll('list_page_entity_meta_form_validate', [$form[$key]['wrapper'], $form_state]);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function submit(array $form, FormStateInterface $form_state): void {
     /** @var \Drupal\Core\Entity\ContentEntityInterface $host_entity */
     $host_entity = $form_state->getFormObject()->getEntity();
