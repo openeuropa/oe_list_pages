@@ -128,7 +128,14 @@ class ListPageLinkDisplayPluginTest extends ListPagePluginFormTestBase {
     // Switch back and save.
     $page->selectFieldOption('Display', 'Titles with optional link');
     $assert_session->assertWaitOnAjaxRequest();
+    // Fill in the configuration field to trigger the validation.
+    $page->fillField('No validate', 'Test validation');
     $page->pressButton('Save');
+    $this->assertSession()->elementTextContains('css', '.messages--error', 'The no_validate value cannot be filled in.');
+    $page->fillField('No validate', '');
+    $page->pressButton('Save');
+    $this->assertSession()->elementNotExists('css', '.messages--error');
+
     // We should see the titles in the same way: linked.
     $links = $page->findAll('css', '.field--name-extra-field-oe-list-page-resultsnodeoe-list-page ul li a');
     $actual = [];

@@ -114,6 +114,41 @@ class ListDisplaySelectionBuilder {
   }
 
   /**
+   * Validates the plugin configuration.
+   *
+   * @param string $plugin_type
+   *   The plugin type.
+   * @param array $element
+   *   The element.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   */
+  public function validatePluginConfiguration(string $plugin_type, array $element, FormStateInterface $form_state): void {
+    $parents = $element['#parents'];
+
+    $plugin_id = $form_state->getValue(array_merge($parents, [
+      $plugin_type,
+      'plugin',
+    ]));
+
+    if ($plugin_id) {
+      /** @var \Drupal\Core\Plugin\PluginFormInterface $plugin */
+      $plugin = $this->linkDisplayPluginManager->createInstance($plugin_id);
+
+      $plugin_configuration_parents = [
+        $plugin_type,
+        'plugin_configuration_wrapper',
+        $plugin_id,
+      ];
+      $plugin_configuration_element = NestedArray::getValue($element, $plugin_configuration_parents, $exists);
+      if ($exists) {
+        $subform_state = SubformState::createForSubform($plugin_configuration_element, $form_state->getCompleteForm(), $form_state);
+        $plugin->validateConfigurationForm($plugin_configuration_element, $subform_state);
+      }
+    }
+  }
+
+  /**
    * Extracts plugin configuration values.
    *
    * It instantiates the selected plugin, calls its submit method and returns

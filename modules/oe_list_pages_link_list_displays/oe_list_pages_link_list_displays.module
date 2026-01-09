@@ -26,3 +26,10 @@ function oe_list_pages_link_list_displays_list_page_entity_meta_form_submit_alte
   $display_configuration = \Drupal::service('oe_list_pages_link_list_displays.list_display_selection_builder')->extractPluginConfiguration('display', $form, $form_state);
   $configuration['extra']['oe_list_pages_link_list_displays']['display'] = $display_configuration;
 }
+
+/**
+ * Implements hook_list_page_entity_meta_form_validate().
+ */
+function oe_list_pages_link_list_displays_list_page_entity_meta_form_validate(array $form, FormStateInterface $form_state) {
+  \Drupal::service('oe_list_pages_link_list_displays.list_display_selection_builder')->validatePluginConfiguration('display', $form, $form_state);
+}
