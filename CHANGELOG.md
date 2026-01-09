@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.17.0](https://github.com/openeuropa/oe_list_pages/tree/1.17.0) (2026-01-09)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.16.0...1.17.0)
+
+**Merged pull requests:**
+
+- EWPP-6400: Update testing matrix. [\#248](https://github.com/openeuropa/oe_list_pages/pull/248) ([nagyad](https://github.com/nagyad))
+- EWPP-6339: Update PHP and triplestore image registries. [\#245](https://github.com/openeuropa/oe_list_pages/pull/245) ([nagyad](https://github.com/nagyad))
+- EWPP-6236: Validation on list page link list displays. [\#244](https://github.com/openeuropa/oe_list_pages/pull/244) ([upchuk](https://github.com/upchuk))
+
 ## [1.16.0](https://github.com/openeuropa/oe_list_pages/tree/1.16.0) (2025-11-17)
 
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.15.2...1.16.0)
@@ -10,6 +20,7 @@
 
 **Merged pull requests:**
 
+- Release-1.16.0: Update changelog. [\#243](https://github.com/openeuropa/oe_list_pages/pull/243) ([hernani](https://github.com/hernani))
 - EWPP-6078: Upgrade to Drupal 11.2. [\#241](https://github.com/openeuropa/oe_list_pages/pull/241) ([sergepavle](https://github.com/sergepavle))
 - EWPP-6042: Support Gitlab CI. [\#240](https://github.com/openeuropa/oe_list_pages/pull/240) ([hernani](https://github.com/hernani))
 - EWPP-5768: Update Drupal to 10.5. [\#239](https://github.com/openeuropa/oe_list_pages/pull/239) ([intelektron](https://github.com/intelektron))
@@ -21,6 +32,7 @@
 
 **Merged pull requests:**
 
+- Release-1.15.2: Update changelog and docker PHP images. [\#236](https://github.com/openeuropa/oe_list_pages/pull/236) ([nagyad](https://github.com/nagyad))
 - EWPP-5553: Update sparql image in docker-compose.yml and .drone.yml. [\#235](https://github.com/openeuropa/oe_list_pages/pull/235) ([sergepavle](https://github.com/sergepavle))
 
 ## [1.15.1](https://github.com/openeuropa/oe_list_pages/tree/1.15.1) (2025-05-05)
