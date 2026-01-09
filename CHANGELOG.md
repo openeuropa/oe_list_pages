@@ -1,11 +1,20 @@
 # Changelog
 
+## [1.17.1](https://github.com/openeuropa/oe_list_pages/tree/1.17.1) (2026-01-09)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.17.0...1.17.1)
+
+**Merged pull requests:**
+
+- EWPP-6352: Remove patch from composer. [\#250](https://github.com/openeuropa/oe_list_pages/pull/250) ([nagyad](https://github.com/nagyad))
+
 ## [1.17.0](https://github.com/openeuropa/oe_list_pages/tree/1.17.0) (2026-01-09)
 
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.16.0...1.17.0)
 
 **Merged pull requests:**
 
+- Release-1.17.0: Update changelog. [\#249](https://github.com/openeuropa/oe_list_pages/pull/249) ([nagyad](https://github.com/nagyad))
 - EWPP-6400: Update testing matrix. [\#248](https://github.com/openeuropa/oe_list_pages/pull/248) ([nagyad](https://github.com/nagyad))
 - EWPP-6339: Update PHP and triplestore image registries. [\#245](https://github.com/openeuropa/oe_list_pages/pull/245) ([nagyad](https://github.com/nagyad))
 - EWPP-6236: Validation on list page link list displays. [\#244](https://github.com/openeuropa/oe_list_pages/pull/244) ([upchuk](https://github.com/upchuk))
