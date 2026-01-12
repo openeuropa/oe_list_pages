@@ -458,6 +458,20 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $assert_session = $this->assertSession();
     $this->assertTrue($assert_session->optionExists('Source bundle', 'Content type one')->isSelected());
     $page->fillField('Title', 'List page for ct1');
+    $pager_options = $page->findField('The number of items to show per page');
+    $options = [];
+    foreach ($pager_options->findAll('xpath', '//option') as $option) {
+      $label = $option->getText();
+      $value = $option->getAttribute('value') ?: $label;
+      $options[$value] = $label;
+    }
+    $this->assertEquals([
+      '10' => '10',
+      '20' => '20',
+      '50' => '50',
+      '100' => '100',
+    ], $options);
+
     $page->pressButton('Save');
 
     // By default we show only 10 results.
