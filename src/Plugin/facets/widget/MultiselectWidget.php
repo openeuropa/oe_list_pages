@@ -168,10 +168,7 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
    * {@inheritdoc}
    */
   public function build(FacetInterface $facet) {
-    $results = $facet->getResults();
-    $results = array_filter($results, function (Result $result) {
-      return $result->getDisplayValue() !== "";
-    });
+    $results = $this->prepareResults($facet->getResults());
 
     $options = $this->transformResultsToOptions($results);
 
@@ -270,6 +267,31 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
     }
 
     return FALSE;
+  }
+
+  /**
+   * Suffix with number.
+   *
+   * @param \Drupal\facets\Result\ResultInterface[] $result
+   *   The result to extract the values.
+   *
+   * @return array
+   *   The values.
+   */
+  protected function prepareResults(array $results) {
+    $results = array_filter($results, function (Result $result) {
+      return $result->getDisplayValue() !== "";
+    });
+
+    if (!empty($results) && $this->getConfiguration()['show_numbers']) {
+      /** @var \Drupal\facets\Result\ResultInterface $result */
+      foreach ($results as $result) {
+        if ($result->getCount() !== FALSE ) {
+          $result->setDisplayValue($result->getDisplayValue() . ' (' . $result->getCount() . ')');
+        }
+      }
+    }
+    return $results;
   }
 
 }

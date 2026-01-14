@@ -53,7 +53,7 @@ class ListField extends MultiSelectFilterFieldPluginBase {
       return '';
     }
 
-    $filter_value = parent::getDefaultValues();
+    $filter_value = array_filter(parent::getDefaultValues());
     return implode(', ', array_map(function ($value) use ($field_definition) {
       return $field_definition->getSetting('allowed_values')[$value];
     }, $filter_value));
