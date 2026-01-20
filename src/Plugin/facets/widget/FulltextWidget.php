@@ -29,6 +29,11 @@ class FulltextWidget extends ListPagesWidgetBase {
       '#default_value' => $this->getValueFromActiveFilters($facet, '0'),
     ];
 
+    $placeholder = $this->getConfiguration()['placeholder'];
+    if (!empty($placeholder)) {
+      $build[$facet->id()]['#attributes']['placeholder'] = $placeholder;
+    }
+
     $build['#cache']['contexts'] = [
       'url.query_args',
       'url.path',
@@ -62,6 +67,7 @@ class FulltextWidget extends ListPagesWidgetBase {
   public function defaultConfiguration() {
     return [
       'fulltext_all_fields' => TRUE,
+      'placeholder' => '',
     ] + parent::defaultConfiguration();
   }
 
@@ -69,11 +75,20 @@ class FulltextWidget extends ListPagesWidgetBase {
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state, FacetInterface $facet) {
+    $form = parent::buildConfigurationForm($form, $form_state, $facet);
+
     $form['fulltext_all_fields'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Fulltext search on all fields'),
       '#description' => $this->t('Perform the search on all available indexed text fields.'),
       '#default_value' => $this->getConfiguration()['fulltext_all_fields'],
+    ];
+
+    $form['placeholder'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Placeholder'),
+      '#default_value' => $this->getConfiguration()['placeholder'],
+      '#description' => $this->t('The placeholder text.'),
     ];
 
     return $form;
