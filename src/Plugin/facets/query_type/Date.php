@@ -41,6 +41,11 @@ class Date extends QueryTypePluginBase {
   ];
 
   /**
+   * Prefix used to indicate a quick picker selection inside filter values.
+   */
+  const DATE_RANGE_PREFIX = 'date_range:';
+
+  /**
    * {@inheritdoc}
    *
    * @SuppressWarnings(PHPMD.CyclomaticComplexity)
@@ -193,7 +198,6 @@ class Date extends QueryTypePluginBase {
 
     $items = [
       'operator' => $active_items[0],
-      'first' => $active_items[1],
     ];
 
     $first_date = new DrupalDateTime($active_items[1]);
@@ -211,13 +215,23 @@ class Date extends QueryTypePluginBase {
       return $items;
     }
 
-    $second_date = new DrupalDateTime($active_items[2]);
-    if (!$second_date instanceof DrupalDateTime || $second_date->hasErrors()) {
-      // If a wrong second date is passed, we have an invalid filter.
-      return [];
-    }
+    $count = count($active_items);
+    for ($index = 2; $index < $count; $index++) {
+      $value = $active_items[$index];
+      if (strpos($value, static::DATE_RANGE_PREFIX) === 0) {
+        $items['date_range'] = substr($value, strlen(static::DATE_RANGE_PREFIX));
+        continue;
+      }
 
-    $items['second'] = $second_date;
+      if (!isset($items['second'])) {
+        $second_date = new DrupalDateTime($value);
+        if (!$second_date instanceof DrupalDateTime || $second_date->hasErrors()) {
+          // If a wrong second date is passed, we have an invalid filter.
+          return [];
+        }
+        $items['second'] = $second_date;
+      }
+    }
 
     return $items;
   }
