@@ -187,6 +187,7 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
     $entity_meta_configuration['override_exposed_filters'] = $configuration->isExposedFiltersOverridden();
     $entity_meta_configuration['exposed_filters'] = $configuration->getExposedFilters();
     $entity_meta_configuration['preset_filters'] = $configuration->getDefaultFiltersValues();
+    $entity_meta_configuration['default_sort'] = $configuration->getDefaultSort();
     $entity_meta_configuration['limit'] = (int) $form_state->getValue([
       $this->getFormKey(),
       'limit',

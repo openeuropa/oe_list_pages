@@ -7,6 +7,7 @@ namespace Drupal\oe_list_pages\Form;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Entity\ContentEntityTypeInterface;
+use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -83,6 +84,13 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
   protected $sortOptionsResolver;
 
   /**
+   * The entity field manager.
+   *
+   * @var \Drupal\Core\Entity\EntityFieldManagerInterface
+   */
+  protected $entityFieldManager;
+
+  /**
    * ListPageConfigurationSubformFactory constructor.
    *
    * @param \Drupal\oe_list_pages\ListPageConfiguration $configuration
@@ -99,8 +107,10 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
    *   The preset filters builder.
    * @param \Drupal\oe_list_pages\ListPageSortOptionsResolver $sortOptionsResolver
    *   The sort options resolver.
+   * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entityFieldManager
+   *   The entity field manager.
    */
-  public function __construct(ListPageConfiguration $configuration, EntityTypeManagerInterface $entityTypeManager, EntityTypeBundleInfoInterface $entityTypeBundleInfo, EventDispatcherInterface $eventDispatcher, ListSourceFactoryInterface $listSourceFactory, DefaultFilterConfigurationBuilder $presetFiltersBuilder, ListPageSortOptionsResolver $sortOptionsResolver) {
+  public function __construct(ListPageConfiguration $configuration, EntityTypeManagerInterface $entityTypeManager, EntityTypeBundleInfoInterface $entityTypeBundleInfo, EventDispatcherInterface $eventDispatcher, ListSourceFactoryInterface $listSourceFactory, DefaultFilterConfigurationBuilder $presetFiltersBuilder, ListPageSortOptionsResolver $sortOptionsResolver, EntityFieldManagerInterface $entityFieldManager) {
     $this->entityTypeManager = $entityTypeManager;
     $this->entityTypeBundleInfo = $entityTypeBundleInfo;
     $this->eventDispatcher = $eventDispatcher;
@@ -108,6 +118,7 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
     $this->configuration = $configuration;
     $this->presetFiltersBuilder = $presetFiltersBuilder;
     $this->sortOptionsResolver = $sortOptionsResolver;
+    $this->entityFieldManager = $entityFieldManager;
   }
 
   /**
@@ -322,6 +333,9 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
       $form_state->set($name, NULL);
     }
 
+    // Reset sort criteria when entity type changes (fields differ).
+    $form_state->set('sort_criteria', NULL);
+
     $form_state->setRebuild(TRUE);
   }
 
@@ -359,6 +373,9 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
     foreach ($remove as $name) {
       $form_state->set($name, NULL);
     }
+
+    // Reset sort criteria when bundle changes (fields may differ).
+    $form_state->set('sort_criteria', NULL);
 
     // When we change the bundle, we want to set the default exposed filter
     // values to the user input so that the checkboxes can be checked when the
@@ -813,7 +830,11 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
    */
   public function removeSortCriterion(array &$form, FormStateInterface $form_state): void {
     $triggering_element = $form_state->getTriggeringElement();
-    $delta = (int) str_replace('remove_sort_criterion_', '', $triggering_element['#name']);
+    // Extract delta from #array_parents since #name is overwritten by #tree.
+    // Parents: [..., 'default_sort', 'criteria', $delta, 'operations'].
+    $parents = $triggering_element['#array_parents'];
+    $criteria_index = array_search('criteria', $parents);
+    $delta = $parents[$criteria_index + 1];
 
     $sort_criteria = $form_state->getValue(['wrapper', 'default_sort', 'criteria'], []);
     unset($sort_criteria[$delta]);
@@ -831,25 +852,74 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
   /**
    * Gets available sort field options for the select element.
    *
-   * The sort options resolver returns options keyed as "field__DIRECTION".
-   * This method extracts unique field names since the direction is handled
-   * by a separate select in each table row.
+   * The fields come from TWO sources that are intersected:
+   *
+   * 1. Search API Index fields: Only fields that are indexed in Search API
+   *    can be used for sorting. These are configured in the Search API index
+   *    configuration (admin/config/search/search-api/index/[index_name]/fields).
+   *
+   * 2. Entity field definitions: We filter the index fields to only show
+   *    those that belong to the selected bundle. This is done by comparing
+   *    the index field's "property path" with the entity's field definitions.
+   *    - Base fields (title, created, changed, langcode, etc.) are available
+   *      for all bundles.
+   *    - Bundle-specific fields (field_*) are only shown for their bundle.
+   *
+   * The field's "property path" in Search API corresponds to the Drupal field
+   * name (e.g., "created", "field_publication_date"). For nested fields like
+   * entity references, the path may be "field_ref:entity:title".
    *
    * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
    *   The list source.
    *
    * @return array
-   *   Field options keyed by field name.
+   *   Field options keyed by Search API field identifier.
    */
   protected function getSortFieldOptions(ListSourceInterface $list_source): array {
-    $sort_options = $this->sortOptionsResolver->getSortOptions($list_source);
     $field_options = [];
-    foreach ($sort_options as $machine_name => $label) {
-      $field_name = explode('__', $machine_name)[0];
-      if (!isset($field_options[$field_name])) {
-        $field_options[$field_name] = $label;
+    $index = $list_source->getIndex();
+    $entity_type = $list_source->getEntityType();
+    $bundle = $list_source->getBundle();
+
+    // Fields to exclude from sort options (not useful for sorting).
+    $excluded_fields = [
+      'status',
+      // The 'type' field is the bundle field - not useful for sorting within
+      // a single bundle context.
+      'type',
+      // Search API internal fields.
+      'search_api_datasource',
+      'search_api_language',
+    ];
+
+    // Get the field definitions for this bundle. This includes:
+    // - Base fields: title, created, changed, uid, langcode, etc.
+    // - Bundle-specific fields: field_* custom fields for this bundle.
+    $bundle_field_definitions = $this->entityFieldManager->getFieldDefinitions($entity_type, $bundle);
+    $bundle_field_names = array_keys($bundle_field_definitions);
+
+    foreach ($index->getFields() as $field_id => $field) {
+      // Skip excluded fields.
+      if (in_array($field_id, $excluded_fields)) {
+        continue;
+      }
+
+      // Get the property path to determine which entity field this index field
+      // corresponds to. The property path is the Drupal field name.
+      // For nested fields (e.g., "field_ref:entity:title"), we check the
+      // first part which is the main field on this entity.
+      $property_path = $field->getPropertyPath();
+      $field_name = explode(':', $property_path)[0];
+
+      // Only include fields that exist on the selected bundle.
+      // This filters out fields from other bundles in the same index.
+      if (in_array($field_name, $bundle_field_names)) {
+        $field_options[$field_id] = $field->getLabel();
       }
     }
+
+    // Sort alphabetically by label for better UX.
+    asort($field_options);
 
     return $field_options;
   }

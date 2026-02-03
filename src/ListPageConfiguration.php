@@ -83,16 +83,15 @@ class ListPageConfiguration {
    */
   protected $sort = [];
 
+  // phpcs:disable Drupal.NamingConventions.ValidVariableName.LowerCamelName
   /**
-   * The default sorting type for the query.
+   * The default sorting criteria for the query.
    *
-   * Array with 3 values keyed 'name', 'weight' and 'direction'.
+   * Array of sort criteria, each with 'name', 'direction' and 'weight'.
    *
    * @var array
    */
-  protected $defaultSort = [];
-
-  // phpcs:disable Drupal.NamingConventions.ValidVariableName.LowerCamelName
+  protected $default_sort = [];
   /**
    * Whether the sort is exposed to the frontend.
    *
@@ -162,6 +161,7 @@ class ListPageConfiguration {
       'exposed_filters' => $wrapper_configuration['exposed_filters'] ?? [],
       'default_filter_values' => $wrapper_configuration['preset_filters'] ?? [],
       'exposed_filters_overridden' => isset($wrapper_configuration['override_exposed_filters']) ? (bool) $wrapper_configuration['override_exposed_filters'] : FALSE,
+      'default_sort' => $wrapper_configuration['default_sort'] ?? [],
       'limit' => $wrapper_configuration['limit'] ?? NULL,
       'page' => $wrapper_configuration['page'] ?? NULL,
       'sort' => $wrapper_configuration['sort'] ?? [],
@@ -311,7 +311,7 @@ class ListPageConfiguration {
    *   - weight: The sort weight (for ordering).
    */
   public function getDefaultSort(): array {
-    return !empty($this->defaultSort) ? $this->defaultSort : [];
+    return !empty($this->default_sort) ? $this->default_sort : [];
   }
 
   /**
@@ -324,7 +324,7 @@ class ListPageConfiguration {
    *   - weight: The sort weight (for ordering).
    */
   public function setDefaultSort(array $sort_criteria): void {
-    $this->defaultSort = $sort_criteria;
+    $this->default_sort = $sort_criteria;
   }
 
   /**
@@ -453,6 +453,7 @@ class ListPageConfiguration {
       'exposed_filters_overridden' => $this->isExposedFiltersOverridden(),
       'exposed_filters' => $this->getExposedFilters(),
       'default_filter_values' => $this->getDefaultFiltersValues(),
+      'default_sort' => $this->getDefaultSort(),
       'limit' => $this->getLimit(),
       'page' => $this->getPage(),
       'sort' => $this->getSort(),

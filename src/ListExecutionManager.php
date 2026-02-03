@@ -90,15 +90,34 @@ class ListExecutionManager implements ListExecutionManagerInterface {
     }
     $language = !empty($configuration->getLanguages()) ? $configuration->getLanguages() : $this->languageManager->getCurrentLanguage()->getId();
     $preset_filters = $configuration->getDefaultFiltersValues();
-    // If there is a sort configured use it,
-    // otherwise use the bundle's default sort if set.
-    $sort = $configuration->getSort();
-    $bundle_sort = $this->getBundleDefaultSort($list_source);
-    // If we have a specific sort, we use that first, followed by the default
-    // bundle sort. Otherwise, just the bundle sort.
-    $sort = $sort ? [$sort['name'] => $sort['direction']] : [];
-    if ($bundle_sort) {
-      $sort[$bundle_sort['name']] = $bundle_sort['direction'];
+    // Build the sort array. Priority:
+    // 1. Runtime sort (from query params / user selection)
+    // 2. List page configured default sort (multi-criteria)
+    // 3. Bundle's default sort (fallback)
+    $sort = [];
+    $runtime_sort = $configuration->getSort();
+    if ($runtime_sort) {
+      $sort[$runtime_sort['name']] = $runtime_sort['direction'];
+    }
+
+    // Apply list page's configured default sort criteria.
+    $default_sort_criteria = $configuration->getDefaultSort();
+    if (!empty($default_sort_criteria)) {
+      // Sort by weight to ensure correct order.
+      uasort($default_sort_criteria, fn($a, $b) => ($a['weight'] ?? 0) <=> ($b['weight'] ?? 0));
+      foreach ($default_sort_criteria as $criterion) {
+        if (!empty($criterion['name']) && !isset($sort[$criterion['name']])) {
+          $sort[$criterion['name']] = $criterion['direction'] ?? 'ASC';
+        }
+      }
+    }
+
+    // Fallback to bundle's default sort if no sort configured.
+    if (empty($sort)) {
+      $bundle_sort = $this->getBundleDefaultSort($list_source);
+      if ($bundle_sort) {
+        $sort[$bundle_sort['name']] = $bundle_sort['direction'];
+      }
     }
 
     $options = [
