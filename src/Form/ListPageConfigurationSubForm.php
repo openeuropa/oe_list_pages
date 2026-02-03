@@ -846,43 +846,50 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
 
     $conditions = $rule['conditions'] ?? [];
     foreach ($conditions as $cond_delta => $condition) {
-      $element[$cond_delta] = [
-        '#type' => 'container',
-        '#attributes' => ['class' => ['condition-row']],
-      ];
-
       if ($cond_delta > 0) {
-        $element[$cond_delta]['and_label'] = [
-          '#markup' => '<span class="condition-and">' . $this->t('AND') . '</span> ',
+        $element['and_' . $cond_delta] = [
+          '#markup' => '<div class="condition-and-separator"><strong>' . $this->t('AND') . '</strong></div>',
         ];
       }
+
+      $element[$cond_delta] = [
+        '#type' => 'container',
+        '#attributes' => [
+          'class' => ['condition-box'],
+          'style' => 'border: 1px solid #ccc; padding: 8px; margin-bottom: 5px; background: #f9f9f9;',
+        ],
+      ];
 
       $element[$cond_delta]['field'] = [
         '#type' => 'select',
         '#title' => $this->t('Field'),
-        '#title_display' => 'invisible',
-        '#options' => ['' => $this->t('- Field -')] + $field_options,
+        '#options' => ['' => $this->t('- Select -')] + $field_options,
         '#default_value' => $condition['field'] ?? '',
       ];
 
-      $element[$cond_delta]['operator'] = [
+      $element[$cond_delta]['op_val'] = [
+        '#type' => 'container',
+        '#attributes' => [
+          'style' => 'display: flex; gap: 5px; align-items: flex-end;',
+        ],
+      ];
+
+      $element[$cond_delta]['op_val']['operator'] = [
         '#type' => 'select',
-        '#title' => $this->t('Operator'),
-        '#title_display' => 'invisible',
+        '#title' => $this->t('Op.'),
         '#options' => $operator_options,
         '#default_value' => $condition['operator'] ?? '=',
       ];
 
-      $element[$cond_delta]['value'] = [
+      $element[$cond_delta]['op_val']['value'] = [
         '#type' => 'textfield',
         '#title' => $this->t('Value'),
-        '#title_display' => 'invisible',
         '#default_value' => $condition['value'] ?? '',
-        '#size' => 15,
-        '#placeholder' => $this->t('Value'),
+        '#size' => 12,
+        '#placeholder' => $this->t('"now" for date'),
       ];
 
-      $element[$cond_delta]['remove'] = [
+      $element[$cond_delta]['op_val']['remove'] = [
         '#type' => 'submit',
         '#value' => $this->t('×'),
         '#name' => 'remove_condition_' . $rule_delta . '_' . $cond_delta,
@@ -892,13 +899,17 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
           'wrapper' => $wrapper_id,
         ],
         '#limit_validation_errors' => [],
-        '#attributes' => ['class' => ['remove-condition'], 'title' => $this->t('Remove condition')],
+        '#attributes' => [
+          'class' => ['button--small'],
+          'title' => $this->t('Remove'),
+          'style' => 'margin-bottom: 0;',
+        ],
       ];
     }
 
     $element['add_condition'] = [
       '#type' => 'submit',
-      '#value' => $this->t('+ Add condition'),
+      '#value' => $this->t('+ Condition'),
       '#name' => 'add_condition_' . $rule_delta,
       '#submit' => [[$this, 'addPromotionCondition']],
       '#ajax' => [
@@ -906,7 +917,7 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
         'wrapper' => $wrapper_id,
       ],
       '#limit_validation_errors' => [],
-      '#attributes' => ['class' => ['add-condition']],
+      '#attributes' => ['class' => ['button--small']],
     ];
 
     return $element;
@@ -920,12 +931,12 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
    */
   protected function getOperatorOptions(): array {
     return [
-      '=' => $this->t('Equals (=)'),
-      '<>' => $this->t('Not equals (<>)'),
-      '>' => $this->t('Greater than (>)'),
-      '>=' => $this->t('Greater or equal (>=)'),
-      '<' => $this->t('Less than (<)'),
-      '<=' => $this->t('Less or equal (<=)'),
+      '=' => '=',
+      '<>' => '≠',
+      '>' => '>',
+      '>=' => '≥',
+      '<' => '<',
+      '<=' => '≤',
     ];
   }
 
@@ -1347,14 +1358,16 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
         $conditions_wrapper = $rule['conditions_wrapper'] ?? [];
         if (is_array($conditions_wrapper)) {
           foreach ($conditions_wrapper as $cond_delta => $cond) {
-            // Skip non-numeric keys (like 'add_condition').
+            // Skip non-numeric keys (like 'add_condition', 'and_X').
             if (!is_numeric($cond_delta) || !is_array($cond)) {
               continue;
             }
+            // Operator and value are nested in 'op_val'.
+            $op_val = $cond['op_val'] ?? [];
             $collected_rule['conditions'][] = [
               'field' => $cond['field'] ?? '',
-              'operator' => $cond['operator'] ?? '=',
-              'value' => $cond['value'] ?? '',
+              'operator' => $op_val['operator'] ?? '=',
+              'value' => $op_val['value'] ?? '',
             ];
           }
         }
