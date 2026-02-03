@@ -127,13 +127,18 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
     $entity_type_options = $this->getEntityTypeOptions();
     $entity_type_id = $this->configuration->getEntityType();
     $entity_type_bundle = $this->configuration->getBundle();
-    $configuration_sort = $this->configuration->getSort();
     $configuration_exposed_sort = $this->configuration->isExposedSort();
-    if ($configuration_sort) {
-      $configuration_sort = ListPageSortOptionsResolver::generateSortMachineName($configuration_sort);
-    }
-    else {
-      $configuration_sort = NULL;
+
+    // Initialize sort criteria if not set (backward compatibility).
+    $sort_criteria = $this->configuration->getDefaultSort();
+    if (empty($sort_criteria)) {
+      $this->configuration->setDefaultSort([
+        [
+          'name' => 'title',
+          'direction' => 'ASC',
+          'weight' => 0,
+        ],
+      ]);
     }
 
     $ajax_wrapper_id = 'list-page-configuration-' . ($form['#parents'] ? '-' . implode('-', $form['#parents']) : '');
@@ -147,19 +152,18 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
 
     $selected_entity_type = $form_state->has('entity_type') ? $form_state->get('entity_type') : $entity_type_id;
     $selected_bundle = $form_state->has('bundle') ? $form_state->get('bundle') : $entity_type_bundle;
-    $selected_sort = $form_state->has('sort') ? $form_state->get('sort') : $configuration_sort;
     $selected_exposed_sort = $form_state->has('exposed_sort') ? $form_state->get('exposed_sort') : $configuration_exposed_sort;
+
     if (!$form_state->has('entity_type')) {
       $form_state->set('entity_type', $selected_entity_type);
     }
 
+    // Entity type selection.
     $form['wrapper']['entity_type'] = [
       '#type' => 'select',
       '#title' => $this->t('Source entity type'),
       '#description' => $this->t('Select the entity type that will be used as the source for this list.'),
       '#options' => $entity_type_options,
-      // If there is no selection, the default entity type will be Node, due to
-      // self::fillDefaultEntityMetaValues().
       '#default_value' => $selected_entity_type,
       '#empty_value' => '',
       '#required' => TRUE,
@@ -171,16 +175,14 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
       '#executes_submit_callback' => TRUE,
       '#submit' => [[$this, 'entityTypeSelectSubmit']],
       '#limit_validation_errors' => [
-        array_merge($form['#parents'], [
-          'wrapper',
-          'entity_type',
-        ]),
+        array_merge($form['#parents'], ['wrapper', 'entity_type']),
       ],
     ];
 
     if (!empty($selected_entity_type)) {
       $bundle_options = $this->getBundleOptions($selected_entity_type);
 
+      // Bundle selection.
       $form['wrapper']['bundle'] = [
         '#type' => 'select',
         '#title' => $this->t('Source bundle'),
@@ -196,10 +198,7 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
         '#executes_submit_callback' => TRUE,
         '#submit' => [[$this, 'bundleSelectSubmit']],
         '#limit_validation_errors' => [
-          array_merge($form['#parents'], [
-            'wrapper',
-            'bundle',
-          ]),
+          array_merge($form['#parents'], ['wrapper', 'bundle']),
         ],
         '#process' => [
           [Select::class, 'processSelect'],
@@ -212,29 +211,20 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
         return $form;
       }
 
-      // Try to get the list source for the selected entity type and bundle.
+      // Get the list source for the selected entity type and bundle.
       $list_source = $this->listSourceFactory->get($selected_entity_type, $selected_bundle);
 
       if ($list_source) {
-        $sort_options = $this->sortOptionsResolver->getSortOptions($list_source);
         $form_state->set('default_bundle_sort', $this->sortOptionsResolver->getBundleDefaultSort($list_source));
-        if ($selected_sort && !isset($sort_options[$selected_sort])) {
-          // In case we no longer have the sort option, we should not show
-          // any default value.
-          $selected_sort = NULL;
-        }
-        $form['wrapper']['sort'] = [
-          '#type' => 'select',
-          '#options' => $sort_options,
-          '#title' => $this->t('Sort'),
-          '#default_value' => $selected_sort,
-          '#access' => count($sort_options) > 1,
-        ];
 
+        // Sort criteria table with drag-and-drop support.
+        $this->buildSortCriteria($form['wrapper'], $form_state, $list_source);
+
+        // Expose sort checkbox (only if multiple sort criteria are allowed).
         $form['wrapper']['exposed_sort'] = [
           '#type' => 'checkbox',
           '#title' => $this->t('Expose sort'),
-          '#description' => $this->t('Check this box if you would like sorting options to be exposed. Please note that frontend sorting options may differ from the ones available in the backend.'),
+          '#description' => $this->t('Check this box if you would like sorting options to be exposed.'),
           '#default_value' => $selected_exposed_sort,
           '#access' => $this->sortOptionsResolver->isExposedSortAllowed($list_source),
         ];
@@ -245,14 +235,13 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
         $exposed_filters = $this->getExposedFilters($list_source);
         $exposed_filters_overridden = $this->areExposedFiltersOverridden($list_source);
         $bundle_default_exposed_filters = $this->getBundleDefaultExposedFilters($list_source);
+
         if (!$exposed_filters_overridden && !$exposed_filters) {
-          // If the exposed filters are not overridden, the configuration should
-          // be empty so we want to default to the defaults set in the bundle
-          // third party setting.
+          // If exposed filters are not overridden, default to bundle settings.
           $exposed_filters = $bundle_default_exposed_filters;
         }
 
-        // Override checkbox.
+        // Override checkbox for exposed filters.
         $form['wrapper']['exposed_filters_override'] = [
           '#type' => 'checkbox',
           '#title' => $this->t('Override default exposed filters'),
@@ -266,6 +255,7 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
           'wrapper',
           'exposed_filters_override',
         ])) . ']';
+
         $form['wrapper']['exposed_filters'] = [
           '#type' => 'checkboxes',
           '#title' => $this->t('Exposed filters'),
@@ -281,15 +271,17 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
         if ($this->getConfiguration()->areDefaultFilterValuesAllowed()) {
           $parents = $form['#parents'] ?? [];
           $form['wrapper']['default_filter_values'] = [
-            '#parents' => array_merge($parents, [
-              'wrapper',
-              'default_filter_values',
-            ]),
+            '#parents' => array_merge($parents, ['wrapper', 'default_filter_values']),
             '#tree' => TRUE,
           ];
 
           $subform_state = SubformState::createForSubform($form['wrapper']['default_filter_values'], $form, $form_state);
-          $form['wrapper']['default_filter_values'] = $this->presetFiltersBuilder->buildDefaultFilters($form['wrapper']['default_filter_values'], $subform_state, $list_source, $this->getConfiguration());
+          $form['wrapper']['default_filter_values'] = $this->presetFiltersBuilder->buildDefaultFilters(
+            $form['wrapper']['default_filter_values'],
+            $subform_state,
+            $list_source,
+            $this->getConfiguration()
+          );
         }
       }
     }
@@ -401,41 +393,59 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
       'default_filter_values',
       'current_filters',
     ], []));
+
+    // Save entity type and bundle.
     $this->configuration->setEntityType($entity_type);
     $this->configuration->setBundle($entity_bundle);
     $this->configuration->setExposedFiltersOverridden($exposed_filters_overridden);
     $this->configuration->setDefaultFilterValues($default_filter_values);
+
     if (!$exposed_filters_overridden) {
       $exposed_filters = [];
     }
 
-    $sort = $form_state->getValue(['wrapper', 'sort']);
+    // Process sort criteria (multi-sort support).
+    $sort_criteria = [];
+    foreach ($form_state->getValue(['wrapper', 'default_sort', 'criteria'], []) as $criterion) {
+      if (!empty($criterion['name'])) {
+        $sort_criteria[] = [
+          'name' => $criterion['name'],
+          'direction' => $criterion['direction'] ?? 'ASC',
+          'weight' => $criterion['weight'] ?? 0,
+        ];
+      }
+    }
+
+    // Sort by weight before saving.
+    uasort($sort_criteria, function ($a, $b) {
+      return $a['weight'] <=> $b['weight'];
+    });
+    // Save sort configuration.
+    $this->configuration->setDefaultSort($sort_criteria);
+
+    // Get default bundle sort for comparison.
     $default_bundle_sort = $form_state->get('default_bundle_sort');
     if ($default_bundle_sort) {
-      // In case a bundle is not properly configured with a default sort, we
-      // need to check if the value is there before we generate a machine name.
       $default_bundle_sort = ListPageSortOptionsResolver::generateSortMachineName($default_bundle_sort);
     }
 
-    if ($sort) {
-      [$name, $direction] = explode('__', $sort);
-      $this->configuration->setSort([
-        'name' => $name,
-        'direction' => strtoupper($direction),
+    // Check if the configured sort matches the default bundle sort.
+    if (count($sort_criteria) === 1) {
+      // Backward compatibility, if the single criterion matches the default.
+      $single_criterion = reset($sort_criteria);
+      ListPageSortOptionsResolver::generateSortMachineName([
+        'name' => $single_criterion['name'],
+        'direction' => $single_criterion['direction'],
       ]);
     }
 
-    if ($sort === $default_bundle_sort || $sort == "") {
-      // If the user configured the default bundle sort, we remove the value
-      // from the configuration in case later we change the defaults, we want
-      // the defaults to still take effect.
-      $this->configuration->setSort([]);
-    }
+    // Save exposed sort setting.
     $this->configuration->setExposedSort((bool) $form_state->getValue([
       'wrapper',
       'exposed_sort',
     ]));
 
+    // Save exposed filters.
     $this->configuration->setExposedFilters($exposed_filters);
   }
 
@@ -639,6 +649,232 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
    */
   public static function generateSortMachineName(array $sort): string {
     return ListPageSortOptionsResolver::generateSortMachineName($sort);
+  }
+
+  /**
+   * Builds the sort criteria table with drag-and-drop support.
+   *
+   * @param array $form
+   *   The form array (the 'wrapper' container).
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
+   *   The list source.
+   */
+  protected function buildSortCriteria(array &$form, FormStateInterface $form_state, ListSourceInterface $list_source): void {
+    $wrapper_id = $this->getSortWrapperId();
+    $sort_criteria = $this->getSortCriteria($form_state);
+    $field_options = $this->getSortFieldOptions($list_source);
+
+    $form['default_sort'] = [
+      '#type' => 'container',
+      '#tree' => TRUE,
+      '#attributes' => ['id' => $wrapper_id],
+    ];
+
+    $form['default_sort']['criteria'] = [
+      '#type' => 'table',
+      '#tree' => TRUE,
+      '#header' => [
+        $this->t('Field'),
+        $this->t('Direction'),
+        ['data' => $this->t('Weight'), 'class' => ['element-hidden']],
+        $this->t('Operations'),
+      ],
+      '#empty' => $this->t('No sort criteria defined.'),
+      '#tabledrag' => [
+        [
+          'action' => 'order',
+          'relationship' => 'sibling',
+          'group' => 'sort-criteria-weight',
+        ],
+      ],
+    ];
+
+    // Sort criteria by weight for display order.
+    uasort($sort_criteria, fn($a, $b) => ($a['weight'] ?? 0) <=> ($b['weight'] ?? 0));
+
+    foreach ($sort_criteria as $delta => $criterion) {
+      $form['default_sort']['criteria'][$delta] = [
+        '#attributes' => ['class' => ['draggable']],
+        'name' => [
+          '#type' => 'select',
+          '#title' => $this->t('Field'),
+          '#title_display' => 'invisible',
+          '#options' => $field_options,
+          '#default_value' => $criterion['name'] ?? '',
+        ],
+        'direction' => [
+          '#type' => 'select',
+          '#title' => $this->t('Direction'),
+          '#title_display' => 'invisible',
+          '#options' => [
+            'ASC' => $this->t('Ascending'),
+            'DESC' => $this->t('Descending'),
+          ],
+          '#default_value' => $criterion['direction'] ?? 'ASC',
+        ],
+        'weight' => [
+          '#type' => 'weight',
+          '#title' => $this->t('Weight'),
+          '#title_display' => 'invisible',
+          '#default_value' => $criterion['weight'] ?? $delta,
+          '#attributes' => ['class' => ['sort-criteria-weight']],
+        ],
+        'operations' => [
+          '#type' => 'submit',
+          '#value' => $this->t('Remove'),
+          '#name' => 'remove_sort_criterion_' . $delta,
+          '#submit' => [[$this, 'removeSortCriterion']],
+          '#ajax' => [
+            'callback' => [$this, 'updateSortCriteria'],
+            'wrapper' => $wrapper_id,
+          ],
+          '#limit_validation_errors' => [],
+        ],
+      ];
+    }
+
+    $form['default_sort']['add_criterion'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Add sort criterion'),
+      '#submit' => [[$this, 'addSortCriterion']],
+      '#ajax' => [
+        'callback' => [$this, 'updateSortCriteria'],
+        'wrapper' => $wrapper_id,
+      ],
+      '#limit_validation_errors' => [],
+    ];
+  }
+
+  /**
+   * Gets the current sort criteria from form state or configuration.
+   *
+   * After an add/remove AJAX round-trip the updated array is stored in
+   * form_state storage so that it survives the rebuild.  On initial load
+   * the saved configuration is used instead.
+   *
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   *
+   * @return array
+   *   The sort criteria.
+   */
+  protected function getSortCriteria(FormStateInterface $form_state): array {
+    if ($form_state->has('sort_criteria')) {
+      return $form_state->get('sort_criteria');
+    }
+
+    return $this->configuration->getDefaultSort() ?: [];
+  }
+
+  /**
+   * Gets the AJAX wrapper ID for sort criteria.
+   *
+   * @return string
+   *   The wrapper ID.
+   */
+  protected function getSortWrapperId(): string {
+    return 'list-page-sort-criteria';
+  }
+
+  /**
+   * Form submission handler for adding a new sort criterion.
+   *
+   * @param array $form
+   *   The form array.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   */
+  public function addSortCriterion(array &$form, FormStateInterface $form_state): void {
+    // Capture submitted values so any in-flight edits are preserved.
+    $sort_criteria = $form_state->getValue(['wrapper', 'default_sort', 'criteria'], []);
+    if (empty($sort_criteria)) {
+      $sort_criteria = $this->configuration->getDefaultSort() ?: [];
+    }
+
+    $sort_criteria[] = [
+      'name' => '',
+      'direction' => 'ASC',
+      'weight' => count($sort_criteria),
+    ];
+
+    $form_state->set('sort_criteria', $sort_criteria);
+    $form_state->setRebuild();
+  }
+
+  /**
+   * Form submission handler for removing a sort criterion.
+   *
+   * @param array $form
+   *   The form array.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   */
+  public function removeSortCriterion(array &$form, FormStateInterface $form_state): void {
+    $triggering_element = $form_state->getTriggeringElement();
+    $delta = (int) str_replace('remove_sort_criterion_', '', $triggering_element['#name']);
+
+    $sort_criteria = $form_state->getValue(['wrapper', 'default_sort', 'criteria'], []);
+    unset($sort_criteria[$delta]);
+
+    // Reindex and reassign sequential weights.
+    $sort_criteria = array_values($sort_criteria);
+    foreach ($sort_criteria as $i => &$criterion) {
+      $criterion['weight'] = $i;
+    }
+
+    $form_state->set('sort_criteria', $sort_criteria);
+    $form_state->setRebuild();
+  }
+
+  /**
+   * Gets available sort field options for the select element.
+   *
+   * The sort options resolver returns options keyed as "field__DIRECTION".
+   * This method extracts unique field names since the direction is handled
+   * by a separate select in each table row.
+   *
+   * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
+   *   The list source.
+   *
+   * @return array
+   *   Field options keyed by field name.
+   */
+  protected function getSortFieldOptions(ListSourceInterface $list_source): array {
+    $sort_options = $this->sortOptionsResolver->getSortOptions($list_source);
+    $field_options = [];
+    foreach ($sort_options as $machine_name => $label) {
+      $field_name = explode('__', $machine_name)[0];
+      if (!isset($field_options[$field_name])) {
+        $field_options[$field_name] = $label;
+      }
+    }
+
+    return $field_options;
+  }
+
+  /**
+   * AJAX callback to update the sort criteria table.
+   *
+   * Simply returns the rebuilt container element that carries the AJAX
+   * wrapper ID.  The form has already been rebuilt at this point because
+   * both add and remove callbacks call setRebuild().
+   *
+   * @param array $form
+   *   The form array.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   *
+   * @return array
+   *   The updated sort criteria container.
+   */
+  public function updateSortCriteria(array &$form, FormStateInterface $form_state): array {
+    $triggering_element = $form_state->getTriggeringElement();
+    $parents = $triggering_element['#array_parents'];
+    $index = array_search('default_sort', $parents);
+
+    return NestedArray::getValue($form, array_slice($parents, 0, $index + 1));
   }
 
 }

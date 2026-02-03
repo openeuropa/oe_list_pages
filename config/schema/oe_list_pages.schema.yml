@@ -33,15 +33,21 @@ oe_list_pages.bundle_third_party_settings:
       type: string
       label: 'The view mode to use when rendering the item in a list'
     default_sort:
-      type: mapping
+      type: sequence
       label: 'Sorting criteria'
-      mapping:
-        name:
-          type: string
-          label: 'The field to sort by'
-        direction:
-          type: string
-          label: 'The direction of the sorting'
+      sequence:
+        type: mapping
+        label: 'Sort criterion'
+        mapping:
+          name:
+            type: string
+            label: 'The field to sort by'
+          direction:
+            type: string
+            label: 'The direction of the sorting'
+          weight:
+            type: integer
+            label: 'Weight for sorting'
     default_exposed_filters:
       type: sequence
       label: 'Exposed filters'

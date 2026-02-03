@@ -83,6 +83,15 @@ class ListPageConfiguration {
    */
   protected $sort = [];
 
+  /**
+   * The default sorting type for the query.
+   *
+   * Array with 3 values keyed 'name', 'weight' and 'direction'.
+   *
+   * @var array
+   */
+  protected $defaultSort = [];
+
   // phpcs:disable Drupal.NamingConventions.ValidVariableName.LowerCamelName
   /**
    * Whether the sort is exposed to the frontend.
@@ -290,6 +299,32 @@ class ListPageConfiguration {
    */
   public function setDefaultFilterValues(array $default_filter_values): void {
     $this->default_filter_values = $default_filter_values;
+  }
+
+  /**
+   * Gets the default sort criteria.
+   *
+   * @return array
+   *   An array of sort criteria, each containing:
+   *   - name: The field name.
+   *   - direction: The sort direction (ASC/DESC).
+   *   - weight: The sort weight (for ordering).
+   */
+  public function getDefaultSort(): array {
+    return !empty($this->defaultSort) ? $this->defaultSort : [];
+  }
+
+  /**
+   * Sets the default sort criteria.
+   *
+   * @param array $sort_criteria
+   *   An array of sort criteria, each containing:
+   *   - name: The field name.
+   *   - direction: The sort direction (ASC/DESC).
+   *   - weight: The sort weight (for ordering).
+   */
+  public function setDefaultSort(array $sort_criteria): void {
+    $this->defaultSort = $sort_criteria;
   }
 
   /**
