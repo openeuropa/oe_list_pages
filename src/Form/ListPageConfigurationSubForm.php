@@ -140,6 +140,7 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
     $entity_type_bundle = $this->configuration->getBundle();
     $configuration_exposed_sort = $this->configuration->isExposedSort();
 
+
     // Initialize sort criteria if not set (backward compatibility).
     $sort_criteria = $this->configuration->getDefaultSort();
     if (empty($sort_criteria)) {
@@ -229,7 +230,8 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
         $form_state->set('default_bundle_sort', $this->sortOptionsResolver->getBundleDefaultSort($list_source));
 
         // Sort criteria table with drag-and-drop support.
-        $this->buildSortCriteria($form['wrapper'], $form_state, $list_source);
+        $form_parents = $form['#parents'] ?? [];
+        $this->buildSortCriteria($form['wrapper'], $form_state, $list_source, $form_parents);
 
         // Expose sort checkbox (only if multiple sort criteria are allowed).
         $form['wrapper']['exposed_sort'] = [
@@ -421,9 +423,23 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
       $exposed_filters = [];
     }
 
-    // Process sort criteria (multi-sort support).
+    // Process promotion settings.
+    $promotion = $this->collectPromotionFromFormState($form_state);
+    if (!empty($promotion['enabled']) && !empty($promotion['values'])) {
+      // Filter out incomplete rows (missing field or value).
+      $promotion['values'] = array_filter($promotion['values'], function ($pv) {
+        return !empty($pv['field']) && !empty($pv['value']);
+      });
+      // Sort promoted values by weight.
+      uasort($promotion['values'], fn($a, $b) => ($a['weight'] ?? 0) <=> ($b['weight'] ?? 0));
+      $promotion['values'] = array_values($promotion['values']);
+    }
+    $this->configuration->setPromotion($promotion);
+
+    // Process sort criteria.
+    $raw_criteria = $this->collectSortCriteriaFromFormState($form_state);
     $sort_criteria = [];
-    foreach ($form_state->getValue(['wrapper', 'default_sort', 'criteria'], []) as $criterion) {
+    foreach ($raw_criteria as $criterion) {
       if (!empty($criterion['name'])) {
         $sort_criteria[] = [
           'name' => $criterion['name'],
@@ -434,27 +450,8 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
     }
 
     // Sort by weight before saving.
-    uasort($sort_criteria, function ($a, $b) {
-      return $a['weight'] <=> $b['weight'];
-    });
-    // Save sort configuration.
-    $this->configuration->setDefaultSort($sort_criteria);
-
-    // Get default bundle sort for comparison.
-    $default_bundle_sort = $form_state->get('default_bundle_sort');
-    if ($default_bundle_sort) {
-      $default_bundle_sort = ListPageSortOptionsResolver::generateSortMachineName($default_bundle_sort);
-    }
-
-    // Check if the configured sort matches the default bundle sort.
-    if (count($sort_criteria) === 1) {
-      // Backward compatibility, if the single criterion matches the default.
-      $single_criterion = reset($sort_criteria);
-      ListPageSortOptionsResolver::generateSortMachineName([
-        'name' => $single_criterion['name'],
-        'direction' => $single_criterion['direction'],
-      ]);
-    }
+    uasort($sort_criteria, fn($a, $b) => ($a['weight'] ?? 0) <=> ($b['weight'] ?? 0));
+    $this->configuration->setDefaultSort(array_values($sort_criteria));
 
     // Save exposed sort setting.
     $this->configuration->setExposedSort((bool) $form_state->getValue([
@@ -669,7 +666,12 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
   }
 
   /**
-   * Builds the sort criteria table with drag-and-drop support.
+   * Builds the promotion and sort criteria sections.
+   *
+   * Structure:
+   * 1. Sorting fieldset (wrapper)
+   *    1.1. Promotion section (optional) - items to show first
+   *    1.2. Sort criteria section - how to sort remaining items
    *
    * @param array $form
    *   The form array (the 'wrapper' container).
@@ -677,16 +679,179 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
    *   The form state.
    * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
    *   The list source.
+   * @param array $form_parents
+   *   The parent form's #parents array for building #states selectors.
    */
-  protected function buildSortCriteria(array &$form, FormStateInterface $form_state, ListSourceInterface $list_source): void {
+  protected function buildSortCriteria(array &$form, FormStateInterface $form_state, ListSourceInterface $list_source, array $form_parents = []): void {
     $wrapper_id = $this->getSortWrapperId();
-    $sort_criteria = $this->getSortCriteria($form_state);
     $field_options = $this->getSortFieldOptions($list_source);
 
-    $form['default_sort'] = [
-      '#type' => 'container',
+    $form['sorting_container'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Default sorting'),
+      '#open' => TRUE,
       '#tree' => TRUE,
       '#attributes' => ['id' => $wrapper_id],
+    ];
+
+    // ==========================================
+    // SECTION 1: PROMOTION (items to show first)
+    // ==========================================
+    $this->buildPromotionSection($form['sorting_container'], $form_state, $field_options, $form_parents, $wrapper_id);
+
+    // ==========================================
+    // SECTION 2: SORT CRITERIA (for other items)
+    // ==========================================
+    $this->buildSortSection($form['sorting_container'], $form_state, $field_options, $wrapper_id);
+  }
+
+  /**
+   * Builds the promotion section of the form.
+   *
+   * @param array $form
+   *   The form array (the sorting_container).
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   * @param array $field_options
+   *   Available field options.
+   * @param array $form_parents
+   *   The parent form's #parents array.
+   * @param string $wrapper_id
+   *   The AJAX wrapper ID.
+   */
+  protected function buildPromotionSection(array &$form, FormStateInterface $form_state, array $field_options, array $form_parents, string $wrapper_id): void {
+    $promotion = $this->getPromotionFromState($form_state);
+    $promotion_enabled = !empty($promotion['enabled']);
+    $promoted_values = $promotion['values'] ?? [];
+
+    // Build checkbox name for #states.
+    $checkbox_name = $this->buildFormElementName(array_merge($form_parents, [
+      'wrapper',
+      'sorting_container',
+      'promotion',
+      'enabled',
+    ]));
+
+    $form['promotion'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Promotion (highlight specific items first)'),
+      '#open' => $promotion_enabled,
+      '#tree' => TRUE,
+    ];
+
+    $form['promotion']['enabled'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Promote specific values first'),
+      '#description' => $this->t('Items matching promoted values will appear at the top of the list, before sorted items.'),
+      '#default_value' => $promotion_enabled,
+    ];
+
+    $form['promotion']['settings'] = [
+      '#type' => 'container',
+      '#states' => [
+        'visible' => [
+          ':input[name="' . $checkbox_name . '"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+
+    $form['promotion']['settings']['values'] = [
+      '#type' => 'table',
+      '#tree' => TRUE,
+      '#header' => [
+        $this->t('Field'),
+        $this->t('Value to promote'),
+        ['data' => $this->t('Weight'), 'class' => ['element-hidden']],
+        $this->t('Operations'),
+      ],
+      '#empty' => $this->t('No promoted values. Add values that should appear first.'),
+      '#tabledrag' => [
+        [
+          'action' => 'order',
+          'relationship' => 'sibling',
+          'group' => 'promoted-value-weight',
+        ],
+      ],
+    ];
+
+    // Sort by weight.
+    if (!empty($promoted_values)) {
+      uasort($promoted_values, fn($a, $b) => ($a['weight'] ?? 0) <=> ($b['weight'] ?? 0));
+    }
+
+    foreach ($promoted_values as $pv_delta => $pv) {
+      $form['promotion']['settings']['values'][$pv_delta] = [
+        '#attributes' => ['class' => ['draggable']],
+        'field' => [
+          '#type' => 'select',
+          '#title' => $this->t('Field'),
+          '#title_display' => 'invisible',
+          '#options' => ['' => $this->t('- Select field -')] + $field_options,
+          '#default_value' => $pv['field'] ?? '',
+        ],
+        'value' => [
+          '#type' => 'textfield',
+          '#title' => $this->t('Value'),
+          '#title_display' => 'invisible',
+          '#default_value' => $pv['value'] ?? '',
+          '#size' => 30,
+          '#placeholder' => $this->t('Enter exact value to promote'),
+        ],
+        'weight' => [
+          '#type' => 'weight',
+          '#title' => $this->t('Weight'),
+          '#title_display' => 'invisible',
+          '#default_value' => $pv['weight'] ?? $pv_delta,
+          '#attributes' => ['class' => ['promoted-value-weight']],
+        ],
+        'remove' => [
+          '#type' => 'submit',
+          '#value' => $this->t('Remove'),
+          '#name' => 'remove_promoted_value_' . $pv_delta,
+          '#submit' => [[$this, 'removePromotedValue']],
+          '#ajax' => [
+            'callback' => [$this, 'updateSortCriteria'],
+            'wrapper' => $wrapper_id,
+          ],
+          '#limit_validation_errors' => [],
+        ],
+      ];
+    }
+
+    $form['promotion']['settings']['add_promoted'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Add promoted value'),
+      '#name' => 'add_promoted_value',
+      '#submit' => [[$this, 'addPromotedValue']],
+      '#ajax' => [
+        'callback' => [$this, 'updateSortCriteria'],
+        'wrapper' => $wrapper_id,
+      ],
+      '#limit_validation_errors' => [],
+    ];
+  }
+
+  /**
+   * Builds the sort criteria section of the form.
+   *
+   * @param array $form
+   *   The form array (the sorting_container).
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   * @param array $field_options
+   *   Available field options.
+   * @param string $wrapper_id
+   *   The AJAX wrapper ID.
+   */
+  protected function buildSortSection(array &$form, FormStateInterface $form_state, array $field_options, string $wrapper_id): void {
+    $sort_criteria = $this->getSortCriteria($form_state);
+
+    $form['default_sort'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Sort criteria'),
+      '#description' => $this->t('Define how items are sorted. Promoted items (if any) will appear first, then remaining items will be sorted according to these criteria.'),
+      '#open' => TRUE,
+      '#tree' => TRUE,
     ];
 
     $form['default_sort']['criteria'] = [
@@ -708,7 +873,7 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
       ],
     ];
 
-    // Sort criteria by weight for display order.
+    // Sort by weight.
     uasort($sort_criteria, fn($a, $b) => ($a['weight'] ?? 0) <=> ($b['weight'] ?? 0));
 
     foreach ($sort_criteria as $delta => $criterion) {
@@ -765,6 +930,39 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
   }
 
   /**
+   * Gets the promotion settings from form state or configuration.
+   *
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   *
+   * @return array
+   *   The promotion settings.
+   */
+  protected function getPromotionFromState(FormStateInterface $form_state): array {
+    if ($form_state->has('promotion')) {
+      return $form_state->get('promotion');
+    }
+    return $this->configuration->getPromotion() ?: [];
+  }
+
+  /**
+   * Builds a form element name from an array of parents.
+   *
+   * @param array $parents
+   *   The array of parent keys.
+   *
+   * @return string
+   *   The form element name (e.g., "parent[child][subchild]").
+   */
+  protected function buildFormElementName(array $parents): string {
+    $first = array_shift($parents);
+    if (empty($parents)) {
+      return $first;
+    }
+    return $first . '[' . implode('][', $parents) . ']';
+  }
+
+  /**
    * Gets the current sort criteria from form state or configuration.
    *
    * After an add/remove AJAX round-trip the updated array is stored in
@@ -804,11 +1002,8 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
    *   The form state.
    */
   public function addSortCriterion(array &$form, FormStateInterface $form_state): void {
-    // Capture submitted values so any in-flight edits are preserved.
-    $sort_criteria = $form_state->getValue(['wrapper', 'default_sort', 'criteria'], []);
-    if (empty($sort_criteria)) {
-      $sort_criteria = $this->configuration->getDefaultSort() ?: [];
-    }
+    $sort_criteria = $this->collectSortCriteriaFromFormState($form_state);
+    $this->collectPromotionFromFormState($form_state);
 
     $sort_criteria[] = [
       'name' => '',
@@ -830,13 +1025,12 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
    */
   public function removeSortCriterion(array &$form, FormStateInterface $form_state): void {
     $triggering_element = $form_state->getTriggeringElement();
-    // Extract delta from #array_parents since #name is overwritten by #tree.
-    // Parents: [..., 'default_sort', 'criteria', $delta, 'operations'].
     $parents = $triggering_element['#array_parents'];
     $criteria_index = array_search('criteria', $parents);
     $delta = $parents[$criteria_index + 1];
 
-    $sort_criteria = $form_state->getValue(['wrapper', 'default_sort', 'criteria'], []);
+    $sort_criteria = $this->collectSortCriteriaFromFormState($form_state);
+    $this->collectPromotionFromFormState($form_state);
     unset($sort_criteria[$delta]);
 
     // Reindex and reassign sequential weights.
@@ -847,6 +1041,131 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
 
     $form_state->set('sort_criteria', $sort_criteria);
     $form_state->setRebuild();
+  }
+
+  /**
+   * Form submission handler for adding a promoted value.
+   *
+   * @param array $form
+   *   The form array.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   */
+  public function addPromotedValue(array &$form, FormStateInterface $form_state): void {
+    $promotion = $this->collectPromotionFromFormState($form_state);
+    $this->collectSortCriteriaFromFormState($form_state);
+
+    $promotion['values'][] = [
+      'field' => '',
+      'value' => '',
+      'weight' => count($promotion['values'] ?? []),
+    ];
+
+    $form_state->set('promotion', $promotion);
+    $form_state->setRebuild();
+  }
+
+  /**
+   * Form submission handler for removing a promoted value.
+   *
+   * @param array $form
+   *   The form array.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   */
+  public function removePromotedValue(array &$form, FormStateInterface $form_state): void {
+    $triggering_element = $form_state->getTriggeringElement();
+    $button_name = $triggering_element['#name'];
+    preg_match('/remove_promoted_value_(\d+)/', $button_name, $matches);
+    $pv_delta = (int) $matches[1];
+
+    $promotion = $this->collectPromotionFromFormState($form_state);
+    $this->collectSortCriteriaFromFormState($form_state);
+
+    if (isset($promotion['values'][$pv_delta])) {
+      unset($promotion['values'][$pv_delta]);
+      $promotion['values'] = array_values($promotion['values']);
+      foreach ($promotion['values'] as $i => &$pv) {
+        $pv['weight'] = $i;
+      }
+    }
+
+    $form_state->set('promotion', $promotion);
+    $form_state->setRebuild();
+  }
+
+  /**
+   * Collects sort criteria from form state.
+   *
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   *
+   * @return array
+   *   The sort criteria array.
+   */
+  protected function collectSortCriteriaFromFormState(FormStateInterface $form_state): array {
+    $criteria_values = $form_state->getValue(['wrapper', 'sorting_container', 'default_sort', 'criteria'], []);
+    if (empty($criteria_values) || !is_array($criteria_values)) {
+      $sort_criteria = $this->configuration->getDefaultSort() ?: [];
+      $form_state->set('sort_criteria', $sort_criteria);
+      return $sort_criteria;
+    }
+
+    $sort_criteria = [];
+    foreach ($criteria_values as $delta => $row) {
+      if (!is_array($row)) {
+        continue;
+      }
+      $sort_criteria[$delta] = [
+        'name' => $row['name'] ?? '',
+        'direction' => $row['direction'] ?? 'ASC',
+        'weight' => $row['weight'] ?? $delta,
+      ];
+    }
+
+    $form_state->set('sort_criteria', $sort_criteria);
+    return $sort_criteria;
+  }
+
+  /**
+   * Collects promotion settings from form state.
+   *
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   *
+   * @return array
+   *   The promotion settings.
+   */
+  protected function collectPromotionFromFormState(FormStateInterface $form_state): array {
+    $promo_values = $form_state->getValue(['wrapper', 'sorting_container', 'promotion'], []);
+    if (empty($promo_values) || !is_array($promo_values)) {
+      $promotion = $this->configuration->getPromotion() ?: [];
+      $form_state->set('promotion', $promotion);
+      return $promotion;
+    }
+
+    $promotion = [
+      'enabled' => !empty($promo_values['enabled']),
+      'values' => [],
+    ];
+
+    $values = $promo_values['settings']['values'] ?? [];
+    if (is_array($values)) {
+      foreach ($values as $pv_delta => $pv) {
+        if (is_array($pv)) {
+          // Keep all rows during collection (even incomplete ones for AJAX).
+          // Filtering happens in submitForm.
+          $promotion['values'][] = [
+            'field' => $pv['field'] ?? '',
+            'value' => $pv['value'] ?? '',
+            'weight' => $pv['weight'] ?? $pv_delta,
+          ];
+        }
+      }
+    }
+
+    $form_state->set('promotion', $promotion);
+    return $promotion;
   }
 
   /**
@@ -942,7 +1261,12 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
   public function updateSortCriteria(array &$form, FormStateInterface $form_state): array {
     $triggering_element = $form_state->getTriggeringElement();
     $parents = $triggering_element['#array_parents'];
-    $index = array_search('default_sort', $parents);
+    // Find the sorting_container in the parents array.
+    $index = array_search('sorting_container', $parents);
+    if ($index === FALSE) {
+      // Fallback to default_sort for backward compatibility.
+      $index = array_search('default_sort', $parents);
+    }
 
     return NestedArray::getValue($form, array_slice($parents, 0, $index + 1));
   }

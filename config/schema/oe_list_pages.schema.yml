@@ -32,9 +32,32 @@ oe_list_pages.bundle_third_party_settings:
     default_view_mode:
       type: string
       label: 'The view mode to use when rendering the item in a list'
+    promotion:
+      type: mapping
+      label: 'Promotion settings (items to show first)'
+      mapping:
+        enabled:
+          type: boolean
+          label: 'Enable promotion'
+        values:
+          type: sequence
+          label: 'Values to promote (shown first in specified order)'
+          sequence:
+            type: mapping
+            label: 'Promoted value'
+            mapping:
+              field:
+                type: string
+                label: 'The field to check for this value'
+              value:
+                type: string
+                label: 'The value to promote'
+              weight:
+                type: integer
+                label: 'Order weight for this promoted value'
     default_sort:
       type: sequence
-      label: 'Sorting criteria'
+      label: 'Sorting criteria (for non-promoted items)'
       sequence:
         type: mapping
         label: 'Sort criterion'
