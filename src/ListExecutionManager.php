@@ -135,7 +135,25 @@ class ListExecutionManager implements ListExecutionManagerInterface {
 
     // Get promotion settings.
     $promotion = $configuration->getPromotion();
-    $has_promotion = !empty($promotion['enabled']) && !empty($promotion['values']);
+
+    // Backward compatibility: convert old 'values' format to new 'rules' format.
+    if (!empty($promotion['values']) && empty($promotion['rules'])) {
+      $promotion['rules'] = [];
+      foreach ($promotion['values'] as $pv) {
+        $promotion['rules'][] = [
+          'weight' => $pv['weight'] ?? 0,
+          'conditions' => [
+            [
+              'field' => $pv['field'] ?? '',
+              'operator' => '=',
+              'value' => $pv['value'] ?? '',
+            ],
+          ],
+        ];
+      }
+    }
+
+    $has_promotion = !empty($promotion['enabled']) && !empty($promotion['rules']);
 
     // If promotion is enabled, we need a different approach:
     // 1. First fetch promoted items (for page 0 display and to know what to exclude)
@@ -213,8 +231,12 @@ class ListExecutionManager implements ListExecutionManagerInterface {
 
     // Step 1: Always fetch ALL promoted items first (we need to know the count
     // for pagination offset calculation, and their IDs to exclude them).
-    foreach ($promotion['values'] as $pv) {
-      if (empty($pv['field']) || !isset($pv['value']) || $pv['value'] === '') {
+    // Each rule can have multiple conditions (combined with AND).
+    $rules = $promotion['rules'] ?? [];
+
+    foreach ($rules as $rule) {
+      $conditions = $rule['conditions'] ?? [];
+      if (empty($conditions)) {
         continue;
       }
 
@@ -229,8 +251,24 @@ class ListExecutionManager implements ListExecutionManagerInterface {
         'extra' => $extra,
       ]);
 
-      // Add condition for the promoted field value.
-      $promo_query->addCondition($pv['field'], $pv['value']);
+      // Add all conditions for this rule (AND logic).
+      foreach ($conditions as $condition) {
+        if (empty($condition['field'])) {
+          continue;
+        }
+
+        $field = $condition['field'];
+        $operator = $condition['operator'] ?? '=';
+        $value = $condition['value'] ?? '';
+
+        // Handle special value "now" for date comparisons.
+        if (strtolower($value) === 'now') {
+          $value = date('Y-m-d\TH:i:s');
+        }
+
+        // Map operators to Search API operators.
+        $promo_query->addCondition($field, $value, $operator);
+      }
 
       $promo_result = $promo_query->execute();
       $promo_items_found = $promo_result->getResultItems();

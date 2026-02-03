@@ -425,15 +425,38 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
 
     // Process promotion settings.
     $promotion = $this->collectPromotionFromFormState($form_state);
-    if (!empty($promotion['enabled']) && !empty($promotion['values'])) {
-      // Filter out incomplete rows (missing field or value).
-      $promotion['values'] = array_filter($promotion['values'], function ($pv) {
-        return !empty($pv['field']) && !empty($pv['value']);
+
+    // Filter out rules with no valid conditions.
+    if (!empty($promotion['rules'])) {
+      $promotion['rules'] = array_filter($promotion['rules'], function ($rule) {
+        if (empty($rule['conditions'])) {
+          return FALSE;
+        }
+        // Keep rules that have at least one complete condition.
+        foreach ($rule['conditions'] as $cond) {
+          if (!empty($cond['field']) && isset($cond['value']) && $cond['value'] !== '') {
+            return TRUE;
+          }
+        }
+        return FALSE;
       });
-      // Sort promoted values by weight.
-      uasort($promotion['values'], fn($a, $b) => ($a['weight'] ?? 0) <=> ($b['weight'] ?? 0));
-      $promotion['values'] = array_values($promotion['values']);
+
+      // Filter out incomplete conditions within each rule.
+      foreach ($promotion['rules'] as &$rule) {
+        $rule['conditions'] = array_filter($rule['conditions'], function ($cond) {
+          return !empty($cond['field']) && isset($cond['value']) && $cond['value'] !== '';
+        });
+        $rule['conditions'] = array_values($rule['conditions']);
+      }
+
+      // Sort rules by weight.
+      uasort($promotion['rules'], fn($a, $b) => ($a['weight'] ?? 0) <=> ($b['weight'] ?? 0));
+      $promotion['rules'] = array_values($promotion['rules']);
     }
+
+    // Enabled is determined by whether there are valid rules.
+    $promotion['enabled'] = !empty($promotion['rules']);
+
     $this->configuration->setPromotion($promotion);
 
     // Process sort criteria.
@@ -721,94 +744,61 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
    */
   protected function buildPromotionSection(array &$form, FormStateInterface $form_state, array $field_options, array $form_parents, string $wrapper_id): void {
     $promotion = $this->getPromotionFromState($form_state);
-    $promotion_enabled = !empty($promotion['enabled']);
-    $promoted_values = $promotion['values'] ?? [];
-
-    // Build checkbox name for #states.
-    $checkbox_name = $this->buildFormElementName(array_merge($form_parents, [
-      'wrapper',
-      'sorting_container',
-      'promotion',
-      'enabled',
-    ]));
+    $rules = $promotion['rules'] ?? [];
 
     $form['promotion'] = [
       '#type' => 'details',
       '#title' => $this->t('Promotion (highlight specific items first)'),
-      '#open' => $promotion_enabled,
+      '#description' => $this->t('Items matching promotion rules will appear at the top of the list. Each rule can have multiple conditions (combined with AND).'),
+      '#open' => !empty($rules),
       '#tree' => TRUE,
     ];
 
-    $form['promotion']['enabled'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Promote specific values first'),
-      '#description' => $this->t('Items matching promoted values will appear at the top of the list, before sorted items.'),
-      '#default_value' => $promotion_enabled,
-    ];
-
-    $form['promotion']['settings'] = [
-      '#type' => 'container',
-      '#states' => [
-        'visible' => [
-          ':input[name="' . $checkbox_name . '"]' => ['checked' => TRUE],
-        ],
-      ],
-    ];
-
-    $form['promotion']['settings']['values'] = [
+    $form['promotion']['rules'] = [
       '#type' => 'table',
       '#tree' => TRUE,
       '#header' => [
-        $this->t('Field'),
-        $this->t('Value to promote'),
-        ['data' => $this->t('Weight'), 'class' => ['element-hidden']],
+        '',
+        $this->t('Conditions'),
+        $this->t('Weight'),
         $this->t('Operations'),
       ],
-      '#empty' => $this->t('No promoted values. Add values that should appear first.'),
+      '#empty' => $this->t('No promotion rules. Items will be displayed in default sort order.'),
       '#tabledrag' => [
         [
           'action' => 'order',
           'relationship' => 'sibling',
-          'group' => 'promoted-value-weight',
+          'group' => 'promotion-rule-weight',
         ],
       ],
     ];
 
-    // Sort by weight.
-    if (!empty($promoted_values)) {
-      uasort($promoted_values, fn($a, $b) => ($a['weight'] ?? 0) <=> ($b['weight'] ?? 0));
+    // Sort rules by weight.
+    if (!empty($rules)) {
+      uasort($rules, fn($a, $b) => ($a['weight'] ?? 0) <=> ($b['weight'] ?? 0));
     }
 
-    foreach ($promoted_values as $pv_delta => $pv) {
-      $form['promotion']['settings']['values'][$pv_delta] = [
+    $operator_options = $this->getOperatorOptions();
+
+    foreach ($rules as $rule_delta => $rule) {
+      $form['promotion']['rules'][$rule_delta] = [
         '#attributes' => ['class' => ['draggable']],
-        'field' => [
-          '#type' => 'select',
-          '#title' => $this->t('Field'),
-          '#title_display' => 'invisible',
-          '#options' => ['' => $this->t('- Select field -')] + $field_options,
-          '#default_value' => $pv['field'] ?? '',
+        'handle' => [
+          '#markup' => '',
         ],
-        'value' => [
-          '#type' => 'textfield',
-          '#title' => $this->t('Value'),
-          '#title_display' => 'invisible',
-          '#default_value' => $pv['value'] ?? '',
-          '#size' => 30,
-          '#placeholder' => $this->t('Enter exact value to promote'),
-        ],
+        'conditions_wrapper' => $this->buildRuleConditions($rule, $rule_delta, $field_options, $operator_options, $wrapper_id),
         'weight' => [
           '#type' => 'weight',
           '#title' => $this->t('Weight'),
           '#title_display' => 'invisible',
-          '#default_value' => $pv['weight'] ?? $pv_delta,
-          '#attributes' => ['class' => ['promoted-value-weight']],
+          '#default_value' => $rule['weight'] ?? $rule_delta,
+          '#attributes' => ['class' => ['promotion-rule-weight']],
         ],
-        'remove' => [
+        'operations' => [
           '#type' => 'submit',
-          '#value' => $this->t('Remove'),
-          '#name' => 'remove_promoted_value_' . $pv_delta,
-          '#submit' => [[$this, 'removePromotedValue']],
+          '#value' => $this->t('Remove rule'),
+          '#name' => 'remove_rule_' . $rule_delta,
+          '#submit' => [[$this, 'removePromotionRule']],
           '#ajax' => [
             'callback' => [$this, 'updateSortCriteria'],
             'wrapper' => $wrapper_id,
@@ -818,16 +808,124 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
       ];
     }
 
-    $form['promotion']['settings']['add_promoted'] = [
+    $form['promotion']['add_rule'] = [
       '#type' => 'submit',
-      '#value' => $this->t('Add promoted value'),
-      '#name' => 'add_promoted_value',
-      '#submit' => [[$this, 'addPromotedValue']],
+      '#value' => $this->t('Add promotion rule'),
+      '#name' => 'add_promotion_rule',
+      '#submit' => [[$this, 'addPromotionRule']],
       '#ajax' => [
         'callback' => [$this, 'updateSortCriteria'],
         'wrapper' => $wrapper_id,
       ],
       '#limit_validation_errors' => [],
+    ];
+  }
+
+  /**
+   * Builds the conditions sub-form for a promotion rule.
+   *
+   * @param array $rule
+   *   The rule data.
+   * @param int $rule_delta
+   *   The rule index.
+   * @param array $field_options
+   *   Available field options.
+   * @param array $operator_options
+   *   Available operator options.
+   * @param string $wrapper_id
+   *   The AJAX wrapper ID.
+   *
+   * @return array
+   *   The conditions form element.
+   */
+  protected function buildRuleConditions(array $rule, int $rule_delta, array $field_options, array $operator_options, string $wrapper_id): array {
+    $element = [
+      '#type' => 'container',
+      '#tree' => TRUE,
+    ];
+
+    $conditions = $rule['conditions'] ?? [];
+    foreach ($conditions as $cond_delta => $condition) {
+      $element[$cond_delta] = [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['condition-row']],
+      ];
+
+      if ($cond_delta > 0) {
+        $element[$cond_delta]['and_label'] = [
+          '#markup' => '<span class="condition-and">' . $this->t('AND') . '</span> ',
+        ];
+      }
+
+      $element[$cond_delta]['field'] = [
+        '#type' => 'select',
+        '#title' => $this->t('Field'),
+        '#title_display' => 'invisible',
+        '#options' => ['' => $this->t('- Field -')] + $field_options,
+        '#default_value' => $condition['field'] ?? '',
+      ];
+
+      $element[$cond_delta]['operator'] = [
+        '#type' => 'select',
+        '#title' => $this->t('Operator'),
+        '#title_display' => 'invisible',
+        '#options' => $operator_options,
+        '#default_value' => $condition['operator'] ?? '=',
+      ];
+
+      $element[$cond_delta]['value'] = [
+        '#type' => 'textfield',
+        '#title' => $this->t('Value'),
+        '#title_display' => 'invisible',
+        '#default_value' => $condition['value'] ?? '',
+        '#size' => 15,
+        '#placeholder' => $this->t('Value'),
+      ];
+
+      $element[$cond_delta]['remove'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('×'),
+        '#name' => 'remove_condition_' . $rule_delta . '_' . $cond_delta,
+        '#submit' => [[$this, 'removePromotionCondition']],
+        '#ajax' => [
+          'callback' => [$this, 'updateSortCriteria'],
+          'wrapper' => $wrapper_id,
+        ],
+        '#limit_validation_errors' => [],
+        '#attributes' => ['class' => ['remove-condition'], 'title' => $this->t('Remove condition')],
+      ];
+    }
+
+    $element['add_condition'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('+ Add condition'),
+      '#name' => 'add_condition_' . $rule_delta,
+      '#submit' => [[$this, 'addPromotionCondition']],
+      '#ajax' => [
+        'callback' => [$this, 'updateSortCriteria'],
+        'wrapper' => $wrapper_id,
+      ],
+      '#limit_validation_errors' => [],
+      '#attributes' => ['class' => ['add-condition']],
+    ];
+
+    return $element;
+  }
+
+  /**
+   * Gets the available operator options for conditions.
+   *
+   * @return array
+   *   Array of operator labels keyed by operator.
+   */
+  protected function getOperatorOptions(): array {
+    return [
+      '=' => $this->t('Equals (=)'),
+      '<>' => $this->t('Not equals (<>)'),
+      '>' => $this->t('Greater than (>)'),
+      '>=' => $this->t('Greater or equal (>=)'),
+      '<' => $this->t('Less than (<)'),
+      '<=' => $this->t('Less or equal (<=)'),
     ];
   }
 
@@ -932,6 +1030,9 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
   /**
    * Gets the promotion settings from form state or configuration.
    *
+   * Handles backward compatibility: converts old 'values' format to new 'rules'
+   * format.
+   *
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The form state.
    *
@@ -942,7 +1043,31 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
     if ($form_state->has('promotion')) {
       return $form_state->get('promotion');
     }
-    return $this->configuration->getPromotion() ?: [];
+
+    $promotion = $this->configuration->getPromotion() ?: [];
+
+    // Backward compatibility: convert old 'values' format to new 'rules' format.
+    if (!empty($promotion['values']) && empty($promotion['rules'])) {
+      $promotion['rules'] = [];
+      foreach ($promotion['values'] as $pv) {
+        $promotion['rules'][] = [
+          'weight' => $pv['weight'] ?? 0,
+          'conditions' => [
+            [
+              'field' => $pv['field'] ?? '',
+              'operator' => '=',
+              'value' => $pv['value'] ?? '',
+            ],
+          ],
+        ];
+      }
+      unset($promotion['values']);
+    }
+
+    // Ensure 'enabled' is set based on rules presence.
+    $promotion['enabled'] = !empty($promotion['rules']);
+
+    return $promotion;
   }
 
   /**
@@ -1044,21 +1169,22 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
   }
 
   /**
-   * Form submission handler for adding a promoted value.
+   * Form submission handler for adding a promotion rule.
    *
    * @param array $form
    *   The form array.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The form state.
    */
-  public function addPromotedValue(array &$form, FormStateInterface $form_state): void {
+  public function addPromotionRule(array &$form, FormStateInterface $form_state): void {
     $promotion = $this->collectPromotionFromFormState($form_state);
     $this->collectSortCriteriaFromFormState($form_state);
 
-    $promotion['values'][] = [
-      'field' => '',
-      'value' => '',
-      'weight' => count($promotion['values'] ?? []),
+    $promotion['rules'][] = [
+      'weight' => count($promotion['rules'] ?? []),
+      'conditions' => [
+        ['field' => '', 'operator' => '=', 'value' => ''],
+      ],
     ];
 
     $form_state->set('promotion', $promotion);
@@ -1066,28 +1192,84 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
   }
 
   /**
-   * Form submission handler for removing a promoted value.
+   * Form submission handler for removing a promotion rule.
    *
    * @param array $form
    *   The form array.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The form state.
    */
-  public function removePromotedValue(array &$form, FormStateInterface $form_state): void {
+  public function removePromotionRule(array &$form, FormStateInterface $form_state): void {
     $triggering_element = $form_state->getTriggeringElement();
     $button_name = $triggering_element['#name'];
-    preg_match('/remove_promoted_value_(\d+)/', $button_name, $matches);
-    $pv_delta = (int) $matches[1];
+    preg_match('/remove_rule_(\d+)/', $button_name, $matches);
+    $rule_delta = (int) $matches[1];
 
     $promotion = $this->collectPromotionFromFormState($form_state);
     $this->collectSortCriteriaFromFormState($form_state);
 
-    if (isset($promotion['values'][$pv_delta])) {
-      unset($promotion['values'][$pv_delta]);
-      $promotion['values'] = array_values($promotion['values']);
-      foreach ($promotion['values'] as $i => &$pv) {
-        $pv['weight'] = $i;
+    if (isset($promotion['rules'][$rule_delta])) {
+      unset($promotion['rules'][$rule_delta]);
+      $promotion['rules'] = array_values($promotion['rules']);
+      foreach ($promotion['rules'] as $i => &$rule) {
+        $rule['weight'] = $i;
       }
+    }
+
+    $form_state->set('promotion', $promotion);
+    $form_state->setRebuild();
+  }
+
+  /**
+   * Form submission handler for adding a condition to a rule.
+   *
+   * @param array $form
+   *   The form array.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   */
+  public function addPromotionCondition(array &$form, FormStateInterface $form_state): void {
+    $triggering_element = $form_state->getTriggeringElement();
+    $button_name = $triggering_element['#name'];
+    preg_match('/add_condition_(\d+)/', $button_name, $matches);
+    $rule_delta = (int) $matches[1];
+
+    $promotion = $this->collectPromotionFromFormState($form_state);
+    $this->collectSortCriteriaFromFormState($form_state);
+
+    if (isset($promotion['rules'][$rule_delta])) {
+      $promotion['rules'][$rule_delta]['conditions'][] = [
+        'field' => '',
+        'operator' => '=',
+        'value' => '',
+      ];
+    }
+
+    $form_state->set('promotion', $promotion);
+    $form_state->setRebuild();
+  }
+
+  /**
+   * Form submission handler for removing a condition from a rule.
+   *
+   * @param array $form
+   *   The form array.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   */
+  public function removePromotionCondition(array &$form, FormStateInterface $form_state): void {
+    $triggering_element = $form_state->getTriggeringElement();
+    $button_name = $triggering_element['#name'];
+    preg_match('/remove_condition_(\d+)_(\d+)/', $button_name, $matches);
+    $rule_delta = (int) $matches[1];
+    $cond_delta = (int) $matches[2];
+
+    $promotion = $this->collectPromotionFromFormState($form_state);
+    $this->collectSortCriteriaFromFormState($form_state);
+
+    if (isset($promotion['rules'][$rule_delta]['conditions'][$cond_delta])) {
+      unset($promotion['rules'][$rule_delta]['conditions'][$cond_delta]);
+      $promotion['rules'][$rule_delta]['conditions'] = array_values($promotion['rules'][$rule_delta]['conditions']);
     }
 
     $form_state->set('promotion', $promotion);
@@ -1145,24 +1327,44 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
     }
 
     $promotion = [
-      'enabled' => !empty($promo_values['enabled']),
-      'values' => [],
+      'enabled' => TRUE,
+      'rules' => [],
     ];
 
-    $values = $promo_values['settings']['values'] ?? [];
-    if (is_array($values)) {
-      foreach ($values as $pv_delta => $pv) {
-        if (is_array($pv)) {
-          // Keep all rows during collection (even incomplete ones for AJAX).
-          // Filtering happens in submitForm.
-          $promotion['values'][] = [
-            'field' => $pv['field'] ?? '',
-            'value' => $pv['value'] ?? '',
-            'weight' => $pv['weight'] ?? $pv_delta,
-          ];
+    $rules = $promo_values['rules'] ?? [];
+    if (is_array($rules)) {
+      foreach ($rules as $rule_delta => $rule) {
+        if (!is_array($rule)) {
+          continue;
         }
+
+        $collected_rule = [
+          'weight' => $rule['weight'] ?? $rule_delta,
+          'conditions' => [],
+        ];
+
+        // Conditions are now in conditions_wrapper.
+        $conditions_wrapper = $rule['conditions_wrapper'] ?? [];
+        if (is_array($conditions_wrapper)) {
+          foreach ($conditions_wrapper as $cond_delta => $cond) {
+            // Skip non-numeric keys (like 'add_condition').
+            if (!is_numeric($cond_delta) || !is_array($cond)) {
+              continue;
+            }
+            $collected_rule['conditions'][] = [
+              'field' => $cond['field'] ?? '',
+              'operator' => $cond['operator'] ?? '=',
+              'value' => $cond['value'] ?? '',
+            ];
+          }
+        }
+
+        $promotion['rules'][$rule_delta] = $collected_rule;
       }
     }
+
+    // Promotion is enabled if there are rules.
+    $promotion['enabled'] = !empty($promotion['rules']);
 
     $form_state->set('promotion', $promotion);
     return $promotion;
