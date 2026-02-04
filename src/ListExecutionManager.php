@@ -136,7 +136,7 @@ class ListExecutionManager implements ListExecutionManagerInterface {
     // Get promotion settings.
     $promotion = $configuration->getPromotion();
 
-    // Backward compatibility: convert old 'values' format to new 'rules' format.
+    // Backward compatibility: old 'values' format to new 'rules' format.
     if (!empty($promotion['values']) && empty($promotion['rules'])) {
       $promotion['rules'] = [];
       foreach ($promotion['values'] as $pv) {
@@ -156,9 +156,9 @@ class ListExecutionManager implements ListExecutionManagerInterface {
     $has_promotion = !empty($promotion['enabled']) && !empty($promotion['rules']);
 
     // If promotion is enabled, we need a different approach:
-    // 1. First fetch promoted items (for page 0 display and to know what to exclude)
+    // 1. First fetch promoted items (for page 0 display and to know excludes)
     // 2. Then fetch regular items (excluding promoted ones)
-    // 3. Combine them respecting the limit and pagination
+    // 3. Combine them respecting the limit and pagination.
     if ($has_promotion) {
       $result = $this->executeListWithPromotion(
         $list_source,
@@ -295,8 +295,7 @@ class ListExecutionManager implements ListExecutionManagerInterface {
     //
     // For page N with limit L:
     // - Start position: N * L
-    // - End position: (N + 1) * L - 1
-
+    // - End position: (N + 1) * L - 1.
     $page_start = $current_page * $limit;
     $page_end = $page_start + $limit;
 
@@ -321,8 +320,10 @@ class ListExecutionManager implements ListExecutionManagerInterface {
     if ($regular_needed > 0) {
       // Calculate offset for regular items.
       // Regular items start after all promoted items in the virtual list.
-      // If we're on a page where promoted items end mid-page, regular offset = 0.
-      // If we're on a page with no promoted items, offset = page_start - total_promoted.
+      // If we're on a page where promoted items end mid-page regular:
+      // offset = 0.
+      // If we're on a page without promoted items:
+      // offset = page_start - total_promoted.
       $regular_offset = max(0, $page_start - $total_promoted);
 
       // Fetch regular items excluding promoted ones.
@@ -384,7 +385,8 @@ class ListExecutionManager implements ListExecutionManagerInterface {
     $result_items = [];
     $skipped = 0;
     $page = 0;
-    $fetch_limit = $needed + count($promoted_entity_ids) + 10; // Fetch extra to account for exclusions.
+    // Fetch extra to account for exclusions.
+    $fetch_limit = $needed + count($promoted_entity_ids) + 10;
 
     while (count($result_items) < $needed) {
       $query = $list_source->getQuery([

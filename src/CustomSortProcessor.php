@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\oe_list_pages;
 
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\search_api\Item\ItemInterface;
 use Drupal\search_api\Plugin\search_api\data_type\value\TextValueInterface;
 use Drupal\search_api\Query\ResultSetInterface;
@@ -29,7 +31,7 @@ class CustomSortProcessor {
    * @param array $promotion
    *   Promotion settings with:
    *   - enabled: bool
-   *   - values: array of {field, value, weight}
+   *   - values: array of {field, value, weight}.
    *
    * @return \Drupal\search_api\Query\ResultSetInterface
    *   The result set with promoted items first.
@@ -77,7 +79,7 @@ class CustomSortProcessor {
    *   Array of promoted values with 'field', 'value', and 'weight' keys.
    *
    * @return \Drupal\search_api\Item\ItemInterface[]
-   *   Items reordered: promoted first (by weight), then others (original order).
+   *   Items ordered: promoted first (by weight), then others (original order).
    */
   protected function sortByPromotedValues(array $items, array $promoted_values): array {
     // Build a map of field+value combinations to their weights.
@@ -212,7 +214,7 @@ class CustomSortProcessor {
       }
 
       $entity = $original_object->getValue();
-      if (!$entity instanceof \Drupal\Core\Entity\FieldableEntityInterface) {
+      if (!$entity instanceof FieldableEntityInterface) {
         return NULL;
       }
 
@@ -237,7 +239,7 @@ class CustomSortProcessor {
       }
 
       // For entity label (title), use the label() method directly.
-      if ($entity_field_name === 'title' && $entity instanceof \Drupal\Core\Entity\EntityInterface) {
+      if ($entity_field_name === 'title' && $entity instanceof EntityInterface) {
         return $entity->label();
       }
 

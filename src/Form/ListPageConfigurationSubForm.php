@@ -140,7 +140,6 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
     $entity_type_bundle = $this->configuration->getBundle();
     $configuration_exposed_sort = $this->configuration->isExposedSort();
 
-
     // Initialize sort criteria if not set (backward compatibility).
     $sort_criteria = $this->configuration->getDefaultSort();
     if (empty($sort_criteria)) {
@@ -694,7 +693,7 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
    * Structure:
    * 1. Sorting fieldset (wrapper)
    *    1.1. Promotion section (optional) - items to show first
-   *    1.2. Sort criteria section - how to sort remaining items
+   *    1.2. Sort criteria section - how to sort remaining items.
    *
    * @param array $form
    *   The form array (the 'wrapper' container).
@@ -1057,7 +1056,7 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
 
     $promotion = $this->configuration->getPromotion() ?: [];
 
-    // Backward compatibility: convert old 'values' format to new 'rules' format.
+    // Backward compatibility: old 'values' format to new 'rules' format.
     if (!empty($promotion['values']) && empty($promotion['rules'])) {
       $promotion['rules'] = [];
       foreach ($promotion['values'] as $pv) {
@@ -1390,7 +1389,7 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
    *
    * 1. Search API Index fields: Only fields that are indexed in Search API
    *    can be used for sorting. These are configured in the Search API index
-   *    configuration (admin/config/search/search-api/index/[index_name]/fields).
+   *    config (admin/config/search/search-api/index/[index_name]/fields).
    *
    * 2. Entity field definitions: We filter the index fields to only show
    *    those that belong to the selected bundle. This is done by comparing
