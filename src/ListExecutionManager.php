@@ -155,12 +155,15 @@ class ListExecutionManager implements ListExecutionManagerInterface {
 
     $has_promotion = !empty($promotion['enabled']) && !empty($promotion['rules']);
 
+    // Track promoted entity IDs for marking in the UI.
+    $promoted_entity_ids = [];
+
     // If promotion is enabled, we need a different approach:
     // 1. First fetch promoted items (for page 0 display and to know excludes)
     // 2. Then fetch regular items (excluding promoted ones)
     // 3. Combine them respecting the limit and pagination.
     if ($has_promotion) {
-      $result = $this->executeListWithPromotion(
+      $promotion_result = $this->executeListWithPromotion(
         $list_source,
         $limit,
         $current_page,
@@ -170,6 +173,8 @@ class ListExecutionManager implements ListExecutionManagerInterface {
         $configuration->getExtra(),
         $promotion
       );
+      $result = $promotion_result['result'];
+      $promoted_entity_ids = $promotion_result['promoted_entity_ids'];
       $query = $list_source->getQuery([
         'limit' => $limit,
         'page' => $current_page,
@@ -192,7 +197,7 @@ class ListExecutionManager implements ListExecutionManagerInterface {
       $result = $query->execute();
     }
 
-    $list_execution = new ListExecutionResults($query, $result, $list_source, $configuration);
+    $list_execution = new ListExecutionResults($query, $result, $list_source, $configuration, $promoted_entity_ids);
 
     $this->executedLists[$configuration->getId()] = $list_execution;
 
@@ -222,10 +227,12 @@ class ListExecutionManager implements ListExecutionManagerInterface {
    * @param array $promotion
    *   The promotion settings.
    *
-   * @return \Drupal\search_api\Query\ResultSetInterface
-   *   The combined result set.
+   * @return array
+   *   An array with keys:
+   *   - 'result': The combined result set.
+   *   - 'promoted_entity_ids': Array of promoted entity IDs.
    */
-  protected function executeListWithPromotion(ListSourceInterface $list_source, int $limit, int $current_page, $language, array $sort, array $preset_filters, array $extra, array $promotion): ResultSetInterface {
+  protected function executeListWithPromotion(ListSourceInterface $list_source, int $limit, int $current_page, $language, array $sort, array $preset_filters, array $extra, array $promotion): array {
     $promoted_items = [];
     $promoted_entity_ids = [];
 
@@ -355,7 +362,10 @@ class ListExecutionManager implements ListExecutionManagerInterface {
     $base_result = $base_query->execute();
     $base_result->setResultItems($final_items);
 
-    return $base_result;
+    return [
+      'result' => $base_result,
+      'promoted_entity_ids' => $promoted_entity_ids,
+    ];
   }
 
   /**

@@ -1,0 +1,5 @@
+promoted-items:
+  version: VERSION
+  css:
+    component:
+      css/oe-list-pages-promoted.css: {}

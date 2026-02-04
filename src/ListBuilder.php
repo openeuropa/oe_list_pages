@@ -226,6 +226,9 @@ class ListBuilder implements ListBuilderInterface {
 
     $items = [];
 
+    // Get promoted entity IDs to mark them in the UI.
+    $promoted_entity_ids = $list_execution->getPromotedEntityIds();
+
     // Build the entities.
     $builder = $this->entityTypeManager->getViewBuilder($configuration->getEntityType());
     foreach ($result->getResultItems() as $item) {
@@ -238,13 +241,41 @@ class ListBuilder implements ListBuilderInterface {
 
       $cache->addCacheableDependency($entity);
       $entity = $this->entityRepository->getTranslationFromContext($entity);
-      $items[] = $builder->view($entity, $view_mode);
+
+      // Check if this item is promoted.
+      $entity_key = $entity->getEntityTypeId() . ':' . $entity->id();
+      $is_promoted = in_array($entity_key, $promoted_entity_ids);
+
+      // Build the item with wrapper for promoted badge.
+      $item_build = $builder->view($entity, $view_mode);
+
+      if ($is_promoted) {
+        $items[] = [
+          '#theme' => 'oe_list_pages_result_item',
+          '#content' => $item_build,
+          '#is_promoted' => TRUE,
+          '#attributes' => ['class' => ['oe-list-pages-item', 'oe-list-pages-item--promoted']],
+        ];
+      }
+      else {
+        $items[] = [
+          '#theme' => 'oe_list_pages_result_item',
+          '#content' => $item_build,
+          '#is_promoted' => FALSE,
+          '#attributes' => ['class' => ['oe-list-pages-item']],
+        ];
+      }
     }
 
     $build['list'] = [
       '#theme' => 'item_list__oe_list_pages_results',
       '#items' => $items,
     ];
+
+    // Attach library for promoted items styling if there are any promoted.
+    if (!empty($promoted_entity_ids)) {
+      $build['#attached']['library'][] = 'oe_list_pages/promoted-items';
+    }
 
     $cache->applyTo($build);
 

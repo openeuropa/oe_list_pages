@@ -41,6 +41,13 @@ class ListExecutionResults implements ListExecutionResultsInterface {
   protected $configuration;
 
   /**
+   * The entity IDs of promoted (highlighted) items.
+   *
+   * @var array
+   */
+  protected $promotedEntityIds = [];
+
+  /**
    * ListExecutionResults constructor.
    *
    * @param \Drupal\search_api\Query\QueryInterface $query
@@ -51,12 +58,15 @@ class ListExecutionResults implements ListExecutionResultsInterface {
    *   The list source.
    * @param \Drupal\oe_list_pages\ListPageConfiguration $configuration
    *   The list page configuration.
+   * @param array $promotedEntityIds
+   *   (optional) The entity IDs of promoted items.
    */
-  public function __construct(QueryInterface $query, ResultSetInterface $results, ListSourceInterface $listSource, ListPageConfiguration $configuration) {
+  public function __construct(QueryInterface $query, ResultSetInterface $results, ListSourceInterface $listSource, ListPageConfiguration $configuration, array $promotedEntityIds = []) {
     $this->query = $query;
     $this->results = $results;
     $this->listSource = $listSource;
     $this->configuration = $configuration;
+    $this->promotedEntityIds = $promotedEntityIds;
   }
 
   /**
@@ -85,6 +95,13 @@ class ListExecutionResults implements ListExecutionResultsInterface {
    */
   public function getConfiguration(): ListPageConfiguration {
     return $this->configuration;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getPromotedEntityIds(): array {
+    return $this->promotedEntityIds;
   }
 
 }

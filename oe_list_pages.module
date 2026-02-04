@@ -34,6 +34,13 @@ function oe_list_pages_theme($existing, $type, $theme, $path) {
         'label' => NULL,
       ],
     ],
+    'oe_list_pages_result_item' => [
+      'variables' => [
+        'content' => NULL,
+        'is_promoted' => FALSE,
+        'attributes' => [],
+      ],
+    ],
     'oe_list_pages_rss' => [
       'variables' => [
         'title' => '',
@@ -123,5 +130,15 @@ function oe_list_pages_entity_type_build(array &$entity_types) {
   }
   if (isset($entity_types['skos_concept'])) {
     $entity_types['skos_concept']->setHandlerClass('oe_list_pages_hierarchy', SkosConceptHierarchicalHandler::class);
+  }
+}
+
+/**
+ * Implements template_preprocess_oe_list_pages_result_item().
+ */
+function template_preprocess_oe_list_pages_result_item(array &$variables) {
+  // Ensure attributes is an Attribute object.
+  if (!($variables['attributes'] instanceof \Drupal\Core\Template\Attribute)) {
+    $variables['attributes'] = new \Drupal\Core\Template\Attribute($variables['attributes'] ?? []);
   }
 }
