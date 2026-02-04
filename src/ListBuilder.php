@@ -229,6 +229,14 @@ class ListBuilder implements ListBuilderInterface {
     // Get promoted entity IDs to mark them in the UI.
     $promoted_entity_ids = $list_execution->getPromotedEntityIds();
 
+    // Check if the promotion badge display is enabled.
+    // This setting is on the List Page content type (e.g., oe_list_page),
+    // not on the source content type being listed.
+    $show_promotion_badge = $this->getShowPromotionBadgeSetting();
+
+    // Add cache tag for node type config changes.
+    $cache->addCacheTags(['config:node_type_list']);
+
     // Build the entities.
     $builder = $this->entityTypeManager->getViewBuilder($configuration->getEntityType());
     foreach ($result->getResultItems() as $item) {
@@ -242,9 +250,9 @@ class ListBuilder implements ListBuilderInterface {
       $cache->addCacheableDependency($entity);
       $entity = $this->entityRepository->getTranslationFromContext($entity);
 
-      // Check if this item is promoted.
+      // Check if this item is promoted and if badge display is enabled.
       $entity_key = $entity->getEntityTypeId() . ':' . $entity->id();
-      $is_promoted = in_array($entity_key, $promoted_entity_ids);
+      $is_promoted = $show_promotion_badge && in_array($entity_key, $promoted_entity_ids);
 
       // Build the item with wrapper for promoted badge.
       $item_build = $builder->view($entity, $view_mode);
@@ -258,12 +266,8 @@ class ListBuilder implements ListBuilderInterface {
         ];
       }
       else {
-        $items[] = [
-          '#theme' => 'oe_list_pages_result_item',
-          '#content' => $item_build,
-          '#is_promoted' => FALSE,
-          '#attributes' => ['class' => ['oe-list-pages-item']],
-        ];
+        // When badge is disabled, render without the wrapper theme.
+        $items[] = $item_build;
       }
     }
 
@@ -272,8 +276,8 @@ class ListBuilder implements ListBuilderInterface {
       '#items' => $items,
     ];
 
-    // Attach library for promoted items styling if there are any promoted.
-    if (!empty($promoted_entity_ids)) {
+    // Attach library for promoted items styling if badge display is enabled.
+    if ($show_promotion_badge && !empty($promoted_entity_ids)) {
       $build['#attached']['library'][] = 'oe_list_pages/promoted-items';
     }
 
@@ -631,6 +635,48 @@ class ListBuilder implements ListBuilderInterface {
     }
 
     return $sort;
+  }
+
+  /**
+   * Gets the show_promotion_badge setting from List Page content types.
+   *
+   * This checks all node types that have the oe_list_page entity meta relation
+   * and returns TRUE if any of them has the setting enabled.
+   *
+   * @return bool
+   *   TRUE if the promotion badge should be shown.
+   */
+  protected function getShowPromotionBadgeSetting(): bool {
+    $show_badge = &drupal_static(__FUNCTION__);
+    if (isset($show_badge)) {
+      return $show_badge;
+    }
+
+    $show_badge = FALSE;
+
+    // Get all node types that have the oe_list_page entity meta relation.
+    try {
+      $node_type_storage = $this->entityTypeManager->getStorage('node_type');
+      $node_types = $node_type_storage->loadMultiple();
+
+      foreach ($node_types as $node_type) {
+        // Check if this node type has the EMR relation for list pages.
+        $emr_bundles = $node_type->getThirdPartySetting('emr', 'entity_meta_bundles', []);
+        if (in_array('oe_list_page', $emr_bundles)) {
+          // Check if the show_promotion_badge setting is enabled.
+          if ($node_type->getThirdPartySetting('oe_list_pages', 'show_promotion_badge', FALSE)) {
+            $show_badge = TRUE;
+            break;
+          }
+        }
+      }
+    }
+    catch (\Exception $e) {
+      // If something goes wrong, default to not showing the badge.
+      $show_badge = FALSE;
+    }
+
+    return $show_badge;
   }
 
 }

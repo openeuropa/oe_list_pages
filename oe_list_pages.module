@@ -134,6 +134,44 @@ function oe_list_pages_entity_type_build(array &$entity_types) {
 }
 
 /**
+ * Implements hook_form_FORM_ID_alter() for node_type_form.
+ */
+function oe_list_pages_form_node_type_form_alter(array &$form, FormStateInterface $form_state) {
+  /** @var \Drupal\node\NodeTypeInterface $node_type */
+  $node_type = $form_state->getFormObject()->getEntity();
+
+  // Only show the List Pages settings on content types that have the
+  // oe_list_page entity meta relation (i.e., List Page content types).
+  $emr_bundles = $node_type->getThirdPartySetting('emr', 'entity_meta_bundles', []);
+  if (!in_array('oe_list_page', $emr_bundles)) {
+    return;
+  }
+
+  $form['oe_list_pages'] = [
+    '#type' => 'details',
+    '#title' => t('List Pages settings'),
+    '#group' => 'additional_settings',
+    '#weight' => 35,
+  ];
+
+  $form['oe_list_pages']['show_promotion_badge'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Show visual badge on highlighted items'),
+    '#description' => t('When enabled, items that are highlighted (promoted) in all list pages will display a visual indicator (star badge). When disabled, the promotion functionality still works but without visual indication.'),
+    '#default_value' => $node_type->getThirdPartySetting('oe_list_pages', 'show_promotion_badge', FALSE),
+  ];
+
+  $form['#entity_builders'][] = 'oe_list_pages_form_node_type_form_builder';
+}
+
+/**
+ * Entity builder for the node type form with third party options.
+ */
+function oe_list_pages_form_node_type_form_builder($entity_type, $type, &$form, FormStateInterface $form_state) {
+  $type->setThirdPartySetting('oe_list_pages', 'show_promotion_badge', (bool) $form_state->getValue('show_promotion_badge'));
+}
+
+/**
  * Implements template_preprocess_oe_list_pages_result_item().
  */
 function template_preprocess_oe_list_pages_result_item(array &$variables) {

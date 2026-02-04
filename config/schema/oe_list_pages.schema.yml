@@ -90,6 +90,9 @@ oe_list_pages.bundle_third_party_settings:
     default_filter_values_allowed:
       type: boolean
       label: 'Allow this content type to define default values for its filters'
+    show_promotion_badge:
+      type: boolean
+      label: 'Show visual badge on promoted/highlighted items'
 
 search_api.index.*.third_party.oe_list_pages:
   type: mapping
