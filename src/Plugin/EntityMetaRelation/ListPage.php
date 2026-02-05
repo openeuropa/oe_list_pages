@@ -129,6 +129,8 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
       '#options' => [
         10 => '10',
         20 => '20',
+        50 => '50',
+        100 => '100',
       ],
       '#default_value' => $entity_meta_wrapper->getConfiguration()['limit'] ?? 10,
     ];
