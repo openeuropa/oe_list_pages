@@ -30,3 +30,6 @@ msgstr "Nulstil filtre"
 
 msgid "Filter by"
 msgstr "Filtrer efter"
+
+msgid "Sort by"
+msgstr "Sortér efter"

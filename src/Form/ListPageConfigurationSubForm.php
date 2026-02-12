@@ -6,6 +6,7 @@ namespace Drupal\oe_list_pages\Form;
 
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\ContentEntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -216,8 +217,10 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
       $list_source = $this->listSourceFactory->get($selected_entity_type, $selected_bundle);
 
       if ($list_source) {
-        $sort_options = $this->sortOptionsResolver->getSortOptions($list_source);
-        $form_state->set('default_bundle_sort', $this->sortOptionsResolver->getBundleDefaultSort($list_source));
+        $entity = $form_state->getFormObject()->getEntity() instanceof ContentEntityInterface ? $form_state->getFormObject()->getEntity() : NULL;
+        $sort_options = $this->sortOptionsResolver->getSortOptions($list_source, context_entity: $entity);
+        $default_bundle_sort = $this->sortOptionsResolver->getBundleDefaultSort($list_source);
+        $form_state->set('default_bundle_sort', $default_bundle_sort);
         if ($selected_sort && !isset($sort_options[$selected_sort])) {
           // In case we no longer have the sort option, we should not show
           // any default value.
@@ -234,9 +237,11 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
         $form['wrapper']['exposed_sort'] = [
           '#type' => 'checkbox',
           '#title' => $this->t('Expose sort'),
-          '#description' => $this->t('Check this box if you would like sorting options to be exposed. Please note that frontend sorting options may differ from the ones available in the backend.'),
+          '#description' => $this->t('Check this box if you would like sorting options to be exposed.'),
           '#default_value' => $selected_exposed_sort,
-          '#access' => $this->sortOptionsResolver->isExposedSortAllowed($list_source),
+          // Don't show the exposed sort checkbox if it's disabled or only
+          // one option.
+          '#access' => $this->sortOptionsResolver->isExposedSortAllowed($list_source, $entity) && count($sort_options) > 1,
         ];
       }
 
@@ -371,13 +376,22 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
     // When we change the bundle, we want to set the default exposed filter
     // values to the user input so that the checkboxes can be checked when the
     // user changes the bundle.
-    $parents = array_merge(array_slice($triggering_element['#parents'], 0, -1), ['exposed_filters']);
     $entity_type = $form_state->get('entity_type');
     $list_source = $this->listSourceFactory->get($entity_type, $triggering_element['#value']);
     if ($list_source instanceof ListSourceInterface) {
       $default_exposed_filters = $this->getBundleDefaultExposedFilters($list_source);
       $input = $form_state->getUserInput();
+      $parents = array_merge(array_slice($triggering_element['#parents'], 0, -1), ['exposed_filters']);
       NestedArray::setValue($input, $parents, $default_exposed_filters);
+
+      // When we change the bundle, we also need to set the default sort for
+      // the bundle so it doesn't get stuck on any previous one.
+      $default_bundle_sort = $this->sortOptionsResolver->getBundleDefaultSort($list_source);
+      if ($default_bundle_sort) {
+        $parents = array_merge(array_slice($triggering_element['#parents'], 0, -1), ['sort']);
+        NestedArray::setValue($input, $parents, ListPageSortOptionsResolver::generateSortMachineName($default_bundle_sort));
+      }
+
       $form_state->setUserInput($input);
     }
   }

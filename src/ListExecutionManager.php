@@ -49,6 +49,13 @@ class ListExecutionManager implements ListExecutionManagerInterface {
   protected $executedLists = [];
 
   /**
+   * The sort options resolver.
+   *
+   * @var \Drupal\oe_list_pages\ListPageSortOptionsResolver
+   */
+  protected $sortOptionsResolver;
+
+  /**
    * ListManager constructor.
    *
    * @param \Drupal\oe_list_pages\ListSourceFactoryInterface $listSourceFactory
@@ -59,12 +66,15 @@ class ListExecutionManager implements ListExecutionManagerInterface {
    *   The request stack.
    * @param \Drupal\Core\Language\LanguageManagerInterface $languageManager
    *   The language manager.
+   * @param \Drupal\oe_list_pages\ListPageSortOptionsResolver $sortOptionsResolver
+   *   The sort options resolver.
    */
-  public function __construct(ListSourceFactoryInterface $listSourceFactory, EntityTypeManager $entityTypeManager, RequestStack $requestStack, LanguageManagerInterface $languageManager) {
+  public function __construct(ListSourceFactoryInterface $listSourceFactory, EntityTypeManager $entityTypeManager, RequestStack $requestStack, LanguageManagerInterface $languageManager, ListPageSortOptionsResolver $sortOptionsResolver) {
     $this->listSourceFactory = $listSourceFactory;
     $this->entityTypeManager = $entityTypeManager;
     $this->requestStack = $requestStack;
     $this->languageManager = $languageManager;
+    $this->sortOptionsResolver = $sortOptionsResolver;
   }
 
   /**
@@ -90,9 +100,27 @@ class ListExecutionManager implements ListExecutionManagerInterface {
     }
     $language = !empty($configuration->getLanguages()) ? $configuration->getLanguages() : $this->languageManager->getCurrentLanguage()->getId();
     $preset_filters = $configuration->getDefaultFiltersValues();
-    // If there is a sort configured use it,
-    // otherwise use the bundle's default sort if set.
+    // If there is a sort configured use it.
     $sort = $configuration->getSort();
+
+    // Check to see if this sort is still allowed as we could have stored
+    // configuration with a given sort that has been disabled.
+    if ($sort && isset($configuration->getExtra()['context_entity'])) {
+      $context_entity_info = $configuration->getExtra()['context_entity'];
+      $context_entity = $this->entityTypeManager->getStorage($context_entity_info['entity_type'])->load($context_entity_info['entity_id']);
+
+      $options = $this->sortOptionsResolver->getSortOptions($list_source, [
+        ListPageSortOptionsResolver::SCOPE_SYSTEM,
+        ListPageSortOptionsResolver::SCOPE_CONFIGURATION,
+        ListPageSortOptionsResolver::SCOPE_USER,
+      ], $context_entity);
+      $sort_name = ListPageSortOptionsResolver::generateSortMachineName($sort);
+      if (!isset($options[$sort_name])) {
+        $sort = [];
+      }
+    }
+
+    // If there is no configured sort, use the bundle's default sort if set.
     $bundle_sort = $this->getBundleDefaultSort($list_source);
     // If we have a specific sort, we use that first, followed by the default
     // bundle sort. Otherwise, just the bundle sort.

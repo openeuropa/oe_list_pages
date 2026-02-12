@@ -30,3 +30,6 @@ msgstr "Szűrők törlése"
 
 msgid "Filter by"
 msgstr "Szűrési feltételek"
+
+msgid "Sort by"
+msgstr "Rendezési szempont"

@@ -213,8 +213,9 @@ class ListPagesSortTest extends ListPagePluginFormTestBase {
     $assert_session = $this->assertSession();
     $this->assertTrue($assert_session->optionExists('Source entity type', 'node')->isSelected());
     $this->assertTrue($assert_session->optionExists('Source bundle', 'content_type_one')->isSelected());
-    // Since we don't disallow the sort exposing, assert the checkbox is there.
-    $assert_session->checkboxNotChecked('Expose sort');
+    // The expose sort checkbox is not there because even though we don't
+    // disallow it, we only have 1 sort option.
+    $assert_session->fieldNotExists('Expose sort');
     $this->getSession()->getPage()->fillField('Title', 'Node title');
     $this->getSession()->getPage()->pressButton('Save');
     $assert_session->pageTextContains('List page Node title has been created.');
@@ -230,27 +231,23 @@ class ListPagesSortTest extends ListPagePluginFormTestBase {
     // exposed, we shouldn't see the sort element.
     $assert_session->fieldNotExists('Sort by');
 
-    // Disallow the sort exposing, assert the form checkbox is gone, then allow
-    // back to expose the sort.
-    \Drupal::state()->set('oe_list_pages_test.disallow_frontend_sort', TRUE);
+    // Implement the subscriber and provide another sort option.
+    \Drupal::state()->set('oe_list_pages_test.alter_sort_options', TRUE);
     $node = $this->drupalGetNodeByTitle('Node title');
     $this->drupalGet($node->toUrl('edit-form'));
+    // Now we can expose the sort.
+    $assert_session->checkboxNotChecked('Expose sort');
+    // Disallow the sort exposing and assert the expose sort checkbox is gone.
+    \Drupal::state()->set('oe_list_pages_test.disallow_frontend_sort', TRUE);
+    $this->getSession()->reload();
     $assert_session->fieldNotExists('Expose sort');
+    // Allow back and expose the sort.
     \Drupal::state()->set('oe_list_pages_test.disallow_frontend_sort', FALSE);
     $this->getSession()->reload();
-    $assert_session->fieldExists('Expose sort');
     $this->clickLink('List Page');
     $this->getSession()->getPage()->checkField('Expose sort');
     $this->getSession()->getPage()->pressButton('Save');
-    $assert_session->pageTextContains('List page Node title has been updated.');
-
-    $this->drupalGet($node->toUrl());
-    // Still no exposed sort as we only have 1 sort option.
-    $assert_session->fieldNotExists('Sort by');
-
-    // Implement the subscriber and provide another sort option.
-    \Drupal::state()->set('oe_list_pages_test.alter_sort_options', TRUE);
-    $this->getSession()->reload();
+    // We now have the sort.
     $assert_session->fieldExists('Sort by');
     $this->assertEquals([
       'created__DESC' => 'Default',

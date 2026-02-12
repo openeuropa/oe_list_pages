@@ -30,3 +30,6 @@ msgstr "Εκκαθάριση φίλτρων"
 
 msgid "Filter by"
 msgstr "Φιλτράρισμα ανά"
+
+msgid "Sort by"
+msgstr "Ταξινόμηση κατά"

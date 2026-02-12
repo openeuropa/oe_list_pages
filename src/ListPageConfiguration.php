@@ -169,6 +169,11 @@ class ListPageConfiguration {
       }
     }
 
+    $configuration['extra']['context_entity'] = [
+      'entity_type' => $entity->getEntityTypeId(),
+      'entity_id' => $entity->id(),
+    ];
+
     return new static($configuration);
   }
 

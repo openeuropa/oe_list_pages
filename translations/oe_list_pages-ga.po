@@ -30,3 +30,6 @@ msgstr "Glan na scagairí"
 
 msgid "Filter by"
 msgstr "Scagadh de réir"
+
+msgid "Sort by"
+msgstr "Sórtáil de réir"

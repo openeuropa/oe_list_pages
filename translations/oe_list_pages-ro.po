@@ -30,3 +30,6 @@ msgstr "Ștergeți filtrele"
 
 msgid "Filter by"
 msgstr "Filtrează după"
+
+msgid "Sort by"
+msgstr "Sortați"

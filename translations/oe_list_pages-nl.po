@@ -30,3 +30,6 @@ msgstr "Filters wissen"
 
 msgid "Filter by"
 msgstr "Filteren op"
+
+msgid "Sort by"
+msgstr "Sorteren op"

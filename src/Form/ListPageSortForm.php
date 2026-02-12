@@ -6,6 +6,7 @@ namespace Drupal\oe_list_pages\Form;
 
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\RedirectCommand;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
@@ -60,20 +61,36 @@ class ListPageSortForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, ?ListPageConfiguration $configuration = NULL, ?ListSourceInterface $list_source = NULL, $current_sort = NULL) {
-    $options = $this->sortOptionsResolver->getSortOptions($list_source, ListPageSortOptionsResolver::SCOPE_USER);
-    if (count($options) < 2 || !$this->sortOptionsResolver->isExposedSortAllowed($list_source) || !$configuration->isExposedSort()) {
+  public function buildForm(array $form, FormStateInterface $form_state, ?ListPageConfiguration $configuration = NULL, ?ListSourceInterface $list_source = NULL, $current_sort = NULL, ?ContentEntityInterface $current_entity = NULL) {
+    $options = $this->sortOptionsResolver->getSortOptions($list_source, [ListPageSortOptionsResolver::SCOPE_USER], $current_entity);
+    if (count($options) < 2 || !$this->sortOptionsResolver->isExposedSortAllowed($list_source, $current_entity) || !$configuration->isExposedSort()) {
       // We shouldn't show a select element with one option.
       return $form;
     }
-    $sort = $current_sort ? ListPageSortOptionsResolver::generateSortMachineName($current_sort) : NULL;
+
+    $sort = $current_sort;
+    if (!$sort) {
+      // If we don't have a currently selected sort, we check the configuration.
+      $sort = $configuration->getSort();
+    }
+
+    $form['sort_anchor'] = [
+      '#type' => 'container',
+      '#attributes' => [
+        'id' => 'sort-anchor',
+      ],
+    ];
     $form['sort'] = [
       '#type' => 'select',
       '#title' => $this->t('Sort by'),
       '#options' => $options,
-      '#default_value' => $sort,
+      '#default_value' => $sort ? ListPageSortOptionsResolver::generateSortMachineName($sort) : NULL,
       '#ajax' => [
         'callback' => [$this, 'ajaxCallback'],
+        'disable-refocus' => TRUE,
+        'progress' => [
+          'type' => 'throbber',
+        ],
       ],
     ];
 
@@ -118,6 +135,7 @@ class ListPageSortForm extends FormBase {
     }
 
     $url->setOption('query', $query);
+    $url->setOption('fragment', 'sort-anchor');
 
     $command = new RedirectCommand($url->toString());
     $response->addCommand($command);

@@ -77,10 +77,12 @@ interface ListBuilderInterface {
    *
    * @param \Drupal\Core\Entity\ContentEntityInterface $entity
    *   The list page entity.
+   * @param \Drupal\oe_list_pages\ListPageConfiguration|null $configuration
+   *   Optional list page configuration.
    *
    * @return array
    *   The sort element form.
    */
-  public function buildSortElement(ContentEntityInterface $entity): array;
+  public function buildSortElement(ContentEntityInterface $entity, ?ListPageConfiguration $configuration = NULL): array;
 
 }

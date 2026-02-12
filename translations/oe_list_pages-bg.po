@@ -30,3 +30,6 @@ msgstr "Изчистване на филтрите"
 
 msgid "Filter by"
 msgstr "Филтриране по"
+
+msgid "Sort by"
+msgstr "Сортиране по"
