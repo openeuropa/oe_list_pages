@@ -7,6 +7,7 @@ namespace Drupal\Tests\oe_list_pages\FunctionalJavascript;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\Tests\oe_list_pages\Traits\FacetsTestTrait;
+use Drupal\facets\Entity\Facet;
 use Drupal\node\Entity\Node;
 use Drupal\oe_list_pages\ListSourceFactory;
 use Drupal\oe_list_pages\Plugin\facets\query_type\DateStatus;
@@ -297,6 +298,51 @@ class FacetsFormTest extends WebDriverTestBase {
     $this->getSession()->getPage()->pressButton('Search');
     $assert->pageTextNotContains('that yellow fruit');
     $assert->pageTextContains('that red fruit');
+  }
+
+  /**
+   * Tests the placeholder configuration for widgets.
+   */
+  public function testWidgetPlaceholder(): void {
+    // Test the FulltextWidget placeholder.
+    $facet = Facet::load('body');
+    $widget_config = $facet->getWidget();
+    $widget_config['config']['placeholder'] = 'Search body...';
+    $facet->setWidget($widget_config['type'], $widget_config['config']);
+    $facet->save();
+
+    $this->drupalGet('/facets-form-test');
+    $field = $this->getSession()->getPage()->findField('Body');
+    $this->assertEquals('Search body...', $field->getAttribute('placeholder'));
+
+    // Remove placeholder.
+    $widget_config['config']['placeholder'] = '';
+    $facet->setWidget($widget_config['type'], $widget_config['config']);
+    $facet->save();
+
+    $this->drupalGet('/facets-form-test');
+    $field = $this->getSession()->getPage()->findField('Body');
+    $this->assertEmpty($field->getAttribute('placeholder'));
+
+    // Test the MultiselectWidget placeholder.
+    $facet = Facet::load('select_one');
+    $widget_config = $facet->getWidget();
+    $widget_config['config']['placeholder'] = 'Select an option...';
+    $facet->setWidget($widget_config['type'], $widget_config['config']);
+    $facet->save();
+
+    $this->drupalGet('/facets-form-test');
+    $field = $this->getSession()->getPage()->findField('Select one');
+    $this->assertEquals('Select an option...', $field->getAttribute('placeholder'));
+
+    // Remove placeholder.
+    $widget_config['config']['placeholder'] = '';
+    $facet->setWidget($widget_config['type'], $widget_config['config']);
+    $facet->save();
+
+    $this->drupalGet('/facets-form-test');
+    $field = $this->getSession()->getPage()->findField('Select one');
+    $this->assertEmpty($field->getAttribute('placeholder'));
   }
 
   /**

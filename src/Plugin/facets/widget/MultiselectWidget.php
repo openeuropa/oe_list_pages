@@ -83,6 +83,31 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
 
   /**
    * {@inheritdoc}
+   */
+  public function defaultConfiguration() {
+    return [
+      'placeholder' => '',
+    ] + parent::defaultConfiguration();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state, FacetInterface $facet) {
+    $form = parent::buildConfigurationForm($form, $form_state, $facet);
+
+    $form['placeholder'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Placeholder'),
+      '#default_value' => $this->getConfiguration()['placeholder'],
+      '#description' => $this->t('The placeholder text.'),
+    ];
+
+    return $form;
+  }
+
+  /**
+   * {@inheritdoc}
    *
    * @SuppressWarnings(PHPMD.CyclomaticComplexity)
    * @SuppressWarnings(PHPMD.NPathComplexity)
@@ -183,6 +208,11 @@ class MultiselectWidget extends ListPagesWidgetBase implements ContainerFactoryP
         '#multiple' => TRUE,
         '#default_value' => $facet->getActiveItems(),
       ];
+
+      $placeholder = $this->getConfiguration()['placeholder'];
+      if (!empty($placeholder)) {
+        $build[$facet->id()]['#attributes']['placeholder'] = $placeholder;
+      }
     }
 
     $build['#cache']['contexts'] = [
