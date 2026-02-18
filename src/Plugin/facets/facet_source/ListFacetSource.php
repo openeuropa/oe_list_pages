@@ -164,11 +164,18 @@ class ListFacetSource extends SearchApiBaseFacetSource implements SearchApiFacet
   public function fillFacetsWithResults(array $facets) {
     $plugin_definition_id = $this->getPluginDefinition()['id'];
     $results = $this->searchApiQueryHelper->getResults($plugin_definition_id);
+    $query = $this->getIndex()->query()->setSearchId($plugin_definition_id);
+    $facet_results = NULL;
+    // Facets v3 query types require both "query" and "facet" configuration.
+    // Keep a fallback query for older flows where results are not cached yet.
+    if ($results instanceof ResultSetInterface) {
+      $query = $results->getQuery();
+      $facet_results = $results->getExtraData('search_api_facets');
+    }
 
-    $facet_results = $results instanceof ResultSetInterface ? $results->getExtraData('search_api_facets') : [];
     foreach ($facets as $facet) {
       $configuration = [
-        'query' => NULL,
+        'query' => $query,
         'facet' => $facet,
         'results' => $facet_results[$facet->getFieldIdentifier()] ?? [],
       ];
@@ -177,9 +184,13 @@ class ListFacetSource extends SearchApiBaseFacetSource implements SearchApiFacet
         $query_type->build();
       }
       catch (InvalidQueryTypeException $exception) {
-        // Do nothing.
+        continue;
       }
 
+      // Keep parity with core Facets behavior and propagate query metadata.
+      if ($results instanceof ResultSetInterface) {
+        $facet->addCacheableDependency($results->getQuery());
+      }
     }
   }
 
