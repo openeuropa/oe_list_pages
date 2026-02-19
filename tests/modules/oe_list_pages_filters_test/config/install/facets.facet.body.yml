@@ -52,5 +52,5 @@ processor_configs:
       build: 15
     settings: {  }
 empty_behavior:
-  behavior: none
+  behavior: empty
 show_title: false

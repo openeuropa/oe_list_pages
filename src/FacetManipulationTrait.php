@@ -5,6 +5,7 @@ namespace Drupal\oe_list_pages;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\facets\FacetInterface;
+use Drupal\facets\FacetSource\SearchApiFacetSourceInterface;
 use Drupal\facets\Processor\ProcessorInterface;
 use Drupal\facets\Result\ResultInterface;
 
@@ -127,8 +128,20 @@ trait FacetManipulationTrait {
    */
   protected function rebuildFacet(FacetInterface $facet, array $values): void {
     $facet->setActiveItems($values);
+    $facet_source = $facet->getFacetSource();
+    $query = NULL;
+
+    // Create a lightweight query so query-type plugins can be instantiated
+    // in Facets v3, where a query object is mandatory.
+    if ($facet_source instanceof SearchApiFacetSourceInterface) {
+      $query = $facet_source
+        ->getIndex()
+        ->query()
+        ->setSearchId($facet->getFacetSourceId());
+    }
+
     $configuration = [
-      'query' => NULL,
+      'query' => $query,
       'facet' => $facet,
       'results' => [],
     ];
@@ -138,9 +151,16 @@ trait FacetManipulationTrait {
         'filter' => $value,
       ];
     }
-    /** @var \Drupal\facets\QueryType\QueryTypeInterface $query_type */
-    $query_type = \Drupal::service('plugin.manager.facets.query_type')->createInstance($facet->getQueryType(), $configuration);
-    $query_type->build();
+    try {
+      /** @var \Drupal\facets\QueryType\QueryTypeInterface $query_type */
+      $query_type = \Drupal::service('plugin.manager.facets.query_type')->createInstance($facet->getQueryType(), $configuration);
+      $query_type->build();
+    }
+    catch (\InvalidArgumentException $exception) {
+      // Facets v3 requires a query object in query-type configuration.
+      return;
+    }
+
     $facet->setResults($this->processFacetResults($facet));
   }
 
