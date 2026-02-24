@@ -85,6 +85,23 @@ class ListPageConfiguration {
 
   // phpcs:disable Drupal.NamingConventions.ValidVariableName.LowerCamelName
   /**
+   * The promotion settings (items to show first).
+   *
+   * Array with 'enabled', 'field', and 'values' keys.
+   *
+   * @var array
+   */
+  protected $promotion = [];
+
+  /**
+   * The default sorting criteria for the query.
+   *
+   * Array of sort criteria, each with 'name', 'direction' and 'weight'.
+   *
+   * @var array
+   */
+  protected $default_sort = [];
+  /**
    * Whether the sort is exposed to the frontend.
    *
    * @var bool
@@ -153,6 +170,8 @@ class ListPageConfiguration {
       'exposed_filters' => $wrapper_configuration['exposed_filters'] ?? [],
       'default_filter_values' => $wrapper_configuration['preset_filters'] ?? [],
       'exposed_filters_overridden' => isset($wrapper_configuration['override_exposed_filters']) ? (bool) $wrapper_configuration['override_exposed_filters'] : FALSE,
+      'promotion' => $wrapper_configuration['promotion'] ?? [],
+      'default_sort' => $wrapper_configuration['default_sort'] ?? [],
       'limit' => $wrapper_configuration['limit'] ?? NULL,
       'page' => $wrapper_configuration['page'] ?? NULL,
       'sort' => $wrapper_configuration['sort'] ?? [],
@@ -293,6 +312,58 @@ class ListPageConfiguration {
   }
 
   /**
+   * Gets the default sort criteria.
+   *
+   * @return array
+   *   An array of sort criteria, each containing:
+   *   - name: The field name.
+   *   - direction: The sort direction (ASC/DESC).
+   *   - weight: The sort weight (for ordering).
+   */
+  public function getDefaultSort(): array {
+    return !empty($this->default_sort) ? $this->default_sort : [];
+  }
+
+  /**
+   * Sets the default sort criteria.
+   *
+   * @param array $sort_criteria
+   *   An array of sort criteria, each containing:
+   *   - name: The field name.
+   *   - direction: The sort direction (ASC/DESC).
+   *   - weight: The sort weight (for ordering).
+   */
+  public function setDefaultSort(array $sort_criteria): void {
+    $this->default_sort = $sort_criteria;
+  }
+
+  /**
+   * Gets the promotion settings.
+   *
+   * @return array
+   *   An array containing:
+   *   - enabled: Whether promotion is enabled.
+   *   - field: The field to use for promotion.
+   *   - values: Array of values to promote with weights.
+   */
+  public function getPromotion(): array {
+    return $this->promotion ?: [];
+  }
+
+  /**
+   * Sets the promotion settings.
+   *
+   * @param array $promotion
+   *   An array containing:
+   *   - enabled: Whether promotion is enabled.
+   *   - field: The field to use for promotion.
+   *   - values: Array of values to promote with weights.
+   */
+  public function setPromotion(array $promotion): void {
+    $this->promotion = $promotion;
+  }
+
+  /**
    * Returns the limit.
    *
    * @return int
@@ -418,6 +489,8 @@ class ListPageConfiguration {
       'exposed_filters_overridden' => $this->isExposedFiltersOverridden(),
       'exposed_filters' => $this->getExposedFilters(),
       'default_filter_values' => $this->getDefaultFiltersValues(),
+      'promotion' => $this->getPromotion(),
+      'default_sort' => $this->getDefaultSort(),
       'limit' => $this->getLimit(),
       'page' => $this->getPage(),
       'sort' => $this->getSort(),

@@ -32,16 +32,55 @@ oe_list_pages.bundle_third_party_settings:
     default_view_mode:
       type: string
       label: 'The view mode to use when rendering the item in a list'
-    default_sort:
+    promotion:
       type: mapping
-      label: 'Sorting criteria'
+      label: 'Promotion settings (items to show first)'
       mapping:
-        name:
-          type: string
-          label: 'The field to sort by'
-        direction:
-          type: string
-          label: 'The direction of the sorting'
+        enabled:
+          type: boolean
+          label: 'Enable promotion'
+        rules:
+          type: sequence
+          label: 'Promotion rules (each rule can have multiple conditions combined with AND)'
+          sequence:
+            type: mapping
+            label: 'Promotion rule'
+            mapping:
+              weight:
+                type: integer
+                label: 'Order weight for this rule'
+              conditions:
+                type: sequence
+                label: 'Conditions (all must match for the rule to apply)'
+                sequence:
+                  type: mapping
+                  label: 'Condition'
+                  mapping:
+                    field:
+                      type: string
+                      label: 'The field to check'
+                    operator:
+                      type: string
+                      label: 'The comparison operator (=, >, <, >=, <=, <>)'
+                    value:
+                      type: string
+                      label: 'The value to compare against'
+    default_sort:
+      type: sequence
+      label: 'Sorting criteria (for non-promoted items)'
+      sequence:
+        type: mapping
+        label: 'Sort criterion'
+        mapping:
+          name:
+            type: string
+            label: 'The field to sort by'
+          direction:
+            type: string
+            label: 'The direction of the sorting'
+          weight:
+            type: integer
+            label: 'Weight for sorting'
     default_exposed_filters:
       type: sequence
       label: 'Exposed filters'
@@ -51,6 +90,9 @@ oe_list_pages.bundle_third_party_settings:
     default_filter_values_allowed:
       type: boolean
       label: 'Allow this content type to define default values for its filters'
+    show_promotion_badge:
+      type: boolean
+      label: 'Show visual badge on promoted/highlighted items'
 
 search_api.index.*.third_party.oe_list_pages:
   type: mapping
