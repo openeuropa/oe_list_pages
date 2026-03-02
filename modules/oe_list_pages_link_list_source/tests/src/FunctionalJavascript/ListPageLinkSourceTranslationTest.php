@@ -81,7 +81,6 @@ class ListPageLinkSourceTranslationTest extends ListPagePluginFormTestBase {
     $this->getSession()->getPage()->fillField('Title', 'List page list');
 
     $this->getSession()->getPage()->selectFieldOption('Link display', 'Title');
-    $this->assertSession()->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->selectFieldOption('Source entity type', 'Content');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->selectFieldOption('Source bundle', 'Content type one');

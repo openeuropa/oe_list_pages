@@ -77,7 +77,6 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     $this->assertSession()->fieldNotExists('Expose sort');
 
     $this->getSession()->getPage()->selectFieldOption('Link display', 'Title');
-    $this->assertSession()->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->selectFieldOption('No results behaviour', 'Hide');
     $this->assertSession()->assertWaitOnAjaxRequest();
 
@@ -143,7 +142,6 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     $this->getSession()->getPage()->fillField('Administrative title', 'List page plugin test');
     $this->getSession()->getPage()->fillField('Title', 'List page list');
     $this->getSession()->getPage()->selectFieldOption('Link display', 'Title');
-    $this->assertSession()->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->selectFieldOption('No results behaviour', 'Hide');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->assertListPagePresetFilters('configuration[0][link_source][plugin_configuration_wrapper][list_pages][list_page_configuration][wrapper][default_filter_values]', 'list-page-default_filter_values--configuration-0-link_source-plugin_configuration_wrapper-list_pages-list_page_configuration-wrapper-default_filter_values');
@@ -184,7 +182,6 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     $page->selectFieldOption('Source bundle', 'Content type one');
     $assert->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->selectFieldOption('Link display', 'Title');
-    $this->assertSession()->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->selectFieldOption('No results behaviour', 'Hide');
     $this->assertSession()->assertWaitOnAjaxRequest();
 
@@ -330,7 +327,6 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     $this->getSession()->getPage()->fillField('Administrative title', 'List page plugin test');
     $this->getSession()->getPage()->fillField('Title', 'List page list');
     $this->getSession()->getPage()->selectFieldOption('Link display', 'Title');
-    $this->assertSession()->assertWaitOnAjaxRequest();
     $this->getSession()->getPage()->selectFieldOption('No results behaviour', 'Hide');
     $this->assertSession()->assertWaitOnAjaxRequest();
 
