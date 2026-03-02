@@ -30,3 +30,6 @@ msgstr "Ħassar il-filtri"
 
 msgid "Filter by"
 msgstr "Iffiltra skont"
+
+msgid "Sort by"
+msgstr "Poġġihom f’ordni skont"

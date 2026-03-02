@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\oe_list_pages;
 
+use Drupal\Core\Entity\ContentEntityInterface;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /**
@@ -31,6 +32,15 @@ class ListPageDisallowSortEvent extends Event {
    * @var bool
    */
   protected $disallowed = FALSE;
+
+  /**
+   * The current entity onto which the list is being built.
+   *
+   * Used to differentiate between contexts for this option.
+   *
+   * @var \Drupal\Core\Entity\ContentEntityInterface|null
+   */
+  protected $contextEntity;
 
   /**
    * Constructs a new ListPageDisallowSortEvent.
@@ -87,6 +97,26 @@ class ListPageDisallowSortEvent extends Event {
    */
   public function disallow(): void {
     $this->disallowed = TRUE;
+  }
+
+  /**
+   * Returns the context entity.
+   *
+   * @return \Drupal\Core\Entity\ContentEntityInterface|null
+   *   The entity.
+   */
+  public function getContextEntity(): ?ContentEntityInterface {
+    return $this->contextEntity;
+  }
+
+  /**
+   * Sets the context entity.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The entity.
+   */
+  public function setContextEntity(ContentEntityInterface $entity): void {
+    $this->contextEntity = $entity;
   }
 
 }

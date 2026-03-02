@@ -125,6 +125,13 @@ class ListBuilder implements ListBuilderInterface {
   protected $listSourceFactory;
 
   /**
+   * The sort options resolver.
+   *
+   * @var \Drupal\oe_list_pages\ListPageSortOptionsResolver
+   */
+  protected $sortOptionsResolver;
+
+  /**
    * ListBuilder constructor.
    *
    * @param \Drupal\oe_list_pages\ListExecutionManagerInterface $listExecutionManager
@@ -149,10 +156,12 @@ class ListBuilder implements ListBuilderInterface {
    *   The multiselect filter field manager.
    * @param \Drupal\oe_list_pages\ListSourceFactory $listSourceFactory
    *   The list source factory.
+   * @param \Drupal\oe_list_pages\ListPageSortOptionsResolver $sortOptionsResolver
+   *   The sort options resolver.
    *
    * @SuppressWarnings(PHPMD.ExcessiveParameterList)
    */
-  public function __construct(ListExecutionManagerInterface $listExecutionManager, EntityTypeManager $entityTypeManager, PagerManagerInterface $pager, EntityRepositoryInterface $entityRepository, FormBuilderInterface $formBuilder, FacetsUrlGenerator $facetsUrlGenerator, ProcessorPluginManager $processorManager, RequestStack $requestStack, UrlProcessorPluginManager $urlProcessorManager, MultiselectFilterFieldPluginManager $multiselectFilterManager, ListSourceFactory $listSourceFactory) {
+  public function __construct(ListExecutionManagerInterface $listExecutionManager, EntityTypeManager $entityTypeManager, PagerManagerInterface $pager, EntityRepositoryInterface $entityRepository, FormBuilderInterface $formBuilder, FacetsUrlGenerator $facetsUrlGenerator, ProcessorPluginManager $processorManager, RequestStack $requestStack, UrlProcessorPluginManager $urlProcessorManager, MultiselectFilterFieldPluginManager $multiselectFilterManager, ListSourceFactory $listSourceFactory, ListPageSortOptionsResolver $sortOptionsResolver) {
     $this->listExecutionManager = $listExecutionManager;
     $this->entityTypeManager = $entityTypeManager;
     $this->pager = $pager;
@@ -164,6 +173,7 @@ class ListBuilder implements ListBuilderInterface {
     $this->urlProcessorManager = $urlProcessorManager;
     $this->multiselectFilterManager = $multiselectFilterManager;
     $this->listSourceFactory = $listSourceFactory;
+    $this->sortOptionsResolver = $sortOptionsResolver;
   }
 
   /**
@@ -473,13 +483,13 @@ class ListBuilder implements ListBuilderInterface {
   /**
    * {@inheritdoc}
    */
-  public function buildSortElement(ContentEntityInterface $entity): array {
+  public function buildSortElement(ContentEntityInterface $entity, ?ListPageConfiguration $configuration = NULL): array {
     $cache = new CacheableMetadata();
     $cache->addCacheContexts(['url.query_args']);
-    $configuration = ListPageConfiguration::fromEntity($entity);
+    $configuration = $configuration ?: ListPageConfiguration::fromEntity($entity);
     $list_source = $this->listSourceFactory->get($configuration->getEntityType(), $configuration->getBundle());
     $current_sort = $this->getSortFromUrl($configuration);
-    $form = $this->formBuilder->getForm(ListPageSortForm::class, $configuration, $list_source, $current_sort);
+    $form = $this->formBuilder->getForm(ListPageSortForm::class, $configuration, $list_source, $current_sort, $entity);
     $cache->applyTo($form);
     return $form;
   }
@@ -591,9 +601,10 @@ class ListBuilder implements ListBuilderInterface {
     }
 
     $list_source = $this->listSourceFactory->get($configuration->getEntityType(), $configuration->getBundle());
-    $index = $list_source->getIndex();
-    $allowed_directions = ['ASC', 'DESC'];
-    if (!$index->getField($sort['name']) || !in_array($sort['direction'], $allowed_directions)) {
+    $context_entity_info = $configuration->getExtra()['context_entity'];
+    $context_entity = $this->entityTypeManager->getStorage($context_entity_info['entity_type'])->load($context_entity_info['entity_id']);
+    $sort_options = $this->sortOptionsResolver->getSortOptions($list_source, [ListPageSortOptionsResolver::SCOPE_USER], $context_entity);
+    if (!isset($sort_options[ListPageSortOptionsResolver::generateSortMachineName($sort)])) {
       // In case a bad field name is passed or one that doesn't exist in the
       // index, we don't want to override the preset sort of the list page.
       return [];

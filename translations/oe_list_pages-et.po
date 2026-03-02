@@ -30,3 +30,6 @@ msgstr "Puhasta filtrid"
 
 msgid "Filter by"
 msgstr "Filtreeri"
+
+msgid "Sort by"
+msgstr "Sortimisalus"

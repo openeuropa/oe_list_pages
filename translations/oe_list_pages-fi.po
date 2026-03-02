@@ -30,3 +30,6 @@ msgstr "Poista valinnat"
 
 msgid "Filter by"
 msgstr "Rajaimet"
+
+msgid "Sort by"
+msgstr "Lajitteluperuste"

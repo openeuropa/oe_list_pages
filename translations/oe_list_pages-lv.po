@@ -30,3 +30,6 @@ msgstr "Notīrīt filtrus"
 
 msgid "Filter by"
 msgstr "Atlasīt pēc"
+
+msgid "Sort by"
+msgstr "Kārtot pēc"

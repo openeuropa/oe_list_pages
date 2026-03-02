@@ -1,4 +1,4 @@
-  msgid ""
+msgid ""
 msgstr ""
 
 msgid "Showing results @first to @last"
@@ -30,3 +30,6 @@ msgstr "Valyti filtrus"
 
 msgid "Filter by"
 msgstr "Filtruoti pagal"
+
+msgid "Sort by"
+msgstr "Rikiuoti pagal"

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\oe_list_pages;
 
+use Drupal\Core\Entity\ContentEntityInterface;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /**
@@ -42,6 +43,15 @@ class ListPageSortAlterEvent extends Event {
    * @var string
    */
   protected $scope = ListPageSortOptionsResolver::SCOPE_CONFIGURATION;
+
+  /**
+   * The current entity onto which the list is being built.
+   *
+   * Used to differentiate between contexts for the available sort options.
+   *
+   * @var \Drupal\Core\Entity\ContentEntityInterface|null
+   */
+  protected $contextEntity;
 
   /**
    * Constructs a new ListPageSourceAlterEvent.
@@ -114,6 +124,26 @@ class ListPageSortAlterEvent extends Event {
    */
   public function setScope(string $scope): void {
     $this->scope = $scope;
+  }
+
+  /**
+   * Returns the context entity.
+   *
+   * @return \Drupal\Core\Entity\ContentEntityInterface|null
+   *   The entity.
+   */
+  public function getContextEntity(): ?ContentEntityInterface {
+    return $this->contextEntity;
+  }
+
+  /**
+   * Sets the context entity.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The entity.
+   */
+  public function setContextEntity(ContentEntityInterface $entity): void {
+    $this->contextEntity = $entity;
   }
 
 }

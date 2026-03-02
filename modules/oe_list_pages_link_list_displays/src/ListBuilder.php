@@ -18,6 +18,7 @@ use Drupal\oe_link_lists\LinkDisplayPluginManagerInterface;
 use Drupal\oe_list_pages\ListBuilder as DefaultListBuilder;
 use Drupal\oe_list_pages\ListExecutionManagerInterface;
 use Drupal\oe_list_pages\ListPageConfiguration;
+use Drupal\oe_list_pages\ListPageSortOptionsResolver;
 use Drupal\oe_list_pages\ListSourceFactory;
 use Drupal\oe_list_pages\MultiselectFilterFieldPluginManager;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -50,8 +51,8 @@ class ListBuilder extends DefaultListBuilder {
    *
    * @SuppressWarnings(PHPMD.ExcessiveParameterList)
    */
-  public function __construct(ListExecutionManagerInterface $listExecutionManager, EntityTypeManager $entityTypeManager, PagerManagerInterface $pager, EntityRepositoryInterface $entityRepository, FormBuilderInterface $formBuilder, FacetsUrlGenerator $facetsUrlGenerator, ProcessorPluginManager $processorManager, RequestStack $requestStack, UrlProcessorPluginManager $urlProcessorManager, MultiselectFilterFieldPluginManager $multiselectFilterManager, ListSourceFactory $listSourceFactory, EventDispatcherInterface $eventDispatcher, LinkDisplayPluginManagerInterface $linkDisplayPluginManager) {
-    parent::__construct($listExecutionManager, $entityTypeManager, $pager, $entityRepository, $formBuilder, $facetsUrlGenerator, $processorManager, $requestStack, $urlProcessorManager, $multiselectFilterManager, $listSourceFactory);
+  public function __construct(ListExecutionManagerInterface $listExecutionManager, EntityTypeManager $entityTypeManager, PagerManagerInterface $pager, EntityRepositoryInterface $entityRepository, FormBuilderInterface $formBuilder, FacetsUrlGenerator $facetsUrlGenerator, ProcessorPluginManager $processorManager, RequestStack $requestStack, UrlProcessorPluginManager $urlProcessorManager, MultiselectFilterFieldPluginManager $multiselectFilterManager, ListSourceFactory $listSourceFactory, ListPageSortOptionsResolver $sortOptionsResolver, EventDispatcherInterface $eventDispatcher, LinkDisplayPluginManagerInterface $linkDisplayPluginManager) {
+    parent::__construct($listExecutionManager, $entityTypeManager, $pager, $entityRepository, $formBuilder, $facetsUrlGenerator, $processorManager, $requestStack, $urlProcessorManager, $multiselectFilterManager, $listSourceFactory, $sortOptionsResolver);
     $this->eventDispatcher = $eventDispatcher;
     $this->linkDisplayPluginManager = $linkDisplayPluginManager;
   }

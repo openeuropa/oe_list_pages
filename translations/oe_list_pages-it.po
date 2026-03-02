@@ -30,3 +30,6 @@ msgstr "Elimina filtri"
 
 msgid "Filter by"
 msgstr "Filtra per"
+
+msgid "Sort by"
+msgstr "Ordina per"

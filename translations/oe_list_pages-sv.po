@@ -30,3 +30,6 @@ msgstr "Rensa sökkriterier"
 
 msgid "Filter by"
 msgstr "Filtrera efter"
+
+msgid "Sort by"
+msgstr "Sortera efter"

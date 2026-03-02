@@ -30,3 +30,6 @@ msgstr "Filter zurücksetzen"
 
 msgid "Filter by"
 msgstr "Filtern nach"
+
+msgid "Sort by"
+msgstr "Sortieren nach"

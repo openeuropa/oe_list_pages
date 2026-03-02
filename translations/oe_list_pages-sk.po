@@ -30,3 +30,6 @@ msgstr "Vymazať filtre"
 
 msgid "Filter by"
 msgstr "Usporiadať podľa"
+
+msgid "Sort by"
+msgstr "Zoradiť podľa"
