@@ -1,11 +1,23 @@
 # Changelog
 
+## [1.18.0](https://github.com/openeuropa/oe_list_pages/tree/1.18.0) (2026-03-02)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.17.1...1.18.0)
+
+**Merged pull requests:**
+
+- EWPP-6414: List page sort improvements. [\#255](https://github.com/openeuropa/oe_list_pages/pull/255) ([upchuk](https://github.com/upchuk))
+- OEL-3899: Add placeholder to MultiselectWidget.php and FulltextWidget.php [\#253](https://github.com/openeuropa/oe_list_pages/pull/253) ([piotrsmykaj](https://github.com/piotrsmykaj))
+- EWPP-6364: Increase pager sizes for list pages. [\#247](https://github.com/openeuropa/oe_list_pages/pull/247) ([sergepavle](https://github.com/sergepavle))
+- EWPP-6021: Remove converting string to lowercase for keyword search. [\#246](https://github.com/openeuropa/oe_list_pages/pull/246) ([sergepavle](https://github.com/sergepavle))
+
 ## [1.17.1](https://github.com/openeuropa/oe_list_pages/tree/1.17.1) (2026-01-09)
 
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.17.0...1.17.1)
 
 **Merged pull requests:**
 
+- Release-1.17.1: Update changelog. [\#251](https://github.com/openeuropa/oe_list_pages/pull/251) ([nagyad](https://github.com/nagyad))
 - EWPP-6352: Remove patch from composer. [\#250](https://github.com/openeuropa/oe_list_pages/pull/250) ([nagyad](https://github.com/nagyad))
 
 ## [1.17.0](https://github.com/openeuropa/oe_list_pages/tree/1.17.0) (2026-01-09)
