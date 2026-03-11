@@ -29,6 +29,7 @@ abstract class ListPagesSearchApiConfiguratorTestBase extends EntityKernelTestBa
     'emr_node',
     'link',
     'node',
+    'node_storage_body_field',
     'oe_list_pages',
     'oe_list_pages_filters_test',
     'oe_list_page_content_type',
@@ -76,7 +77,7 @@ abstract class ListPagesSearchApiConfiguratorTestBase extends EntityKernelTestBa
       ->set('tracking_page_size', 100)
       ->save();
 
-    $this->installConfig(['node',
+    $this->installConfig(['node', 'node_storage_body_field',
       'open_vocabularies',
       'oe_list_pages',
       'oe_list_page_content_type',
