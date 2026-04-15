@@ -47,4 +47,12 @@ interface ListExecutionResultsInterface {
    */
   public function getConfiguration(): ListPageConfiguration;
 
+  /**
+   * Returns the entity IDs of promoted (highlighted) items.
+   *
+   * @return array
+   *   An array of entity IDs in the format "entity_type:entity_id".
+   */
+  public function getPromotedEntityIds(): array;
+
 }
