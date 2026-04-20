@@ -298,40 +298,44 @@ class ListPageConfiguration {
   }
 
   /**
-   * Returns the limit.
+   * Returns the limit for the number of items per page.
    *
    * @return int|null
-   *   The limit.
+   *   The limit, or NULL for a default limit, or zero to have all items on
+   *   every page.
    */
   public function getLimit(): ?int {
     return $this->limit;
   }
 
   /**
-   * Sets the limit.
+   * Sets the limit for the number of items per page.
    *
    * @param int|null $limit
-   *   The limit.
+   *   The limit, or NULL for a default limit, or zero to have all items on
+   *   every page.
    */
   public function setLimit(?int $limit = NULL): void {
     $this->limit = $limit;
   }
 
   /**
-   * Returns the page.
+   * Returns the page number.
    *
-   * @return int
-   *   The page.
+   * @return int|null
+   *   The page number, starting from zero, or NULL to get the page number from
+   *   the 'page' query parameter of the current request.
    */
   public function getPage(): ?int {
     return $this->page;
   }
 
   /**
-   * Sets the page.
+   * Sets the page number.
    *
-   * @param int $page
-   *   The page.
+   * @param int|null $page
+   *   The page number, starting from zero, or NULL to get the page number from
+   *   the 'page' query parameter of the current request.
    */
   public function setPage(?int $page = NULL): void {
     $this->page = $page;
