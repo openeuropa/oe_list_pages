@@ -130,6 +130,7 @@ class ListPageLinkSourcePluginTest extends KernelTestBase {
       $test_entities_by_bundle[$entity->bundle()][$entity->id()] = $entity->label();
     }
 
+    /** @var \Drupal\oe_list_pages\ListSourceFactoryInterface $list_source_factory */
     $list_source_factory = $this->container->get('oe_list_pages.list_source.factory');
     foreach (['foo', 'bar'] as $bundle) {
       $item_list = $list_source_factory->get('entity_test_with_bundle', $bundle);
@@ -200,6 +201,7 @@ class ListPageLinkSourcePluginTest extends KernelTestBase {
       'type' => 'foo',
     ]);
     $entity->save();
+    /** @var \Drupal\oe_list_pages\ListSourceFactoryInterface $list_source_factory */
     $list_source_factory = $this->container->get('oe_list_pages.list_source.factory');
     $item_list = $list_source_factory->get('entity_test_with_bundle', 'foo');
     $item_list->getIndex()->indexItems();
