@@ -300,7 +300,7 @@ class ListPageConfiguration {
   /**
    * Returns the limit.
    *
-   * @return int
+   * @return int|null
    *   The limit.
    */
   public function getLimit(): ?int {
@@ -310,7 +310,7 @@ class ListPageConfiguration {
   /**
    * Sets the limit.
    *
-   * @param int $limit
+   * @param int|null $limit
    *   The limit.
    */
   public function setLimit(?int $limit = NULL): void {
