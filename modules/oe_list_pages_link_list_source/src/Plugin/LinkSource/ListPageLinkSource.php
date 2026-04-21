@@ -23,6 +23,7 @@ use Drupal\oe_list_pages\ListSourceInterface;
 use Drupal\oe_list_pages_link_list_source\ContextualFilterValuesProcessor;
 use Drupal\oe_list_pages_link_list_source\ContextualFiltersConfigurationBuilder;
 use Drupal\oe_list_pages_link_list_source\Exception\InapplicableContextualFilter;
+use Drupal\oe_list_pages_link_list_source\PagePosition;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
@@ -169,7 +170,14 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
       return $links;
     }
 
-    $configuration->setLimit($limit ?? 0);
+    if ($limit === 0) {
+      // Limit 0 should be illegal. Let's treat it the same as NULL for now.
+      $limit = NULL;
+    }
+    $position = PagePosition::fromRange($offset, $limit);
+    $configuration->setPage($position->page);
+    $configuration->setLimit($position->itemsPerPage ?? 0);
+
     $list_execution = $this->listExecutionManager->executeList($configuration);
     if (!$list_execution) {
       $links->addCacheableDependency($cache);
@@ -186,7 +194,9 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
       return $links;
     }
 
-    foreach ($results->getResultItems() as $item) {
+    $result_items = array_slice($results->getResultItems(), $position->offsetInPage, $limit, TRUE);
+
+    foreach ($result_items as $item) {
       try {
         // Do not crash the application in case the index still has an item in
         // it pointing to an entity that got deleted.
