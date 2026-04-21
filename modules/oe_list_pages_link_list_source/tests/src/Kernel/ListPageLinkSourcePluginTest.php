@@ -173,19 +173,19 @@ class ListPageLinkSourcePluginTest extends KernelTestBase {
       $test_entities_by_bundle['foo'],
       $this->extractEntityNames($plugin->getLinks(0)),
     );
-    // Offset has no effect if limit is zero.
+    // The offset is applied correctly.
     $this->assertEquals(
-      $test_entities_by_bundle['foo'],
-      $this->extractEntityNames($plugin->getLinks(0, 3)),
+      array_slice($test_entities_by_bundle['foo'], 3, NULL, TRUE),
+      $this->extractEntityNames($plugin->getLinks(NULL, 3)),
     );
-    // Offset has no effect at all.
-    // @todo Fix this.
+    // Load with offset and length that match cleanly on one page.
     $this->assertEquals(
-      array_slice($test_entities_by_bundle['foo'], 0, 3, TRUE),
+      array_slice($test_entities_by_bundle['foo'], 6, 3, TRUE),
       $this->extractEntityNames($plugin->getLinks(3, 6)),
     );
+    // Load with offset and length that do not match cleanly on a page.
     $this->assertEquals(
-      array_slice($test_entities_by_bundle['foo'], 0, 3, TRUE),
+      array_slice($test_entities_by_bundle['foo'], 4, 3, TRUE),
       $this->extractEntityNames($plugin->getLinks(3, 4)),
     );
   }
