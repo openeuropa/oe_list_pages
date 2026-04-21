@@ -177,7 +177,7 @@ class ContextualFilterValuesProcessor {
    * @return \Drupal\Core\Entity\ContentEntityInterface|null
    *   The content entity.
    */
-  protected function getCurrentEntityFromRoute() :?ContentEntityInterface {
+  protected function getCurrentEntityFromRoute(): ?ContentEntityInterface {
     $route_name = $this->routeMatch->getRouteName();
 
     if (empty($route_name)) {
