@@ -202,14 +202,9 @@ class ListExecutionManager implements ListExecutionManagerInterface {
       );
       $result = $promotion_result['result'];
       $promoted_entity_ids = $promotion_result['promoted_entity_ids'];
-      $query = $list_source->getQuery([
-        'limit' => $limit,
-        'page' => $current_page,
-        'language' => $language,
-        'sort' => $sort,
-        'preset_filters' => $preset_filters,
-        'extra' => $configuration->getExtra(),
-      ]);
+      // Use the EXECUTED base query so cache tags accumulated during
+      // execution (facets, preset filters, etc.) are carried downstream.
+      $query = $promotion_result['query'];
     }
     else {
       $options = [
@@ -234,150 +229,56 @@ class ListExecutionManager implements ListExecutionManagerInterface {
   /**
    * Executes a list query with promotion support.
    *
-   * This method fetches promoted items first, then fills the remaining slots
-   * with regular items, ensuring no duplicates and correct pagination.
-   *
-   * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
-   *   The list source.
-   * @param int $limit
-   *   The number of items per page.
-   * @param int $current_page
-   *   The current page number (0-indexed).
-   * @param string|array $language
-   *   The language(s) to filter by.
-   * @param array $sort
-   *   The sort configuration.
-   * @param array $preset_filters
-   *   The preset filters.
-   * @param array $extra
-   *   Extra configuration.
-   * @param array $promotion
-   *   The promotion settings.
+   * Promoted items (matching the promotion rules) are surfaced first in the
+   * virtual list; regular items (everything matching preset filters minus
+   * promoted) follow. The current page is then sliced out of that virtual
+   * list.
    *
    * @return array
    *   An array with keys:
    *   - 'result': The combined result set.
+   *   - 'query': The executed base query (carries cache tags).
    *   - 'promoted_entity_ids': Array of promoted entity IDs.
    */
   protected function executeListWithPromotion(ListSourceInterface $list_source, int $limit, int $current_page, $language, array $sort, array $preset_filters, array $extra, array $promotion): array {
+    // Step 1: Fetch every promoted item once.
+    //
+    // We need their total count to compute pagination offsets, and their IDs
+    // to exclude them from the regular query so an item never appears twice.
+    // Each rule can have multiple conditions combined with AND; items
+    // matching several rules are deduplicated by entity ID.
     $promoted_items = [];
     $promoted_entity_ids = [];
-
-    // Step 1: Always fetch ALL promoted items first (we need to know the count
-    // for pagination offset calculation, and their IDs to exclude them).
-    // Each rule can have multiple conditions (combined with AND).
-    $rules = $promotion['rules'] ?? [];
-
-    foreach ($rules as $rule) {
+    foreach ($promotion['rules'] ?? [] as $rule) {
       $conditions = $rule['conditions'] ?? [];
       if (empty($conditions)) {
         continue;
       }
-
-      // Create a query to find items matching this promotion rule.
-      // Fetch a reasonable maximum to get all promoted items.
-      $promo_query = $list_source->getQuery([
-        'limit' => 100,
-        'page' => 0,
-        'language' => $language,
-        'sort' => $sort,
-        'preset_filters' => $preset_filters,
-        'extra' => $extra,
-      ]);
-
-      // Add all conditions for this rule (AND logic).
-      foreach ($conditions as $condition) {
-        if (empty($condition['field'])) {
-          continue;
-        }
-
-        $field = $condition['field'];
-        $operator = $condition['operator'] ?? '=';
-        $value = $condition['value'] ?? '';
-
-        // Handle special value "now" for date comparisons.
-        if (strtolower($value) === 'now') {
-          $value = date('Y-m-d\TH:i:s');
-        }
-
-        // Map operators to Search API operators.
-        $promo_query->addCondition($field, $value, $operator);
-      }
-
-      $promo_result = $promo_query->execute();
-      $promo_items_found = $promo_result->getResultItems();
-
-      foreach ($promo_items_found as $item_id => $item) {
-        // Extract entity ID to avoid duplicates.
+      $rule_items = $this->fetchAllPromotedForRule(
+        $list_source, $language, $sort, $preset_filters, $extra, $conditions
+      );
+      foreach ($rule_items as $item_id => $item) {
+        // Dedupe by entity ID: an entity may match multiple rules but must
+        // appear only once in the promoted section.
         $entity_id = $this->extractEntityIdFromItem($item);
-        if ($entity_id && !in_array($entity_id, $promoted_entity_ids)) {
+        if ($entity_id && !in_array($entity_id, $promoted_entity_ids, TRUE)) {
           $promoted_items[$item_id] = $item;
           $promoted_entity_ids[] = $entity_id;
         }
       }
     }
-
     $total_promoted = count($promoted_items);
 
-    // Step 2: Calculate pagination.
-    // Promoted items come first, then regular items follow.
-    // We need to determine which items to show based on the virtual position.
+    // Step 2: Execute the base query.
     //
-    // Virtual list structure:
-    // [0 ... total_promoted-1] = promoted items
-    // [total_promoted ... total_items] = regular items
-    //
-    // For page N with limit L:
-    // - Start position: N * L
-    // - End position: (N + 1) * L - 1.
-    $page_start = $current_page * $limit;
-    $page_end = $page_start + $limit;
-
-    $final_items = [];
-
-    // Determine how many promoted items fall within this page's range.
-    if ($page_start < $total_promoted) {
-      // Some promoted items are on this page.
-      $promo_start = $page_start;
-      $promo_end = min($page_end, $total_promoted);
-      $promo_count = $promo_end - $promo_start;
-
-      // Get the slice of promoted items for this page.
-      $promoted_slice = array_slice($promoted_items, $promo_start, $promo_count, TRUE);
-      $final_items = $promoted_slice;
-    }
-
-    // Calculate how many regular items we need to fill the page.
-    $promoted_on_page = count($final_items);
-    $regular_needed = $limit - $promoted_on_page;
-
-    if ($regular_needed > 0) {
-      // Calculate offset for regular items.
-      // Regular items start after all promoted items in the virtual list.
-      // If we're on a page where promoted items end mid-page regular:
-      // offset = 0.
-      // If we're on a page without promoted items:
-      // offset = page_start - total_promoted.
-      $regular_offset = max(0, $page_start - $total_promoted);
-
-      // Fetch regular items excluding promoted ones.
-      $regular_items = $this->fetchRegularItemsExcludingPromoted(
-        $list_source,
-        $regular_needed,
-        $regular_offset,
-        $language,
-        $sort,
-        $preset_filters,
-        $extra,
-        $promoted_entity_ids
-      );
-
-      // Combine promoted + regular.
-      $final_items = $final_items + $regular_items;
-    }
-
-    // Create a result set with the final items.
-    // We need a base query to create a proper result set.
+    // It matches ALL items (promoted + regular) against preset filters,
+    // language and bundle. We use it for two things:
+    //  - its total result count, which drives the pager;
+    //  - its cache tags, accumulated during execute() by QuerySubscriber
+    //    (facets, preset filters, index) — this is why we keep the EXECUTED
+    //    query and return it to the caller, rather than re-creating a fresh
+    //    unexecuted one that would have no facet tags.
+    // Its item list is overwritten just below with our computed final set.
     $base_query = $list_source->getQuery([
       'limit' => $limit,
       'page' => $current_page,
@@ -387,46 +288,188 @@ class ListExecutionManager implements ListExecutionManagerInterface {
       'extra' => $extra,
     ]);
     $base_result = $base_query->execute();
+
+    // Step 3: Compute the page slice from a virtual list.
+    //
+    // Virtual list structure:
+    //   [0 ... total_promoted-1]        = promoted items in sort order
+    //   [total_promoted ... total-1]    = regular items in sort order
+    // For page N with limit L:
+    //   - Start position: N * L
+    //   - End position:   (N + 1) * L - 1
+    $page_start = $current_page * $limit;
+    $page_end = $page_start + $limit;
+
+    $final_items = [];
+
+    // How many promoted items fall within this page's range (possibly 0).
+    if ($page_start < $total_promoted) {
+      $promo_count = min($page_end, $total_promoted) - $page_start;
+      $final_items = array_slice($promoted_items, $page_start, $promo_count, TRUE);
+    }
+
+    // Step 4: Top up with regular items if the page is not full yet.
+    $regular_needed = $limit - count($final_items);
+    if ($regular_needed > 0) {
+      // Regular items start after promoted ones in the virtual list. When
+      // promoted items end mid-page the offset is 0 (no regular has been
+      // shown yet); otherwise it's the number of regulars already displayed
+      // on previous pages.
+      $regular_offset = max(0, $page_start - $total_promoted);
+      $final_items += $this->fetchRegularItemsExcludingPromoted(
+        $list_source,
+        $regular_needed,
+        $regular_offset,
+        $language,
+        $sort,
+        $preset_filters,
+        $extra,
+        array_keys($promoted_items)
+      );
+    }
+
+    // Swap the base query's items for our ordered promoted+regular set.
+    // The result's total count and cache tags stay intact.
     $base_result->setResultItems($final_items);
 
     return [
       'result' => $base_result,
+      'query' => $base_query,
       'promoted_entity_ids' => $promoted_entity_ids,
     ];
   }
 
   /**
+   * Fetches every item matching one promotion rule's conditions.
+   *
+   * Auto-paginates based on the result's reported total count so no item
+   * is silently dropped regardless of how many match the rule. This is a
+   * correctness requirement: the caller needs every promoted item ID to
+   * exclude them from the regular query; truncating would leak promoted
+   * items into the regular section and desynchronise pagination.
+   *
+   * The per-iteration batch size below is an internal optimisation — it
+   * controls queries-per-call vs. memory-per-response, not the feature's
+   * capacity. Larger = fewer Solr round-trips; smaller = smaller result
+   * objects in PHP memory. The feature works correctly for any batch
+   * size greater than zero.
+   */
+  protected function fetchAllPromotedForRule(ListSourceInterface $list_source, $language, array $sort, array $preset_filters, array $extra, array $conditions): array {
+    // Typical promotion rules match a handful of items, so a moderate
+    // batch fits the common case in a single round-trip while keeping
+    // per-response memory bounded on outlier deployments.
+    $batch_size = 100;
+    $items = [];
+    $page = 0;
+    $total = NULL;
+
+    do {
+      // Build a query matching this rule's conditions (AND logic) plus the
+      // base list constraints (preset filters, language, bundle, sort).
+      $query = $list_source->getQuery([
+        'limit' => $batch_size,
+        'page' => $page,
+        'language' => $language,
+        'sort' => $sort,
+        'preset_filters' => $preset_filters,
+        'extra' => $extra,
+      ]);
+      foreach ($conditions as $condition) {
+        if (empty($condition['field'])) {
+          continue;
+        }
+        $value = $condition['value'] ?? '';
+        // Special value "now" lets rules target e.g. "upcoming" items via
+        // a date comparison resolved at query time.
+        if (is_string($value) && strtolower($value) === 'now') {
+          $value = date('Y-m-d\TH:i:s');
+        }
+        $query->addCondition($condition['field'], $value, $condition['operator'] ?? '=');
+      }
+      $result = $query->execute();
+      $page_items = $result->getResultItems();
+      if (empty($page_items)) {
+        break;
+      }
+      $items += $page_items;
+      // Pick up the authoritative total on the first round-trip; it drives
+      // the loop termination without relying on a hard-coded cap.
+      if ($total === NULL) {
+        $total = $result->getResultCount();
+      }
+      $page++;
+    } while (count($items) < $total);
+
+    return $items;
+  }
+
+  /**
    * Fetches regular items excluding promoted ones.
    *
-   * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
-   *   The list source.
-   * @param int $needed
-   *   Number of items needed.
-   * @param int $offset
-   *   The offset to start from (in regular items, not counting promoted).
-   * @param string|array $language
-   *   The language(s) to filter by.
-   * @param array $sort
-   *   The sort configuration.
-   * @param array $preset_filters
-   *   The preset filters.
-   * @param array $extra
-   *   Extra configuration.
-   * @param array $promoted_entity_ids
-   *   Entity IDs to exclude.
+   * Uses a Search API `NOT IN` condition on `search_api_id` so Solr
+   * handles the exclusion natively. This avoids the earlier offset-based
+   * PHP iteration, which relied on Solr returning promoted and regular
+   * items in identical order across separate queries — an assumption that
+   * breaks when the sort field has ties or missing values.
    *
-   * @return array
-   *   Array of Search API items.
+   * If `NOT IN` on `search_api_id` is unsupported by the backend the
+   * exception is caught and we fall back to fetching and skipping in PHP.
    */
-  protected function fetchRegularItemsExcludingPromoted(ListSourceInterface $list_source, int $needed, int $offset, $language, array $sort, array $preset_filters, array $extra, array $promoted_entity_ids): array {
-    $result_items = [];
-    $skipped = 0;
-    $page = 0;
-    // Fetch extra to account for exclusions.
-    $fetch_limit = $needed + count($promoted_entity_ids) + 10;
+  protected function fetchRegularItemsExcludingPromoted(ListSourceInterface $list_source, int $needed, int $offset, $language, array $sort, array $preset_filters, array $extra, array $promoted_item_ids): array {
+    if ($needed <= 0) {
+      return [];
+    }
 
+    // Primary path: exclude promoted items via a single Search API
+    // condition. Solr filters them out natively so the items returned are
+    // already the "regular" subset in sort order — no PHP-side skipping
+    // needed, and no dependency on two separate queries returning items
+    // in identical positions.
+    //
+    // We cannot request an arbitrary offset directly because
+    // ListSource::getQuery derives the query offset from `limit * page`.
+    // Workaround: fetch (offset + needed) items from page 0 then slice
+    // in PHP. For typical pages this stays small (< 50).
+    $query = $list_source->getQuery([
+      'limit' => $offset + $needed,
+      'page' => 0,
+      'language' => $language,
+      'sort' => $sort,
+      'preset_filters' => $preset_filters,
+      'extra' => $extra,
+    ]);
+    if (!empty($promoted_item_ids)) {
+      try {
+        // `search_api_id` is the internal item identifier
+        // (e.g. "entity:node/123:en") and is always available for filtering
+        // on Solr-backed indexes.
+        $query->addCondition('search_api_id', $promoted_item_ids, 'NOT IN');
+        $items = $query->execute()->getResultItems();
+        return array_slice($items, $offset, $needed, TRUE);
+      }
+      catch (\Exception $e) {
+        // The backend may not support NOT IN on search_api_id (e.g.
+        // database backend). Fall through to the PHP-skip strategy below.
+      }
+    }
+    else {
+      // No promoted items: a plain paginated query is enough.
+      return array_slice($query->execute()->getResultItems(), $offset, $needed, TRUE);
+    }
+
+    // Fallback path: fetch enough items to cover offset + needed + every
+    // promoted item we might encounter, then skip them manually. This is
+    // the tight worst case (all promoted items in the first batch). If it
+    // turns out to be insufficient — e.g. the total result is spread
+    // across several Solr pages — the while loop pages through naturally
+    // until we have enough, the index is exhausted, or the safety cap
+    // kicks in.
+    $result_items = [];
+    $seen_regular = 0;
+    $page = 0;
+    $fetch_limit = $offset + $needed + count($promoted_item_ids);
     while (count($result_items) < $needed) {
-      $query = $list_source->getQuery([
+      $page_query = $list_source->getQuery([
         'limit' => $fetch_limit,
         'page' => $page,
         'language' => $language,
@@ -434,44 +477,32 @@ class ListExecutionManager implements ListExecutionManagerInterface {
         'preset_filters' => $preset_filters,
         'extra' => $extra,
       ]);
-
-      $result = $query->execute();
-      $items = $result->getResultItems();
-
-      if (empty($items)) {
-        // No more items available.
+      $page_items = $page_query->execute()->getResultItems();
+      if (empty($page_items)) {
+        // No more items in the index.
         break;
       }
-
-      foreach ($items as $item_id => $item) {
-        $entity_id = $this->extractEntityIdFromItem($item);
-
-        // Skip promoted items.
-        if ($entity_id && in_array($entity_id, $promoted_entity_ids)) {
+      foreach ($page_items as $item_id => $item) {
+        // Skip promoted items — they're shown in the promoted section.
+        if (in_array($item_id, $promoted_item_ids, TRUE)) {
           continue;
         }
-
-        // Handle offset: skip items until we reach the desired offset.
-        if ($skipped < $offset) {
-          $skipped++;
+        // Skip regular items that belong to earlier pages.
+        if ($seen_regular < $offset) {
+          $seen_regular++;
           continue;
         }
-
         $result_items[$item_id] = $item;
-
         if (count($result_items) >= $needed) {
           break 2;
         }
       }
-
       $page++;
-
-      // Safety limit to prevent infinite loops.
+      // Safety cap against unbounded loops on degenerate backends.
       if ($page > 100) {
         break;
       }
     }
-
     return $result_items;
   }
 
