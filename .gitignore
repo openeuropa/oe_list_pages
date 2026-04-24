@@ -1,5 +1,6 @@
 .DS_Store
 .idea
+/config/sync/
 behat.yml
 build
 composer.lock
@@ -9,7 +10,9 @@ junit-export
 node_modules
 npm-debug.log
 package-lock.json
+pathes.lock.json
 phpunit.xml
+recipes
 runner.yml
 vendor
 yarn.lock
