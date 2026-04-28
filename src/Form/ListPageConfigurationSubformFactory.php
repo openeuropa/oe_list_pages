@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\oe_list_pages\Form;
 
+use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\oe_list_pages\DefaultFilterConfigurationBuilder;
@@ -61,6 +62,13 @@ class ListPageConfigurationSubformFactory implements ListPageConfigurationFactor
   protected $sortOptionsResolver;
 
   /**
+   * The entity field manager.
+   *
+   * @var \Drupal\Core\Entity\EntityFieldManagerInterface
+   */
+  protected $entityFieldManager;
+
+  /**
    * ListPageConfigurationSubformFactory constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
@@ -75,21 +83,24 @@ class ListPageConfigurationSubformFactory implements ListPageConfigurationFactor
    *   The preset list builder.
    * @param \Drupal\oe_list_pages\ListPageSortOptionsResolver $sortOptionsResolver
    *   The sort options resolver.
+   * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entityFieldManager
+   *   The entity field manager.
    */
-  public function __construct(EntityTypeManagerInterface $entityTypeManager, EntityTypeBundleInfoInterface $entityTypeBundleInfo, EventDispatcherInterface $eventDispatcher, ListSourceFactoryInterface $listSourceFactory, DefaultFilterConfigurationBuilder $presetFiltersBuilder, ListPageSortOptionsResolver $sortOptionsResolver) {
+  public function __construct(EntityTypeManagerInterface $entityTypeManager, EntityTypeBundleInfoInterface $entityTypeBundleInfo, EventDispatcherInterface $eventDispatcher, ListSourceFactoryInterface $listSourceFactory, DefaultFilterConfigurationBuilder $presetFiltersBuilder, ListPageSortOptionsResolver $sortOptionsResolver, EntityFieldManagerInterface $entityFieldManager) {
     $this->entityTypeManager = $entityTypeManager;
     $this->entityTypeBundleInfo = $entityTypeBundleInfo;
     $this->eventDispatcher = $eventDispatcher;
     $this->listSourceFactory = $listSourceFactory;
     $this->presetFiltersBuilder = $presetFiltersBuilder;
     $this->sortOptionsResolver = $sortOptionsResolver;
+    $this->entityFieldManager = $entityFieldManager;
   }
 
   /**
    * {@inheritdoc}
    */
   public function getForm(ListPageConfiguration $configuration): ListPageConfigurationSubForm {
-    return new ListPageConfigurationSubForm($configuration, $this->entityTypeManager, $this->entityTypeBundleInfo, $this->eventDispatcher, $this->listSourceFactory, $this->presetFiltersBuilder, $this->sortOptionsResolver);
+    return new ListPageConfigurationSubForm($configuration, $this->entityTypeManager, $this->entityTypeBundleInfo, $this->eventDispatcher, $this->listSourceFactory, $this->presetFiltersBuilder, $this->sortOptionsResolver, $this->entityFieldManager);
   }
 
 }

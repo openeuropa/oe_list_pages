@@ -1,0 +1,56 @@
+/**
+ * @file
+ * Styles for promoted/highlighted items in list pages.
+ */
+
+/* Wrapper for list items */
+.oe-list-pages-item {
+  position: relative;
+}
+
+/* Promoted item styling */
+.oe-list-pages-item--promoted {
+  position: relative;
+}
+
+/* Promoted badge */
+.oe-list-pages-promoted-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  padding: 4px 8px;
+  background-color: #ffc107;
+  color: #212529;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  border-radius: 0 0 4px 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.oe-list-pages-promoted-badge svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Alternative: Badge as inline element instead of absolute positioned */
+.oe-list-pages-item--promoted.oe-list-pages-item--inline-badge .oe-list-pages-promoted-badge {
+  position: static;
+  display: inline-flex;
+  margin-right: 8px;
+  border-radius: 4px;
+}
+
+/* Screen reader only text */
+.visually-hidden {
+  position: absolute !important;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  width: 1px;
+  height: 1px;
+  word-wrap: normal;
+}
