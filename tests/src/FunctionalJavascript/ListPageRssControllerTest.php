@@ -28,8 +28,6 @@ class ListPageRssControllerTest extends WebDriverTestBase {
     'content_translation',
     'locale',
     'node',
-    'emr',
-    'emr_node',
     'rdf_skos',
     'search_api',
     'search_api_db',
@@ -82,7 +80,6 @@ class ListPageRssControllerTest extends WebDriverTestBase {
 
     // Create list page.
     $this->drupalGet('/node/add/oe_list_page');
-    $this->clickLink('List Page');
     $page = $this->getSession()->getPage();
     $this->assertTrue($this->assertSession()->optionExists('Source bundle', 'Content type one')->isSelected());
     $page->fillField('Title', 'List page test');

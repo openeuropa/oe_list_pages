@@ -1,14 +1,9 @@
 langcode: en
 status: true
-dependencies:
-  module:
-    - emr
+dependencies: {  }
 third_party_settings:
   oe_list_pages:
     default_filter_values_allowed: true
-  emr:
-    entity_meta_bundles:
-      - oe_list_page
 name: 'List page'
 type: oe_list_page
 description: ''

@@ -133,7 +133,7 @@ class ListPageConfiguration {
   }
 
   /**
-   * Creates an instance from an entity that has a list page entity meta.
+   * Creates an instance from a host entity that carries list page fields.
    *
    * @param \Drupal\Core\Entity\ContentEntityInterface $entity
    *   The entity.
@@ -142,10 +142,7 @@ class ListPageConfiguration {
    *   The configuration.
    */
   public static function fromEntity(ContentEntityInterface $entity): ListPageConfiguration {
-    /** @var \Drupal\emr\Entity\EntityMetaInterface $entity_meta */
-    $entity_meta = $entity->get('emr_entity_metas')->getEntityMeta('oe_list_page');
-    /** @var \Drupal\oe_list_pages\ListPageWrapper $wrapper */
-    $wrapper = $entity_meta->getWrapper();
+    $wrapper = new ListPageWrapper($entity);
     $wrapper_configuration = $wrapper->getConfiguration();
     $configuration = [
       'entity_type' => $wrapper->getSourceEntityType(),

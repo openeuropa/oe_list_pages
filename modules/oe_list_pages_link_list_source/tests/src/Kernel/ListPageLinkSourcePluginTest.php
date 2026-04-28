@@ -22,7 +22,6 @@ class ListPageLinkSourcePluginTest extends KernelTestBase {
     'system',
     'field',
     'user',
-    'emr',
     'entity_test',
     'oe_link_lists',
     'oe_list_pages_link_list_source',
@@ -32,6 +31,7 @@ class ListPageLinkSourcePluginTest extends KernelTestBase {
     'search_api_db',
     'search_api_test_db',
     'facets',
+    'node',
   ];
 
   /**

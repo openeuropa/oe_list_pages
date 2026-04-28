@@ -40,8 +40,6 @@ class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
     'facets',
     'entity_reference_revisions',
     'oe_list_pages_filters_test',
-    'emr',
-    'emr_node',
     'rdf_skos',
     'search_api',
     'search_api_db',

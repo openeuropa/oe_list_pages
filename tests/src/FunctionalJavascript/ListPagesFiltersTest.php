@@ -30,8 +30,6 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     'oe_list_page_content_type',
     'oe_list_pages_address',
     'node',
-    'emr',
-    'emr_node',
     'rdf_skos',
     'search_api',
     'search_api_db',
@@ -61,7 +59,6 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     // Create list for content type one.
     $this->drupalLogin($user);
     $this->drupalGet('/node/add/oe_list_page');
-    $this->clickLink('List Page');
     $page = $this->getSession()->getPage();
     $assert = $this->assertSession();
     $this->assertTrue($assert->optionExists('Source bundle', 'Content type one')->isSelected());
@@ -74,7 +71,6 @@ class ListPagesFiltersTest extends WebDriverTestBase {
 
     // Create list for content type two.
     $this->drupalGet('/node/add/oe_list_page');
-    $this->clickLink('List Page');
     $page = $this->getSession()->getPage();
     $page->selectFieldOption('Source bundle', 'Content type two');
     $assert->assertWaitOnAjaxRequest();
@@ -83,7 +79,6 @@ class ListPagesFiltersTest extends WebDriverTestBase {
 
     // Create list for content type one without exposed filters.
     $this->drupalGet('/node/add/oe_list_page');
-    $this->clickLink('List Page');
     $page = $this->getSession()->getPage();
     $this->assertTrue($assert->optionExists('Source bundle', 'Content type one')->isSelected());
     $page->checkField('Override default exposed filters');
@@ -230,7 +225,6 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $admin = $this->createUser([], NULL, TRUE);
     $this->drupalLogin($admin);
     $this->drupalGet('/node/add/oe_list_page');
-    $this->clickLink('List Page');
     $page = $this->getSession()->getPage();
     $assert_session = $this->assertSession();
     $this->assertTrue($assert_session->optionExists('Source bundle', 'Content type one')->isSelected());
@@ -453,7 +447,6 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     $admin = $this->createUser([], NULL, TRUE);
     $this->drupalLogin($admin);
     $this->drupalGet('/node/add/oe_list_page');
-    $this->clickLink('List Page');
     $page = $this->getSession()->getPage();
     $assert_session = $this->assertSession();
     $this->assertTrue($assert_session->optionExists('Source bundle', 'Content type one')->isSelected());
@@ -473,7 +466,6 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     ], $options);
 
     $page->pressButton('Save');
-
     // By default we show only 10 results.
     $this->assertCount(10, $this->getSession()->getPage()->findAll('css', '.node--type-content-type-one'));
 
@@ -486,7 +478,6 @@ class ListPagesFiltersTest extends WebDriverTestBase {
     // Update the node to show 20 results.
     $node = $this->drupalGetNodeByTitle('List page for ct1');
     $this->drupalGet($node->toUrl('edit-form'));
-    $this->clickLink('List Page');
     $this->getSession()->getPage()->selectFieldOption('The number of items to show per page', '20');
     $page->pressButton('Save');
     $this->assertCount(20, $this->getSession()->getPage()->findAll('css', '.node--type-content-type-one'));

@@ -6,5 +6,6 @@ type: module
 core_version_requirement: ^10 || ^11
 
 dependencies:
-  - emr:emr_node
+  - drupal:node
+  - drupal:path
   - oe_list_pages:oe_list_pages

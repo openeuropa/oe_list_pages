@@ -1,0 +1,20 @@
+<?php
+
+/**
+ * @file
+ * The module file.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter() for \Drupal\node\Form\NodeForm.
+ */
+function oe_list_pages_filters_test_form_node_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  /** @var \Drupal\node\NodeInterface $node */
+  $node = $form_state->getFormObject()->getEntity();
+
+  if (isset($form['oe_list_page_config'])) {
+    $form['oe_list_page_config']['#group'] = 'advanced';
+  }
+}

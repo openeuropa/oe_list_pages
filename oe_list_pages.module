@@ -8,6 +8,7 @@
 declare(strict_types=1);
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\node\NodeInterface;
 use Drupal\oe_list_pages\SkosConceptHierarchicalHandler;
 use Drupal\oe_list_pages\TaxonomyTermHierarchicalHandler;
 
@@ -123,5 +124,17 @@ function oe_list_pages_entity_type_build(array &$entity_types) {
   }
   if (isset($entity_types['skos_concept'])) {
     $entity_types['skos_concept']->setHandlerClass('oe_list_pages_hierarchy', SkosConceptHierarchicalHandler::class);
+  }
+}
+
+/**
+ * Implements hook_entity_type_alter().
+ *
+ * Whenever we create a node, we need to set some default list page values.
+ */
+function oe_list_pages_node_create(NodeInterface $node) : void {
+  if ($node->hasField('oe_list_page_source')) {
+    $bundles = \Drupal::service('entity_type.bundle.info')->getBundleInfo('node');
+    $node->set('oe_list_page_source', 'node:' . key($bundles));
   }
 }

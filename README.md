@@ -4,6 +4,24 @@ The OpenEuropa List Pages component allows creation and management of list pages
 List pages use Search API queries allowing to configure different query options like facet filtering for all the indexed content bundles.
 In order for a Search API index to be used by list pages, it should be configured with the associated list page option in its settings page.
 
+## Migration from Entity Meta Relation
+
+Starting from 2.x, list page configuration is no longer stored
+on a separate `entity_meta` entity (via the `oe_list_page` Entity Meta Relation
+bundle). It now lives directly on the host node, in two regular Drupal fields:
+
+| Field machine name      | Type          | Translatable storage | Notes                                                          |
+|-------------------------|---------------|----------------------|----------------------------------------------------------------|
+| `oe_list_page_source`   | `string`      | No                   | Stores the `entity_type:bundle` source pair.                   |
+| `oe_list_page_config`   | `string_long` | Yes                  | Stores the PHP-serialized configuration array (filters, sort). |
+
+
+### Upgrade path
+
+Ensure that after the upgrade runs, you set the `oe_list_page_config` field in the form display of your node type and make it use the new ListPageConfigurationWidget.
+
+If the bundle that used to have the oe_list_page EMR has other fields, the bundle is not deleted, and it is your responsibility to migrate those fields as well.
+
 ## Submodules
 
 ### OpenEuropa List Page Content Type

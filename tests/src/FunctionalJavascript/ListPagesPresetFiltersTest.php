@@ -11,10 +11,12 @@ use Drupal\facets\Entity\Facet;
 use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
 use Drupal\oe_list_pages\DefaultFilterConfigurationBuilder;
+use Drupal\oe_list_pages\ListPageWrapper;
 use Drupal\oe_list_pages\ListPresetFilter;
 use Drupal\oe_list_pages\ListSourceFactory;
 use Drupal\oe_list_pages\Plugin\facets\query_type\DateStatus;
 use Drupal\search_api\Entity\Index;
+use Drupal\Tests\oe_list_pages\Traits\ListPageTestTrait;
 
 /**
  * Tests the list page preset filters.
@@ -24,6 +26,7 @@ use Drupal\search_api\Entity\Index;
 class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
 
   use FacetsTestTrait;
+  use ListPageTestTrait;
 
   /**
    * {@inheritdoc}
@@ -37,8 +40,6 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
     'oe_list_page_content_type',
     'oe_list_pages_address',
     'node',
-    'emr',
-    'emr_node',
     'rdf_skos',
     'search_api',
     'search_api_db',
@@ -60,7 +61,6 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
     $admin = $this->createUser([], NULL, TRUE);
     $this->drupalLogin($admin);
     $this->drupalGet('/node/add/oe_list_page');
-    $this->clickLink('List Page');
     $this->assertSession()->fieldExists('Add default value for');
 
     // Create a new content type without preset filters functionality.
@@ -69,14 +69,9 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
       'name' => 'List without preset filters',
     ]);
 
-    /** @var \Drupal\emr\EntityMetaRelationInstaller $installer */
-    $installer = \Drupal::service('emr.installer');
-    $installer->installEntityMetaTypeOnContentEntityType('oe_list_page', 'node', [
-      'list_without_preset_filters',
-    ]);
+    $this->installListPageFields('list_without_preset_filters');
 
     $this->drupalGet('/node/add/list_without_preset_filters');
-    $this->clickLink('List Page');
     $this->assertSession()->fieldNotExists('Add default value for');
   }
 
@@ -88,7 +83,7 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
     $this->drupalLogin($admin);
 
     $this->goToListPageConfiguration();
-    $this->assertListPagePresetFilterValidations('emr_plugins_oe_list_page[wrapper][default_filter_values]');
+    $this->assertListPagePresetFilterValidations('oe_list_page[wrapper][default_filter_values]');
   }
 
   /**
@@ -99,8 +94,7 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
     $this->drupalLogin($admin);
     $this->drupalGet('/node/add/oe_list_page');
     $this->getSession()->getPage()->fillField('Title', 'List page for ct1');
-    $this->clickLink('List Page');
-    $this->assertListPagePresetFilters('emr_plugins_oe_list_page[wrapper][default_filter_values]', 'list-page-default_filter_values--emr_plugins_oe_list_page-wrapper-default_filter_values');
+    $this->assertListPagePresetFilters('oe_list_page[wrapper][default_filter_values]', 'list-page-default_filter_values--oe_list_page-wrapper-default_filter_values');
   }
 
   /**
@@ -112,7 +106,7 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
   public function testListPageDefaultStatusPresetFilters(): void {
     // Create the configured facet.
     $list_id = ListSourceFactory::generateFacetSourcePluginId('node', 'content_type_one');
-    $ajax_wrapper_id = 'list-page-default_filter_values--emr_plugins_oe_list_page-wrapper-default_filter_values';
+    $ajax_wrapper_id = 'list-page-default_filter_values--oe_list_page-wrapper-default_filter_values';
 
     $processor_options = [
       'default_status' => DateStatus::PAST,
@@ -179,7 +173,6 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
     $this->drupalLogin($admin);
     $this->drupalGet('/node/add/oe_list_page');
     $this->getSession()->getPage()->fillField('Title', 'List page for ct1');
-    $this->clickLink('List Page');
 
     $assert_session = $this->assertSession();
     $this->assertTrue($assert_session->optionExists('Source bundle', 'content_type_one')->isSelected());
@@ -194,13 +187,12 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
 
     $node = $this->drupalGetNodeByTitle('List page for ct1');
     $this->drupalGet($node->toUrl('edit-form'));
-    $this->clickLink('List Page');
 
     // Set preset filter for default date facet.
     $this->getSession()->getPage()->selectFieldOption('Add default value for', 'Facet for end_value');
     $assert_session->assertWaitOnAjaxRequest();
     $filter_id = DefaultFilterConfigurationBuilder::generateFilterId($facet->id());
-    $filter_selector = 'emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $filter_id . ']';
+    $filter_selector = 'oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $filter_id . ']';
     $this->getSession()->getPage()->selectFieldOption($filter_selector . '[' . $facet->id() . '][0][list]', DateStatus::UPCOMING);
     $this->getSession()->getPage()->pressButton('Set default value');
     $assert_session->assertWaitOnAjaxRequest();
@@ -213,10 +205,9 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
 
     // Include both upcoming and past.
     $this->drupalGet($node->toUrl('edit-form'));
-    $this->clickLink('List Page');
     $this->getSession()->getPage()->pressButton('default-edit-' . $filter_id . '-' . $ajax_wrapper_id);
     $assert_session->assertWaitOnAjaxRequest();
-    $this->getSession()->getPage()->selectFieldOption('emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $filter_id . '][oe_list_pages_filter_operator]', 'Any of');
+    $this->getSession()->getPage()->selectFieldOption('oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $filter_id . '][oe_list_pages_filter_operator]', 'Any of');
     $this->getSession()->getPage()->selectFieldOption($filter_selector . '[' . $facet->id() . '][1][list]', DateStatus::PAST);
     $this->getSession()->getPage()->pressButton('Set default value');
     $assert_session->assertWaitOnAjaxRequest();
@@ -269,7 +260,6 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
     $this->drupalLogin($admin);
     $this->drupalGet('/node/add/oe_list_page');
     $this->getSession()->getPage()->fillField('Title', 'List page for ct1');
-    $this->clickLink('List Page');
 
     $assert_session = $this->assertSession();
     $this->assertTrue($assert_session->optionExists('Source bundle', 'content_type_one')->isSelected());
@@ -281,13 +271,12 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
 
     $node = $this->drupalGetNodeByTitle('List page for ct1');
     $this->drupalGet($node->toUrl('edit-form'));
-    $this->clickLink('List Page');
 
     // Set preset filter for the Foo facet.
     $this->getSession()->getPage()->selectFieldOption('Add default value for', 'Foo');
     $assert_session->assertWaitOnAjaxRequest();
     $filter_id = DefaultFilterConfigurationBuilder::generateFilterId($facet->id());
-    $filter_selector = 'emr_plugins_oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $filter_id . ']';
+    $filter_selector = 'oe_list_page[wrapper][default_filter_values][wrapper][edit][' . $filter_id . ']';
     $this->getSession()->getPage()->selectFieldOption($filter_selector . '[' . $facet->id() . '][0][list]', '2');
     $this->getSession()->getPage()->pressButton('Set default value');
     $assert_session->assertWaitOnAjaxRequest();
@@ -383,7 +372,6 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
     $this->drupalLogin($admin);
     $this->drupalGet('/node/add/oe_list_page');
     $this->getSession()->getPage()->fillField('Title', 'List page for ct1');
-    $this->clickLink('List Page');
 
     $assert_session = $this->assertSession();
     $this->assertTrue($assert_session->optionExists('Source bundle', 'content_type_one')->isSelected());
@@ -473,11 +461,10 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
    *   The preset filters.
    */
   protected function setListPageFilters(NodeInterface $node, array $filters): void {
-    $meta = $node->get('emr_entity_metas')->getEntityMeta('oe_list_page');
-    $configuration = $meta->getWrapper()->getConfiguration();
+    $wrapper = new ListPageWrapper($node);
+    $configuration = $wrapper->getConfiguration();
     $configuration['preset_filters'] = $filters;
-    $meta->getWrapper()->setConfiguration($configuration);
-    $node->get('emr_entity_metas')->attach($meta);
+    $wrapper->setConfiguration($configuration);
     $node->save();
   }
 
@@ -518,7 +505,6 @@ class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
    */
   protected function goToListPageConfiguration(): void {
     $this->drupalGet('node/add/oe_list_page');
-    $this->clickLink('List Page');
   }
 
 }

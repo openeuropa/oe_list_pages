@@ -17,7 +17,6 @@ use Drupal\Core\GeneratedUrl;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Theme\ThemeManagerInterface;
-use Drupal\emr\Entity\EntityMetaInterface;
 use Drupal\facets\UrlProcessor\UrlProcessorPluginManager;
 use Drupal\node\NodeInterface;
 use Drupal\oe_list_pages\FacetManipulationTrait;
@@ -357,12 +356,11 @@ class ListPageRssController extends ControllerBase {
    *   The access result.
    */
   public function checkAccess(NodeInterface $node): AccessResultInterface {
-    $entity_meta = $node->get('emr_entity_metas')->getEntityMeta('oe_list_page');
-    if ($entity_meta instanceof EntityMetaInterface && !$entity_meta->isNew()) {
+    if ($node->hasField('oe_list_page_source') && !$node->get('oe_list_page_source')->isEmpty()) {
       return AccessResult::allowed()->addCacheableDependency($node);
     }
 
-    return AccessResult::forbidden('Node type does not have List Page meta configured.')->addCacheableDependency($node);
+    return AccessResult::forbidden('Node type does not have List Page fields configured.')->addCacheableDependency($node);
   }
 
   /**

@@ -2,47 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Drupal\Tests\oe_list_pages\Kernel;
+namespace Drupal\Tests\oe_list_pages\Traits;
 
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\node\Entity\NodeType;
 
 /**
- * Base test for the list-page node-field configuration.
+ * Helpers for tests that work with the list-page node fields.
  */
-class ListsEntityMetaTestBase extends ListsSourceTestBase {
-
-  /**
-   * The node storage.
-   *
-   * @var \Drupal\Core\Entity\EntityStorageInterface|object
-   */
-  protected $nodeStorage;
-
-  /**
-   * A node type used in the tests.
-   *
-   * @var \Drupal\node\NodeTypeInterface
-   */
-  protected $nodeType;
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function setUp(): void {
-    parent::setUp();
-
-    $this->installSchema('node', ['node_access']);
-
-    $values = ['type' => 'list_page', 'name' => 'List page'];
-    $this->nodeType = NodeType::create($values);
-    $this->nodeType->save();
-
-    $this->createListPageFields($this->nodeType->id());
-
-    $this->nodeStorage = $this->entityTypeManager->getStorage('node');
-  }
+trait ListPageTestTrait {
 
   /**
    * Installs the list page fields on a given node bundle.
@@ -50,7 +18,7 @@ class ListsEntityMetaTestBase extends ListsSourceTestBase {
    * @param string $bundle
    *   The node bundle id.
    */
-  protected function createListPageFields(string $bundle): void {
+  protected function installListPageFields(string $bundle): void {
     if (!FieldStorageConfig::loadByName('node', 'oe_list_page_source')) {
       FieldStorageConfig::create([
         'entity_type' => 'node',
@@ -60,7 +28,6 @@ class ListsEntityMetaTestBase extends ListsSourceTestBase {
         'translatable' => FALSE,
       ])->save();
     }
-
     if (!FieldStorageConfig::loadByName('node', 'oe_list_page_config')) {
       FieldStorageConfig::create([
         'entity_type' => 'node',
@@ -91,6 +58,26 @@ class ListsEntityMetaTestBase extends ListsSourceTestBase {
         'translatable' => FALSE,
       ])->save();
     }
+
+    // Place the configuration widget on the bundle's default form display.
+    $form_display_storage = \Drupal::entityTypeManager()->getStorage('entity_form_display');
+    $form_display = $form_display_storage->load('node.' . $bundle . '.default');
+    if (!$form_display) {
+      $form_display = $form_display_storage->create([
+        'targetEntityType' => 'node',
+        'bundle' => $bundle,
+        'mode' => 'default',
+        'status' => TRUE,
+      ]);
+    }
+    $form_display->setComponent('oe_list_page_config', [
+      'type' => 'oe_list_pages_configuration',
+      'weight' => 1,
+      'region' => 'content',
+      'settings' => [],
+    ]);
+    $form_display->removeComponent('oe_list_page_source');
+    $form_display->save();
   }
 
 }
