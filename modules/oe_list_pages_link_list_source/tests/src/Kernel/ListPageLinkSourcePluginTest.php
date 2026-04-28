@@ -8,6 +8,8 @@ use Drupal\Core\Cache\Cache;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\entity_test\Entity\EntityTestBundle;
 use Drupal\entity_test\Entity\EntityTestWithBundle;
+use Drupal\oe_link_lists\EntityAwareLinkInterface;
+use Drupal\oe_link_lists\LinkCollectionInterface;
 use Drupal\search_api\Entity\Index;
 
 /**
@@ -130,6 +132,7 @@ class ListPageLinkSourcePluginTest extends KernelTestBase {
       $test_entities_by_bundle[$entity->bundle()][$entity->id()] = $entity->label();
     }
 
+    /** @var \Drupal\oe_list_pages\ListSourceFactoryInterface $list_source_factory */
     $list_source_factory = $this->container->get('oe_list_pages.list_source.factory');
     foreach (['foo', 'bar'] as $bundle) {
       $item_list = $list_source_factory->get('entity_test_with_bundle', $bundle);
@@ -149,12 +152,12 @@ class ListPageLinkSourcePluginTest extends KernelTestBase {
       'bundle' => 'foo',
     ]);
     // By default, without a limit passed all results are returned.
-    $this->assertEquals($test_entities_by_bundle['foo'], $this->extractEntityNames($plugin->getLinks()->toArray()));
+    $this->assertEquals($test_entities_by_bundle['foo'], $this->extractEntityNames($plugin->getLinks()));
     $plugin->setConfiguration([
       'entity_type' => 'entity_test_with_bundle',
       'bundle' => 'bar',
     ]);
-    $this->assertEquals($test_entities_by_bundle['bar'], $this->extractEntityNames($plugin->getLinks()->toArray()));
+    $this->assertEquals($test_entities_by_bundle['bar'], $this->extractEntityNames($plugin->getLinks()));
 
     // Test that the limit is applied to the results.
     $plugin->setConfiguration([
@@ -163,7 +166,27 @@ class ListPageLinkSourcePluginTest extends KernelTestBase {
     ]);
     $this->assertEquals(
       array_slice($test_entities_by_bundle['foo'], 0, 2, TRUE),
-      $this->extractEntityNames($plugin->getLinks(2)->toArray())
+      $this->extractEntityNames($plugin->getLinks(2)),
+    );
+    // A limit of zero is the same as a limit of NULL.
+    $this->assertEquals(
+      $test_entities_by_bundle['foo'],
+      $this->extractEntityNames($plugin->getLinks(0)),
+    );
+    // The offset is applied correctly.
+    $this->assertEquals(
+      array_slice($test_entities_by_bundle['foo'], 3, NULL, TRUE),
+      $this->extractEntityNames($plugin->getLinks(NULL, 3)),
+    );
+    // Load with offset and length that match cleanly on one page.
+    $this->assertEquals(
+      array_slice($test_entities_by_bundle['foo'], 6, 3, TRUE),
+      $this->extractEntityNames($plugin->getLinks(3, 6)),
+    );
+    // Load with offset and length that do not match cleanly on a page.
+    $this->assertEquals(
+      array_slice($test_entities_by_bundle['foo'], 4, 3, TRUE),
+      $this->extractEntityNames($plugin->getLinks(3, 4)),
     );
   }
 
@@ -200,6 +223,7 @@ class ListPageLinkSourcePluginTest extends KernelTestBase {
       'type' => 'foo',
     ]);
     $entity->save();
+    /** @var \Drupal\oe_list_pages\ListSourceFactoryInterface $list_source_factory */
     $list_source_factory = $this->container->get('oe_list_pages.list_source.factory');
     $item_list = $list_source_factory->get('entity_test_with_bundle', 'foo');
     $item_list->getIndex()->indexItems();
@@ -225,18 +249,19 @@ class ListPageLinkSourcePluginTest extends KernelTestBase {
   }
 
   /**
-   * Helper method to extract entity ID and name from an array of test entities.
+   * Helper method to extract entity IDs and names from a link collection.
    *
-   * @param \Drupal\oe_link_lists\EntityAwareLinkInterface[] $links
-   *   A list of link objects.
+   * @param \Drupal\oe_link_lists\LinkCollectionInterface $links
+   *   An object holding a list of entity-aware link objects.
    *
-   * @return array
+   * @return array<int, string>
    *   A list of entity labels, keyed by entity ID.
    */
-  protected function extractEntityNames(array $links): array {
+  protected function extractEntityNames(LinkCollectionInterface $links): array {
     $labels = [];
 
     foreach ($links as $link) {
+      $this->assertInstanceOf(EntityAwareLinkInterface::class, $link);
       $entity = $link->getEntity();
       $labels[$entity->id()] = $entity->label();
     }

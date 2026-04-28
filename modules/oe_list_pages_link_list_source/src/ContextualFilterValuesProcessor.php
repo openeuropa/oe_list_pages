@@ -109,18 +109,18 @@ class ContextualFilterValuesProcessor {
   }
 
   /**
-   * Processes the raw configuration into a configuration object.
+   * Processes link list configuration into a list page configuration object.
    *
    * Looking at the current entity from context, it tries to transform values
    * from it into preset filter values on the configuration.
    *
    * @param array $raw_configuration
-   *   The raw configuration.
+   *   Raw configuration from the list page link source plugin.
    * @param \Drupal\Core\Cache\CacheableMetadata $cache
-   *   The cache metadata.
+   *   Object to collect cache metadata.
    *
    * @return \Drupal\oe_list_pages\ListPageConfiguration
-   *   The configuration object ready for the query execution.
+   *   The list page configuration object ready for the query execution.
    */
   public function processConfiguration(array $raw_configuration, CacheableMetadata $cache): ListPageConfiguration {
     $configuration = new ListPageConfiguration($raw_configuration);
@@ -177,7 +177,7 @@ class ContextualFilterValuesProcessor {
    * @return \Drupal\Core\Entity\ContentEntityInterface|null
    *   The content entity.
    */
-  protected function getCurrentEntityFromRoute() :?ContentEntityInterface {
+  protected function getCurrentEntityFromRoute(): ?ContentEntityInterface {
     $route_name = $this->routeMatch->getRouteName();
 
     if (empty($route_name)) {
@@ -244,7 +244,7 @@ class ContextualFilterValuesProcessor {
    * @param \Drupal\oe_list_pages\ListSourceInterface $list_source
    *   The list source.
    * @param \Drupal\Core\Cache\CacheableMetadata $cache
-   *   The cacheable metadata.
+   *   Object to collect cache metadata.
    *
    * @return array
    *   The filter values.
