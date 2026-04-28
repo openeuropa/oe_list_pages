@@ -6,11 +6,12 @@ namespace Drupal\oe_list_pages_link_list_displays;
 
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\SubformState;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\emr\Entity\EntityMetaInterface;
 use Drupal\oe_link_lists\LinkDisplayPluginManagerInterface;
+use Drupal\oe_list_pages\ListPageWrapper;
 
 /**
  * Builds the link display selection on the list pages form.
@@ -44,13 +45,12 @@ class ListDisplaySelectionBuilder {
    *   The list pages form section.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The form state.
-   * @param \Drupal\emr\Entity\EntityMetaInterface $entity_meta
-   *   The list pages entity meta.
+   * @param \Drupal\Core\Entity\ContentEntityInterface $host_entity
+   *   The host entity carrying the list page configuration.
    */
-  public function form(array &$form, FormStateInterface $form_state, EntityMetaInterface $entity_meta) {
-    /** @var \Drupal\oe_list_pages\ListPageWrapper $entity_meta_wrapper */
-    $entity_meta_wrapper = $entity_meta->getWrapper();
-    $configuration = $entity_meta_wrapper->getConfiguration();
+  public function form(array &$form, FormStateInterface $form_state, ContentEntityInterface $host_entity) {
+    $wrapper = new ListPageWrapper($host_entity);
+    $configuration = $wrapper->getConfiguration();
 
     $plugin_id = self::getSelectedPlugin('display', $form_state);
     if (!$plugin_id) {

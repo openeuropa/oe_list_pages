@@ -6,6 +6,7 @@ namespace Drupal\Tests\oe_list_pages\FunctionalJavascript;
 
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\node\NodeInterface;
+use Drupal\oe_list_pages\ListPageWrapper;
 use Drupal\search_api\Entity\Index;
 
 /**
@@ -26,8 +27,6 @@ class ListPagesSortTest extends ListPagePluginFormTestBase {
     'oe_list_pages_filters_test',
     'oe_list_page_content_type',
     'node',
-    'emr',
-    'emr_node',
     'rdf_skos',
     'search_api',
     'search_api_db',
@@ -144,7 +143,6 @@ class ListPagesSortTest extends ListPagePluginFormTestBase {
     // to the subscriber.
     $node = $this->drupalGetNodeByTitle('Node title');
     $this->drupalGet($node->toUrl('edit-form'));
-    $this->clickLink('List Page');
     $this->getSession()->getPage()->selectFieldOption('Source bundle', 'content_type_one');
     $assert_session->assertWaitOnAjaxRequest();
     $assert_session->selectExists('Sort');
@@ -171,7 +169,6 @@ class ListPagesSortTest extends ListPagePluginFormTestBase {
 
     // Edit again the node and save a different sort.
     $this->drupalGet($node->toUrl('edit-form'));
-    $this->clickLink('List Page');
     $this->getSession()->getPage()->selectFieldOption('Sort', 'field_test_boolean__DESC');
     $this->getSession()->getPage()->pressButton('Save');
     $this->assertEquals([
@@ -189,7 +186,6 @@ class ListPagesSortTest extends ListPagePluginFormTestBase {
 
     // Switch back to the default sort.
     $this->drupalGet($node->toUrl('edit-form'));
-    $this->clickLink('List Page');
     $this->assertTrue($assert_session->optionExists('Sort', 'Boolean')->isSelected());
     $this->getSession()->getPage()->selectFieldOption('Sort', 'created__DESC');
     $this->getSession()->getPage()->pressButton('Save');
@@ -244,7 +240,6 @@ class ListPagesSortTest extends ListPagePluginFormTestBase {
     // Allow back and expose the sort.
     \Drupal::state()->set('oe_list_pages_test.disallow_frontend_sort', FALSE);
     $this->getSession()->reload();
-    $this->clickLink('List Page');
     $this->getSession()->getPage()->checkField('Expose sort');
     $this->getSession()->getPage()->pressButton('Save');
     // We now have the sort.
@@ -325,12 +320,8 @@ class ListPagesSortTest extends ListPagePluginFormTestBase {
    */
   protected function getSortInformationFromNodeMeta(string $title): array {
     $node = $this->drupalGetNodeByTitle($title, TRUE);
-    /** @var \Drupal\emr\Field\ComputedEntityMetasItemList $entity_meta_list */
-    $entity_meta_list = $node->get('emr_entity_metas');
-    $entity_meta = $entity_meta_list->getEntityMeta('oe_list_page');
-    /** @var \Drupal\oe_list_pages\ListPageWrapper $entity_meta_wrapper */
-    $entity_meta_wrapper = $entity_meta->getWrapper();
-    return $entity_meta_wrapper->getConfiguration()['sort'];
+    $wrapper = new ListPageWrapper($node);
+    return $wrapper->getConfiguration()['sort'];
   }
 
   /**
@@ -353,7 +344,6 @@ class ListPagesSortTest extends ListPagePluginFormTestBase {
    */
   protected function goToListPageConfiguration(): void {
     $this->drupalGet('node/add/oe_list_page');
-    $this->clickLink('List Page');
   }
 
   /**

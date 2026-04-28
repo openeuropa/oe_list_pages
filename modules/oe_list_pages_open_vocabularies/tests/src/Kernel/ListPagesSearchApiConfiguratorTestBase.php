@@ -24,9 +24,7 @@ abstract class ListPagesSearchApiConfiguratorTestBase extends EntityKernelTestBa
     'user',
     'datetime',
     'datetime_range',
-    'emr',
     'entity_reference_revisions',
-    'emr_node',
     'link',
     'node',
     'node_storage_body_field',
@@ -68,8 +66,6 @@ abstract class ListPagesSearchApiConfiguratorTestBase extends EntityKernelTestBa
     $this->installEntitySchema('open_vocabulary_association');
     $this->installEntitySchema('user');
     $this->installEntitySchema('taxonomy_term');
-    $this->installEntitySchema('entity_meta');
-    $this->installEntitySchema('entity_meta_relation');
 
     // Set tracking page size so tracking will work properly.
     $this->container->get('config.factory')
@@ -83,8 +79,6 @@ abstract class ListPagesSearchApiConfiguratorTestBase extends EntityKernelTestBa
       'oe_list_page_content_type',
       'oe_list_pages_filters_test',
       'oe_list_pages_open_vocabularies_test',
-      'emr',
-      'emr_node',
     ]);
 
     // Create OpenVocabularies vocabularies.

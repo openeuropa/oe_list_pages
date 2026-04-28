@@ -28,9 +28,10 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   entity_meta_bundle = "oe_list_page",
  *   content_form = TRUE,
  *   description = @Translation("List Page."),
- *   attach_by_default = TRUE,
- *   entity_meta_wrapper_class = "\Drupal\oe_list_pages\ListPageWrapper",
+ *   attach_by_default = TRUE
  * )
+ *
+ * @todo remove one EMR is no longer available.
  */
 class ListPage extends EntityMetaRelationContentFormPluginBase {
 
@@ -89,6 +90,14 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
       $container->get('oe_list_pages.list_page_configuration_subform_factory'),
       $container->get('module_handler')
     );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function applies(ContentEntityInterface $entity): bool {
+    // This EMR plugin is no longer in use.
+    return FALSE;
   }
 
   /**
@@ -201,19 +210,6 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
     $this->moduleHandler->alter('list_page_entity_meta_form_submit', $form[$key]['wrapper'], $form_state, $entity_meta_configuration);
     $entity_meta_wrapper->setConfiguration($entity_meta_configuration);
     $host_entity->get('emr_entity_metas')->attach($entity_meta);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function fillDefaultEntityMetaValues(EntityMetaInterface $entity_meta): void {
-    // Set the default value to be the first node bundle.
-    // We want to do this because we don't want any entity meta being created
-    // without a value (via the API).
-    $bundles = $this->entityTypeBundleInfo->getBundleInfo('node');
-    /** @var \Drupal\oe_list_pages\ListPageWrapper $wrapper */
-    $wrapper = $entity_meta->getWrapper();
-    $wrapper->setSource('node', key($bundles));
   }
 
   /**

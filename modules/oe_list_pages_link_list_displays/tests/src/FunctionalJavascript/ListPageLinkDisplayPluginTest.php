@@ -27,8 +27,6 @@ class ListPageLinkDisplayPluginTest extends ListPagePluginFormTestBase {
     'entity_reference_revisions',
     'oe_list_pages_filters_test',
     'oe_list_pages_link_list_displays',
-    'emr',
-    'emr_node',
     'search_api',
     'search_api_db',
     'block',
@@ -113,13 +111,12 @@ class ListPageLinkDisplayPluginTest extends ListPagePluginFormTestBase {
     // Edit the node and change the display.
     $node = $this->drupalGetNodeByTitle('List page for ct1');
     $this->drupalGet($node->toUrl('edit-form'));
-    $this->clickLink('List Page');
     $this->assertEquals('title', $page->findField('Display')->find('css', 'option[selected="selected"]')->getValue());
     $page->selectFieldOption('Display', 'Titles with optional link');
     $assert_session->assertWaitOnAjaxRequest();
     $assert_session->pageTextNotContains('This plugin does not have any configuration options.');
     // By default, the Link checkbox is checked.
-    $checkbox = $page->find('css', '.form-item-emr-plugins-oe-list-page-wrapper-display-plugin-configuration-wrapper-test-configurable-title-link input');
+    $checkbox = $page->find('css', '.form-item-oe-list-page-wrapper-display-plugin-configuration-wrapper-test-configurable-title-link input');
     $this->assertTrue($checkbox->isChecked());
     // Switch again to another plugin for testing.
     $page->selectFieldOption('Display', 'Same configuration display one.');
@@ -145,7 +142,6 @@ class ListPageLinkDisplayPluginTest extends ListPagePluginFormTestBase {
     $this->assertEquals($expected, $actual);
     // Edit again and configure to not link the titles.
     $this->drupalGet($node->toUrl('edit-form'));
-    $this->clickLink('List Page');
     $checkbox->uncheck();
     $page->pressButton('Save');
     // Now the titles are without links.
@@ -250,7 +246,6 @@ class ListPageLinkDisplayPluginTest extends ListPagePluginFormTestBase {
     // Edit again the node and save a different sort.
     $node = $this->drupalGetNodeByTitle('Node title');
     $this->drupalGet($node->toUrl('edit-form'));
-    $this->clickLink('List Page');
     $this->getSession()->getPage()->selectFieldOption('Sort', 'field_test_boolean__DESC');
     $this->getSession()->getPage()->pressButton('Save');
     $this->assertResultsAreInCorrectOrder([
@@ -342,7 +337,6 @@ class ListPageLinkDisplayPluginTest extends ListPagePluginFormTestBase {
    */
   protected function goToListPageConfiguration(): void {
     $this->drupalGet('node/add/oe_list_page');
-    $this->clickLink('List Page');
   }
 
   /**
