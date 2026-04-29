@@ -28,9 +28,10 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   entity_meta_bundle = "oe_list_page",
  *   content_form = TRUE,
  *   description = @Translation("List Page."),
- *   attach_by_default = TRUE,
- *   entity_meta_wrapper_class = "\Drupal\oe_list_pages\ListPageWrapper",
+ *   attach_by_default = TRUE
  * )
+ *
+ * @todo remove one EMR is no longer available.
  */
 class ListPage extends EntityMetaRelationContentFormPluginBase {
 
@@ -89,6 +90,14 @@ class ListPage extends EntityMetaRelationContentFormPluginBase {
       $container->get('oe_list_pages.list_page_configuration_subform_factory'),
       $container->get('module_handler')
     );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function applies(ContentEntityInterface $entity): bool {
+    // This EMR plugin is no longer in use.
+    return FALSE;
   }
 
   /**

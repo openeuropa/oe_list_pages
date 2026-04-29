@@ -4,13 +4,14 @@ namespace Drupal\oe_list_pages\Plugin\ExtraField\Derivative;
 
 use Drupal\Component\Plugin\Derivative\DeriverBase;
 use Drupal\Core\Entity\ContentEntityTypeInterface;
+use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Creatives a derivative for all content bundles that have oe_list_pages meta.
+ * Creates a derivative for every bundle that carries the list page fields.
  */
 class ListPageDeriver extends DeriverBase implements ContainerDeriverInterface {
 
@@ -29,16 +30,19 @@ class ListPageDeriver extends DeriverBase implements ContainerDeriverInterface {
   protected $entityTypeBundleInfo;
 
   /**
-   * Construct the ListPageDeriver.
+   * The entity field manager.
    *
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
-   *   The entity type manager.
-   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entityTypeBundleInfo
-   *   The entity type bundle info.
+   * @var \Drupal\Core\Entity\EntityFieldManagerInterface
    */
-  public function __construct(EntityTypeManagerInterface $entityTypeManager, EntityTypeBundleInfoInterface $entityTypeBundleInfo) {
+  protected $entityFieldManager;
+
+  /**
+   * Constructs the deriver.
+   */
+  public function __construct(EntityTypeManagerInterface $entityTypeManager, EntityTypeBundleInfoInterface $entityTypeBundleInfo, EntityFieldManagerInterface $entityFieldManager) {
     $this->entityTypeManager = $entityTypeManager;
     $this->entityTypeBundleInfo = $entityTypeBundleInfo;
+    $this->entityFieldManager = $entityFieldManager;
   }
 
   /**
@@ -47,7 +51,8 @@ class ListPageDeriver extends DeriverBase implements ContainerDeriverInterface {
   public static function create(ContainerInterface $container, $base_plugin_id) {
     return new static(
       $container->get('entity_type.manager'),
-      $container->get('entity_type.bundle.info')
+      $container->get('entity_type.bundle.info'),
+      $container->get('entity_field.manager'),
     );
   }
 
@@ -60,13 +65,10 @@ class ListPageDeriver extends DeriverBase implements ContainerDeriverInterface {
       if (!($entity_type instanceof ContentEntityTypeInterface) || empty($entity_type->getBundleEntityType())) {
         continue;
       }
-      $bundle_entity_storage = $this->entityTypeManager->getStorage($entity_type->getBundleEntityType());
       $bundles = $this->entityTypeBundleInfo->getBundleInfo($entity_type->id());
       foreach ($bundles as $bundle_id => $bundle_definition) {
-        $bundle = $bundle_entity_storage->load($bundle_id);
-        $meta_bundles = $bundle->getThirdPartySetting('emr', 'entity_meta_bundles', []);
-
-        if (!in_array('oe_list_page', $meta_bundles)) {
+        $field_definitions = $this->entityFieldManager->getFieldDefinitions($entity_type->id(), $bundle_id);
+        if (!isset($field_definitions['oe_list_page_source'])) {
           continue;
         }
 

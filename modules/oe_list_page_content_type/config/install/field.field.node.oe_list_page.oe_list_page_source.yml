@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.oe_list_page_source
+    - node.type.oe_list_page
+id: node.oe_list_page.oe_list_page_source
+field_name: oe_list_page_source
+entity_type: node
+bundle: oe_list_page
+label: 'List Pages source'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

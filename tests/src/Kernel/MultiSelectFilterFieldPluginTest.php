@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\oe_list_pages\Kernel;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Tests\oe_list_pages\Traits\ListPageTestTrait;
 use Drupal\facets\FacetInterface;
 use Drupal\link\LinkItemInterface;
 use Drupal\link\Plugin\Field\FieldWidget\LinkWidget;
@@ -16,6 +17,8 @@ use Drupal\search_api\Item\Field;
  * Tests for MultiSelectFilterField plugins.
  */
 class MultiSelectFilterFieldPluginTest extends ListsSourceTestBase {
+
+  use ListPageTestTrait;
 
   /**
    * The entity type manager.
@@ -241,11 +244,7 @@ class MultiSelectFilterFieldPluginTest extends ListsSourceTestBase {
       'type' => 'test_bundle',
       'name' => 'Test bundle',
     ])->save();
-    /** @var \Drupal\emr\EntityMetaRelationInstaller $installer */
-    $installer = \Drupal::service('emr.installer');
-    $installer->installEntityMetaTypeOnContentEntityType('oe_list_page', 'node', [
-      'test_bundle',
-    ]);
+    $this->installListPageFields('test_bundle');
     $node = $this->entityTypeManager->getStorage('node')->create([
       'type' => 'test_bundle',
       'title' => 'Test node',

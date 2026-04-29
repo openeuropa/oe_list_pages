@@ -6,18 +6,10 @@ type: module
 core_version_requirement: ^10 || ^11
 
 dependencies:
-  - emr:emr_node
+  - drupal:node
   - facets:facets
   - search_api:search_api
   - multivalue_form_element:multivalue_form_element
-
-config_devel:
-  install:
-    - emr.entity_meta_type.oe_list_page
-    - field.field.entity_meta.oe_list_page.list_page_plugin
-    - field.field.entity_meta.oe_list_page.list_page_plugin_config
-    - field.storage.entity_meta.list_page_plugin
-    - field.storage.entity_meta.list_page_plugin_config
 
 'interface translation project': oe_list_pages
 # The path to the actual translations is defined in

@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace Drupal\Tests\oe_list_pages\FunctionalJavascript;
 
 use Drupal\node\Entity\Node;
+use Drupal\oe_list_pages\ListPageWrapper;
 
 /**
- * Tests the List pages EMR plugin form.
+ * Tests the List pages configuration form.
  *
  * @group oe_list_pages
  */
@@ -24,8 +25,6 @@ class ListPagesPluginTest extends ListPagePluginFormTestBase {
     'oe_list_pages_filters_test',
     'oe_list_page_content_type',
     'node',
-    'emr',
-    'emr_node',
     'rdf_skos',
     'search_api',
     'search_api_db',
@@ -39,7 +38,7 @@ class ListPagesPluginTest extends ListPagePluginFormTestBase {
   protected $defaultTheme = 'stark';
 
   /**
-   * Test List Page entity meta plugin and available entity types/bundles.
+   * Test list page configuration form and available entity types/bundles.
    */
   public function testListPagePluginForm(): void {
     $admin = $this->createUser([], NULL, TRUE);
@@ -52,24 +51,17 @@ class ListPagesPluginTest extends ListPagePluginFormTestBase {
     $this->getSession()->getPage()->fillField('Title', 'Node title');
     $this->getSession()->getPage()->pressButton('Save');
 
-    // Assert the entity meta was correctly saved.
+    // Assert the node-level list page fields were saved.
     $node = Node::load(1);
     $this->assertEquals(1, $node->getRevisionId());
     $this->assertEquals('Node title', $node->label());
-    /** @var \Drupal\emr\Field\ComputedEntityMetasItemList $entity_meta_list */
-    $entity_meta_list = $node->get('emr_entity_metas');
-    $entity_meta = $entity_meta_list->getEntityMeta('oe_list_page');
-    $this->assertFalse($entity_meta->isNew());
-
-    /** @var \Drupal\oe_list_pages\ListPageWrapper $entity_meta_wrapper */
-    $entity_meta_wrapper = $entity_meta->getWrapper();
-    $this->assertEquals('taxonomy_term:vocabulary_one', $entity_meta_wrapper->getSource());
-    $this->assertEquals('taxonomy_term', $entity_meta_wrapper->getSourceEntityType());
-    $this->assertEquals('vocabulary_one', $entity_meta_wrapper->getSourceEntityBundle());
+    $wrapper = new ListPageWrapper($node);
+    $this->assertEquals('taxonomy_term:vocabulary_one', $wrapper->getSource());
+    $this->assertEquals('taxonomy_term', $wrapper->getSourceEntityType());
+    $this->assertEquals('vocabulary_one', $wrapper->getSourceEntityBundle());
 
     // Edit the node and assert that we show correct values in the form.
     $this->drupalGet($node->toUrl('edit-form'));
-    $this->clickLink('List Page');
     $this->assertTrue($this->assertSession()->optionExists('Source entity type', 'Taxonomy term')->isSelected());
     $this->assertTrue($this->assertSession()->optionExists('Source bundle', 'Vocabulary one')->isSelected());
 
@@ -82,30 +74,20 @@ class ListPagesPluginTest extends ListPagePluginFormTestBase {
     $this->getSession()->getPage()->pressButton('Save');
 
     \Drupal::entityTypeManager()->getStorage('node')->resetCache();
-    \Drupal::entityTypeManager()->getStorage('entity_meta_relation')->resetCache();
     $node = Node::load(1);
     $this->assertEquals(2, $node->getRevisionId());
-    /** @var \Drupal\emr\Field\ComputedEntityMetasItemList $entity_meta_list */
-    $entity_meta_list = $node->get('emr_entity_metas');
-    $entity_meta = $entity_meta_list->getEntityMeta('oe_list_page');
-    $entity_meta_wrapper = $entity_meta->getWrapper();
-    $this->assertEquals('node:content_type_one', $entity_meta_wrapper->getSource());
-    $this->assertEquals('node', $entity_meta_wrapper->getSourceEntityType());
-    $this->assertEquals('content_type_one', $entity_meta_wrapper->getSourceEntityBundle());
+    $wrapper = new ListPageWrapper($node);
+    $this->assertEquals('node:content_type_one', $wrapper->getSource());
+    $this->assertEquals('node', $wrapper->getSourceEntityType());
+    $this->assertEquals('content_type_one', $wrapper->getSourceEntityBundle());
 
-    // Assert the previous entity meta revision kept the old value.
+    // Assert the previous revision kept the old value.
     $first_revision = \Drupal::entityTypeManager()->getStorage('node')->loadRevision(1);
     $this->assertEquals(1, $first_revision->getRevisionId());
-    /** @var \Drupal\emr\Field\ComputedEntityMetasItemList $entity_meta_list */
-    $entity_meta_list = $first_revision->get('emr_entity_metas');
-    $entity_meta = $entity_meta_list->getEntityMeta('oe_list_page');
-    $this->assertFalse($entity_meta->isNew());
-
-    /** @var \Drupal\oe_list_pages\ListPageWrapper $entity_meta_wrapper */
-    $entity_meta_wrapper = $entity_meta->getWrapper();
-    $this->assertEquals('taxonomy_term:vocabulary_one', $entity_meta_wrapper->getSource());
-    $this->assertEquals('taxonomy_term', $entity_meta_wrapper->getSourceEntityType());
-    $this->assertEquals('vocabulary_one', $entity_meta_wrapper->getSourceEntityBundle());
+    $first_wrapper = new ListPageWrapper($first_revision);
+    $this->assertEquals('taxonomy_term:vocabulary_one', $first_wrapper->getSource());
+    $this->assertEquals('taxonomy_term', $first_wrapper->getSourceEntityType());
+    $this->assertEquals('vocabulary_one', $first_wrapper->getSourceEntityBundle());
   }
 
   /**
@@ -113,7 +95,6 @@ class ListPagesPluginTest extends ListPagePluginFormTestBase {
    */
   protected function goToListPageConfiguration(): void {
     $this->drupalGet('node/add/oe_list_page');
-    $this->clickLink('List Page');
   }
 
 }

@@ -2,10 +2,10 @@ langcode: en
 status: true
 dependencies:
   module:
-    - emr
-id: entity_meta.oe_list_page_config
+    - node
+id: node.oe_list_page_config
 field_name: oe_list_page_config
-entity_type: entity_meta
+entity_type: node
 type: string_long
 settings:
   case_sensitive: false

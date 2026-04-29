@@ -159,8 +159,7 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
       '#title' => $this->t('Source entity type'),
       '#description' => $this->t('Select the entity type that will be used as the source for this list.'),
       '#options' => $entity_type_options,
-      // If there is no selection, the default entity type will be Node, due to
-      // self::fillDefaultEntityMetaValues().
+      // If there is no selection, the default entity type will be Node.
       '#default_value' => $selected_entity_type,
       '#empty_value' => '',
       '#required' => TRUE,
@@ -353,17 +352,10 @@ class ListPageConfigurationSubForm implements ListPageConfigurationSubformInterf
     $form_state->set('bundle', $triggering_element['#value']);
     $form_state->setRebuild(TRUE);
 
-    $element = NestedArray::getValue($form, array_slice($triggering_element['#array_parents'], 0, -4));
-    $ajax_wrapper_id_part = ($element['#parents'] ? '-' . implode('-', $element['#parents']) : '');
-
     // In this form we embed the default filters form as well so if we change
     // entity types, we need to reset any filter selection.
     $remove = [];
     foreach ($form_state->getStorage() as $name => $value) {
-      if (strpos($name, $ajax_wrapper_id_part) === FALSE) {
-        continue;
-      }
-
       if (str_starts_with($name, 'default_facet_id') || str_starts_with($name, 'default_filter_id') || str_starts_with($name, 'contextual_facet_id') || str_starts_with($name, 'contextual_filter_id')) {
         $remove[] = $name;
       }
