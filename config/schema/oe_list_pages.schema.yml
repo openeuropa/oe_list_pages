@@ -59,3 +59,17 @@ search_api.index.*.third_party.oe_list_pages:
     lists_pages_index:
       type: boolean
       label: 'Marks the index to be used for list pages.'
+
+field.formatter.settings.oe_list_pages_filter_link:
+  type: field.formatter.settings.entity_reference_label
+  label: 'List page filter link formatter settings'
+  mapping:
+    filter_id:
+      type: string
+      label: 'Filter ID'
+    link_anywhere:
+      type: boolean
+      label: 'Link anywhere'
+    list_page_url:
+      type: string
+      label: 'List page URL override'

@@ -2,6 +2,9 @@ services:
   oe_list_pages.list_facet_manager_wrapper:
     class: Drupal\oe_list_pages\ListFacetManagerWrapper
     arguments: ['@facets.manager']
+  oe_list_pages.parent_bundle_list_page_lookup:
+    class: Drupal\oe_list_pages\ParentBundleListPageLookup
+    arguments: ['@entity_type.manager', '@language_manager', '@database']
   oe_list_pages.list_source.factory:
     class: Drupal\oe_list_pages\ListSourceFactory
     arguments: ['@oe_list_pages.list_facet_manager_wrapper', '@entity_type.manager', '@module_handler']
