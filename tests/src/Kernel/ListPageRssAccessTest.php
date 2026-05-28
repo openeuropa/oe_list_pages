@@ -6,11 +6,14 @@ namespace Drupal\Tests\oe_list_pages\Kernel;
 
 use Drupal\Core\Url;
 use Drupal\node\Entity\NodeType;
+use Drupal\Tests\oe_list_pages\Traits\ListPageTestTrait;
 
 /**
  * Tests the List page RSS feed access.
  */
-class ListPageRssAccessTest extends ListsEntityMetaTestBase {
+class ListPageRssAccessTest extends ListsSourceTestBase {
+
+  use ListPageTestTrait;
 
   /**
    * Node with list page metadata configured.
@@ -27,6 +30,20 @@ class ListPageRssAccessTest extends ListsEntityMetaTestBase {
   ];
 
   /**
+   * The node storage.
+   *
+   * @var \Drupal\Core\Entity\EntityStorageInterface|object
+   */
+  protected $nodeStorage;
+
+  /**
+   * A node type used in the tests.
+   *
+   * @var \Drupal\node\NodeTypeInterface
+   */
+  protected $nodeType;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
@@ -34,6 +51,16 @@ class ListPageRssAccessTest extends ListsEntityMetaTestBase {
     $this->installConfig(['language']);
     // Set up a current user to ensure anonymous users are available.
     $this->setUpCurrentUser();
+
+    $this->installSchema('node', ['node_access']);
+
+    $values = ['type' => 'list_page', 'name' => 'List page'];
+    $this->nodeType = NodeType::create($values);
+    $this->nodeType->save();
+
+    $this->nodeStorage = $this->entityTypeManager->getStorage('node');
+
+    $this->installListPageFields($this->nodeType->id());
 
     // Create a node with list page metadata.
     $this->listPageNode = $this->nodeStorage->create([

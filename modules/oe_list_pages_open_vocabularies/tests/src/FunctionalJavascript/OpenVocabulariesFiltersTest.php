@@ -38,8 +38,6 @@ class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
     'oe_list_pages_link_list_source',
     'open_vocabularies',
     'node',
-    'emr',
-    'emr_node',
     'rdf_skos',
     'search_api',
     'search_api_db',
@@ -255,7 +253,6 @@ class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
     // Add default values for the first association.
     $node = $this->drupalGetNodeByTitle('Node title');
     $this->drupalGet($node->toUrl('edit-form'));
-    $this->clickLink('List Page');
 
     $page->selectFieldOption('Add default value for', $this->firstAssociation->label());
     $assert->assertWaitOnAjaxRequest();
@@ -267,7 +264,7 @@ class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
 
     $field_id = 'open_vocabularies_tags_vocabulary_tags_vocabulary_node_content_type_one_field_open_vocabularies';
     $association_filter_id = FilterConfigurationFormBuilderBase::generateFilterId($field_id);
-    $default_value_name_prefix = 'emr_plugins_oe_list_page[wrapper][default_filter_values]';
+    $default_value_name_prefix = 'oe_list_page[wrapper][default_filter_values]';
     $filter_selector = $default_value_name_prefix . '[wrapper][edit][' . $association_filter_id . ']';
     $this->getSession()->getPage()->fillField($filter_selector . '[' . $field_id . '][0][entity_reference]', 'green color (2)');
     $page->pressButton('Set default value');
@@ -293,7 +290,6 @@ class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
 
     $node = $this->drupalGetNodeByTitle('Node title');
     $this->drupalGet($node->toUrl('edit-form'));
-    $this->clickLink('List Page');
 
     // Add another default value, for the second association.
     $page->selectFieldOption('Add default value for', $this->secondAssociation->label());
@@ -306,7 +302,7 @@ class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
 
     $field_id = 'open_vocabularies_tags_vocabulary_two_tags_vocabulary_two_node_content_type_one_field_open_vocabularies';
     $association_filter_id = FilterConfigurationFormBuilderBase::generateFilterId($field_id);
-    $default_value_name_prefix = 'emr_plugins_oe_list_page[wrapper][default_filter_values]';
+    $default_value_name_prefix = 'oe_list_page[wrapper][default_filter_values]';
     $filter_selector = $default_value_name_prefix . '[wrapper][edit][' . $association_filter_id . ']';
     $this->getSession()->getPage()->fillField($filter_selector . '[' . $field_id . '][0][entity_reference]', 'yellow color (1)');
     $page->pressButton('Set default value');
@@ -351,7 +347,6 @@ class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
 
     // Can be edited again.
     $this->drupalGet($node->toUrl('edit-form'));
-    $this->clickLink('List Page');
     $assert->fieldNotExists('Tags association');
     $assert->fieldNotExists('Tags association two');
     $page->pressButton('Save');
@@ -419,7 +414,6 @@ class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {
    */
   protected function goToListPageConfiguration(): void {
     $this->drupalGet('node/add/oe_list_page');
-    $this->clickLink('List Page');
   }
 
 }

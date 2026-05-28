@@ -4,15 +4,42 @@ declare(strict_types=1);
 
 namespace Drupal\oe_list_pages;
 
-use Drupal\emr\EntityMetaWrapper;
+use Drupal\Core\Entity\ContentEntityInterface;
 
 /**
- * Wrapper for the list page entity meta.
+ * Wraps a node carrying the list page configuration.
  */
-class ListPageWrapper extends EntityMetaWrapper {
+class ListPageWrapper {
 
   /**
-   * Set the entity/bundle pair for the list page source.
+   * The wrapped entity (host node).
+   *
+   * @var \Drupal\Core\Entity\ContentEntityInterface
+   */
+  protected ContentEntityInterface $entity;
+
+  /**
+   * Constructs a new wrapper.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The host entity (a node).
+   */
+  public function __construct(ContentEntityInterface $entity) {
+    $this->entity = $entity;
+  }
+
+  /**
+   * Returns the wrapped entity.
+   *
+   * @return \Drupal\Core\Entity\ContentEntityInterface
+   *   The host entity.
+   */
+  public function getEntity(): ContentEntityInterface {
+    return $this->entity;
+  }
+
+  /**
+   * Sets the entity/bundle pair for the list page source.
    *
    * @param string $entity_type
    *   Entity type name.
@@ -20,20 +47,20 @@ class ListPageWrapper extends EntityMetaWrapper {
    *   Bundle of entity type.
    */
   public function setSource(string $entity_type, string $bundle): void {
-    $this->entityMeta->set('oe_list_page_source', $entity_type . ':' . $bundle);
+    $this->entity->set('oe_list_page_source', $entity_type . ':' . $bundle);
   }
 
   /**
-   * Returns the entity meta list page source.
-   *
-   * This is a pair of entity_type:bundle that will be used for querying on this
-   * list page.
+   * Returns the list page source.
    *
    * @return string|null
-   *   The entity_type:bundle pair source.
+   *   The entity_type:bundle pair, or NULL if not set.
    */
   public function getSource(): ?string {
-    return $this->entityMeta->get('oe_list_page_source')->value;
+    if (!$this->entity->hasField('oe_list_page_source') || $this->entity->get('oe_list_page_source')->isEmpty()) {
+      return NULL;
+    }
+    return $this->entity->get('oe_list_page_source')->value;
   }
 
   /**
@@ -47,8 +74,7 @@ class ListPageWrapper extends EntityMetaWrapper {
     if (!$source) {
       return NULL;
     }
-
-    [$entity_type, $bundle] = explode(':', $source);
+    [$entity_type] = explode(':', $source);
     return $entity_type;
   }
 
@@ -63,29 +89,32 @@ class ListPageWrapper extends EntityMetaWrapper {
     if (!$source) {
       return NULL;
     }
-
-    [$entity_type, $bundle] = explode(':', $source);
+    [, $bundle] = explode(':', $source);
     return $bundle;
   }
 
   /**
-   * Returns the entity meta configuration.
+   * Returns the list page configuration.
    *
    * @return array
-   *   The list page configuration.
+   *   The unserialized configuration array.
    */
   public function getConfiguration(): array {
-    return $this->entityMeta->get('oe_list_page_config')->isEmpty() ? [] : unserialize($this->entityMeta->get('oe_list_page_config')->value);
+    if (!$this->entity->hasField('oe_list_page_config') || $this->entity->get('oe_list_page_config')->isEmpty()) {
+      return [];
+    }
+    $value = $this->entity->get('oe_list_page_config')->value;
+    return $value === NULL ? [] : unserialize($value, ['allowed_classes' => [ListPresetFilter::class]]);
   }
 
   /**
-   * Sets the entity meta configuration.
+   * Sets the list page configuration.
    *
    * @param array $configuration
-   *   The list page configuration.
+   *   The configuration.
    */
   public function setConfiguration(array $configuration): void {
-    $this->entityMeta->set('oe_list_page_config', serialize($configuration));
+    $this->entity->set('oe_list_page_config', serialize($configuration));
   }
 
 }

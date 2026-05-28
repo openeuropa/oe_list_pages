@@ -29,8 +29,6 @@ abstract class ListsSourceTestBase extends EntityKernelTestBase {
     'node',
     'node_storage_body_field',
     'language',
-    'emr',
-    'emr_node',
     'rdf_skos',
     'search_api',
     'search_api_db',
@@ -92,10 +90,7 @@ abstract class ListsSourceTestBase extends EntityKernelTestBase {
     $this->installEntitySchema('entity_test_mulrev_changed');
     $this->installEntitySchema('user');
     $this->installEntitySchema('node');
-    $this->installEntitySchema('entity_meta');
-    $this->installEntitySchema('entity_meta_relation');
     $this->installEntitySchema('taxonomy_term');
-    $this->installSchema('emr', ['entity_meta_default_revision']);
 
     \Drupal::state()->set('search_api_use_tracking_batch', FALSE);
 
@@ -106,8 +101,6 @@ abstract class ListsSourceTestBase extends EntityKernelTestBase {
       ->save();
 
     $this->installConfig([
-      'emr',
-      'emr_node',
       'facets',
       'oe_list_pages',
       'search_api_test_example_content',

@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace Drupal\Tests\oe_list_pages\FunctionalJavascript;
 
 use Drupal\Tests\BrowserTestBase;
+use Drupal\Tests\oe_list_pages\Traits\ListPageTestTrait;
 use Drupal\search_api\Entity\Index;
 
 /**
  * Tests the index alter form and saving of third party settings.
  */
 class ListPageIndexFormTest extends BrowserTestBase {
+
+  use ListPageTestTrait;
 
   /**
    * {@inheritdoc}
@@ -20,8 +23,6 @@ class ListPageIndexFormTest extends BrowserTestBase {
     'oe_list_pages',
     'oe_list_pages_filters_test',
     'node',
-    'emr',
-    'emr_node',
     'rdf_skos',
     'search_api',
     'search_api_db',
@@ -38,11 +39,7 @@ class ListPageIndexFormTest extends BrowserTestBase {
    */
   protected function setUp(): void {
     parent::setUp();
-    /** @var \Drupal\emr\EntityMetaRelationInstaller $installer */
-    $installer = \Drupal::service('emr.installer');
-    $installer->installEntityMetaTypeOnContentEntityType('oe_list_page', 'node', [
-      'content_type_one',
-    ]);
+    $this->installListPageFields('content_type_one');
   }
 
   /**
