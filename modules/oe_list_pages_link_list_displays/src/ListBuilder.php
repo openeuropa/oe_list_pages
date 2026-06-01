@@ -52,8 +52,7 @@ class ListBuilder extends DefaultListBuilder {
    * @SuppressWarnings(PHPMD.ExcessiveParameterList)
    */
   public function __construct(ListExecutionManagerInterface $listExecutionManager, EntityTypeManager $entityTypeManager, PagerManagerInterface $pager, EntityRepositoryInterface $entityRepository, FormBuilderInterface $formBuilder, FacetsUrlGenerator $facetsUrlGenerator, ProcessorPluginManager $processorManager, RequestStack $requestStack, UrlProcessorPluginManager $urlProcessorManager, MultiselectFilterFieldPluginManager $multiselectFilterManager, ListSourceFactory $listSourceFactory, ListPageSortOptionsResolver $sortOptionsResolver, EventDispatcherInterface $eventDispatcher, LinkDisplayPluginManagerInterface $linkDisplayPluginManager) {
-    parent::__construct($listExecutionManager, $entityTypeManager, $pager, $entityRepository, $formBuilder, $facetsUrlGenerator, $processorManager, $requestStack, $urlProcessorManager, $multiselectFilterManager, $listSourceFactory, $sortOptionsResolver);
-    $this->eventDispatcher = $eventDispatcher;
+    parent::__construct($listExecutionManager, $entityTypeManager, $pager, $entityRepository, $formBuilder, $facetsUrlGenerator, $processorManager, $requestStack, $urlProcessorManager, $multiselectFilterManager, $listSourceFactory, $sortOptionsResolver, $eventDispatcher);
     $this->linkDisplayPluginManager = $linkDisplayPluginManager;
   }
 

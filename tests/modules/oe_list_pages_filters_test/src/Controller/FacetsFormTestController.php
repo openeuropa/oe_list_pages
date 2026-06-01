@@ -9,7 +9,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Pager\PagerManagerInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\facets\FacetManager\DefaultFacetManager;
-use Drupal\oe_list_pages\Form\ListFacetsForm;
+use Drupal\oe_list_pages\ListPageConfiguration;
 use Drupal\oe_list_pages\ListSourceFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -94,7 +94,19 @@ class FacetsFormTestController extends ControllerBase {
    * Builds the page.
    */
   public function build() {
+    $configuration = [
+      'entity_type' => 'node',
+      'bundle' => 'content_type_one',
+      'exposed_filters' => [],
+      'exposed_filters_overridden' => FALSE,
+      'default_filter_values' => [],
+      'contextual_filters' => [],
+    ];
+    $listPageConfiguration = new ListPageConfiguration($configuration);
     $list_source = $this->listSourceFactory->get('node', 'content_type_one');
+    $listPageConfiguration->setListSource($list_source);
+    $listPageConfiguration->setExposedFilters(array_keys($list_source->getAvailableFilters()));
+    $listPageConfiguration->setExposedFiltersOverridden(TRUE);
 
     // Run the query for a given source and print the results on the page so
     // we can assert them.
@@ -122,8 +134,7 @@ class FacetsFormTestController extends ControllerBase {
     ];
 
     $build['list_items']['#cache']['max-age'] = 0;
-    $ignored_filters = $this->state->get('oe_list_pages_test.ignored_filters', []);
-    $build['form'] = \Drupal::formBuilder()->getForm(ListFacetsForm::class, $list_source, $ignored_filters);
+    $build['form'] = \Drupal::service('oe_list_pages.builder')->buildFiltersForm($listPageConfiguration);
 
     return $build;
   }
