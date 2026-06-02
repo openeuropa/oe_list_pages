@@ -66,7 +66,7 @@
         },
         "patches": {
             "drupal/entity_meta_relation": {
-                "https://www.drupal.org/project/entity_meta_relation/issues/3579512": "https://git.drupalcode.org/project/entity_meta_relation/-/merge_requests/8/diffs.patch"
+                "https://www.drupal.org/project/entity_meta_relation/issues/3579512": "https://www.drupal.org/files/issues/2026-06-02/3579512-5.patch"
             }
         },
         "drupal-scaffold": {
