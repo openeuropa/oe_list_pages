@@ -1,11 +1,20 @@
 # Changelog
 
+## [2.0.0-beta1](https://github.com/openeuropa/oe_list_pages/tree/2.0.0-beta1) (2026-06-02)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.19.0...2.0.0-beta1)
+
+**Merged pull requests:**
+
+- EWPP-6627: OE List page EMR migration. [\#262](https://github.com/openeuropa/oe_list_pages/pull/262) ([upchuk](https://github.com/upchuk))
+
 ## [1.19.0](https://github.com/openeuropa/oe_list_pages/tree/1.19.0) (2026-04-27)
 
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.18.0...1.19.0)
 
 **Merged pull requests:**
 
+- Release-1.19.0: Update changelog. [\#261](https://github.com/openeuropa/oe_list_pages/pull/261) ([nagyad](https://github.com/nagyad))
 - EWPP-6514: Support D11.3. [\#259](https://github.com/openeuropa/oe_list_pages/pull/259) ([nagyad](https://github.com/nagyad))
 
 ## [1.18.0](https://github.com/openeuropa/oe_list_pages/tree/1.18.0) (2026-03-02)
