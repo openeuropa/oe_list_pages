@@ -1,11 +1,20 @@
 # Changelog
 
+## [2.0.0-beta2](https://github.com/openeuropa/oe_list_pages/tree/2.0.0-beta2) (2026-06-02)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/2.0.0-beta1...2.0.0-beta2)
+
+**Merged pull requests:**
+
+- EWPP-6922: Fix EMR patching. [\#266](https://github.com/openeuropa/oe_list_pages/pull/266) ([nagyad](https://github.com/nagyad))
+
 ## [2.0.0-beta1](https://github.com/openeuropa/oe_list_pages/tree/2.0.0-beta1) (2026-06-02)
 
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/1.19.0...2.0.0-beta1)
 
 **Merged pull requests:**
 
+- Release-2.0.0-beta1: Update changelog. [\#265](https://github.com/openeuropa/oe_list_pages/pull/265) ([nagyad](https://github.com/nagyad))
 - EWPP-6627: OE List page EMR migration. [\#262](https://github.com/openeuropa/oe_list_pages/pull/262) ([upchuk](https://github.com/upchuk))
 
 ## [1.19.0](https://github.com/openeuropa/oe_list_pages/tree/1.19.0) (2026-04-27)
