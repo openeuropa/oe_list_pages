@@ -86,6 +86,7 @@ class ListPageFilterLinkFormatter extends EntityReferenceLabelFormatter implemen
       'filter_id' => '',
       'link_anywhere' => TRUE,
       'list_page_url' => '',
+      'link_classes' => '',
     ] + parent::defaultSettings();
   }
 
@@ -115,6 +116,12 @@ class ListPageFilterLinkFormatter extends EntityReferenceLabelFormatter implemen
       '#default_value' => $this->getSetting('list_page_url'),
       '#description' => $this->t('Optional. Internal path of the listing to link to (must start with "/"). Leave empty to auto-detect the published oe_list_page node whose source matches the parent bundle.'),
     ];
+    $form['link_classes'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Link CSS classes'),
+      '#default_value' => $this->getSetting('link_classes'),
+      '#description' => $this->t('Optional. Space-separated CSS classes added to each generated link, for example to render it as a badge.'),
+    ];
     return $form;
   }
 
@@ -131,6 +138,9 @@ class ListPageFilterLinkFormatter extends EntityReferenceLabelFormatter implemen
     if (($override = trim((string) $this->getSetting('list_page_url'))) !== '') {
       $summary[] = $this->t('Target URL: @url', ['@url' => $override]);
     }
+    if (($classes = trim((string) $this->getSetting('link_classes'))) !== '') {
+      $summary[] = $this->t('Link classes: @classes', ['@classes' => $classes]);
+    }
     return $summary;
   }
 
@@ -145,6 +155,7 @@ class ListPageFilterLinkFormatter extends EntityReferenceLabelFormatter implemen
     $on_list_page = $this->isCurrentRequestOn($target_path);
     $should_link = $target_path !== NULL && ($this->getSetting('link_anywhere') || $on_list_page);
     $base_query = $should_link ? $this->buildBaseQuery($on_list_page, $filter_id) : NULL;
+    $link_classes = preg_split('/\s+/', trim((string) $this->getSetting('link_classes')), -1, PREG_SPLIT_NO_EMPTY) ?: [];
 
     foreach ($this->getEntitiesToView($items, $langcode) as $delta => $referenced) {
       $label = $referenced->label();
@@ -152,10 +163,14 @@ class ListPageFilterLinkFormatter extends EntityReferenceLabelFormatter implemen
       if ($should_link && !$referenced->isNew()) {
         $query = $base_query;
         $query['f'][] = $filter_id . ':' . $referenced->id();
+        $options = ['query' => $query];
+        if ($link_classes) {
+          $options['attributes']['class'] = $link_classes;
+        }
         $elements[$delta] = [
           '#type' => 'link',
           '#title' => $label,
-          '#url' => Url::fromUserInput($target_path, ['query' => $query]),
+          '#url' => Url::fromUserInput($target_path, $options),
         ];
       }
       else {

@@ -73,3 +73,6 @@ field.formatter.settings.oe_list_pages_filter_link:
     list_page_url:
       type: string
       label: 'List page URL override'
+    link_classes:
+      type: string
+      label: 'Link CSS classes'
