@@ -3,6 +3,7 @@
 namespace Drupal\oe_list_pages_address\Plugin\facets\processor;
 
 use CommerceGuys\Addressing\Country\CountryRepositoryInterface;
+use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\facets\FacetInterface;
 use Drupal\facets\Processor\BuildProcessorInterface;
@@ -31,6 +32,13 @@ class FormatCountryCodeProcessor extends ProcessorPluginBase implements BuildPro
   protected $countryRepository;
 
   /**
+   * The language manager.
+   *
+   * @var \Drupal\Core\Language\LanguageManagerInterface
+   */
+  protected $languageManager;
+
+  /**
    * Constructs a new FormatCountryCodeProcessor.
    *
    * @param array $configuration
@@ -41,11 +49,14 @@ class FormatCountryCodeProcessor extends ProcessorPluginBase implements BuildPro
    *   The plugin implementation definition.
    * @param \CommerceGuys\Addressing\Country\CountryRepositoryInterface $country_repository
    *   The country repository.
+   * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
+   *   The language manager.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, CountryRepositoryInterface $country_repository) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, CountryRepositoryInterface $country_repository, LanguageManagerInterface $language_manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->countryRepository = $country_repository;
+    $this->languageManager = $language_manager;
   }
 
   /**
@@ -56,7 +67,8 @@ class FormatCountryCodeProcessor extends ProcessorPluginBase implements BuildPro
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('address.country_repository')
+      $container->get('address.country_repository'),
+      $container->get('language_manager')
     );
   }
 
@@ -64,10 +76,11 @@ class FormatCountryCodeProcessor extends ProcessorPluginBase implements BuildPro
    * {@inheritdoc}
    */
   public function build(FacetInterface $facet, array $results) {
+    $langcode = $this->languageManager->getCurrentLanguage()->getId();
     // Loop over all results and try to determine the country.
     foreach ($results as $i => $result) {
       try {
-        $country = $this->countryRepository->get($result->getRawValue());
+        $country = $this->countryRepository->get($result->getRawValue(), $langcode);
       }
       catch (\Exception $exception) {
         continue;
