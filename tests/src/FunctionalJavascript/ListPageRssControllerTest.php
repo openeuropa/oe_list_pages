@@ -13,12 +13,15 @@ use Drupal\locale\SourceString;
 use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
 use Drupal\search_api\Entity\Index;
+use OpenEuropa\TestingUtilities\Traits\CachedDatabaseInstallTrait;
 use Symfony\Component\DomCrawler\Crawler;
 
 /**
  * Test the list page RSS feed controller.
  */
 class ListPageRssControllerTest extends WebDriverTestBase {
+
+  use CachedDatabaseInstallTrait;
 
   /**
    * {@inheritdoc}
@@ -47,6 +50,7 @@ class ListPageRssControllerTest extends WebDriverTestBase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
+    $this->cacheDbInstall = TRUE;
     parent::setUp();
 
     // Translate the Aug (short month) string.

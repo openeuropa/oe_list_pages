@@ -14,12 +14,14 @@ use Drupal\node\NodeInterface;
 use Drupal\oe_list_pages\DefaultFilterConfigurationBuilder;
 use Drupal\search_api\Entity\Index;
 use Drupal\taxonomy\Entity\Term;
+use OpenEuropa\TestingUtilities\Traits\CachedDatabaseInstallTrait;
 
 /**
  * Base class for testing list page configuration forms.
  */
 abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
 
+  use CachedDatabaseInstallTrait;
   use SparqlConnectionTrait;
 
   /**
@@ -31,6 +33,8 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
+    $this->cacheDbInstall = TRUE;
+
     parent::setUp();
 
     // Rebuild all containers to ensure services are properly initialized after

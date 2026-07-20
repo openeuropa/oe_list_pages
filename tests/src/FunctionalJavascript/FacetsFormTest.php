@@ -13,12 +13,14 @@ use Drupal\node\Entity\Node;
 use Drupal\oe_list_pages\ListSourceFactory;
 use Drupal\oe_list_pages\Plugin\facets\query_type\DateStatus;
 use Drupal\search_api\Entity\Index;
+use OpenEuropa\TestingUtilities\Traits\CachedDatabaseInstallTrait;
 
 /**
  * Tests the list facets form.
  */
 class FacetsFormTest extends WebDriverTestBase {
 
+  use CachedDatabaseInstallTrait;
   use FacetsTestTrait;
   use ListPageTestTrait;
 
@@ -54,6 +56,7 @@ class FacetsFormTest extends WebDriverTestBase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
+    $this->cacheDbInstall = TRUE;
     parent::setUp();
     $this->installListPageFields('content_type_one');
 

@@ -7,6 +7,7 @@ namespace Drupal\Tests\oe_list_pages\FunctionalJavascript;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\oe_list_pages\ListPageWrapper;
 use Drupal\Tests\oe_list_pages\Traits\ListPageTestTrait;
+use OpenEuropa\TestingUtilities\Traits\CachedDatabaseInstallTrait;
 
 /**
  * Tests the List pages exposed filters.
@@ -15,6 +16,7 @@ use Drupal\Tests\oe_list_pages\Traits\ListPageTestTrait;
  */
 class ListPagesExposedFiltersTest extends WebDriverTestBase {
 
+  use CachedDatabaseInstallTrait;
   use ListPageTestTrait;
 
   /**
@@ -41,6 +43,7 @@ class ListPagesExposedFiltersTest extends WebDriverTestBase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
+    $this->cacheDbInstall = TRUE;
     parent::setUp();
     $this->installListPageFields('content_type_one');
   }
