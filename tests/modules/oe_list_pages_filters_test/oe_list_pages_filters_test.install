@@ -7,10 +7,31 @@
 
 declare(strict_types=1);
 
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
+
 /**
  * Implements hook_install().
  */
 function oe_list_pages_filters_test_install($is_syncing) {
+
+  // Create the Body field on the test content types without specifying the
+  // field type, so it is inferred from the body field storage. The storage
+  // type differs per core version (text_with_summary before Drupal 11.4,
+  // text_long after).
+  $body_storage = FieldStorageConfig::loadByName('node', 'body');
+  if ($body_storage) {
+    foreach (['content_type_one', 'content_type_two'] as $bundle) {
+      if (!FieldConfig::loadByName('node', $bundle, 'body')) {
+        FieldConfig::create([
+          'field_storage' => $body_storage,
+          'bundle' => $bundle,
+          'label' => 'Body',
+          'translatable' => TRUE,
+        ])->save();
+      }
+    }
+  }
 
   // Configure the RDF SKOS graphs.
   $graphs = [

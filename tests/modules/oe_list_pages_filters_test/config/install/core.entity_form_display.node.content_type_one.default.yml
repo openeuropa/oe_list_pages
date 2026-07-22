@@ -2,7 +2,6 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.field.node.content_type_one.body
     - field.field.node.content_type_one.field_country_code
     - field.field.node.content_type_one.field_date_range
     - field.field.node.content_type_one.field_link
@@ -19,16 +18,6 @@ targetEntityType: node
 bundle: content_type_one
 mode: default
 content:
-  body:
-    type: text_textarea_with_summary
-    weight: 7
-    region: content
-    settings:
-      rows: 9
-      summary_rows: 3
-      placeholder: ''
-      show_summary: false
-    third_party_settings: {  }
   created:
     type: datetime_timestamp
     weight: 2
