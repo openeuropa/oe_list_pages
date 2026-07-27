@@ -10,6 +10,7 @@ use Drupal\facets\Entity\Facet;
 use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
 use Drupal\search_api\Entity\Index;
+use OpenEuropa\TestingUtilities\Traits\CachedDatabaseInstallTrait;
 
 /**
  * Tests the list page filters.
@@ -17,6 +18,8 @@ use Drupal\search_api\Entity\Index;
  * @group oe_list_pages
  */
 class ListPagesFiltersTest extends WebDriverTestBase {
+
+  use CachedDatabaseInstallTrait;
 
   /**
    * {@inheritdoc}
@@ -44,6 +47,7 @@ class ListPagesFiltersTest extends WebDriverTestBase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
+    $this->cacheDbInstall = TRUE;
     parent::setUp();
 
     // Rebuild all containers to ensure services are properly initialized after

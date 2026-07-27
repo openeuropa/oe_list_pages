@@ -7,12 +7,14 @@ namespace Drupal\Tests\oe_list_pages\FunctionalJavascript;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\oe_list_pages\Traits\ListPageTestTrait;
 use Drupal\search_api\Entity\Index;
+use OpenEuropa\TestingUtilities\Traits\CachedDatabaseInstallTrait;
 
 /**
  * Tests the index alter form and saving of third party settings.
  */
 class ListPageIndexFormTest extends BrowserTestBase {
 
+  use CachedDatabaseInstallTrait;
   use ListPageTestTrait;
 
   /**
@@ -38,6 +40,7 @@ class ListPageIndexFormTest extends BrowserTestBase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
+    $this->cacheDbInstall = TRUE;
     parent::setUp();
     $this->installListPageFields('content_type_one');
   }
