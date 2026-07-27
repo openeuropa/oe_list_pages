@@ -21,6 +21,8 @@ use Drupal\user\Entity\Role;
 
 /**
  * Tests the list page link source plugin.
+ *
+ * @group batch2
  */
 class ListPageLinkSourcePluginTest extends ListPagePluginFormTestBase {
 

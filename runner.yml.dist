@@ -52,7 +52,7 @@ commands:
   toolkit:code-review:
     - { task: "exec", command: "./vendor/bin/grumphp run" }
   toolkit:test-phpunit:
-    - { task: "exec", command: "./vendor/bin/phpunit" }
+    - { task: "run", command: "toolkit:test-phpunit-batches" }
 
 toolkit:
   build:
@@ -64,6 +64,12 @@ toolkit:
   test:
     phpstan:
       config: phpstan.neon.dist
+    phpunit:
+      execution: parallel
+      batches:
+        - batch1
+        - batch2
+        - batch3
   ci:
     PHP:
       - 8.3

@@ -16,6 +16,7 @@ use Drupal\search_api\Entity\Index;
 /**
  * Tests the List pages open vocabularies filters.
  *
+ * @group batch3
  * @group oe_list_pages
  */
 class OpenVocabulariesFiltersTest extends ListPagePluginFormTestBase {

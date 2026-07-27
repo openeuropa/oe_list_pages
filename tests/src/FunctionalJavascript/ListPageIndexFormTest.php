@@ -11,6 +11,8 @@ use OpenEuropa\TestingUtilities\Traits\CachedDatabaseInstallTrait;
 
 /**
  * Tests the index alter form and saving of third party settings.
+ *
+ * @group batch3
  */
 class ListPageIndexFormTest extends BrowserTestBase {
 

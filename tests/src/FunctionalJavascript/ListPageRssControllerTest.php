@@ -18,6 +18,8 @@ use Symfony\Component\DomCrawler\Crawler;
 
 /**
  * Test the list page RSS feed controller.
+ *
+ * @group batch3
  */
 class ListPageRssControllerTest extends WebDriverTestBase {
 

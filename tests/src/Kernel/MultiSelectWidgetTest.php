@@ -11,6 +11,8 @@ use Drupal\oe_list_pages\Plugin\facets\widget\MultiselectWidget;
 
 /**
  * Test for Multiselect widget.
+ *
+ * @group batch1
  */
 class MultiSelectWidgetTest extends ListsSourceTestBase {
 

@@ -10,6 +10,8 @@ use Drupal\oe_list_pages\ListSourceFactory;
 
 /**
  * Tests the list facet form.
+ *
+ * @group batch1
  */
 class ListFacetsFormTest extends ListsSourceTestBase {
 

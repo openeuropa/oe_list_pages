@@ -15,6 +15,8 @@ use Drupal\search_api\Item\Field;
 
 /**
  * Tests for MultiSelectFilterField plugins.
+ *
+ * @group batch1
  */
 class MultiSelectFilterFieldPluginTest extends ListsSourceTestBase {
 

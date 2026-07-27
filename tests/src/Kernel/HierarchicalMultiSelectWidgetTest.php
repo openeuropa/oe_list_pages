@@ -14,6 +14,8 @@ use Drupal\taxonomy\Entity\Vocabulary;
 
 /**
  * Test for Hierarchical Multiselect widget.
+ *
+ * @group batch1
  */
 class HierarchicalMultiSelectWidgetTest extends ListsSourceTestBase {
 

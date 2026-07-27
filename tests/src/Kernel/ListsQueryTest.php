@@ -17,6 +17,8 @@ use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 
 /**
  * Tests the List sources querying functionality.
+ *
+ * @group batch1
  */
 class ListsQueryTest extends ListsSourceTestBase {
 

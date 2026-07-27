@@ -11,6 +11,8 @@ use Drupal\oe_list_pages\Plugin\facets\widget\FulltextWidget;
 
 /**
  * Test for Fulltext widget and query type.
+ *
+ * @group batch1
  */
 class FulltextWidgetTest extends ListsSourceTestBase {
 
