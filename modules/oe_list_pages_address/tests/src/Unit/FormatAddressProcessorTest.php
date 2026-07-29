@@ -12,6 +12,7 @@ use Drupal\oe_list_pages_address\Plugin\facets\processor\FormatCountryCodeProces
 /**
  * Unit test for processor.
  *
+ * @group batch2
  * @group facets
  */
 class FormatAddressProcessorTest extends UnitTestCase {

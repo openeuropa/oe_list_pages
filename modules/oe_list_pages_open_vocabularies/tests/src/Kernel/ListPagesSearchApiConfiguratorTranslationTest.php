@@ -10,6 +10,8 @@ use Drupal\open_vocabularies\Entity\OpenVocabularyAssociation;
 
 /**
  * Tests that the created facets are also translated after the associations.
+ *
+ * @group batch1
  */
 class ListPagesSearchApiConfiguratorTranslationTest extends ListPagesSearchApiConfiguratorTestBase {
 

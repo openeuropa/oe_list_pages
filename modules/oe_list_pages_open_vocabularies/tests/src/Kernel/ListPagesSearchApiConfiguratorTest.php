@@ -11,6 +11,8 @@ use Drupal\search_api\Entity\Index;
 
 /**
  * Tests the list page open vocabularies configurator.
+ *
+ * @group batch1
  */
 class ListPagesSearchApiConfiguratorTest extends ListPagesSearchApiConfiguratorTestBase {
 

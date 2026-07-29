@@ -13,6 +13,8 @@ use Drupal\search_api\Entity\Index;
 
 /**
  * Tests the list page link source translation aspects.
+ *
+ * @group batch3
  */
 class ListPageLinkSourceTranslationTest extends ListPagePluginFormTestBase {
 

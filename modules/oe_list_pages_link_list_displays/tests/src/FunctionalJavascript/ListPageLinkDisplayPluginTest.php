@@ -13,6 +13,8 @@ use Drupal\search_api\Entity\Index;
 
 /**
  * Tests the list pages with link list displays.
+ *
+ * @group batch3
  */
 class ListPageLinkDisplayPluginTest extends ListPagePluginFormTestBase {
 

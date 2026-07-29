@@ -12,7 +12,7 @@ use Drupal\search_api\Entity\Index;
 /**
  * Tests the list page sort configuration.
  *
- * @group oe_list_pages
+ * @group batch2
  */
 class ListPagesSortTest extends ListPagePluginFormTestBase {
 

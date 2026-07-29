@@ -9,6 +9,8 @@ use Drupal\oe_list_pages\ListSourceInterface;
 
 /**
  * Tests the available List sources and their available filters.
+ *
+ * @group batch1
  */
 class ListsSourceTest extends ListsSourceTestBase {
 

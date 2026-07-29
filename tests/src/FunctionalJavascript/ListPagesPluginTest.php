@@ -10,7 +10,7 @@ use Drupal\oe_list_pages\ListPageWrapper;
 /**
  * Tests the List pages configuration form.
  *
- * @group oe_list_pages
+ * @group batch2
  */
 class ListPagesPluginTest extends ListPagePluginFormTestBase {
 

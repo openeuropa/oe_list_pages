@@ -12,6 +12,8 @@ use Drupal\search_api\Entity\Index;
 
 /**
  * Tests the list page link source plugin.
+ *
+ * @group batch1
  */
 class ListPageLinkSourcePluginTest extends KernelTestBase {
 

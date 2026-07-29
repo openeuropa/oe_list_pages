@@ -17,6 +17,8 @@ use OpenEuropa\TestingUtilities\Traits\CachedDatabaseInstallTrait;
 
 /**
  * Tests the list facets form.
+ *
+ * @group batch3
  */
 class FacetsFormTest extends WebDriverTestBase {
 

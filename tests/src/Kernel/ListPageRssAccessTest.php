@@ -10,6 +10,8 @@ use Drupal\Tests\oe_list_pages\Traits\ListPageTestTrait;
 
 /**
  * Tests the List page RSS feed access.
+ *
+ * @group batch1
  */
 class ListPageRssAccessTest extends ListsSourceTestBase {
 

@@ -9,6 +9,8 @@ use Drupal\oe_list_pages\ListSourceFactory;
 
 /**
  * Tests the list builder.
+ *
+ * @group batch1
  */
 class ListBuilderTest extends ListsSourceTestBase {
 

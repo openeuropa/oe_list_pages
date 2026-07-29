@@ -18,6 +18,8 @@ use OpenEuropa\TestingUtilities\Traits\CachedDatabaseInstallTrait;
 
 /**
  * Base class for testing list page configuration forms.
+ *
+ * @group batch3
  */
 abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
 

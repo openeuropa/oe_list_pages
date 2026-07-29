@@ -21,7 +21,7 @@ use Drupal\Tests\oe_list_pages\Traits\ListPageTestTrait;
 /**
  * Tests the list page preset filters.
  *
- * @group oe_list_pages
+ * @group batch2
  */
 class ListPagesPresetFiltersTest extends ListPagePluginFormTestBase {
 

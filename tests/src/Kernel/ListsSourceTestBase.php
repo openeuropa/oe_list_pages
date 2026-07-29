@@ -12,6 +12,8 @@ use Drupal\search_api\Entity\Index;
 
 /**
  * Tests the List sources and their properties.
+ *
+ * @group batch1
  */
 abstract class ListsSourceTestBase extends EntityKernelTestBase {
 

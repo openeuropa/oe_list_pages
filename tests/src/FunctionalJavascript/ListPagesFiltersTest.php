@@ -15,7 +15,7 @@ use OpenEuropa\TestingUtilities\Traits\CachedDatabaseInstallTrait;
 /**
  * Tests the list page filters.
  *
- * @group oe_list_pages
+ * @group batch3
  */
 class ListPagesFiltersTest extends WebDriverTestBase {
 
