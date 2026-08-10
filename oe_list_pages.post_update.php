@@ -9,14 +9,8 @@ declare(strict_types=1);
 
 use Drupal\Component\Utility\Crypt;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
-use Drupal\Core\Config\FileStorage;
 use Drupal\Core\Config\StorageInterface;
-use Drupal\emr\Entity\EntityMetaType;
 use Drupal\facets\Entity\Facet;
-use Drupal\field\Entity\FieldConfig;
-use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\oe_list_pages\EntityMetaMigrator;
-use Drupal\oe_list_pages\EntityMetaRelationUninstaller;
 use Drupal\oe_list_pages\ListSourceFactory;
 use Drupal\search_api\Datasource\DatasourceInterface;
 
@@ -124,108 +118,14 @@ function oe_list_pages_post_update_0004() {
 }
 
 /**
- * Installs the new node fields and form display for the oe_list_page bundle.
+ * Implements hook_removed_post_updates().
  */
-function oe_list_pages_post_update_0005(): void {
-  $storage = new FileStorage(\Drupal::service('extension.list.module')->getPath('oe_list_pages') . '/config/post_updates/0005_list_page_no_emr');
-  foreach ($storage->listAll('field.storage.') as $name) {
-    _oe_list_pages_import_config_from_file($name, $storage);
-  }
-  foreach ($storage->listAll('field.field.') as $name) {
-    _oe_list_pages_import_config_from_file($name, $storage);
-  }
-}
-
-/**
- * Migrate oe_list_page entity metas to node fields.
- */
-function oe_list_pages_post_update_0006(&$sandbox): ?string {
-  $meta_storage = \Drupal::entityTypeManager()->getStorage('entity_meta');
-  $meta_storage->resetCache();
-
-  if (!isset($sandbox['total'])) {
-    $ids = \Drupal::database()
-      ->query("SELECT id FROM entity_meta WHERE bundle = :bundle ORDER BY id DESC", [
-        'bundle' => 'oe_list_page',
-      ])
-      ->fetchCol();
-    $sandbox['ids'] = array_unique($ids);
-    $sandbox['total'] = count($sandbox['ids']);
-    $sandbox['current'] = 0;
-    $sandbox['items_per_batch'] = 1;
-  }
-
-  $chunk_ids = array_splice($sandbox['ids'], 0, $sandbox['items_per_batch']);
-  foreach ($chunk_ids as $id) {
-    $entity_meta = EntityMetaMigrator::loadEntityMeta($id);
-    if ($entity_meta) {
-      EntityMetaMigrator::migrateOeListPageEntityMeta($entity_meta);
-    }
-    $sandbox['current']++;
-  }
-
-  $sandbox['#finished'] = empty($sandbox['total']) ? 1 : ($sandbox['current'] / $sandbox['total']);
-  if ($sandbox['#finished'] === 1) {
-    return t('A total of @updated entity meta entities have been migrated.', ['@updated' => $sandbox['current']])->__toString();
-  }
-  return NULL;
-}
-
-/**
- * Uninstall oe_list_page entity meta type.
- */
-function oe_list_pages_post_update_0007(): void {
-  EntityMetaRelationUninstaller::uninstallEntityMetaTypeOnContentEntityType(
-    'oe_list_page',
-    'node',
-    ['oe_list_page'],
-  );
-
-  $field_configs = [
-    'entity_meta.oe_list_page.oe_list_page_source',
-    'entity_meta.oe_list_page.oe_list_page_config',
+function oe_list_pages_removed_post_updates() {
+  return [
+    'oe_list_pages_post_update_0005' => '3.0.0',
+    'oe_list_pages_post_update_0006' => '3.0.0',
+    'oe_list_pages_post_update_0007' => '3.0.0',
   ];
-  foreach ($field_configs as $field_id) {
-    $field = FieldConfig::load($field_id);
-    if ($field) {
-      $field->delete();
-    }
-  }
-
-  // Only delete the bundle if no other modules have other fields on it.
-  $remaining_fields = \Drupal::entityTypeManager()
-    ->getStorage('field_config')
-    ->loadByProperties([
-      'entity_type' => 'entity_meta',
-      'bundle' => 'oe_list_page',
-    ]);
-  if (empty($remaining_fields)) {
-    $bundle = EntityMetaType::load('oe_list_page');
-    if ($bundle) {
-      $bundle->delete();
-    }
-  }
-  else {
-    \Drupal::logger('oe_list_pages')->notice('Skipping deletion of the oe_list_page entity meta type bundle because the following field configs still reference it: @fields. You need to migrate these fields and remove them yourself.', [
-      '@fields' => implode(', ', array_keys($remaining_fields)),
-    ]);
-  }
-
-  foreach (['oe_list_page_source', 'oe_list_page_config'] as $storage_field_name) {
-    $storage = FieldStorageConfig::loadByName('entity_meta', $storage_field_name);
-    if (!$storage) {
-      continue;
-    }
-    $remaining = \Drupal::entityTypeManager()
-      ->getStorage('field_config')
-      ->loadByProperties([
-        'entity_type' => 'entity_meta',
-        'field_name' => $storage_field_name,
-      ]);
-    if (empty($remaining)) {
-      $storage->delete();
-    }
-  }
 }
 
 /**
