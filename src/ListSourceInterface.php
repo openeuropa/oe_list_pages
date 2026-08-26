@@ -65,6 +65,11 @@ interface ListSourceInterface {
    *
    * @param array $options
    *   An array of options.
+   *   Use 'limit' for the number of items per page.
+   *   If 'limit' is NULL, a default limit will be used.
+   *   If 'limit' is zero, every page will have all items.
+   *   Use 'page' for the page number, starting from zero.
+   *   if 'page' is NULL, it will fall back to zero.
    *
    * @return \Drupal\search_api\Query\QueryInterface
    *   The search api query.

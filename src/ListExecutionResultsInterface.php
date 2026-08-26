@@ -26,7 +26,7 @@ interface ListExecutionResultsInterface {
   /**
    * Gets the result set.
    *
-   * @return Drupal\search_api\Query\ResultSetInterface
+   * @return \Drupal\search_api\Query\ResultSetInterface
    *   The result set interface.
    */
   public function getResults(): ResultSetInterface;

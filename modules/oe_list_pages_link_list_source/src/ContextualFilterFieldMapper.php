@@ -46,7 +46,7 @@ class ContextualFilterFieldMapper {
    * @param \Drupal\Core\Entity\ContentEntityInterface $entity
    *   The contextual entity.
    * @param \Drupal\Core\Cache\CacheableMetadata $cacheable_metadata
-   *   Cache metadata to bubble up.
+   *   Object to collect cache metadata.
    *
    * @return string|null
    *   Returns a field name if found, otherwise NULL.
