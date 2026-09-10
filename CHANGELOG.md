@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.0.0](https://github.com/openeuropa/oe_list_pages/tree/2.0.0) (2026-09-09)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/2.0.0-beta2...2.0.0)
+
+**Merged pull requests:**
+
+- EWPP-7147: Parallize phpunit tests in github actions. [\#272](https://github.com/openeuropa/oe_list_pages/pull/272) ([hernani](https://github.com/hernani))
+- EWPP-6988: Test against Drupal 11.4. [\#270](https://github.com/openeuropa/oe_list_pages/pull/270) ([nagyad](https://github.com/nagyad))
+- EWPP-7120: Functional test cached DB. [\#269](https://github.com/openeuropa/oe_list_pages/pull/269) ([upchuk](https://github.com/upchuk))
+
 ## [2.0.0-beta2](https://github.com/openeuropa/oe_list_pages/tree/2.0.0-beta2) (2026-06-02)
 
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/2.0.0-beta1...2.0.0-beta2)
