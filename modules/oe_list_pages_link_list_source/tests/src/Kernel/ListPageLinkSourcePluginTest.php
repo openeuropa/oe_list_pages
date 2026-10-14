@@ -119,7 +119,7 @@ class ListPageLinkSourcePluginTest extends KernelTestBase {
   /**
    * Tests the getLinks() method.
    *
-   * @covers ::getLinks
+   * @covers \Drupal\oe_list_pages_link_list_source\Plugin\LinkSource\ListPageLinkSource::getLinks
    */
   public function testGetLinks(): void {
     // Create content of two types.
