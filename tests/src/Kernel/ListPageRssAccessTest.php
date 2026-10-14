@@ -32,13 +32,6 @@ class ListPageRssAccessTest extends ListsSourceTestBase {
   ];
 
   /**
-   * The node storage.
-   *
-   * @var \Drupal\Core\Entity\EntityStorageInterface|object
-   */
-  protected $nodeStorage;
-
-  /**
    * A node type used in the tests.
    *
    * @var \Drupal\node\NodeTypeInterface
@@ -60,12 +53,10 @@ class ListPageRssAccessTest extends ListsSourceTestBase {
     $this->nodeType = NodeType::create($values);
     $this->nodeType->save();
 
-    $this->nodeStorage = $this->entityTypeManager->getStorage('node');
-
     $this->installListPageFields($this->nodeType->id());
 
     // Create a node with list page metadata.
-    $this->listPageNode = $this->nodeStorage->create([
+    $this->listPageNode = $this->entityTypeManager->getStorage('node')->create([
       'type' => $this->nodeType->id(),
       'title' => 'List Page',
     ]);
@@ -81,7 +72,7 @@ class ListPageRssAccessTest extends ListsSourceTestBase {
     $this->nodeType = NodeType::create($values);
     $this->nodeType->save();
     // Create a node without list page metadata.
-    $article = $this->nodeStorage->create([
+    $article = $this->entityTypeManager->getStorage('node')->create([
       'type' => 'article',
       'title' => 'Article',
     ]);
