@@ -138,3 +138,13 @@ function oe_list_pages_node_create(NodeInterface $node) : void {
     $node->set('oe_list_page_source', 'node:' . key($bundles));
   }
 }
+
+/**
+ * Implments hook_module_implements_alter().
+ */
+function oe_list_pages_module_implements_alter(&$implementations, $hook) {
+  if ($hook === 'requirements') {
+    // We have our own version.
+    unset($implementations['sparql_entity_storage']);
+  }
+}
