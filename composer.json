@@ -16,6 +16,7 @@
         "symfony/options-resolver": "^6"
     },
     "require-dev": {
+        "consolidation/robo": "5.1.1",
         "composer/installers": "^1.11 || ^2.3",
         "drupal/address": "^1.8 || ^2.0",
         "drupal/config_devel": "^1.2",
@@ -23,13 +24,13 @@
         "drupal/core-dev": "^10 || ^11",
         "drupal/extra_field": "^2.3 || ^3.0@beta",
         "drupal/inline_entity_form": "^1.0-rc15 || ^3.0@RC",
+        "drupal/open_vocabularies": "^1.3",
         "drupal/rdf_skos": "^1.4",
         "drupal/sparql_entity_storage": "^2.0.0-alpha19",
         "drush/drush": "^12 || ^13",
         "ec-europa/toolkit": "^10.23",
         "openeuropa/code-review-drupal": "^1.0.0-alpha",
         "openeuropa/oe_link_lists": "dev-master",
-        "openeuropa/open_vocabularies": "^1.0.0-beta2",
         "openeuropa/oe_testing_utils": "dev-main"
     },
     "scripts": {
@@ -74,7 +75,10 @@
             "locations": {
                 "web-root": "./build"
             }
-        }
+        },
+        "_readme": [
+            "Locking consolidation/robo to 5.1.1 due to 5.2.x calling Application::addCommand() which doesn't exists. Remove when support for Drupal core 10.6.x is dropped."
+        ]
     },
     "config": {
         "sort-packages": true,
