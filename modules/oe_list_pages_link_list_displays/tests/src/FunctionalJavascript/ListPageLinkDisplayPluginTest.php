@@ -62,7 +62,8 @@ class ListPageLinkDisplayPluginTest extends ListPagePluginFormTestBase {
       'body' => 'this is a cherry',
       'field_select_one' => 'test2',
       'status' => NodeInterface::PUBLISHED,
-      'created' => $date->getTimestamp(),
+      // Newer than the yellow fruit so the default created DESC sort is stable.
+      'created' => $date->getTimestamp() + 1,
     ];
     $node = Node::create($values);
     $node->save();
