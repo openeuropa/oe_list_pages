@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\oe_list_pages\Plugin\facets\facet_source;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Path\CurrentPathStack;
 use Drupal\facets\Exception\InvalidQueryTypeException;
 use Drupal\facets\FacetSource\SearchApiFacetSourceInterface;
@@ -64,8 +65,9 @@ class ListFacetSource extends SearchApiBaseFacetSource implements SearchApiFacet
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, $query_type_plugin_manager, $search_results_cache, RequestStack $request_stack, CurrentPathStack $current_path_stack, EntityTypeManagerInterface $entity_type_manager, DisplayPluginManager $display_plugin_manager) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition, $query_type_plugin_manager, $search_results_cache);
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, $query_type_plugin_manager, $search_results_cache, RequestStack $request_stack, CurrentPathStack $current_path_stack, EntityTypeManagerInterface $entity_type_manager, DisplayPluginManager $display_plugin_manager, ?ModuleHandlerInterface $module_handler = NULL) {
+    // Facets 3 requires the module handler, Facets 2 ignores the extra arg.
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $query_type_plugin_manager, $search_results_cache, $module_handler ?? \Drupal::moduleHandler());
 
     $this->currentPathStack = $current_path_stack;
     $this->requestStack = $request_stack;
@@ -89,7 +91,8 @@ class ListFacetSource extends SearchApiBaseFacetSource implements SearchApiFacet
       $container->get('request_stack'),
       $container->get('path.current'),
       $container->get('entity_type.manager'),
-      $container->get('plugin.manager.search_api.display')
+      $container->get('plugin.manager.search_api.display'),
+      $container->get('module_handler')
     );
   }
 

@@ -151,16 +151,9 @@ trait FacetManipulationTrait {
         'filter' => $value,
       ];
     }
-    try {
-      /** @var \Drupal\facets\QueryType\QueryTypeInterface $query_type */
-      $query_type = \Drupal::service('plugin.manager.facets.query_type')->createInstance($facet->getQueryType(), $configuration);
-      $query_type->build();
-    }
-    catch (\InvalidArgumentException $exception) {
-      // Facets v3 requires a query object in query-type configuration.
-      return;
-    }
-
+    /** @var \Drupal\facets\QueryType\QueryTypeInterface $query_type */
+    $query_type = \Drupal::service('plugin.manager.facets.query_type')->createInstance($facet->getQueryType(), $configuration);
+    $query_type->build();
     $facet->setResults($this->processFacetResults($facet));
   }
 
