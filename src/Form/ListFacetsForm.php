@@ -114,6 +114,11 @@ class ListFacetsForm extends FormBase {
       }
 
       if ($widget instanceof ListPagesWidgetInterface) {
+        // List page widgets are form elements that must render without facet
+        // results too, but Facets 3 renders nothing for the "none" behavior.
+        if (($facet->getEmptyBehavior()['behavior'] ?? NULL) === 'none') {
+          $facet->setEmptyBehavior(['behavior' => 'empty']);
+        }
         $form['facets'][$facet->id()] = $this->facetsManager->getFacetManager()->build($facet);
         $cache->addCacheTags($facet->getCacheTags());
       }

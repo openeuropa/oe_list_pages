@@ -1,0 +1,4 @@
+plugin.plugin_configuration.facets_processor.oe_list_pages_address_format_country_code:
+  type: mapping
+  label: 'Format country code processor'
+  mapping: {}
