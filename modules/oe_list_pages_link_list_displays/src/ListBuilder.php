@@ -16,6 +16,7 @@ use Drupal\oe_link_lists\Event\EntityValueResolverEvent;
 use Drupal\oe_link_lists\LinkCollection;
 use Drupal\oe_link_lists\LinkDisplayPluginManagerInterface;
 use Drupal\oe_list_pages\ListBuilder as DefaultListBuilder;
+use Drupal\oe_list_pages_link_list_displays\Event\ListDisplayResolveEvent;
 use Drupal\oe_list_pages\ListExecutionManagerInterface;
 use Drupal\oe_list_pages\ListPageConfiguration;
 use Drupal\oe_list_pages\ListPageSortOptionsResolver;
@@ -71,10 +72,14 @@ class ListBuilder extends DefaultListBuilder {
       return parent::buildList($configuration);
     }
 
+    // Allow other modules to change the display used to render the list.
+    $event = new ListDisplayResolveEvent($configuration, $extra['oe_list_pages_link_list_displays']['display']);
+    $this->eventDispatcher->dispatch($event, ListDisplayResolveEvent::NAME);
+    $display_configuration = $event->getDisplayConfiguration();
+
     // Verify that the chosen display plugin exists.
-    $display_configuration = $extra['oe_list_pages_link_list_displays'];
-    $display_plugin = $display_configuration['display']['plugin'];
-    $display_plugin_configuration = $display_configuration['display']['plugin_configuration'] ?? [];
+    $display_plugin = $display_configuration['plugin'];
+    $display_plugin_configuration = $display_configuration['plugin_configuration'] ?? [];
     if (!$this->linkDisplayPluginManager->hasDefinition($display_plugin)) {
       return parent::buildList($configuration);
     }

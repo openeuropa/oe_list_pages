@@ -124,8 +124,10 @@ class ListPageSortForm extends FormBase {
     }
 
     $url = Url::fromRoute('<current>');
+    // Keep the selected filters and sort, as well as the selected display
+    // provided by the oe_list_pages_link_list_extra_displays module.
     $query = array_filter($this->requestStack->getCurrentRequest()->query->all(), function ($value, $key) {
-      return in_array($key, ['sort', 'f']);
+      return in_array($key, ['sort', 'f', 'display']);
     }, ARRAY_FILTER_USE_BOTH);
     if ($sort) {
       $query['sort'] = [
