@@ -1,0 +1,40 @@
+<?php
+
+/**
+ * @file
+ * The OpenEuropa List Pages Link List Extra Displays module.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_list_page_configuration_form_alter().
+ */
+function oe_list_pages_link_list_extra_displays_list_page_configuration_form_alter(array &$form, FormStateInterface $form_state) {
+  $host_entity = $form_state->getFormObject()->getEntity();
+  \Drupal::service('oe_list_pages_link_list_extra_displays.form_builder')->form($form, $form_state, $host_entity);
+}
+
+/**
+ * Implements hook_list_page_configuration_form_submit_alter().
+ */
+function oe_list_pages_link_list_extra_displays_list_page_configuration_form_submit_alter(array &$form, FormStateInterface $form_state, array &$configuration) {
+  $extra_displays = \Drupal::service('oe_list_pages_link_list_extra_displays.form_builder')->extractConfiguration($form, $form_state);
+  if ($extra_displays) {
+    $configuration['extra']['oe_list_pages_link_list_extra_displays'] = $extra_displays;
+    return;
+  }
+
+  // Some forms start from the stored configuration so make sure the removed
+  // extra displays are not kept.
+  unset($configuration['extra']['oe_list_pages_link_list_extra_displays']);
+}
+
+/**
+ * Implements hook_list_page_configuration_form_validate().
+ */
+function oe_list_pages_link_list_extra_displays_list_page_configuration_form_validate(array $form, FormStateInterface $form_state) {
+  \Drupal::service('oe_list_pages_link_list_extra_displays.form_builder')->validate($form, $form_state);
+}
