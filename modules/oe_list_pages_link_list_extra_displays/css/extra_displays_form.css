@@ -1,0 +1,17 @@
+/**
+ * @file
+ * Styles for the extra displays table on the list page form.
+ */
+.extra-displays .extra-displays__title {
+  width: 30%;
+}
+
+.extra-displays .extra-displays__display {
+  width: 70%;
+}
+
+/* Keep the operations column just wide enough for its button. */
+.extra-displays .extra-displays__operations {
+  width: 1%;
+  white-space: nowrap;
+}

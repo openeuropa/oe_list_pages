@@ -1,0 +1,10 @@
+name: List page extra displays from link lists
+description: Allows list pages to have extra link list displays between which visitors can switch.
+type: module
+core_version_requirement: ^10 || ^11
+
+dependencies:
+  - extra_field:extra_field
+  - oe_link_lists:oe_link_lists
+  - oe_list_pages:oe_list_pages
+  - oe_list_pages:oe_list_pages_link_list_displays
