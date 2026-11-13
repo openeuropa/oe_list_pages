@@ -30,7 +30,8 @@
         "openeuropa/code-review-drupal": "^1.0.0-alpha",
         "openeuropa/oe_link_lists": "dev-master",
         "openeuropa/open_vocabularies": "^1.0.0-beta2",
-        "openeuropa/oe_testing_utils": "dev-main"
+        "openeuropa/oe_testing_utils": "dev-main",
+        "consolidation/robo": "5.1.1"
     },
     "scripts": {
         "post-install-cmd": "./vendor/bin/run drupal:site-setup",
@@ -57,6 +58,9 @@
         }
     },
     "extra": {
+        "_readme": [
+            "Locking consolidation/robo to 5.1.1 due to 5.2.x calling Application::addCommand() which doesn't exists. Remove when support for Drupal core 10.6.x is dropped."
+        ],
         "composer-exit-on-patch-failure": true,
         "enable-patching": true,
         "installer-paths": {

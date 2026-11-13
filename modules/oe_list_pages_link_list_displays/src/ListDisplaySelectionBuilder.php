@@ -52,24 +52,47 @@ class ListDisplaySelectionBuilder {
     $wrapper = new ListPageWrapper($host_entity);
     $configuration = $wrapper->getConfiguration();
 
-    $plugin_id = self::getSelectedPlugin('display', $form_state);
-    if (!$plugin_id) {
-      $plugin_id = $configuration['extra']['oe_list_pages_link_list_displays']['display']['plugin'] ?? NULL;
-    }
-
     $parents = $form['#parents'] ?? [];
     $parents = array_merge($parents, [
       'display',
     ]);
-
-    $display_plugin_options = $this->linkDisplayPluginManager->getPluginsAsOptions('dynamic', 'list_pages');
 
     $form['display'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Display options'),
     ];
 
-    $form['display']['plugin'] = [
+    $display_configuration = $configuration['extra']['oe_list_pages_link_list_displays']['display'] ?? [];
+    $this->buildPluginElement($form['display'], $form_state, 'display', $parents, $display_configuration['plugin'] ?? NULL, $display_configuration['plugin_configuration'] ?? [], $form['#attributes']['id']);
+  }
+
+  /**
+   * Builds the display plugin select and the plugin configuration form.
+   *
+   * @param array $element
+   *   The element onto which to build the plugin select.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   * @param string $plugin_select_key
+   *   A unique key used to keep track of the selected plugin in the form.
+   * @param array $parents
+   *   The parents of the element.
+   * @param string|null $default_plugin
+   *   The stored plugin ID.
+   * @param array $default_plugin_configuration
+   *   The stored plugin configuration.
+   * @param string $ajax_wrapper_id
+   *   The ID of the wrapper to replace when selecting a plugin.
+   */
+  public function buildPluginElement(array &$element, FormStateInterface $form_state, string $plugin_select_key, array $parents, ?string $default_plugin, array $default_plugin_configuration, string $ajax_wrapper_id): void {
+    $plugin_id = self::getSelectedPlugin($plugin_select_key, $form_state);
+    if (!$plugin_id) {
+      $plugin_id = $default_plugin;
+    }
+
+    $display_plugin_options = $this->linkDisplayPluginManager->getPluginsAsOptions('dynamic', 'list_pages');
+
+    $element['plugin'] = [
       '#type' => 'select',
       '#title' => $this->t('Display'),
       '#empty_option' => $this->t('None'),
@@ -78,14 +101,14 @@ class ListDisplaySelectionBuilder {
       '#options' => $display_plugin_options,
       '#ajax' => [
         'callback' => [$this, 'pluginConfigurationAjaxCallback'],
-        'wrapper' => $form['#attributes']['id'],
+        'wrapper' => $ajax_wrapper_id,
       ],
       '#submit' => [
         [get_class($this), 'selectPlugin'],
       ],
       '#default_value' => $plugin_id,
       '#executes_submit_callback' => TRUE,
-      '#plugin_select' => 'display',
+      '#plugin_select' => $plugin_select_key,
       '#limit_validation_errors' => [
         array_merge($parents, ['plugin']),
       ],
@@ -93,20 +116,20 @@ class ListDisplaySelectionBuilder {
     ];
 
     // A wrapper that the Ajax callback will replace.
-    $form['display']['plugin_configuration_wrapper'] = [
+    $element['plugin_configuration_wrapper'] = [
       '#type' => 'container',
       '#weight' => 10,
       '#tree' => TRUE,
     ];
 
     $triggering_element = $form_state->getTriggeringElement();
-    $ajax_plugin_select = $triggering_element && isset($triggering_element['#plugin_select']) && $triggering_element['#plugin_select'] === 'display';
+    $ajax_plugin_select = $triggering_element && isset($triggering_element['#plugin_select']) && $triggering_element['#plugin_select'] === $plugin_select_key;
     if ($plugin_id) {
-      $existing_config = !$ajax_plugin_select ? ($configuration['extra']['oe_list_pages_link_list_displays']['display']['plugin_configuration'] ?? []) : [];
+      $existing_config = !$ajax_plugin_select && $plugin_id === $default_plugin ? $default_plugin_configuration : [];
       /** @var \Drupal\Core\Plugin\PluginFormInterface $plugin */
       $plugin = $this->linkDisplayPluginManager->createInstance($plugin_id, $existing_config);
 
-      $form['display']['plugin_configuration_wrapper'][$plugin_id] = [
+      $element['plugin_configuration_wrapper'][$plugin_id] = [
         '#process' => [[get_class($this), 'processPluginConfiguration']],
         '#plugin' => $plugin,
       ];

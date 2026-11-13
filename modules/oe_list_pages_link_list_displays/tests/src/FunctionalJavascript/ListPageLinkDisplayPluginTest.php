@@ -56,6 +56,7 @@ class ListPageLinkDisplayPluginTest extends ListPagePluginFormTestBase {
     ];
     $node = Node::create($values);
     $node->save();
+    $date->modify('+1 hour');
     $values = [
       'title' => 'that red fruit',
       'type' => 'content_type_one',

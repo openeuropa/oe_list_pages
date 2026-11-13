@@ -1243,4 +1243,28 @@ abstract class ListPagePluginFormTestBase extends WebDriverTestBase {
    */
   abstract protected function goToListPageConfiguration(): void;
 
+  /**
+   * Marks a page so that we can detect when a reload has been completed.
+   *
+   * The class will not be present upon reload.
+   */
+  protected function markPageToDetectReload(): void {
+    $script = <<<JS
+(function() {
+  document.body.classList.add('marked-for-reload');
+}())
+JS;
+    $this->getSession()->executeScript($script);
+    $this->assertTrue($this->assertSession()->elementExists('css', 'body')->hasClass('marked-for-reload'));
+  }
+
+  /**
+   * Waits until the page has been reloaded.
+   *
+   * Must be preceded by ::markPageToDetectReload() or it won't have any effect.
+   */
+  protected function waitForPageReload(): void {
+    $this->assertNotNull($this->assertSession()->waitForElement('css', 'body:not(.marked-for-reload)'));
+  }
+
 }

@@ -1,0 +1,12 @@
+services:
+  oe_list_pages_link_list_extra_displays.form_builder:
+    class: Drupal\oe_list_pages_link_list_extra_displays\ExtraDisplaysFormBuilder
+    arguments: ['@oe_list_pages_link_list_displays.list_display_selection_builder']
+  oe_list_pages_link_list_extra_displays.display_switcher_builder:
+    class: Drupal\oe_list_pages_link_list_extra_displays\DisplaySwitcherBuilder
+    arguments: ['@request_stack']
+  oe_list_pages_link_list_extra_displays.list_display_resolve_subscriber:
+    class: Drupal\oe_list_pages_link_list_extra_displays\EventSubscriber\ListDisplayResolveSubscriber
+    arguments: ['@request_stack']
+    tags:
+      - { name: event_subscriber }

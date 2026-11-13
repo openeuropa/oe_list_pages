@@ -1,2 +1,7 @@
 includes:
   - ./vendor/openeuropa/code-review-drupal/dist/phpstan.drupal.neon
+parameters:
+  ignoreErrors:
+    # Plugin managers still use annotation-only discovery for now.
+    - identifier: pluginManager.attributeDiscoveryMissing
+      reportUnmatched: false
