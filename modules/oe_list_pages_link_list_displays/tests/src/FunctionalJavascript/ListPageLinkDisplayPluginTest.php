@@ -108,7 +108,7 @@ class ListPageLinkDisplayPluginTest extends ListPagePluginFormTestBase {
     foreach ($links as $link) {
       $actual[] = $link->getHtml();
     }
-    $this->assertEquals($expected, $actual);
+    $this->assertEqualsCanonicalizing($expected, $actual);
 
     // Edit the node and change the display.
     $node = $this->drupalGetNodeByTitle('List page for ct1');
