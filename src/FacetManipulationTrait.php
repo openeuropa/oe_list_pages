@@ -5,6 +5,7 @@ namespace Drupal\oe_list_pages;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\facets\FacetInterface;
+use Drupal\facets\FacetSource\SearchApiFacetSourceInterface;
 use Drupal\facets\Processor\ProcessorInterface;
 use Drupal\facets\Result\ResultInterface;
 
@@ -127,8 +128,20 @@ trait FacetManipulationTrait {
    */
   protected function rebuildFacet(FacetInterface $facet, array $values): void {
     $facet->setActiveItems($values);
+    $facet_source = $facet->getFacetSource();
+    $query = NULL;
+
+    // Create a lightweight query so query-type plugins can be instantiated
+    // in Facets v3, where a query object is mandatory.
+    if ($facet_source instanceof SearchApiFacetSourceInterface) {
+      $query = $facet_source
+        ->getIndex()
+        ->query()
+        ->setSearchId($facet->getFacetSourceId());
+    }
+
     $configuration = [
-      'query' => NULL,
+      'query' => $query,
       'facet' => $facet,
       'results' => [],
     ];

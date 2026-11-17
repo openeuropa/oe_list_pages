@@ -1,2 +1,11 @@
 includes:
   - ./vendor/openeuropa/code-review-drupal/dist/phpstan.drupal.neon
+
+parameters:
+  ignoreErrors:
+    # Facets 3 adds a constructor argument that Facets 2 does not declare.
+    -
+      message: '#^Method Drupal\\facets\\Plugin\\facets\\facet_source\\SearchApiBaseFacetSource\:\:__construct\(\) invoked with 6 parameters, 5 required\.$#'
+      identifier: arguments.count
+      path: src/Plugin/facets/facet_source/ListFacetSource.php
+      reportUnmatched: false
