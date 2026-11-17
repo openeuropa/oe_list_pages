@@ -53,4 +53,11 @@ final class ListPageEvents {
    */
   const DISALLOW_EXPOSED_SORT = "oe_list_pages.disallow_exposed_sort";
 
+  /**
+   * Event fired to alter ignored filters to limit facets from list source.
+   *
+   * @var string
+   */
+  const ALTER_IGNORED_FILTERS = "oe_list_pages.alter_ignored_filters";
+
 }

@@ -22,6 +22,7 @@ use Drupal\oe_list_pages\Form\ListPageSortForm;
 use Drupal\oe_list_pages\Plugin\facets\processor\DefaultStatusProcessorInterface;
 use Drupal\oe_list_pages\Plugin\facets\widget\FulltextWidget;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Default list builder implementation.
@@ -132,6 +133,13 @@ class ListBuilder implements ListBuilderInterface {
   protected $sortOptionsResolver;
 
   /**
+   * The event dispatcher.
+   *
+   * @var \Symfony\Contracts\EventDispatcher\EventDispatcherInterface
+   */
+  protected $eventDispatcher;
+
+  /**
    * ListBuilder constructor.
    *
    * @param \Drupal\oe_list_pages\ListExecutionManagerInterface $listExecutionManager
@@ -158,10 +166,12 @@ class ListBuilder implements ListBuilderInterface {
    *   The list source factory.
    * @param \Drupal\oe_list_pages\ListPageSortOptionsResolver $sortOptionsResolver
    *   The sort options resolver.
+   * @param \Symfony\Contracts\EventDispatcher\EventDispatcherInterface $eventDispatcher
+   *   The event dispatcher.
    *
    * @SuppressWarnings(PHPMD.ExcessiveParameterList)
    */
-  public function __construct(ListExecutionManagerInterface $listExecutionManager, EntityTypeManager $entityTypeManager, PagerManagerInterface $pager, EntityRepositoryInterface $entityRepository, FormBuilderInterface $formBuilder, FacetsUrlGenerator $facetsUrlGenerator, ProcessorPluginManager $processorManager, RequestStack $requestStack, UrlProcessorPluginManager $urlProcessorManager, MultiselectFilterFieldPluginManager $multiselectFilterManager, ListSourceFactory $listSourceFactory, ListPageSortOptionsResolver $sortOptionsResolver) {
+  public function __construct(ListExecutionManagerInterface $listExecutionManager, EntityTypeManager $entityTypeManager, PagerManagerInterface $pager, EntityRepositoryInterface $entityRepository, FormBuilderInterface $formBuilder, FacetsUrlGenerator $facetsUrlGenerator, ProcessorPluginManager $processorManager, RequestStack $requestStack, UrlProcessorPluginManager $urlProcessorManager, MultiselectFilterFieldPluginManager $multiselectFilterManager, ListSourceFactory $listSourceFactory, ListPageSortOptionsResolver $sortOptionsResolver, EventDispatcherInterface $eventDispatcher) {
     $this->listExecutionManager = $listExecutionManager;
     $this->entityTypeManager = $entityTypeManager;
     $this->pager = $pager;
@@ -174,6 +184,7 @@ class ListBuilder implements ListBuilderInterface {
     $this->multiselectFilterManager = $multiselectFilterManager;
     $this->listSourceFactory = $listSourceFactory;
     $this->sortOptionsResolver = $sortOptionsResolver;
+    $this->eventDispatcher = $eventDispatcher;
   }
 
   /**
@@ -299,6 +310,11 @@ class ListBuilder implements ListBuilderInterface {
     if (!empty($available_filters)) {
       $ignored_filters = array_diff(array_keys($available_filters), array_values($exposed_filters));
     }
+
+    // Update ignored filters based on list source information.
+    $event = new ListPageIgnoredFiltersAlterEvent($list_source, $ignored_filters);
+    $this->eventDispatcher->dispatch($event, ListPageEvents::ALTER_IGNORED_FILTERS);
+    $ignored_filters = $event->getIgnoredFilters();
 
     $build = $this->formBuilder->getForm(ListFacetsForm::class, $list_source, $ignored_filters);
 

@@ -21,7 +21,6 @@ class OeListPagesLinkListDisplaysServiceProvider extends ServiceProviderBase {
       // Switch out the ListBuilder class with our own.
       $definition = $container->getDefinition('oe_list_pages.builder');
       $definition->setClass(ListBuilder::class);
-      $definition->addArgument(new Reference('event_dispatcher'));
       $definition->addArgument(new Reference('plugin.manager.oe_link_lists.link_display'));
     }
   }
