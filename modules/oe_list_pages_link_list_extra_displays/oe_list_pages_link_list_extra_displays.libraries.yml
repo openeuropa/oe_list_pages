@@ -1,0 +1,4 @@
+extra_displays_form:
+  css:
+    theme:
+      css/extra_displays_form.css: {}

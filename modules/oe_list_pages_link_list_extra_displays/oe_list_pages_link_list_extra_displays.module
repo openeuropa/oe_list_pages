@@ -1,0 +1,73 @@
+<?php
+
+/**
+ * @file
+ * The OpenEuropa List Pages Link List Extra Displays module.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
+use Drupal\oe_list_pages_link_list_extra_displays\ExtraDisplaysHelper;
+
+/**
+ * Implements hook_list_page_configuration_form_alter().
+ */
+function oe_list_pages_link_list_extra_displays_list_page_configuration_form_alter(array &$form, FormStateInterface $form_state) {
+  $host_entity = $form_state->getFormObject()->getEntity();
+  \Drupal::service('oe_list_pages_link_list_extra_displays.form_builder')->form($form, $form_state, $host_entity);
+}
+
+/**
+ * Implements hook_list_page_configuration_form_submit_alter().
+ */
+function oe_list_pages_link_list_extra_displays_list_page_configuration_form_submit_alter(array &$form, FormStateInterface $form_state, array &$configuration) {
+  $extra_displays = \Drupal::service('oe_list_pages_link_list_extra_displays.form_builder')->extractConfiguration($form, $form_state);
+  if ($extra_displays) {
+    $configuration['extra']['oe_list_pages_link_list_extra_displays'] = $extra_displays;
+    return;
+  }
+
+  // Some forms start from the stored configuration so make sure the removed
+  // extra displays are not kept.
+  unset($configuration['extra']['oe_list_pages_link_list_extra_displays']);
+}
+
+/**
+ * Implements hook_list_page_configuration_form_validate().
+ */
+function oe_list_pages_link_list_extra_displays_list_page_configuration_form_validate(array $form, FormStateInterface $form_state) {
+  \Drupal::service('oe_list_pages_link_list_extra_displays.form_builder')->validate($form, $form_state);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for oe_list_pages_facets_form.
+ */
+function oe_list_pages_link_list_extra_displays_form_oe_list_pages_facets_form_alter(array &$form, FormStateInterface $form_state, string $form_id) {
+  $form['#submit'][] = [ExtraDisplaysHelper::class, 'facetsFormSubmit'];
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for oe_list_pages_selected_facet.
+ *
+ * Keeps the requested display on the links that remove the selected filters.
+ * When the last filter is removed, the link points to the current page
+ * without any query arguments so the display would otherwise be lost.
+ */
+function oe_list_pages_link_list_extra_displays_preprocess_oe_list_pages_selected_facet(array &$variables): void {
+  $delta = ExtraDisplaysHelper::getRequestedDelta(\Drupal::request());
+  if (!$delta) {
+    return;
+  }
+
+  foreach ($variables['items'] as $item) {
+    if (!isset($item['url']) || !$item['url'] instanceof Url) {
+      continue;
+    }
+
+    $query = $item['url']->getOption('query') ?? [];
+    $query[ExtraDisplaysHelper::QUERY_PARAMETER] = $delta;
+    $item['url']->setOption('query', $query);
+  }
+}
