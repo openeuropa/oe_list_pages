@@ -9,6 +9,8 @@ use Drupal\Tests\UnitTestCase;
 
 /**
  * Tests the PagePosition class.
+ *
+ * @group batch1
  */
 class PagePositionTest extends UnitTestCase {
 
