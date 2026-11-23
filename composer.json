@@ -16,7 +16,6 @@
         "symfony/options-resolver": "^6"
     },
     "require-dev": {
-        "consolidation/robo": "5.1.1",
         "composer/installers": "^1.11 || ^2.3",
         "drupal/address": "^1.8 || ^2.0",
         "drupal/config_devel": "^1.2",
@@ -75,10 +74,7 @@
             "locations": {
                 "web-root": "./build"
             }
-        },
-        "_readme": [
-            "Locking consolidation/robo to 5.1.1 due to 5.2.x calling Application::addCommand() which doesn't exists. Remove when support for Drupal core 10.6.x is dropped."
-        ]
+        }
     },
     "config": {
         "sort-packages": true,
