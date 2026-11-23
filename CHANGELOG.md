@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.1.0](https://github.com/openeuropa/oe_list_pages/tree/3.1.0) (2026-11-23)
+
+[Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/3.0.0...3.1.0)
+
+**Merged pull requests:**
+
+- EWPP-0000: Unlock consolidation/robo. [\#285](https://github.com/openeuropa/oe_list_pages/pull/285) ([hernani](https://github.com/hernani))
+- EWPP-7503: Extra list page displays. [\#281](https://github.com/openeuropa/oe_list_pages/pull/281) ([upchuk](https://github.com/upchuk))
+- EWPP-7383: Fix open\_vocabularies package in composer.json. [\#280](https://github.com/openeuropa/oe_list_pages/pull/280) ([sergepavle](https://github.com/sergepavle))
+- EWPP-7384: Fix rdf\_skos package in composer.json. [\#279](https://github.com/openeuropa/oe_list_pages/pull/279) ([sergepavle](https://github.com/sergepavle))
+- OEL-4328: Add support for facets v3. [\#256](https://github.com/openeuropa/oe_list_pages/pull/256) ([AaronGilMartinez](https://github.com/AaronGilMartinez))
+
 ## [3.0.0](https://github.com/openeuropa/oe_list_pages/tree/3.0.0) (2026-10-14)
 
 [Full Changelog](https://github.com/openeuropa/oe_list_pages/compare/2.0.0...3.0.0)
