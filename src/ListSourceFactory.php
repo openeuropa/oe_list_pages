@@ -206,7 +206,7 @@ class ListSourceFactory implements ListSourceFactoryInterface {
       return TRUE;
     }
 
-    if ($configuration['bundles']['default'] === TRUE && !empty($selected) && !in_array($bundle, $selected)) {
+    if ($configuration['bundles']['default'] === TRUE && !in_array($bundle, $selected)) {
       // All bundles are indexed, except a few that are selected.
       return TRUE;
     }
