@@ -75,6 +75,13 @@ class ListPageConfiguration {
   protected $page = NULL;
 
   /**
+   * The offset of the query.
+   *
+   * @var int|null
+   */
+  protected $offset = NULL;
+
+  /**
    * The sorting type for the query.
    *
    * The sort should an array with two values keyed 'name' and 'direction'.
@@ -335,6 +342,26 @@ class ListPageConfiguration {
   }
 
   /**
+   * Returns the offset.
+   *
+   * @return int|null
+   *   The offset.
+   */
+  public function getOffset(): ?int {
+    return $this->offset;
+  }
+
+  /**
+   * Sets the offset.
+   *
+   * @param int|null $offset
+   *   The offset.
+   */
+  public function setOffset(?int $offset = NULL): void {
+    $this->offset = $offset;
+  }
+
+  /**
    * Returns the sort.
    *
    * @return array
@@ -422,6 +449,7 @@ class ListPageConfiguration {
       'default_filter_values' => $this->getDefaultFiltersValues(),
       'limit' => $this->getLimit(),
       'page' => $this->getPage(),
+      'offset' => $this->getOffset(),
       'sort' => $this->getSort(),
       'extra' => $this->getExtra(),
     ];

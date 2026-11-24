@@ -133,6 +133,7 @@ class ListSource implements ListSourceInterface {
     $resolver->setDefaults([
       'limit' => 10,
       'page' => 0,
+      'offset' => NULL,
       'language' => NULL,
       'sort' => [],
       'ignored_filters' => [],
@@ -142,6 +143,7 @@ class ListSource implements ListSourceInterface {
 
     $resolver->setAllowedTypes('limit', 'int');
     $resolver->setAllowedTypes('page', 'int');
+    $resolver->setAllowedTypes('offset', ['int', 'null']);
     $resolver->setAllowedTypes('language', ['string', 'array', 'null']);
     $resolver->setAllowedTypes('sort', 'array');
     $resolver->setAllowedTypes('ignored_filters', 'array');
@@ -151,7 +153,7 @@ class ListSource implements ListSourceInterface {
     $resolved_options = $resolver->resolve($options);
 
     $query = $this->index->query([
-      'offset' => ($resolved_options['limit'] * $resolved_options['page']),
+      'offset' => $resolved_options['offset'] ?? ($resolved_options['limit'] * $resolved_options['page']),
     ]);
 
     if ($resolved_options['limit']) {

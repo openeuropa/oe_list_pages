@@ -132,6 +132,7 @@ class ListExecutionManager implements ListExecutionManagerInterface {
     $options = [
       'limit' => $limit,
       'page' => $current_page,
+      'offset' => $configuration->getOffset(),
       'language' => $language,
       'sort' => $sort,
       'preset_filters' => $preset_filters,

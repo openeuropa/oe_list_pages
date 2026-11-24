@@ -171,6 +171,7 @@ class ListPageLinkSource extends LinkSourcePluginBase implements ContainerFactor
 
     $limit = is_null($limit) ? 0 : $limit;
     $configuration->setLimit($limit);
+    $configuration->setOffset($offset);
     $list_execution = $this->listExecutionManager->executeList($configuration);
     if (!$list_execution) {
       $links->addCacheableDependency($cache);
